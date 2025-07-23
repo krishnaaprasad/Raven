@@ -34,7 +34,7 @@ export default function Home() {
     {/* IMAGE */}
     <div className="w-full md:w-1/2 flex justify-center items-center">
       <img
-        src="/perfume raven.png" // Adjust path as needed
+        src="/perfume raven.PNG" // Adjust path as needed
         alt="Raven Fragrance Perfume Bottle"
         className="max-w-[230px] sm:max-w-[270px] md:max-w-[340px] w-full h-auto rounded-2xl shadow-xl object-contain bg-transparent"
         draggable="false"
