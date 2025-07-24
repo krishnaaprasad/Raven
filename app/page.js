@@ -22,10 +22,9 @@ export default function Home() {
     className="absolute inset-0 w-full h-full object-cover"
     poster="/perfume-banner-fallback.jpg"
   >
-    <source src="/ravenintro.mp4" type="video/mp4" />
+    <source src="/intro.mp4" type="video/mp4" />
   </video>
-  {/* Luxury dark-gold overlay for richness and color pop */}
-  <div className="absolute inset-0 bg-gradient-to-br from-black/60 via-[#B4933A]/20 to-black/70 backdrop-blur-[1px] pointer-events-none" />
+  
 </section>
 
 <div className="w-full h-[2px] bg-gradient-to-r from-[#af9b64] via-[#B4933A] to-[#af9b64] shadow-md" />
