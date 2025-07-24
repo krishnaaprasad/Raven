@@ -13,13 +13,13 @@ export default function Home() {
   </div>
 </div>
    
- <section className="relative w-full min-h-[400px] md:min-h-[550px] flex items-center justify-center overflow-hidden">
+ <section className="relative w-full min-h-[280px] sm:min-h-[340px] md:min-h-[550px] flex items-center justify-center overflow-hidden">
   <video
     autoPlay
     loop
     muted
     playsInline
-    className="absolute inset-0 w-full h-full object-cover"
+    className="absolute inset-0 w-full h-full object-cover object-[50%_20%] md:object-center"
     poster="/perfume-banner-fallback.jpg"
   >
     <source src="/intro.mp4" type="video/mp4" />
