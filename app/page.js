@@ -13,7 +13,7 @@ export default function Home() {
   </div>
 </div>
    
- <section className="relative w-full min-h-[300px] sm:min-h-[340px] md:min-h-[550px] flex items-center justify-center overflow-hidden">
+ <section className="relative w-full min-h-[340px] sm:min-h-[380px] md:min-h-[550px] flex items-center justify-center overflow-hidden">
   <video
     autoPlay
     loop
