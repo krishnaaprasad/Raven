@@ -1,5 +1,6 @@
 import NavBar from '@/components/NavBar';
 import ScentStorySection from "@/components/ScentStorySection";
+import ProductBanner from '@/components/ProductBanner';
 
 import FindYourScentSection from "@/components/FindYourScentSection";
 
@@ -13,7 +14,7 @@ export default function Home() {
   </div>
 </div>
    
- <section className="relative w-full min-h-[340px] sm:min-h-[380px] md:min-h-[550px] flex items-center justify-center overflow-hidden">
+ <section className="relative w-full min-h-[320px] sm:min-h-[340px] md:min-h-[550px] flex items-center justify-center overflow-hidden">
   <video
     autoPlay
     loop
@@ -29,7 +30,8 @@ export default function Home() {
 
 <div className="w-full h-[2px] bg-gradient-to-r from-[#af9b64] via-[#B4933A] to-[#af9b64] shadow-md" />
   
-  <FindYourScentSection />
+  {/* <FindYourScentSection */}
+  <ProductBanner />
   <ScentStorySection />
   </>
 
