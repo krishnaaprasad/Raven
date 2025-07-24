@@ -67,44 +67,31 @@ const sparkleKeyframes = {
 
 export default function ProductBanner() {
   return (
-    <div className="relative bg-gradient-to-br from-black via-zinc-900 to-black text-white py-28 px-6 sm:px-12 overflow-hidden shadow-2xl">
-      {/* Vignette overlay for rich depth */}
-      <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-transparent via-black/50 to-black/90 rounded-xl z-0" />
+    <section className="relative w-full min-h-[350px] md:min-h-[500px] overflow-hidden bg-[#3b2a0c]">
+      {/* Central gold-blur halo behind bottle */}
+      <div className="absolute left-1/2 top-[54%] -translate-x-1/2 -translate-y-1/2 w-[440px] h-[260px] sm:w-[560px] sm:h-[340px] bg-[radial-gradient(ellipse_at_center,_rgba(246,190,67,0.30)_0%,_rgba(24,17,17,0.90)_80%)] rounded-full blur-[50px] z-0" />
+      {/* Subtle vignette for luxury depth */}
+      <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_center,_rgba(24,17,17,0)_60%,rgba(18,15,12,0.92)_98%)] z-0" />
 
-      {/* Animated Glow blobs */}
-      <motion.div
-        className="absolute w-[550px] h-[550px] bg-yellow-400 rounded-full opacity-20 blur-[200px] top-[-180px] left-[-220px] z-0"
-        variants={floating}
-        initial="animate"
-        animate="animate"
-      />
-      <motion.div
-        className="absolute w-[420px] h-[420px] bg-amber-300 rounded-full opacity-10 blur-[160px] bottom-[-140px] right-[-140px] z-0"
-        variants={floating}
-        initial="animate"
-        animate="animate"
-        transition={{ duration: 8, repeat: Infinity, repeatType: 'loop', ease: 'easeInOut', delay: 2 }}
-      />
-
-      <div className="relative z-10 max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-14">
+      <div className="relative z-10 max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-14 py-28 px-6 sm:px-12">
         {/* Bottle with 3D hover and glowing border */}
         <motion.div
           initial={{ opacity: 0, y: 80 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1.3, ease: 'easeOut' }}
-          whileHover={{ scale: 1.12, rotateY: 7 }}
+          transition={{ duration: 0.5, ease: 'easeOut' }}
+          whileHover={{ scale: 1.05, rotateY: 7 }}
           whileTap={{ scale: 0.95, rotateY: 0 }}
           className="w-full md:w-1/2 flex justify-center cursor-grab will-change-transform"
         >
           <div className="relative group transition duration-500 ease-in-out">
             <img
-              src="/perfume.PNG" // <-- Replace with your bottle image path
+              src="/perfume.PNG" // Use your uploaded bottle image here
               alt="Raven Fragrance Bottle"
-              className="w-[320px] md:w-[380px] lg:w-[420px] shadow-[0_16px_60px_rgba(255,215,0,0.6)] rounded-3xl object-contain bg-transparent select-none"
+              className="w-[320px] md:w-[380px] lg:w-[420px] shadow-[0_8px_30px_rgba(255,215,0,0.6)] rounded-3xl object-contain bg-transparent select-none"
               draggable={false}
             />
             <motion.div
-              className="absolute inset-0 rounded-3xl border border-yellow-300 opacity-0 group-hover:opacity-40 transition-opacity duration-500 pointer-events-none"
+              className="absolute inset-0 rounded-3xl border border-yellow-500 opacity-0 group-hover:opacity-40 transition-opacity duration-500 pointer-events-none"
               animate={pulseGlow.animate}
               transition={pulseGlow.transition}
             />
@@ -196,6 +183,6 @@ export default function ProductBanner() {
           </motion.div>
         </motion.div>
       </div>
-    </div>
+    </section>
   )
 }
