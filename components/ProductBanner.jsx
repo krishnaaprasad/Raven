@@ -98,7 +98,7 @@ export default function ProductBanner() {
         >
           <div className="relative group transition duration-500 ease-in-out">
             <img
-              src="/perfume.png" // <-- Replace with your bottle image path
+              src="/perfume.PNG" // <-- Replace with your bottle image path
               alt="Raven Fragrance Bottle"
               className="w-[320px] md:w-[380px] lg:w-[420px] shadow-[0_16px_60px_rgba(255,215,0,0.6)] rounded-3xl object-contain bg-transparent select-none"
               draggable={false}
