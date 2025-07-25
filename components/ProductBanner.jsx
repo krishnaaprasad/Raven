@@ -157,30 +157,7 @@ export default function ProductBanner() {
             </q>
           </motion.p>
 
-          <motion.div variants={fadeUp}>
-            <motion.button
-              initial={{ boxShadow: '0 0 8px rgba(255,215,0,0.3)' }}
-              animate={{
-                boxShadow: [
-                  '0 0 10px rgba(255,215,0,0.35)',
-                  '0 0 25px rgba(255,215,0,0.75)',
-                  '0 0 10px rgba(255,215,0,0.35)',
-                ],
-              }}
-              transition={{
-                duration: 3,
-                repeat: Infinity,
-                repeatType: 'loop',
-              }}
-              whileHover={{
-                scale: 1.07,
-                boxShadow: '0 0 30px rgba(255,215,0,1)',
-              }}
-              className="px-8 py-3 border border-yellow-300 text-yellow-300 rounded-full font-semibold shadow-lg hover:bg-yellow-300 hover:text-black transition"
-            >
-              Shop Now
-            </motion.button>
-          </motion.div>
+          
         </motion.div>
       </div>
     </section>
