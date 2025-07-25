@@ -19,9 +19,13 @@ const fade = {
 export default function AboutRaven() {
   return (
     <section
-      className="relative w-full py-24 md:py-32 px-4 flex justify-center items-center overflow-hidden bg-[#181510]"
-      aria-labelledby="about-raven"
-    >
+       className="
+    relative w-full py-24 md:py-32 px-4 flex justify-center items-center overflow-hidden bg-[#181510]
+    bg-[url('/aboutbg.jpg')] bg-center bg-cover bg-no-repeat
+    before:absolute before:inset-0 before:bg-black/80 before:z-0
+  "
+  aria-labelledby="about-raven"
+>
       {/* Gold halo and glow for luxury effect */}
       <div
         className="absolute left-1/2 top-[40%] -translate-x-1/2 -translate-y-1/2 w-[520px] h-[320px] bg-[radial-gradient(ellipse_at_center,_rgba(246,200,104,0.13)_0%,_rgba(24,17,17,0.96)_95%)] pointer-events-none blur-[60px] z-0"
