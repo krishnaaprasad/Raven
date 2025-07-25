@@ -3,6 +3,8 @@ import ScentStorySection from "@/components/ScentStorySection";
 import ProductBanner from '@/components/ProductBanner';
 import AboutRaven from '@/components/AboutRaven';
 import WhyChooseRaven  from '@/components/WhyChooseRaven';
+import RebelSpirit  from '@/components/RebelSpirit';
+import RebelFinale from '@/components/RebelFinale'
 
 import FindYourScentSection from "@/components/FindYourScentSection";
 
@@ -32,8 +34,9 @@ export default function Home() {
 
 <div className="w-full h-[2px] bg-gradient-to-r from-[#af9b64] via-[#B4933A] to-[#af9b64] shadow-md" />
   <AboutRaven />
+  <RebelSpirit />
   <WhyChooseRaven />
-  <ProductBanner />
+  <RebelFinale />
   <ScentStorySection />
   
   
