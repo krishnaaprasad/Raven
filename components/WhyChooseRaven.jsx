@@ -20,7 +20,7 @@ export default function WhyChooseRaven() {
     <section className="
     relative w-full py-24 md:py-32 px-4 flex justify-center items-center overflow-hidden bg-[#181510]
     bg-[url('/choosebg.png')] bg-center bg-cover bg-no-repeat 
-    before:absolute before:inset-0 before:bg-black/85 before:z-0
+    before:absolute before:inset-0 before:bg-black/70 before:z-0
   "
   aria-labelledby="about-raven"
      >
