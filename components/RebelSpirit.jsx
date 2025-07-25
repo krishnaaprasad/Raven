@@ -22,7 +22,7 @@ export default function RebelSpirit() {
       className="
         relative w-full py-24 md:py-32 px-4 flex justify-center items-center overflow-hidden
         bg-[#181510]
-        bg-[url('/spiritbg.png')] bg-center bg-cover bg-no-repeat shadow-[0_12px_48px_0_rgba(246,200,104,0.12)
+        bg-[url('/spiritbg.png')] bg-center bg-cover bg-no-repeat
       "
       aria-labelledby="rebel-spirit"
     >
@@ -45,7 +45,7 @@ export default function RebelSpirit() {
           <img
             src="/floral.png"
             alt="Editorial luxury floral accent"
-            className="rounded-3xl object-cover w-[295px] md:w-[340px] xl:w-[370px] shadow-[0_7px_24px_rgba(246,200,104,0.14)] border-none relative z-10"
+            className="rounded-3xl object-cover w-[295px] md:w-[340px] xl:w-[370px] border-none relative z-10"
             style={{ background: 'transparent', mixBlendMode: 'lighten', filter: 'brightness(1.14) blur(0.1px)' }}
             draggable={false}
           />
