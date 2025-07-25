@@ -35,7 +35,7 @@ export default function WhyChooseRaven() {
         >
           <motion.h2
             variants={fade}
-            className="text-3xl sm:text-4xl font-serif font-bold text-[#FFE186] mb-4 tracking-wide"
+            className="text-3xl sm:text-4xl font-extrabold font-serif text-[#FFE186] uppercase tracking-wide mb-4 text-center"
           >
             Why Choose Raven?
           </motion.h2>

@@ -57,7 +57,7 @@ export default function AboutRaven() {
         <motion.h2
           variants={fade}
           id="about-raven"
-          className="text-3xl sm:text-4xl font-serif font-extrabold text-[#FFE186] tracking-wide text-center mb-4"
+          className="text-3xl sm:text-4xl font-extrabold font-serif text-[#FFE186] uppercase tracking-wide mb-4 text-center"
         >
           Who Is Raven?
         </motion.h2>
