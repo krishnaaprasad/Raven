@@ -22,7 +22,7 @@ export default function RebelSpirit() {
       aria-labelledby="rebel-spirit"
     >
       {/* Gentle semi-dark overlay for luxury contrast */}
-      <div className="absolute inset-0 bg-black/60 pointer-events-none z-0" />
+      <div className="absolute inset-0 bg-black/80 pointer-events-none z-0" />
 
       {/* Gold aura and luxury overlays for blending */}
       <div className="absolute left-1/2 top-[38%] -translate-x-1/2 -translate-y-1/2 w-[530px] h-[240px] bg-[radial-gradient(ellipse_at_center,_rgba(246,200,104,0.13)_0%,_rgba(24,17,17,0.94)_95%)] pointer-events-none blur-[54px] z-0" aria-hidden="true" />
