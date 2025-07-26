@@ -36,8 +36,8 @@ export default function Home() {
   <AboutRaven />
   <RebelSpirit />
   <WhyChooseRaven />
-  <RebelFinale />
   <ScentStorySection />
+  <RebelFinale />
   
   
   </>

@@ -40,7 +40,7 @@ export default function RebelSpirit() {
           {/* Additional subtle gold glow below image if desired */}
           <div className="absolute -top-8 left-1/2 -translate-x-1/2 w-[420px] h-[220px] bg-[radial-gradient(ellipse,_rgba(246,200,104,0.09)_0%,rgba(24,17,17,0)_75%)] blur-2xl pointer-events-none z-0" />
           <Image
-            src="/floral.png"
+            src="/floral1.png"
             alt="Editorial luxury floral accent"
             width={370}
             height={420}

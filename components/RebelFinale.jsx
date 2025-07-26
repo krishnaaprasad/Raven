@@ -25,7 +25,7 @@ export default function RebelFinale() {
       alt=""
       className="w-full h-full object-cover object-center brightness-[0.62]"
     />
-    <div className="absolute inset-0 bg-black/70"></div>
+    <div className="absolute inset-0 bg-black/95"></div>
   </div>
       {/* Living gold particles */}
       <div className="absolute inset-0 pointer-events-none z-0">
