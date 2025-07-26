@@ -25,7 +25,7 @@ export default function Home() {
     muted
     playsInline
     className="absolute inset-0 w-full h-full object-cover object-[50%_20%] md:object-center"
-    poster="/perfume-banner-fallback.jpg"
+    poster=""
   >
     <source src="/intro.mp4" type="video/mp4" />
   </video>

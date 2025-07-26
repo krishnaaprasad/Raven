@@ -1,4 +1,5 @@
 import { FaFacebookF, FaInstagram, FaXTwitter } from 'react-icons/fa6';
+import Image from 'next/image'
 
 export default function Footer() {
   return (
@@ -8,10 +9,14 @@ export default function Footer() {
 
           {/* Brand & Social */}
           <div>
-            <img 
-            src="/logo.png" 
-            alt="Raven Fragrance Logo" 
-            className="h-6 w-auto mx-auto sm:mx-0 mb-5" 
+            <Image
+              src="/logo.png"
+              alt="Raven Fragrance Logo"
+              width={96}      // Suggested: set actual logo width in pixels
+              height={24}     // Set height in pixels to match your logo's aspect ratio (here, 24px for .h-6)
+              className="h-6 w-auto mx-auto sm:mx-0 mb-5"
+              priority={true} // Loads the logo ASAP (recommended for header/logo)
+              draggable={false}
             />
             <p className="text-sm mt-2">
               Discover your next favorite scent with our curated collection of timeless fragrances.

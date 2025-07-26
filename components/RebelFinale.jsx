@@ -94,7 +94,7 @@ export default function RebelFinale() {
             href="/shop"
             initial={{ scale: 1, y: 0, boxShadow: '0 2px 10px rgba(255,225,134,0.13)' }}
             whileHover={{
-              scale: 1.07,
+              scale: 1.05,
               y: -4,
               boxShadow: '0 12px 36px 0 rgba(255,225,134,0.23),0_0_0_4px_#FFE18644',
               background: 'linear-gradient(90deg, #FFE186 5%, #F6C868 95%)',
@@ -103,7 +103,7 @@ export default function RebelFinale() {
             }}
             whileTap={{ scale: 0.97, y: 2 }}
             transition={{ type: 'spring', stiffness: 360, damping: 20 }}
-            className="inline-block px-10 py-4 rounded-full bg-[#191510]/90 border border-[#FFE186] text-[#FFE186] font-bold shadow-lg tracking-wide text-lg uppercase relative hover:ring-2 hover:ring-[#FFE186]/30 transition-all duration-300"
+            className="inline-block px-10 py-4 rounded-full bg-[#191510]/90 border border-[#FFE186] text-[#FFE186] font-bold shadow-lg tracking-wide text-lg uppercase relative hover:ring-2 hover:ring-[#FFE186]/30 transition-all duration-200"
           >
             Order REBEL now &mdash; 50ml
           </motion.a>

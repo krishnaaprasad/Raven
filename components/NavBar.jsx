@@ -1,5 +1,7 @@
 'use client'
 import React, { useState, useEffect, useRef } from 'react'
+import Image from 'next/image'
+
 import {
   Disclosure,
   DisclosureButton,
@@ -74,11 +76,15 @@ export default function NavBar() {
               {/* Middle: Logo & Nav */}
               <div className="flex flex-1 items-center justify-center sm:items-stretch sm:justify-start">
                 <div className="flex flex-shrink-0 items-center">
-                  <img
-                    src="/logo.png"
-                    alt="Raven Fragrance Logo"
-                    className="h-5 sm:h-5 w-auto"
-                  />
+                  <Image
+                  src="/logo.png"
+                  alt="Raven Fragrance Logo"
+                  width={80}      // Adjust to match your actual logo width (in pixels)
+                  height={20}     // Height in pixels (1.25rem ≈ 20px for h-5)
+                  className="h-5 sm:h-5 w-auto"
+                  priority={true} // Ensures fast loading for header/logo images
+                  draggable={false}
+                />
                 </div>
                 <div className="hidden sm:ml-6 sm:flex sm:space-x-6">
                   {navigation.map((item) => (
