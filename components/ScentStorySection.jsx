@@ -10,7 +10,6 @@ export default function ScentStorySection() {
       label: "TOP NOTES",
       title: "Sparkling Orange Blossom",
       description: "A burst of citrusy freshness that awakens the senses",
-      // Transparent orange
       glowBg: "hover:bg-[rgba(246,190,67,0.18)]",
     },
     {
@@ -19,7 +18,6 @@ export default function ScentStorySection() {
       label: "HEART NOTES",
       title: "Indian Jasmine",
       description: "Exotic floral elegance with mysterious depth",
-      // Transparent lavender
       glowBg: "hover:bg-[rgba(180,147,220,0.18)]",
     },
     {
@@ -28,15 +26,23 @@ export default function ScentStorySection() {
       label: "BASE NOTES",
       title: "Soft Vanilla, Bamboo Wood",
       description: "Warm, sensual foundation with woody sophistication",
-      // Transparent green
       glowBg: "hover:bg-[rgba(141,193,120,0.16)]",
     },
   ];
 
   return (
-    <section className="bg-[#191919] py-14 px-2">
-      <div className="max-w-5xl mx-auto text-center text-[#FFE186]">
-        <h2 className="text-3xl font-extrabold font-serif mb-3">
+    <section
+      className="
+        relative w-full py-14 px-2
+        bg-[#191919]
+        bg-[url('/spirit.png')] bg-center bg-cover bg-no-repeat
+        before:absolute before:inset-0 before:bg-black/70 before:z-0
+      "
+      aria-labelledby="scent-story"
+    >
+      {/* Content container with higher stacking context so it appears above the overlay */}
+      <div className="relative z-10 max-w-5xl mx-auto text-center text-[#FFE186]">
+        <h2 id="scent-story" className="text-3xl font-extrabold font-serif mb-3">
           The <span className="text-[#ffffff]">Scent</span> Story
         </h2>
         <p className="text-[15px] max-w-2xl mx-auto mb-10 text-[#DAC986]">
@@ -67,8 +73,8 @@ export default function ScentStorySection() {
         </div>
         <div className="bg-[#191919] border border-[#B4933A] rounded-lg py-7 px-5 max-w-2xl mx-auto">
           <h3 className="text-[#f3bd1c] font-extrabold text-base mb-2 hover:drop-shadow-[0_0_8px_#FFE186] transition-all duration-300">
-         Experience the Complete Journey
-         </h3>
+            Experience the Complete Journey
+          </h3>
           <p className="text-[#DAC986] text-sm max-w-md mx-auto">
             From the first spritz to the lingering trail, discover how Rebel evolves on your skin.
           </p>
