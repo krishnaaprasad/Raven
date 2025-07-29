@@ -10,7 +10,7 @@ export default function Footer() {
           {/* Brand & Social */}
           <div>
             <Image
-              src="/whitelogo.png"
+              src="/whitelogo.PNG"
               alt="Raven Fragrance Logo"
               width={96}
               height={24}
