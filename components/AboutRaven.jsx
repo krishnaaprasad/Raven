@@ -44,7 +44,7 @@ export default function AboutRaven() {
             RAVEN
         </span>
         <Image
-            src="/fevicon.png"
+            src="/fevicon.PNG"
             alt="Raven Logo"
             width={40}
             height={40}
