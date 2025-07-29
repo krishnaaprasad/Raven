@@ -1,6 +1,7 @@
 'use client'
 import { motion } from 'framer-motion'
-import { FaFeather } from 'react-icons/fa6'
+import Image from 'next/image'
+
 
 const container = {
   hidden: { opacity: 0, y: 32 },
@@ -36,17 +37,29 @@ export default function AboutRaven() {
         whileInView="show"
         viewport={{ once: true, amount: 0.5 }}
         className="relative z-10 max-w-3xl w-full mx-auto flex flex-col items-center"
-      >
-        {/* Editorial feather accent */}
-        <motion.span variants={fade} className="mb-4">
-          <FaFeather size={40} className="text-[#B28C34] drop-shadow-[0_1px_6px_rgba(110,82,28,0.16)]" aria-hidden="true" />
-        </motion.span>
+      >        
+        {/* Logo next to text */}
+        <motion.div variants={fade} className="flex items-center justify-center gap-3 mb-2">
+        <span className="text-3xl sm:text-4xl font-extrabold font-serif text-[#B28C34] drop-shadow-[0_1px_4px_rgba(80,68,42,0.13)] uppercase tracking-wider">
+            RAVEN
+        </span>
+        <Image
+            src="/fevicon.png"
+            alt="Raven Logo"
+            width={40}
+            height={40}
+            className="drop-shadow-[0_1px_6px_rgba(110,82,28,0.16)]"
+            priority
+        />
+        
+        </motion.div>
+
         <motion.h2
           variants={fade}
           id="about-raven"
-          className="text-3xl sm:text-4xl font-extrabold font-serif text-[#B28C34] drop-shadow-[0_1px_4px_rgba(80,68,42,0.13)] uppercase tracking-wider mb-4 text-center"
+          className="text-2xl sm:text-3xl font-extrabold font-serif text-[#B28C34] uppercase tracking-wider mb-4 text-center"
         >
-          RAVEN <><br /></>Who Is Rebel?
+          Who Is Rebel?
         </motion.h2>
         {/* Gold underline with glow */}
         <div className="relative w-20 h-1 mx-auto mb-7">
