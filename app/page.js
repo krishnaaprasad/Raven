@@ -4,7 +4,8 @@ import ProductBanner from '@/components/ProductBanner';
 import AboutRaven from '@/components/AboutRaven';
 import WhyChooseRaven  from '@/components/WhyChooseRaven';
 import RebelSpirit  from '@/components/RebelSpirit';
-import RebelFinale from '@/components/RebelFinale'
+import RebelFinale from '@/components/RebelFinale';
+import RavenBadge from '@/components/RavenBadge'
 
 import FindYourScentSection from "@/components/FindYourScentSection";
 
@@ -36,6 +37,7 @@ export default function Home() {
   <AboutRaven />
   <RebelSpirit />
   <WhyChooseRaven />
+  <RavenBadge />
   <ScentStorySection />
   <RebelFinale />
   
