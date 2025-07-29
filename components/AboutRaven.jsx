@@ -21,7 +21,7 @@ export default function AboutRaven() {
       className="
         relative w-full py-24 md:py-32 px-4 flex justify-center items-center overflow-hidden
         bg-[#FDF6EC]
-        border-4 border-[#B28C34]/20 shadow-[0_6px_32px_0_rgba(178,140,52,0.11)] rounded-[2.5rem]
+        shadow-[0_6px_32px_0_rgba(178,140,52,0.11)]
       "
       aria-labelledby="about-raven"
     >
