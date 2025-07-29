@@ -17,12 +17,13 @@ export default function RebelSpirit() {
       className="
         relative w-full py-24 md:py-32 px-4 flex justify-center items-center overflow-hidden 
         bg-[#FCF8F3]
-        border-4 border-[#C9AE71]/15 shadow-[0_9px_45px_0_rgba(201,174,113,0.10)]
+        border-2 border-[#C9AE71]/15 shadow-[0_9px_45px_0_rgba(201,174,113,0.10)]
       "
       aria-labelledby="rebel-spirit"
     >
       {/* Floating gold flecks for subtle luxury */}
       <div className="absolute inset-0 pointer-events-none z-0">
+        
         {[...Array(14)].map((_, i) => (
           <div key={i}
             className="absolute rounded-full"
@@ -52,7 +53,7 @@ export default function RebelSpirit() {
           {/* Gentle gold halo under image */}
           <div className="absolute -top-7 left-1/2 -translate-x-1/2 w-[345px] h-[115px] bg-[radial-gradient(ellipse,_rgba(178,140,52,0.09)_0%,rgba(252,248,243,0)_95%)] blur-2xl pointer-events-none z-0" />
           <Image
-            src="/floral1.png"
+            src="/floral2.png"
             alt="Editorial luxury floral accent"
             width={370}
             height={420}
