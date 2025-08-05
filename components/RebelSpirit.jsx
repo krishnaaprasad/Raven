@@ -51,7 +51,7 @@ export default function RebelSpirit() {
       </div>
 
       {/* Gold radial glow */}
-      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[440px] h-[200px] bg-[radial-gradient(ellipse_at_center,_rgba(178,140,52,0.13)_0%,_rgba(252,248,243,0.95)_100%)] rounded-3xl blur-[42px] z-10 pointer-events-none" />
+      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[440px] h-[200px] rounded-3xl blur-[48px] z-10 pointer-events-none" />
 
       {/* Right side content - with subtle white glow */}
       <motion.div
@@ -60,7 +60,6 @@ export default function RebelSpirit() {
         whileInView="show"
         viewport={{ once: true, amount: 0.55 }}
         className="relative z-20 w-full md:w-1/2 ml-auto flex flex-col justify-center px-6 py-8 md:px-9 md:py-11 text-center md:text-left"
-        //style={{ filter: 'drop-shadow(0 0 0px rgba(255,255,255,0.79))' }}
       >
         <motion.h2
           variants={fade}
