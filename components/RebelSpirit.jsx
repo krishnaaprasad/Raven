@@ -4,7 +4,11 @@ import Image from 'next/image'
 
 const container = {
   hidden: { opacity: 0, y: 32 },
-  show: { opacity: 1, y: 0, transition: { staggerChildren: 0.22, duration: 1.05, ease: 'easeOut' } }
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: { staggerChildren: 0.22, duration: 1.05, ease: 'easeOut' }
+  }
 }
 const fade = {
   hidden: { opacity: 0, y: 40 },
@@ -14,116 +18,104 @@ const fade = {
 export default function RebelSpirit() {
   return (
     <section
-      className="
-        relative w-full py-24 md:py-32 px-4 flex justify-center items-center overflow-hidden 
-        bg-[#FCF8F3]
-        border-2 border-[#C9AE71]/15 shadow-[0_9px_45px_0_rgba(201,174,113,0.10)]
-      "
+      className="relative w-full py-24 md:py-32 px-4 flex items-center overflow-hidden bg-[#FCF8F3] border-2 border-[#C9AE71]/15 shadow-[0_9px_45px_0_rgba(201,174,113,0.10)]"
       aria-labelledby="rebel-spirit"
     >
-      {/* Floating gold flecks for subtle luxury */}
-      <div className="absolute inset-0 pointer-events-none z-0">
-        
+      {/* Background image using next/image */}
+      <div className="absolute inset-0 z-0 pointer-events-none">
+        <Image
+          src="/raven_bg.png" // Change to your image path
+          alt="Banner background"
+          fill
+          className="object-cover"
+          priority
+        />
+      </div>
+
+      {/* Floating gold flecks */}
+      <div className="absolute inset-0 pointer-events-none z-10">
         {[...Array(14)].map((_, i) => (
-          <div key={i}
+          <div
+            key={i}
             className="absolute rounded-full"
             style={{
-              width: `${6 + Math.random()*8}px`,
-              height: `${6 + Math.random()*10}px`,
-              left: `${5 + Math.random()*89}%`,
-              top: `${8 + Math.random()*78}%`,
+              width: `${6 + Math.random() * 8}px`,
+              height: `${6 + Math.random() * 10}px`,
+              left: `${5 + Math.random() * 89}%`,
+              top: `${8 + Math.random() * 78}%`,
               background: 'rgba(178,140,52,0.14)',
               filter: 'blur(1.3px)'
             }}
           />
         ))}
       </div>
-      {/* Subtle gold radial for glow and depth */}
-      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[440px] h-[200px] bg-[radial-gradient(ellipse_at_center,_rgba(178,140,52,0.13)_0%,_rgba(252,248,243,0.95)_100%)] rounded-3xl blur-[42px] z-0 pointer-events-none" aria-hidden="true" />
 
-      <div className="relative z-10 max-w-6xl mx-auto w-full flex flex-col-reverse md:flex-row items-center md:items-stretch gap-12 md:gap-16">
-        {/* Left: Bright, elegant floral image with extra gold glow */}
-        <motion.div
-          initial={{ opacity: 0, x: -48 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          transition={{ duration: 1.1, ease: 'easeOut' }}
-          viewport={{ once: true, amount: 0.5 }}
-          className="w-full md:w-1/2 flex justify-center items-center relative"
+      {/* Gold radial glow */}
+      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[440px] h-[200px] bg-[radial-gradient(ellipse_at_center,_rgba(178,140,52,0.13)_0%,_rgba(252,248,243,0.95)_100%)] rounded-3xl blur-[42px] z-10 pointer-events-none" />
+
+      {/* Right side content - with subtle white glow */}
+      <motion.div
+        variants={container}
+        initial="hidden"
+        whileInView="show"
+        viewport={{ once: true, amount: 0.55 }}
+        className="relative z-20 w-full md:w-1/2 ml-auto flex flex-col justify-center px-6 py-8 md:px-9 md:py-11 text-center md:text-left"
+        style={{ filter: 'drop-shadow(0 0 8px rgba(255,255,255,0.79))' }}
+      >
+        <motion.h2
+          variants={fade}
+          id="rebel-spirit"
+          initial={{ scale: 0.92 }}
+          animate={{ scale: 1 }}
+          transition={{
+            type: 'spring',
+            stiffness: 315,
+            damping: 18,
+            delay: 0.12
+          }}
+          className="text-3xl sm:text-4xl font-extrabold font-serif text-[#9c6f0c] drop-shadow-md tracking-wide mb-5 uppercase"
         >
-          {/* Gentle gold halo under image */}
-          <div className="absolute -top-7 left-1/2 -translate-x-1/2 w-[345px] h-[115px] bg-[radial-gradient(ellipse,_rgba(178,140,52,0.09)_0%,rgba(252,248,243,0)_95%)] blur-2xl pointer-events-none z-0" />
-          <Image
-            src="/floral2.png"
-            alt="Editorial luxury floral accent"
-            width={370}
-            height={420}
-            className="rounded-3xl object-cover w-[295px] md:w-[340px] xl:w-[370px] border-none relative z-10"
-            style={{
-              background: 'transparent',
-              mixBlendMode: 'lighten',
-              filter: 'brightness(1.12) blur(0.01px)'
-            }}
-            draggable={false}
-            priority={true}
-          />
-        </motion.div>
+          The Spirit of the Rebel Woman
+        </motion.h2>
 
-        {/* Right: Editorial glass panel with rich text content */}
-        <motion.div
-          variants={container}
-          initial="hidden"
-          whileInView="show"
-          viewport={{ once: true, amount: 0.55 }}
-          className="w-full md:w-1/2 flex flex-col justify-center z-10 text-center md:text-left"
+        <div className="w-16 h-1 bg-gradient-to-r from-[#EFE2BA] via-[#B28C34] to-[#EFE2BA] rounded-full md:ml-0 mb-8" />
+
+        <motion.p
+          variants={fade}
+          className="text-lg sm:text-xl text-[#433A20] font-medium leading-relaxed mb-5 drop-shadow-sm"
         >
-          {/* Glassy/frosted plinth effect for hero text */}
-          <div className="relative bg-white/70 backdrop-blur-[3.5px] rounded-3xl shadow-[0_4px_24px_0_rgba(178,140,52,0.08)] px-6 py-8 md:px-9 md:py-11 transition-all">
-            <motion.h2
-              variants={fade}
-              id="rebel-spirit"
-              initial={{ scale: 0.92 }}
-              animate={{ scale: 1 }}
-              transition={{ type: "spring", stiffness: 315, damping: 18, delay: 0.12 }}
-              className="text-3xl sm:text-4xl font-extrabold font-serif text-transparent bg-clip-text bg-gradient-to-r from-[#B69C43] via-[#E7C879] to-[#B28C34] drop-shadow-[0_1px_6px_rgba(140,120,70,0.10)] tracking-wide mb-5 uppercase"
-            >
-              The Spirit of the Rebel Woman
-            </motion.h2>
-            {/* Gold underline */}
-            <div className="w-16 h-1 bg-gradient-to-r from-[#EFE2BA] via-[#B28C34] to-[#EFE2BA] rounded-full mx-auto md:mx-0 mb-8" />
+          <span className="text-4xl font-serif font-extrabold text-[#B28C34] leading-none mr-2 mt-0.5 select-none">
+            A
+          </span>
+          <span className="font-semibold text-[#B28C34]">
+            Dynamic, Daring Woman
+          </span>
+          <br />
+          The Rebel is all energy, all charm — all her. She is fearlessly spontaneous, effortlessly radiant, and irresistibly joyful. Every morning, she’s ready for whatever the world brings — with charisma, light, and her signature scent.
+        </motion.p>
 
-            <motion.p
-              variants={fade}
-              className="text-lg sm:text-xl text-neutral-900 font-medium leading-relaxed mb-5"
-            >
-              <span className="float-left text-4xl font-serif font-extrabold text-[#B28C34] leading-none mr-2 mt-0.5 select-none">
-                A
-              </span>
-              <span className="font-semibold text-[#B28C34]">Dynamic, Daring Woman</span>
-              <br />
-              The Rebel is all energy, all charm — all her. She is fearlessly spontaneous, effortlessly radiant, and irresistibly joyful. Every morning, she’s ready for whatever the world brings — with charisma, light, and her signature scent.
-            </motion.p>
-            <motion.p
-              variants={fade}
-              className="text-base sm:text-lg text-[#B28C34] italic leading-relaxed mb-2"
-            >
-              Her secret weapon?{' '}
-              <span className="relative inline-block">
-                <span className="relative italic text-[#B28C34] z-10">high-voltage floral cocktail</span>
-                <motion.span
-                  layout
-                  initial={{ scaleX: 0 }}
-                  whileInView={{ scaleX: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.9, type: "spring" }}
-                  className="absolute -bottom-px left-0 w-full h-[2px] bg-[#B28C34] origin-left"
-                  style={{ zIndex: 0 }}
-                />
-              </span>{' '}
-              that unveils the most rebellious side of her untamed beauty.
-            </motion.p>
-          </div>
-        </motion.div>
-      </div>
+        <motion.p
+          variants={fade}
+          className="text-base sm:text-lg italic text-[#3a300d] leading-relaxed mb-2 drop-shadow-sm"
+        >
+          Her secret weapon?{' '}
+          <span className="relative inline-block">
+            <span className="relative italic text-[#3a300d] z-10">
+              high-voltage floral cocktail
+            </span>
+            <motion.span
+              layout
+              initial={{ scaleX: 0 }}
+              whileInView={{ scaleX: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.9, type: 'spring' }}
+              className="absolute -bottom-px left-0 w-full h-[2px] bg-[#B28C34] origin-left"
+              style={{ zIndex: 0 }}
+            />
+          </span>{' '}
+          that unveils the most rebellious side of her untamed beauty.
+        </motion.p>
+      </motion.div>
     </section>
   )
 }

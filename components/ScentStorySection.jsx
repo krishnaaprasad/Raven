@@ -74,7 +74,7 @@ export default function ScentStorySection() {
 
         {/* Intro Paragraph */}
         <motion.p
-          className="text-[16px] max-w-2xl mx-auto mb-16 text-[#6F6756] font-light leading-relaxed"
+          className="text-lg sm:text-xl text-neutral-800 font-normal max-w-2xl mx-auto mb-14"
         >
           Together, they form a fresh and exotic elixir, impossible to forget — a scent that glows on the skin like sunlight.
         </motion.p>
@@ -116,7 +116,7 @@ export default function ScentStorySection() {
           <h3 className="text-[#B28C34] font-extrabold text-xl mb-3 drop-shadow-sm hover:drop-shadow-lg transition-shadow duration-300">
             Experience the Complete Journey
           </h3>
-          <p className="text-[#6F6756] text-base max-w-md mx-auto leading-relaxed">
+          <p className="text-[#1b1a16] text-base max-w-md mx-auto leading-relaxed">
             From the first spritz to the lingering trail, discover how Rebel evolves on your skin.
           </p>
         </motion.div>
