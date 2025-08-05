@@ -60,7 +60,7 @@ export default function RebelSpirit() {
         whileInView="show"
         viewport={{ once: true, amount: 0.55 }}
         className="relative z-20 w-full md:w-1/2 ml-auto flex flex-col justify-center px-6 py-8 md:px-9 md:py-11 text-center md:text-left"
-        style={{ filter: 'drop-shadow(0 0 8px rgba(255,255,255,0.79))' }}
+        //style={{ filter: 'drop-shadow(0 0 0px rgba(255,255,255,0.79))' }}
       >
         <motion.h2
           variants={fade}
@@ -78,7 +78,7 @@ export default function RebelSpirit() {
           The Spirit of the Rebel Woman
         </motion.h2>
 
-        <div className="w-16 h-1 bg-gradient-to-r from-[#EFE2BA] via-[#B28C34] to-[#EFE2BA] rounded-full md:ml-0 mb-8" />
+        <div className="w-16 h-1 bg-gradient-to-r from-[#EFE2BA] via-[#B28C34] to-[#EFE2BA] rounded-full mx-auto md:mx-0 mb-8" />
 
         <motion.p
           variants={fade}
