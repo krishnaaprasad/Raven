@@ -75,14 +75,14 @@ export default function AboutRaven() {
           variants={fade}
           className="text-lg sm:text-xl text-neutral-800 font-light leading-relaxed text-center mb-6"
         >
-          <span className="text-[#B28C34] font-semibold">Rebel</span> radiates casual elegance—the kind that doesn’t ask for attention but commands it naturally. To be a <span className="text-[#B28C34] font-semibold">Rebel</span> means breaking rules while blending elegance and edge, turning every step into a statement.
+          <span className="text-[#B28C34] font-semibold">Rebel</span> radiates casual elegance the kind that doesn’t ask for attention but commands it naturally. To be a <span className="text-[#B28C34] font-semibold">Rebel</span> means breaking rules while blending elegance and edge, turning every step into a statement.
         </motion.p>
         {/* Signature quote */}
         <motion.p
           variants={fade}
-          className="text-base sm:text-lg text-[#B28C34] italic drop-shadow-[0_1px_3px_rgba(110,82,28,0.14)] leading-relaxed text-center mb-7"
+          className="text-base sm:text-lg text-[#96711a] italic leading-relaxed text-center mb-7"
         >
-          “To scent is not to mask, but to reveal. In a world of imitation, <span className="font-semibold">Raven</span> is a return to authenticity—a quiet revolution, an invitation to the extraordinary.”
+          “To scent is not to mask, but to reveal. In a world of imitation, <span className="font-semibold">Raven</span> is a return to authenticity, a quiet revolution, an invitation to the extraordinary.”
         </motion.p>
         {/* Core values */}
         <motion.ul
@@ -103,8 +103,8 @@ export default function AboutRaven() {
         </motion.ul>
         {/* Founder signature */}
         <motion.div variants={fade} className="mt-4">
-          <span className="block text-xs text-[#846525] italic mb-1">Founded in the pursuit of truth and beauty</span>
-          <span className="block text-[#B28C34] font-semibold font-serif">— The Raven Atelier</span>
+          <span className="block text-xs text-[#846525] italic mb-1 text-center">Founded in the pursuit of truth and beauty</span>
+          <span className="block text-[#B28C34] font-semibold font-serif text-center">— The Raven Atelier</span>
         </motion.div>
       </motion.div>
     </section>

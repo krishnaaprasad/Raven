@@ -49,7 +49,7 @@ export default function WhyChooseRaven() {
             variants={fade}
             className="text-lg sm:text-xl text-neutral-800 font-normal max-w-2xl mx-auto mb-14"
           >
-            Raven stands alone in a world of fleeting trends. Every note, every bottle, is an act of craft, a journey toward truth—and a fragrance meant to reveal, not mask.
+            Raven stands alone in a world of fleeting trends. Every note, every bottle, is an act of craft, a journey toward truth and a fragrance meant to reveal, not mask.
           </motion.p>
 
           {/* Differentiators grid */}

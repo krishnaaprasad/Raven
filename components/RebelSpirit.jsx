@@ -77,16 +77,23 @@ export default function RebelSpirit() {
           The Spirit of the Rebel Woman
         </motion.h2>
 
-        <div className="w-16 h-1 bg-gradient-to-r from-[#EFE2BA] via-[#B28C34] to-[#EFE2BA] rounded-full mx-auto md:mx-0 mb-8" />
+        <div className="relative w-20 h-1 mx-auto mb-7">
+          <div className="w-full h-full rounded-full bg-gradient-to-r from-[#B28C34] via-[#F9E8A7] to-[#B28C34]" />
+          <div
+            className="absolute left-1/2 top-full -translate-x-1/2 mt-1 w-36 h-6 bg-[radial-gradient(ellipse_at_center,_rgba(178,140,52,0.13)_0%,_rgba(249,232,167,0.03)_80%,transparent_100%)] pointer-events-none"
+            style={{ filter: 'blur(7px)' }}
+            aria-hidden="true"
+          />
+        </div>
 
         <motion.p
           variants={fade}
           className="text-lg sm:text-xl text-[#433A20] font-medium leading-relaxed mb-5 drop-shadow-sm"
         >
-          <span className="text-4xl font-serif font-extrabold text-[#B28C34] leading-none mr-2 mt-0.5 select-none">
+          <span className="text-4xl font-serif font-extrabold text-[#9e730d] leading-none mr-2 mt-0.5 select-none">
             A
           </span>
-          <span className="font-semibold text-[#B28C34]">
+          <span className="font-bold text-[#9e730d]">
             Dynamic, Daring Woman
           </span>
           <br />
@@ -99,7 +106,7 @@ export default function RebelSpirit() {
         >
           Her secret weapon?{' '}
           <span className="relative inline-block">
-            <span className="relative italic text-[#3a300d] z-10">
+            <span className="relative italic text-[#887017] z-10">
               high-voltage floral cocktail
             </span>
             <motion.span
@@ -108,7 +115,7 @@ export default function RebelSpirit() {
               whileInView={{ scaleX: 1 }}
               viewport={{ once: true }}
               transition={{ duration: 0.9, type: 'spring' }}
-              className="absolute -bottom-px left-0 w-full h-[2px] bg-[#B28C34] origin-left"
+              className="absolute origin-left"
               style={{ zIndex: 0 }}
             />
           </span>{' '}

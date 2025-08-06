@@ -76,7 +76,7 @@ export default function ScentStorySection() {
         <motion.p
           className="text-lg sm:text-xl text-neutral-800 font-normal max-w-2xl mx-auto mb-14"
         >
-          Together, they form a fresh and exotic elixir, impossible to forget — a scent that glows on the skin like sunlight.
+          Together, they form a fresh and exotic elixir, impossible to forget a scent that glows on the skin like sunlight.
         </motion.p>
 
         {/* Notes Grid */}
