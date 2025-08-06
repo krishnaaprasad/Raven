@@ -27,7 +27,7 @@ export default function RebelSpirit() {
           src="/raven_bg.png" // Change to your image path
           alt="Banner background"
           fill
-          className="object-cover"
+          className="object-cover object-right md:object-center"
           priority
         />
       </div>
@@ -90,7 +90,7 @@ export default function RebelSpirit() {
             Dynamic, Daring Woman
           </span>
           <br />
-          The Rebel is all energy, all charm — all her. She is fearlessly spontaneous, effortlessly radiant, and irresistibly joyful. Every morning, she’s ready for whatever the world brings — with charisma, light, and her signature scent.
+          The Rebel is all energy, all charm, all her. She is fearlessly spontaneous, effortlessly radiant, and irresistibly joyful. Every morning, she’s ready for whatever the world brings with charisma, light, and her signature scent.
         </motion.p>
 
         <motion.p
