@@ -1,102 +1,139 @@
 'use client'
 import { useState } from 'react'
 import Image from 'next/image'
-import product from '../data/product.js'
+import { FaStar, FaCheck, FaShoppingCart } from 'react-icons/fa'
+import product from '../data/product'
 
 export default function ProductPage() {
   const [selected, setSelected] = useState(product.variants[0])
+  const [quantity, setQuantity] = useState(1)
+  const [activeImg, setActiveImg] = useState(0)
+
+  const increase = () => setQuantity(q => q + 1)
+  const decrease = () => setQuantity(q => (q > 1 ? q - 1 : 1))
 
   return (
-    <section className="relative min-h-screen py-12 px-4 sm:px-6 bg-[#FCF8F3] flex flex-col md:flex-row items-center md:items-stretch gap-10 md:gap-14">
-      
-      {/* Subtle golden glow background */}
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute left-1/2 top-1/3 -translate-x-1/2 w-[80%] sm:w-[480px] h-[200px] sm:h-[240px] bg-[radial-gradient(ellipse_at_center,_rgba(201,174,113,0.12)_0%,_rgba(252,248,243,0.9)_100%)] rounded-full blur-[55px]" />
-      </div>
-
-      {/* Product Image */}
-      <div className="relative w-full md:w-1/2 flex justify-center items-center">
-        <div className="absolute -z-10 left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] sm:w-[450px] h-[140px] sm:h-[200px] bg-[radial-gradient(ellipse_at_center,_rgba(255,189,103,0.1)_0%,_rgba(252,248,243,0)_100%)] rounded-3xl blur-[45px]" />
-        <Image
-          src={product.image}
-          alt={product.name}
-          width={320}
-          height={420}
-          className="object-contain rounded-2xl shadow-lg border border-[#e9dec2] bg-white/60 backdrop-blur-sm p-3 sm:p-4 max-w-[280px] sm:max-w-[350px]"
-          priority
-        />
-      </div>
-
-      {/* Product Details */}
-      <div className="relative w-full md:w-1/2 flex flex-col justify-center gap-5 sm:gap-6 md:pr-8 text-center md:text-left">
-        
-        {/* Brand Tag */}
-        <span className="tracking-[0.18em] font-serif text-[#B28C34] text-xs sm:text-sm uppercase">
-          Raven Parfums
-        </span>
-        
-        {/* Title */}
-        <h1 className="text-3xl sm:text-4xl md:text-5xl font-serif font-bold text-[#8a6a1a] leading-snug sm:leading-tight">
-          {product.name}
-        </h1>
-
-        {/* Divider */}
-        <div className="mx-auto md:mx-0 w-16 sm:w-20 h-1 bg-gradient-to-r from-[#EFE2BA] via-[#B28C34] to-[#EFE2BA] rounded-full" />
-
-        {/* Description */}
-        <p className="text-[#3d2d0f] text-base sm:text-lg md:text-xl leading-relaxed max-w-xl mx-auto md:mx-0">
-          {product.description}
-        </p>
-
-        {/* Features */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-5 mt-2">
-          {product.featureIcons.map((icon, i) => (
-            <div key={i} className="flex flex-col items-center text-[11px] sm:text-xs font-medium text-[#5a4c2b]">
-              <span className="inline-flex w-11 h-11 sm:w-12 sm:h-12 mb-2 rounded-full border border-[#c7b57a] bg-white/70 backdrop-blur-sm shadow-sm items-center justify-center">
-                <Image src={icon} alt={product.features[i]} width={28} height={28} className="sm:w-[30px] sm:h-[30px]" />
-              </span>
-              {product.features[i]}
+    <section className="min-h-screen bg-[#FCF8F3] py-10 px-2 sm:px-8 flex flex-col items-center">
+      <div className="max-w-7xl w-full grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-16 items-start">
+        {/* Left side - Image and thumbnails */}
+        <div className="flex flex-col items-center justify-center h-full py-4">
+          <div className="relative flex flex-col items-center w-full">
+            <div className="absolute -z-10 left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 
+              w-[340px] h-[150px] sm:w-[400px] sm:h-[190px] rounded-3xl 
+              bg-[radial-gradient(ellipse_at_center,_rgba(224,174,70,0.13)_0%,_rgba(252,248,243,0.87)_100%)] 
+              blur-[39px]" />
+            <div className="w-full flex justify-center">
+              <div className="aspect-square bg-white shadow rounded-2xl border border-[#e5ddc0] flex items-center justify-center max-w-[350px] w-full min-h-[350px]">
+                <Image
+                  src={product.images[activeImg]}
+                  alt={`${product.name} Image ${activeImg + 1}`}
+                  width={330}
+                  height={350}
+                  className="object-contain rounded-2xl"
+                  priority
+                  onError={e => e.currentTarget.style.display='none'}
+                />
+              </div>
             </div>
-          ))}
+            {/* Thumbnails */}
+            <div className="flex gap-3 mt-5 justify-center w-full">
+              {product.images.map((src, i) => (
+                <button
+                  key={i}
+                  onClick={() => setActiveImg(i)}
+                  className={`w-14 h-14 rounded-xl border flex items-center justify-center bg-white shadow-sm
+                    ${activeImg === i ? 'border-[#B28C34] ring-2 ring-[#B28C34]' : 'border-gray-200'}
+                  `}
+                  aria-label={`View product image ${i+1}`}
+                >
+                  <Image
+                    src={src}
+                    alt={`Thumbnail ${i+1}`}
+                    width={52}
+                    height={52}
+                    className="object-contain"
+                    onError={e => e.currentTarget.style.display='none'}
+                  />
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
 
-        {/* Variants */}
-        <div className="flex flex-wrap gap-2 sm:gap-3 justify-center md:justify-start">
-          {product.variants.map((v) => (
-            <button 
-              key={v.size}
-              onClick={() => setSelected(v)}
-              className={
-                "px-3 sm:px-4 py-2 rounded-md text-xs sm:text-sm font-medium transition-all border shadow-sm " +
-                (selected.size === v.size
-                  ? "border-[#B28C34] bg-[#f9f6ec] text-[#6a5323] scale-105"
-                  : "border-gray-200 bg-white text-[#7d6a42] hover:border-[#B28C34]/50")
-              }
-            >
-              {v.size}
+        {/* Right side - Product info + buy box */}
+        <div className="flex flex-col items-center md:items-start justify-center px-2 py-4 w-full max-w-lg mx-auto">
+
+          {/* Product Name */}
+          <h1 className="font-serif font-bold text-3xl sm:text-4xl mb-5 text-[#1E140B] leading-tight w-full max-w-xs">
+            {product.name}
+          </h1>
+
+          {/* Subtitle */}
+          <p className="text-[#755B00] text-sm md:text-base mb-5 font-medium w-full max-w-xs">
+            Long lasting | Premium scent | Fragrance
+          </p>
+
+          {/* Price */}
+          <div className="w-full max-w-xs mb-4">
+            <p className="text-gray-700 text-xs font-semibold mb-1">
+              MRP ₹{Math.round(selected.price * 1.10)} (Incl. of all taxes)
+            </p>
+            <div className="flex items-end gap-3">
+              <span className="text-3xl font-extrabold text-[#B28C34] leading-none">₹{selected.price}</span>
+              <span className="text-gray-400 line-through text-lg leading-none">
+                ₹{Math.round(selected.price * 1.10)}
+              </span>
+            </div>
+          </div>
+
+          {/* Size Selector */}
+          <div className="w-full max-w-xs mb-5">
+            <p className="text-[#4B423C] font-semibold mb-2">Size: {selected.size}</p>
+            <div className="flex gap-3">
+              {product.variants.map((v) => (
+                <button
+                  key={v.size}
+                  onClick={() => setSelected(v)}
+                  className={`rounded-full px-4 py-2 text-xs sm:text-sm font-semibold transition ${
+                    selected.size === v.size
+                      ? 'bg-black text-white'
+                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                  }`}
+                >
+                  {v.size.toUpperCase()}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Benefits list */}
+          <div className="w-full max-w-xs mb-6">
+            <p className="font-bold mb-2 text-[#231F20]">What makes it great:</p>
+            <ul className="space-y-2 text-[#5F544E] text-sm">
+              {product.benefits?.map((b, i) => (
+                <li key={i} className="flex items-center gap-2">
+                  <FaCheck className="text-[#b28c34]" />
+                  {b}
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Quantity + Add to cart */}
+          <div className="flex items-center gap-3 w-full max-w-xs mb-4">
+            <div className="flex items-center border border-[#D0C5A3] rounded-full overflow-hidden bg-white">
+              <button onClick={decrease} className="px-4 py-2 text-lg font-semibold text-[#917B2E]">−</button>
+              <span className="px-6 py-2 font-semibold">{quantity}</span>
+              <button onClick={increase} className="px-4 py-2 text-lg font-semibold text-[#917B2E]">+</button>
+            </div>
+            <button className="flex-1 flex items-center justify-center gap-2 border border-black rounded-full py-3 font-semibold text-xs uppercase hover:bg-black hover:text-white transition">
+              <FaShoppingCart /> ADD TO CART
             </button>
-          ))}
-        </div>
+          </div>
 
-        {/* Price */}
-        <div className="text-xl sm:text-2xl md:text-3xl font-bold text-[#B28C34]">
-          ₹{selected.price}
-        </div>
-
-        {/* Desktop Add to Cart */}
-        <div className="hidden md:block">
-          <button className="rounded-lg px-8 py-3 bg-gradient-to-r from-[#B28C34] via-[#FFD700] to-[#B28C34] text-black font-semibold tracking-wide shadow-md hover:shadow-lg hover:scale-105 transition-transform duration-300">
-            Add to Cart
-          </button>
-        </div>
-      </div>
-
-      {/* Mobile Sticky Add to Cart */}
-      <div className="fixed bottom-0 left-0 right-0 z-20 bg-white/95 backdrop-blur-sm shadow-[0_-4px_20px_rgba(0,0,0,0.08)] p-4 md:hidden">
-        <div className="flex items-center justify-between">
-          <span className="text-lg font-bold text-[#B28C34]">₹{selected.price}</span>
-          <button className="rounded-lg px-6 py-3 bg-gradient-to-r from-[#B28C34] via-[#FFD700] to-[#B28C34] text-black font-semibold shadow-md hover:shadow-lg transition-transform duration-300">
-            Add to Cart
+          {/* Buy It Now */}
+          <button className="w-full max-w-xs rounded-full bg-black text-white py-3 font-semibold uppercase tracking-wide hover:bg-gray-900 transition">
+            BUY IT NOW
           </button>
         </div>
       </div>
