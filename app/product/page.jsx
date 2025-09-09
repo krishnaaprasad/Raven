@@ -139,7 +139,7 @@ export default function ProductPage() {
               <span className="px-6 py-2 font-semibold">{quantity}</span>
               <button onClick={increase} className="px-4 py-2 text-lg font-semibold text-[#917B2E]">+</button>
             </div>
-            <button className="flex-1 flex items-center justify-center gap-2 border border-black py-3 font-semibold text-xs uppercase hover:bg-black hover:text-white transition">
+            <button className="flex-1 flex items-center rounded-full justify-center gap-2 border border-black py-3 font-semibold text-xs uppercase hover:bg-black hover:text-white transition">
               <FaShoppingCart /> ADD TO CART
             </button>
           </div>
