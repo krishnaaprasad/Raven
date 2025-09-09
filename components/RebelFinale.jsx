@@ -78,7 +78,7 @@ export default function RebelFinale() {
         </motion.p>
         <motion.div variants={fade} className="mt-8">
           <motion.a
-            href="/shop"
+            href="/product"
             initial={{ scale: 1, y: 0, boxShadow: '0 2px 10px rgba(201,174,113,0.13)' }}
             whileHover={{
               scale: 1.05,
