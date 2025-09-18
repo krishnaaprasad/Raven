@@ -11,6 +11,8 @@ import Lightbox from 'yet-another-react-lightbox'
 import 'yet-another-react-lightbox/styles.css'
 
 import product from '../data/product'
+import { useCart } from '../context/cartcontext'
+import { toast } from 'react-hot-toast'
 
 export default function ProductPage() {
   const [selected, setSelected] = useState(product.variants[0])
@@ -19,8 +21,24 @@ export default function ProductPage() {
   const [lightboxOpen, setLightboxOpen] = useState(false)
   const [lightboxIndex, setLightboxIndex] = useState(0)
 
+  const { addToCart } = useCart()
+
   const increase = () => setQuantity(q => q + 1)
   const decrease = () => setQuantity(q => (q > 1 ? q - 1 : 1))
+
+  const handleAddToCart = () => {
+    addToCart(
+      {
+        id: product.id,
+        name: product.name,
+        size: selected.size,
+        price: selected.price,
+        image: product.images[0],
+      },
+      quantity
+    )
+    toast.success(`${product.name} (${selected.size}) added to cart!`)
+  }
 
   return (
     <section className="min-h-screen bg-[#FCF8F3] py-8 px-4 sm:px-8">
@@ -139,7 +157,10 @@ export default function ProductPage() {
               <span className="px-6 py-2 font-semibold">{quantity}</span>
               <button onClick={increase} className="px-4 py-2 text-lg font-semibold text-[#917B2E]">+</button>
             </div>
-            <button className="flex-1 flex items-center rounded-full justify-center gap-2 border border-black py-3 font-semibold text-xs uppercase hover:bg-black hover:text-white transition">
+            <button 
+              onClick={handleAddToCart}
+              className="flex-1 flex items-center rounded-full justify-center gap-2 border border-black py-3 font-semibold text-xs uppercase hover:bg-black hover:text-white transition"
+            >
               <FaShoppingCart /> ADD TO CART
             </button>
           </div>

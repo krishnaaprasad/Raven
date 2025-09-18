@@ -1,6 +1,8 @@
 'use client'
 import React, { useState, useEffect, useRef } from 'react'
 import Image from 'next/image'
+import Link from 'next/link'
+import { useCart } from '../app/context/cartcontext'
 
 import {
   Disclosure,
@@ -31,6 +33,7 @@ function classNames(...classes) {
 export default function NavBar() {
   const [showSearch, setShowSearch] = useState(false)
   const searchRef = useRef(null)
+  const { cartCount } = useCart()
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -77,14 +80,14 @@ export default function NavBar() {
               <div className="flex flex-1 items-center justify-center sm:items-stretch sm:justify-start">
                 <div className="flex flex-shrink-0 items-center">
                   <Image
-                  src="/logo.png"
-                  alt="Raven Fragrance Logo"
-                  width={80}      // Adjust to match your actual logo width (in pixels)
-                  height={20}     // Height in pixels (1.25rem ≈ 20px for h-5)
-                  className="h-5 sm:h-5 w-auto"
-                  priority={true} // Ensures fast loading for header/logo images
-                  draggable={false}
-                />
+                    src="/logo.png"
+                    alt="Raven Fragrance Logo"
+                    width={80}
+                    height={20}
+                    className="h-5 sm:h-5 w-auto"
+                    priority={true}
+                    draggable={false}
+                  />
                 </div>
                 <div className="hidden sm:ml-6 sm:flex sm:space-x-6">
                   {navigation.map((item) => (
@@ -131,8 +134,15 @@ export default function NavBar() {
                   <UserIcon className="h-6 w-6 text-[#191919] hover:text-[#B4933A] cursor-pointer" />
                 </a>
 
-                {/* Cart */}
-                <ShoppingBagIcon className="h-6 w-6 text-[#191919] hover:text-[#B4933A] cursor-pointer" />
+                {/* Cart icon with live cart count, same icon as before, linking to /cart */}
+                <Link href="/cart" className="relative cursor-pointer">
+                  <ShoppingBagIcon className="h-6 w-6 text-[#191919] hover:text-[#B4933A]" />
+                  {cartCount > 0 && (
+                    <span className="absolute -top-2 -right-2 rounded-full bg-red-600 text-white text-xs w-5 h-5 flex items-center justify-center font-bold">
+                      {cartCount}
+                    </span>
+                  )}
+                </Link>
               </div>
             </div>
           </div>
