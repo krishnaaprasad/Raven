@@ -34,6 +34,15 @@ export default function NavBar() {
   const [showSearch, setShowSearch] = useState(false)
   const searchRef = useRef(null)
   const { cartCount } = useCart()
+  const [animateCart, setAnimateCart] = useState(false)
+
+  useEffect(() => {
+    if (cartCount > 0) {
+      setAnimateCart(true)
+      const timer = setTimeout(() => setAnimateCart(false), 600)
+      return () => clearTimeout(timer)
+    }
+  }, [cartCount])
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -121,7 +130,7 @@ export default function NavBar() {
                   />
                 </div>
 
-                {/* Mobile search icon (after logo) */}
+                {/* Mobile search icon */}
                 <button
                   onClick={() => setShowSearch((prev) => !prev)}
                   className="block sm:hidden text-[#191919] hover:text-[#B4933A]"
@@ -129,14 +138,22 @@ export default function NavBar() {
                   <MagnifyingGlassIcon className="h-6 w-6" />
                 </button>
 
-                {/* Login / Register */}
+                {/* Login */}
                 <a href="/login">
                   <UserIcon className="h-6 w-6 text-[#191919] hover:text-[#B4933A] cursor-pointer" />
                 </a>
 
-                {/* Cart icon with live cart count, same icon as before, linking to /cart */}
-                <Link href="/cart" className="relative cursor-pointer">
-                  <ShoppingBagIcon className="h-6 w-6 text-[#191919] hover:text-[#B4933A]" />
+                {/* Cart */}
+                <Link
+                  href="/cart"
+                  id="cart-icon"
+                  className="relative cursor-pointer"
+                >
+                  <ShoppingBagIcon
+                    className={`h-6 w-6 text-[#191919] hover:text-[#B4933A] transition-transform duration-500 ${
+                      animateCart ? 'animate-bounce' : ''
+                    }`}
+                  />
                   {cartCount > 0 && (
                     <span className="absolute -top-2 -right-2 rounded-full bg-red-600 text-white text-xs w-5 h-5 flex items-center justify-center font-bold">
                       {cartCount}
