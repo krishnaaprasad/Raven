@@ -124,7 +124,7 @@ export default function ProductPage() {
               MRP ₹{Math.round(selected.price * 1.1)} (Incl. of all taxes)
             </p>
             <div className="flex items-center gap-3">
-              <span className="text-3xl font-extrabold text-[#B28C34]">₹{selected.price}</span>
+              <span className="text-2xl font-extrabold text-[#B28C34]">₹{selected.price}</span>
               <span className="text-gray-400 line-through text-lg">
                 ₹{Math.round(selected.price * 1.1)}
               </span>
@@ -187,7 +187,7 @@ export default function ProductPage() {
               onClick={handleAddToCart}
               whileTap={{ scale: 0.9 }}
               animate={isAdding ? { scale: [1, 1.2, 1] } : {}}
-              transition={{ duration: 0.4 }}
+              transition={{ duration: 0.9 }}
               className="flex-1 flex items-center justify-center gap-2 rounded-full border border-black py-3 font-semibold text-xs uppercase bg-white hover:bg-black hover:text-white transition"
             >
               <FaShoppingCart /> {isAdding ? 'Added!' : 'Add to Cart'}
