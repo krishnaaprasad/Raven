@@ -129,7 +129,7 @@ export default function MiniCart({ isOpen, onClose }) {
                   Proceed to Checkout
                 </button>
                 <Link
-                  href="/cart"
+                  href="/Cart"
                   onClick={onClose}
                   className="mt-3 block text-center underline text-[#7e4343] hover:text-[#9c5516] text-sm"
                 >
