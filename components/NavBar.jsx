@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useCart } from '../app/context/cartcontext'
+import MiniCart from './MiniCart'
 
 import {
   Disclosure,
@@ -35,6 +36,7 @@ export default function NavBar() {
   const searchRef = useRef(null)
   const { cartCount } = useCart()
   const [animateCart, setAnimateCart] = useState(false)
+  const [showMiniCart, setShowMiniCart] = useState(false)
 
   useEffect(() => {
     if (cartCount > 0) {
@@ -144,10 +146,12 @@ export default function NavBar() {
                 </a>
 
                 {/* Cart */}
-                <Link
-                  href="/cart"
+                <button
+                  aria-label="View Cart"
                   id="cart-icon"
-                  className="relative cursor-pointer"
+                  className="relative cursor-pointer bg-transparent border-none outline-none"
+                  onClick={() => setShowMiniCart(true)}
+                  type="button"
                 >
                   <ShoppingBagIcon
                     className={`h-6 w-6 text-[#191919] hover:text-[#B4933A] transition-transform duration-500 ${
@@ -159,7 +163,8 @@ export default function NavBar() {
                       {cartCount}
                     </span>
                   )}
-                </Link>
+                </button>
+                <MiniCart isOpen={showMiniCart} onClose={() => setShowMiniCart(false)} />
               </div>
             </div>
           </div>
