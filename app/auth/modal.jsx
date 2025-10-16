@@ -78,11 +78,11 @@ export default function AuthModal({ onClose }) {
       <style jsx global>{`
         @media (max-width: 600px) {
           .login-auth-modal-close {
-            top: 1.2rem !important;
+            top: 6.5rem !important;
             right: 1.6rem !important;
             width: 1.9rem !important;
             height: 1.9rem !important;
-            font-size: 2.5rem !important;
+            font-size: 1.8rem !important;
           }
         }
       `}</style>
