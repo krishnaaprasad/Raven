@@ -4,21 +4,27 @@ import LoginRegister from "./page"; // path to your login/register page
 
 export default function AuthModal({ onClose }) {
   return (
-    <div
-      className="login-auth-modal-overlay"
-      onClick={onClose}
-      style={{
-        position: "fixed",
-        inset: 0,
-        zIndex: 9999,
-        background: "rgba(50, 39, 10, 0.16)", // luxury overlay
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: 16,
-        backdropFilter: "blur(1px)"
-      }}
-    >
+      <div
+        className="login-auth-modal-overlay"
+        onMouseDown={(e) => {
+          if (e.target === e.currentTarget) onClose();
+        }}
+        onTouchStart={(e) => {
+          if (e.target === e.currentTarget) onClose();
+        }}
+        style={{
+          position: "fixed",
+          inset: 0,
+          zIndex: 9999,
+          background: "rgba(50, 39, 10, 0.16)", // luxury overlay
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: 16,
+          backdropFilter: "blur(1px)",
+          WebkitBackdropFilter: "blur(1px)", // Safari support
+        }}
+      >
       <div
         className="login-auth-modal-content"
         onClick={e => e.stopPropagation()}
