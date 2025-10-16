@@ -34,47 +34,51 @@ export default function AuthModal({ onClose }) {
           overflow: "visible"
         }}
       >
-        {/* Close Button (safe-positioned inside modal box) */}
-      <div
-        className="absolute top-0 right-0 p-3"
+        <button
+        className="login-auth-modal-close"
+        onClick={onClose}
+        aria-label="Close Modal"
+        type="button"
         style={{
-          display: 'flex',
-          justifyContent: 'flex-end',
-          width: '100%',
-          pointerEvents: 'none', // ensures only button captures clicks
+          position: "absolute",
+          top: "2.5rem",         // default for desktop
+          right: "2.5rem",       // default for desktop
+          fontSize: "1.5rem",
+          color: "#B28C34",
+          background: "#FFF8E7",
+          border: "none",
+          borderRadius: "50%",
+          width: "2.25rem",
+          height: "2.25rem",
+          boxShadow: "0 2px 8px rgba(178,140,52,0.25)",
+          cursor: "pointer",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          transition: "all 0.2s ease-in-out",
+          zIndex: 100,
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.background = "#f5e9ca";
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.background = "#FFF8E7";
         }}
       >
-        <button
-          onClick={onClose}
-          aria-label="Close Modal"
-          type="button"
-          style={{
-            position: 'relative',
-            top: 'env(safe-area-inset-top, 0)', // ✅ safe for iOS notch
-            marginTop: '0.25rem',
-            marginRight: '0.25rem',
-            fontSize: '1.75rem',
-            color: '#B28C34',
-            background: '#FFF8E7',
-            border: 'none',
-            borderRadius: '50%',
-            width: '40px',
-            height: '40px',
-            boxShadow: '0 2px 10px rgba(178,140,52,0.3)',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            transition: 'all 0.25s ease',
-            pointerEvents: 'auto', // re-enable click for button itself
-            zIndex: 100,
-          }}
-          onMouseEnter={(e) => (e.currentTarget.style.background = '#f6eacb')}
-          onMouseLeave={(e) => (e.currentTarget.style.background = '#FFF8E7')}
-        >
-          &times;
-        </button>
-      </div>
+        &times;
+      </button>
+      <style jsx global>{`
+        @media (max-width: 600px) {
+          .login-auth-modal-close {
+            top: 1.2rem !important;
+            right: 1.6rem !important;
+            width: 1.9rem !important;
+            height: 1.9rem !important;
+            font-size: 1.3rem !important;
+          }
+        }
+      `}</style>
+
       <LoginRegister />
       </div>
     </div>
