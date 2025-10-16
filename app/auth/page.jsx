@@ -63,7 +63,7 @@ export default function LoginRegisterPage() {
                   Let’s get you started.
                 </p>
 
-                <form className="space-y-5">
+                <form className="space-y-5" onSubmit={(e) => e.preventDefault()}>
                   <div>
                     <label
                       className="block text-sm font-medium mb-1"
@@ -151,7 +151,7 @@ export default function LoginRegisterPage() {
                 </form>
 
                 <p
-                  className="text-center text-sm mt-5.5"
+                  className="text-center text-sm mt-5"
                   style={{ color: textMuted }}
                 >
                   Already have an account?{' '}
@@ -183,7 +183,7 @@ export default function LoginRegisterPage() {
                   Please enter your details to sign in.
                 </p>
 
-                <form className="space-y-5">
+                <form className="space-y-5" onSubmit={(e) => e.preventDefault()}>
                   <div>
                     <label
                       className="block text-sm font-medium mb-1"
