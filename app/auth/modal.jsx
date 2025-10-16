@@ -49,8 +49,8 @@ export default function AuthModal({ onClose }) {
         type="button"
         style={{
           position: "absolute",
-          top: "2.5rem",         // default for desktop
-          right: "2.5rem",       // default for desktop
+          top: "3.8rem",         // default for desktop
+          right: "2.9rem",       // default for desktop
           fontSize: "1.5rem",
           color: "#B28C34",
           background: "#FFF8E7",
@@ -78,7 +78,7 @@ export default function AuthModal({ onClose }) {
       <style jsx global>{`
         @media (max-width: 600px) {
           .login-auth-modal-close {
-            top: 7.5rem !important;
+            top: 8.5rem !important;
             right: 1.6rem !important;
             width: 1.9rem !important;
             height: 1.9rem !important;
