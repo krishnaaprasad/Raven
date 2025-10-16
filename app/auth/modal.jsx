@@ -1,12 +1,11 @@
 'use client'
 import React from "react";
-import LoginRegister from "./page"; // path to your login/register page
-
-export default function AuthModal({ onClose }) {
+// Import the actual component, not a Next.js page file
+import LoginRegister from "./page"; // make sure LoginRegister.jsx exists in the same folder
+export default function AuthModal({ onClose = () => {} }) {
   return (
     <div
       className="login-auth-modal-overlay"
-      onClick={onClose}
       style={{
         position: "fixed",
         inset: 0,
@@ -17,6 +16,10 @@ export default function AuthModal({ onClose }) {
         justifyContent: "center",
         padding: 16,
         backdropFilter: "blur(1px)"
+      }}
+      onClick={e => {
+        // Only close if clicking directly on the overlay, not on children
+        if (e.target === e.currentTarget) onClose();
       }}
     >
       <div
@@ -78,8 +81,7 @@ export default function AuthModal({ onClose }) {
             }
           }
         `}</style>
-
-      <LoginRegister />
+        <LoginRegister />
       </div>
     </div>
   );
