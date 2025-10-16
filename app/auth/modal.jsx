@@ -78,7 +78,7 @@ export default function AuthModal({ onClose }) {
       <style jsx global>{`
         @media (max-width: 600px) {
           .login-auth-modal-close {
-            top: 6.5rem !important;
+            top: 7.5rem !important;
             right: 1.6rem !important;
             width: 1.9rem !important;
             height: 1.9rem !important;
