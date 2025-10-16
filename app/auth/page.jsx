@@ -41,7 +41,7 @@ export default function LoginRegisterPage() {
         {/* ===== Left Side: Forms ===== */}
         <div
           className="relative w-full md:w-1/2 flex items-center justify-center"
-          style={{ minHeight: '500px', overflow: 'hidden' }}
+          style={{ minHeight: '530px', overflow: 'hidden' }}
         >
           <AnimatePresence mode="wait" custom={direction}>
             {isRegistering ? (
@@ -53,7 +53,7 @@ export default function LoginRegisterPage() {
                 initial="initial"
                 animate="animate"
                 exit="exit"
-                transition={{ duration: 0.55, ease: 'easeInOut' }}
+                transition={{ duration: 0.3, ease: 'easeInOut' }}
                 className="absolute inset-0 flex flex-col justify-center px-10 py-12 bg-white"
               >
                 <h2 className="text-3xl font-bold text-stone-900 mb-2">
@@ -151,7 +151,7 @@ export default function LoginRegisterPage() {
                 </form>
 
                 <p
-                  className="text-center text-sm mt-1.5"
+                  className="text-center text-sm mt-5.5"
                   style={{ color: textMuted }}
                 >
                   Already have an account?{' '}
@@ -173,7 +173,7 @@ export default function LoginRegisterPage() {
                 initial="initial"
                 animate="animate"
                 exit="exit"
-                transition={{ duration: 0.55, ease: 'easeInOut' }}
+                transition={{ duration: 0.3, ease: 'easeInOut' }}
                 className="absolute inset-0 flex flex-col justify-center px-10 py-12 bg-white"
               >
                 <h2 className="text-3xl font-bold text-stone-900 mb-2">
