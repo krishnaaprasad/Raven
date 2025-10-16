@@ -16,7 +16,7 @@ export default function AuthModal({ onClose }) {
         alignItems: "center",
         justifyContent: "center",
         padding: 16,
-        backdropFilter: "blur(2px)"
+        backdropFilter: "blur(1px)"
       }}
     >
       <div
@@ -36,6 +36,7 @@ export default function AuthModal({ onClose }) {
           overflow: "visible"
         }}
       >
+        {/* Close button inside */}
         <button
           className="login-auth-modal-close"
           onClick={onClose}
@@ -43,27 +44,34 @@ export default function AuthModal({ onClose }) {
           type="button"
           style={{
             position: "absolute",
-            top: 18,
-            right: 24,
-            fontSize: "2rem",
-            color: "#b28c34",
-            background: "#fff8e7",
+            top: "4.7rem",
+            right: "3rem",
+            fontSize: "1.75rem",
+            color: "#B28C34",
+            background: "#FFF8E7",
             border: "none",
             borderRadius: "50%",
-            width: 33,
-            height: 33,
-            boxShadow: "0 2px 8px #b28c3444",
+            width: "2.25rem",
+            height: "2.25rem",
+            boxShadow: "0 2px 8px rgba(178,140,52,0.25)",
             cursor: "pointer",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            transition: "background 0.2s"
+            transition: "all 0.2s ease-in-out",
+            zIndex: 100,
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = "#f5e9ca";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = "#FFF8E7";
           }}
         >
           &times;
         </button>
-        <LoginRegister />
-      </div>
-    </div>
+              <LoginRegister />
+            </div>
+          </div>
   );
 }

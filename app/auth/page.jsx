@@ -74,7 +74,6 @@ export default function LoginRegisterPage() {
                     <input
                       id="register-name"
                       type="text"
-                      placeholder="Your Name"
                       className="w-full border rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-yellow-400 font-medium"
                       style={{
                         backgroundColor: '#f7f7f7',
@@ -92,7 +91,6 @@ export default function LoginRegisterPage() {
                     <input
                       id="register-email"
                       type="email"
-                      placeholder="you@example.com"
                       className="w-full border rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-yellow-400 font-medium"
                       style={{
                         backgroundColor: '#f7f7f7',
@@ -111,7 +109,6 @@ export default function LoginRegisterPage() {
                       <input
                         id="register-password"
                         type="password"
-                        placeholder="••••••••"
                         className="w-full border rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-yellow-400 font-medium"
                         style={{
                           backgroundColor: '#f7f7f7',
@@ -129,7 +126,6 @@ export default function LoginRegisterPage() {
                       <input
                         id="confirm-password"
                         type="password"
-                        placeholder="••••••••"
                         className="w-full border rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-yellow-400 font-medium"
                         style={{
                           backgroundColor: '#f7f7f7',
@@ -141,7 +137,7 @@ export default function LoginRegisterPage() {
 
                   <button
                     type="submit"
-                    className="w-full font-bold py-3 px-4 rounded-lg mt-2"
+                    className="w-full font-bold py-3 px-4 rounded-lg mt-1"
                     style={{
                       backgroundColor: primary,
                       color: '#191919',
@@ -155,7 +151,7 @@ export default function LoginRegisterPage() {
                 </form>
 
                 <p
-                  className="text-center text-sm mt-6"
+                  className="text-center text-sm mt-1.5"
                   style={{ color: textMuted }}
                 >
                   Already have an account?{' '}
@@ -198,7 +194,6 @@ export default function LoginRegisterPage() {
                     <input
                       id="login-email"
                       type="email"
-                      placeholder="you@example.com"
                       className="w-full border rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-yellow-400 font-medium"
                       style={{
                         backgroundColor: '#f7f7f7',
@@ -216,7 +211,6 @@ export default function LoginRegisterPage() {
                     <input
                       id="login-password"
                       type="password"
-                      placeholder="••••••••"
                       className="w-full border rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-yellow-400 font-medium"
                       style={{
                         backgroundColor: '#f7f7f7',
@@ -302,7 +296,7 @@ export default function LoginRegisterPage() {
                 fontFamily: 'Manrope, sans-serif',
             }}
             >
-            Aroma
+            REBEL
             </h1>
             <p
             className="text-white/90 text-lg font-medium drop-shadow"
@@ -314,7 +308,6 @@ export default function LoginRegisterPage() {
             </p>
         </div>
         </div>
-
       </div>
     </div>
   )
