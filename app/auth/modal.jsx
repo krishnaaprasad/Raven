@@ -76,7 +76,7 @@ export default function AuthModal({ onClose }) {
             right: 1.6rem !important;
             width: 1.9rem !important;
             height: 1.9rem !important;
-            font-size: 1.3rem !important;
+            font-size: 2.5rem !important;
           }
         }
       `}</style>
