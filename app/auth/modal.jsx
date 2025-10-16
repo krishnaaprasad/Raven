@@ -20,66 +20,64 @@ export default function AuthModal({ onClose }) {
       }}
     >
       <div
-        className="login-auth-modal-content"
-        onClick={e => e.stopPropagation()}
-        style={{
-          background: "transparent", // <--- REMOVE the white!
-          borderRadius: "26px",
-          boxShadow: "none", // <--- REMOVE any shadow if user design already has it
-          maxWidth: 850,
-          width: "100%",
-          margin: "0 auto",
-          padding: 0,
-          position: "relative",
-          display: "flex",
-          flexDirection: "column",
-          overflow: "visible"
-        }}
-      >
+  className="login-auth-modal-content"
+  onClick={e => e.stopPropagation()}
+  style={{
+    // Transparent background - only handles overlay, not shape!
+    background: "none",
+    borderRadius: "26px",
+    boxShadow: "none",
+    maxWidth: 900,
+    width: "100%",
+    margin: "0 auto",
+    padding: 0,
+    position: "relative", // Needed, but real positioning is on the card!
+    display: "flex",
+    flexDirection: "column",
+    overflow: "visible"
+  }}
+>
+        {/* Responsive Close Button */}
         <button
-        className="login-auth-modal-close"
-        onClick={onClose}
-        aria-label="Close Modal"
-        type="button"
-        style={{
-          position: "absolute",
-          top: "3.8rem",         // default for desktop
-          right: "3rem",       // default for desktop
-          fontSize: "1.5rem",
-          color: "#B28C34",
-          background: "#FFF8E7",
-          border: "none",
-          borderRadius: "50%",
-          width: "2.25rem",
-          height: "2.25rem",
-          boxShadow: "0 2px 8px rgba(178,140,52,0.25)",
-          cursor: "pointer",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          transition: "all 0.2s ease-in-out",
-          zIndex: 100,
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.background = "#f5e9ca";
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.background = "#FFF8E7";
-        }}
-      >
-        &times;
-      </button>
-      <style jsx global>{`
-        @media (max-width: 600px) {
-          .login-auth-modal-close {
-            top: 1.2rem !important;
-            right: 1.6rem !important;
-            width: 1.9rem !important;
-            height: 1.9rem !important;
-            font-size: 1.3rem !important;
+          className="login-auth-modal-close"
+          onClick={onClose}
+          aria-label="Close Modal"
+          type="button"
+          style={{
+            position: "absolute",
+            top: "1.1rem",
+            right: "1.1rem",
+            fontSize: "1.5rem",
+            color: "#b28c34",
+            background: "#fff8e7",
+            border: "none",
+            borderRadius: "50%",
+            width: "2.1rem",
+            height: "2.1rem",
+            boxShadow: "0 2px 8px rgba(178,140,52,0.22)",
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            transition: "all 0.22s",
+            zIndex: 100,
+          }}
+          onMouseEnter={e => (e.currentTarget.style.background = "#f5e9ca")}
+          onMouseLeave={e => (e.currentTarget.style.background = "#fff8e7")}
+        >
+          &times;
+        </button>
+        <style jsx global>{`
+          @media (max-width:600px){
+            .login-auth-modal-close {
+              top: 0.7rem !important;
+              right: 0.7rem !important;
+              font-size: 1.15rem !important;
+              width: 1.7rem !important;
+              height: 1.7rem !important;
+            }
           }
-        }
-      `}</style>
+        `}</style>
 
       <LoginRegister />
       </div>
