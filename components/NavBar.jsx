@@ -92,15 +92,17 @@ export default function NavBar() {
                 {/* Middle: Logo & Nav */}
                 <div className="flex flex-1 items-center justify-center sm:items-stretch sm:justify-start">
                   <div className="flex flex-shrink-0 items-center">
-                    <Image
-                      src="/logo.png"
-                      alt="Raven Fragrance Logo"
-                      width={80}
-                      height={20}
-                      className="h-5 sm:h-5 w-auto"
-                      priority={true}
-                      draggable={false}
-                    />
+                    <Link href="/" className="flex items-center">
+                      <Image
+                        src="/logo.png"
+                        alt="Raven Fragrance Logo"
+                        width={80}
+                        height={20}
+                        className="h-5 sm:h-5 w-auto"
+                        priority={true}
+                        draggable={false}
+                      />
+                    </Link>
                   </div>
                   <div className="hidden sm:ml-6 sm:flex sm:space-x-6">
                     {navigation.map((item) => (
