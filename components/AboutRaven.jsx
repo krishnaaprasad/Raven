@@ -75,14 +75,14 @@ export default function AboutRaven() {
           variants={fade}
           className="text-lg sm:text-xl text-neutral-800 font-light leading-relaxed text-center mb-6"
         >
-          <span className="text-[#B28C34] font-semibold">Rebel</span> radiates casual elegance the kind that doesn’t ask for attention but commands it naturally. To be a <span className="text-[#B28C34] font-semibold">Rebel</span> means breaking rules while blending elegance and edge, turning every step into a statement.
+          <span className="text-[#B28C34] font-semibold">Rebel</span> embodies effortless style and confident presence—never seeking attention, but always making an impact. To be a <span className="text-[#B28C34] font-semibold">Rebel</span> means challenging expectations and blending sophistication with boldness, turning every moment into a statement.
         </motion.p>
         {/* Signature quote */}
         <motion.p
           variants={fade}
           className="text-base sm:text-lg text-[#96711a] italic leading-relaxed text-center mb-7"
         >
-          “To scent is not to mask, but to reveal. In a world of imitation, <span className="font-semibold">Raven</span> is a return to authenticity, a quiet revolution, an invitation to the extraordinary.”
+          “Rebel is pure expression. In a world of imitation, <span className="font-semibold">Raven</span> invites authenticity, a quiet revolution for those who dare to be extraordinary.”
         </motion.p>
         {/* Core values */}
         <motion.ul
