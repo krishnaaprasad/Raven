@@ -12,11 +12,11 @@ const features = [
     title: 'No Harsh Additives',
     description: 'Free from sulfates, parabens, and synthetics.',
   },
-  {
+  /*{
     Icon: DropHalfBottom,
     title: 'Water-Based Scents',
     description: 'Lightweight formulas for long-lasting wear.',
-  },
+  },*/
   {
     Icon: Sparkle,
     title: 'Glow with Grace',
@@ -26,9 +26,9 @@ const features = [
 
 export default function RavenBadge() {
   return (
-    <section className="w-full py-20 bg-white px-4">
-      <div className="max-w-6xl mx-auto text-center">
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-10">
+    <section className="w-full py-20 bg-white px-4 ">
+      <div className="max-w-6xl mx-auto text-center ">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-10 ">
           {features.map((item, index) => (
             <div
               key={index}

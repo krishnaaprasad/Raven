@@ -121,12 +121,12 @@ export default function ProductPage() {
           {/* Price */}
           <div>
             <p className="text-gray-700 text-xs font-semibold mb-1">
-              MRP ₹{Math.round(selected.price * 1.1)} (Incl. of all taxes)
+              MRP ₹{Math.round(selected.price * 1.365)} (Incl. of all taxes)
             </p>
             <div className="flex items-center gap-3">
               <span className="text-2xl font-extrabold text-[#B28C34]">₹{selected.price}</span>
               <span className="text-gray-400 line-through text-lg">
-                ₹{Math.round(selected.price * 1.1)}
+                ₹{Math.round(selected.price * 1.365)}
               </span>
             </div>
           </div>

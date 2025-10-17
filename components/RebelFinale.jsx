@@ -66,9 +66,9 @@ export default function RebelFinale() {
           variants={fade}
           className="text-lg sm:text-xl text-[#514536] font-light leading-relaxed mb-5 max-w-xl"
         >
-          <span className="font-semibold text-[#B28C34]">Rebel</span> is more than a fragrance, it’s a mood, a mindset and a moment. <br />
-          For the woman who breaks rules with elegance,<br className="hidden sm:inline" /> who chases the sun, not the crowd.<br />
-          Who knows that true seduction lies in being boldly, radiantly herself.
+          <span className="font-semibold text-[#B28C34]">Rebel</span> is more than a fragrance, it’s a mood and a mindset. <br />
+          Made for those who lead with confidence,<br className="hidden sm:inline" /> who follow their instincts, not the noise.<br />
+          For anyone who knows that true allure lies in being unapologetically, unmistakably themselves.
         </motion.p>
         <motion.p
           variants={fade}

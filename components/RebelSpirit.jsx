@@ -74,7 +74,7 @@ export default function RebelSpirit() {
           }}
           className="text-3xl sm:text-4xl font-extrabold font-serif text-[#9c6f0c] drop-shadow-md tracking-wide mb-5 uppercase"
         >
-          The Spirit of the Rebel Woman
+          The Spirit of the Rebel
         </motion.h2>
 
         <div className="relative w-20 h-1 mx-auto mb-7">
@@ -94,20 +94,20 @@ export default function RebelSpirit() {
             A
           </span>
           <span className="font-bold text-[#9e730d]">
-            Dynamic, Daring Woman
+            Dynamic, Force of Nature.
           </span>
           <br />
-          The Rebel is all energy, all charm, all her. She is fearlessly spontaneous, effortlessly radiant, and irresistibly joyful. Every morning, she’s ready for whatever the world brings with charisma, light, and her signature scent.
+          The rebel is pure energy, pure charm, purely themselves. Fearlessly spontaneous, effortlessly radiant, and irresistibly alive. Every morning, they meet the world with charisma, light, and a signature scent that’s unmistakably theirs.
         </motion.p>
 
         <motion.p
           variants={fade}
           className="text-base sm:text-lg italic text-[#3a300d] leading-relaxed mb-2 drop-shadow-sm"
         >
-          Her secret weapon?{' '}
+          Their secret weapon?{' '}
           <span className="relative inline-block">
             <span className="relative italic text-[#887017] z-10">
-              high-voltage floral cocktail
+               A high-voltage floral fusion
             </span>
             <motion.span
               layout
@@ -119,7 +119,7 @@ export default function RebelSpirit() {
               style={{ zIndex: 0 }}
             />
           </span>{' '}
-          that unveils the most rebellious side of her untamed beauty.
+          that reveals the most untamed, rebellious edge of their true being.
         </motion.p>
       </motion.div>
     </section>

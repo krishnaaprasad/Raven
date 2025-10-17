@@ -26,8 +26,7 @@ const product = {
     'Travel friendly & ideal for gifting purpose'
   ],
   variants: [
-    { size: '50ml', price: 549 },
-    { size: '100ml', price: 599 }
+    { size: '50ml', price: 549 }
   ],
 }
 export default product

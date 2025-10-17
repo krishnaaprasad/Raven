@@ -60,7 +60,7 @@ export default function WhyChooseRaven() {
             {[{
               icon: '🌿',
               heading: 'Rare Ingredients',
-              desc: 'We distill only the rarest botanicals and natural absolutes—sourced ethically, chosen for depth and uniqueness.'
+              desc: 'We distill only the rarest botanicals and natural absolutes sourced ethically, chosen for depth and uniqueness.'
             }, {
               icon: '🔬',
               heading: 'Artisan Craft',
@@ -68,7 +68,7 @@ export default function WhyChooseRaven() {
             }, {
               icon: '🌗',
               heading: 'Philosophy First',
-              desc: 'We create not for trend, but for meaning. Raven is fragrance as a personal revelation and philosophy—wear your story, not a fashion.'
+              desc: 'We create not for trend, but for meaning. Raven is fragrance as a personal revelation and philosophy wear your story, not a fashion.'
             }].map((item, idx) => (
               <motion.div
                 key={idx}
