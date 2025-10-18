@@ -104,7 +104,7 @@ export default function NavBar() {
                       />
                     </Link>
                   </div>
-                  <div className="hidden sm:ml-6 sm:flex sm:space-x-6">
+                  <div className="hidden sm:flex sm:space-x-6 absolute left-1/2 transform -translate-x-1/2">
                     {navigation.map((item) => (
                       <a
                         key={item.name}
@@ -127,22 +127,22 @@ export default function NavBar() {
                 {/* Right side icons */}
                 <div className="flex items-center space-x-4">
                   {/* Desktop search */}
-                  <div className="hidden md:block w-64 relative">
+                  {/* <div className="hidden md:block w-64 relative">
                     <MagnifyingGlassIcon className="absolute left-3 top-2.5 h-5 w-5 text-[#B4933A]" />
                     <input
                       type="text"
                       placeholder="Search..."
                       className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md text-sm text-[#191919] focus:outline-none focus:ring-1 focus:ring-[#B4933A]"
                     />
-                  </div>
+                  </div> */}
 
                   {/* Mobile search icon */}
-                  <button
+                  {/* <button
                     onClick={() => setShowSearch((prev) => !prev)}
                     className="block sm:hidden text-[#191919] hover:text-[#B4933A]"
                   >
                     <MagnifyingGlassIcon className="h-6 w-6" />
-                  </button>
+                  </button>  */}
 
                   {/* Login modal trigger */}
                   <button
