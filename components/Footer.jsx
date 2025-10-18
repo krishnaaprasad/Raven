@@ -75,8 +75,8 @@ export default function Footer() {
         <div className="mt-12 border-t border-[#2D2D2D] pt-6 flex flex-col md:flex-row justify-between items-center text-sm text-neutral-500 gap-4">
           <p>© 2025 Raven Fragrance. All rights reserved.</p>
           <div className="flex space-x-4">
-            <a href="#" className="hover:underline hover:text-[#B4933A] transition">Privacy Policy</a>
-            <a href="#" className="hover:underline hover:text-[#B4933A] transition">Terms of Service</a>
+            <a href="./policy/privacy-policy" className="hover:underline hover:text-[#B4933A] transition">Privacy Policy</a>
+            <a href="./policy/terms-conditions" className="hover:underline hover:text-[#B4933A] transition">Terms of Service</a>
           </div>
         </div>
       </div>
