@@ -136,9 +136,9 @@ function ContactPageInner() {
         </div>
       )}
 
-      <div className="flex justify-center py-20 px-6 sm:px-12 lg:px-24">
+      <div className="flex justify-center py-10 px-6 sm:px-12 lg:px-24">
         <div className="max-w-[1080px] w-full flex flex-col">
-          <div className="text-center mb-10">
+          <div className="text-center mb-3">
             <h1 className="text-4xl md:text-5xl font-serif text-[#b66f19] mb-6 text-center">
               Contact Us
             </h1>
