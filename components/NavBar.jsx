@@ -24,7 +24,7 @@ const AuthModal = dynamic(() => import('../app/auth/modal'), { ssr: false })
 const navigation = [
   { name: 'Home', href: '/' },
   { name: 'Shop', href: '/product' },
-  { name: 'Contact Us', href: '/contact' },
+  { name: 'Contact Us', href: '/contact-us' },
 ]
 
 function classNames(...classes) {
