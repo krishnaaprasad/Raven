@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useCart } from '../app/context/cartcontext'
 import MiniCart from './MiniCart'
 import dynamic from 'next/dynamic'
+import { useSession, signOut } from 'next-auth/react'
 
 import {
   Disclosure,
@@ -16,7 +17,6 @@ import {
   XMarkIcon,
   ShoppingBagIcon,
   UserIcon,
-  MagnifyingGlassIcon,
 } from '@heroicons/react/24/outline'
 
 const AuthModal = dynamic(() => import('../app/auth/modal'), { ssr: false })
@@ -32,6 +32,7 @@ function classNames(...classes) {
 }
 
 export default function NavBar() {
+  const { data: session } = useSession()
   const [showSearch, setShowSearch] = useState(false)
   const searchRef = useRef(null)
   const { cartCount } = useCart()
@@ -75,20 +76,6 @@ export default function NavBar() {
                   </DisclosureButton>
                 </div>
 
-                {/* Mobile search bar dropdown */}
-                {showSearch && (
-                  <div
-                    ref={searchRef}
-                    className="absolute top-12 left-0 right-0 z-10 bg-white px-4 py-2 border-t border-gray-200 shadow-sm sm:hidden"
-                  >
-                    <input
-                      type="text"
-                      placeholder="Search..."
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-black"
-                    />
-                  </div>
-                )}
-
                 {/* Middle: Logo & Nav */}
                 <div className="flex flex-1 items-center justify-center sm:items-stretch sm:justify-start">
                   <div className="flex flex-shrink-0 items-center">
@@ -106,7 +93,7 @@ export default function NavBar() {
                   </div>
                   <div className="hidden sm:flex sm:space-x-6 absolute left-1/2 transform -translate-x-1/2">
                     {navigation.map((item) => (
-                      <a
+                      <Link
                         key={item.name}
                         href={item.href}
                         className="
@@ -119,39 +106,32 @@ export default function NavBar() {
                         "
                       >
                         {item.name}
-                      </a>
+                      </Link>
                     ))}
+                    {/* Show My Account only if logged in */}
+                    {session && (
+                      <Link
+                        href="/account"
+                        className="relative text-base font-medium text-[#191919] hover:text-[#B4933A]"
+                      >
+                        My Account
+                      </Link>
+                    )}
                   </div>
                 </div>
 
                 {/* Right side icons */}
                 <div className="flex items-center space-x-4">
-                  {/* Desktop search */}
-                  {/* <div className="hidden md:block w-64 relative">
-                    <MagnifyingGlassIcon className="absolute left-3 top-2.5 h-5 w-5 text-[#B4933A]" />
-                    <input
-                      type="text"
-                      placeholder="Search..."
-                      className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md text-sm text-[#191919] focus:outline-none focus:ring-1 focus:ring-[#B4933A]"
-                    />
-                  </div> */}
-
-                  {/* Mobile search icon */}
-                  {/* <button
-                    onClick={() => setShowSearch((prev) => !prev)}
-                    className="block sm:hidden text-[#191919] hover:text-[#B4933A]"
-                  >
-                    <MagnifyingGlassIcon className="h-6 w-6" />
-                  </button>  */}
-
-                  {/* Login modal trigger */}
-                  <button
-                    onClick={() => setShowAuthModal(true)}
-                    className="bg-transparent border-none outline-none"
-                    aria-label="Login/Register"
-                  >
-                    <UserIcon className="h-6 w-6 text-[#191919] hover:text-[#B4933A] cursor-pointer" />
-                  </button>
+                  {/* Show login modal only if not logged in */}
+                  {!session && (
+                    <button
+                      onClick={() => setShowAuthModal(true)}
+                      className="bg-transparent border-none outline-none"
+                      aria-label="Login/Register"
+                    >
+                      <UserIcon className="h-6 w-6 text-[#191919] hover:text-[#B4933A] cursor-pointer" />
+                    </button>
+                  )}
 
                   {/* Cart */}
                   <button
@@ -171,6 +151,16 @@ export default function NavBar() {
                     )}
                   </button>
                   <MiniCart isOpen={showMiniCart} onClose={() => setShowMiniCart(false)} />
+
+                  {/* Logout if logged in */}
+                  {session && (
+                    <button
+                      onClick={() => signOut()}
+                      className="text-[#B4933A] font-medium hover:underline"
+                    >
+                      Logout
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
@@ -181,28 +171,29 @@ export default function NavBar() {
                 {navigation.map((item) => (
                   <DisclosureButton
                     key={item.name}
-                    as="a"
+                    as={Link}
                     href={item.href}
-                    className="
-                      block rounded-md px-3 py-2 text-base font-semibold text-[#191919] hover:text-[#B4933A]
-                      relative
-                      after:absolute after:bottom-0 after:left-1/2 after:h-[2px] after:bg-[#B4933A] after:origin-center
-                      after:scale-x-0 after:w-full after:transition-transform after:duration-300
-                      hover:after:scale-x-100 hover:after:left-0
-                    "
+                    className="block rounded-md px-3 py-2 text-base font-semibold text-[#191919] hover:text-[#B4933A]"
                   >
                     {item.name}
                   </DisclosureButton>
                 ))}
+                {session && (
+                  <DisclosureButton
+                    as={Link}
+                    href="/account"
+                    className="block rounded-md px-3 py-2 text-base font-semibold text-[#191919] hover:text-[#B4933A]"
+                  >
+                    My Account
+                  </DisclosureButton>
+                )}
               </div>
             </DisclosurePanel>
           </>
         )}
       </Disclosure>
       {/* Auth Modal rendered at top level */}
-      {showAuthModal && (
-        <AuthModal onClose={() => setShowAuthModal(false)} />
-      )}
+      {!session && showAuthModal && <AuthModal onClose={() => setShowAuthModal(false)} />}
     </>
   )
 }

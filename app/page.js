@@ -43,8 +43,8 @@ export default function Home() {
 
 <div className="w-full h-[2px] bg-gradient-to-r from-[#af9b64] via-[#B4933A] to-[#af9b64] shadow-md" />
   <RavenBadge />
-  <AboutRaven />
   <WhyChooseRaven />
+  {/* <AboutRaven /> */}
   <RebelSpirit />
   <RebelFinale />
   <ScentStorySection />
