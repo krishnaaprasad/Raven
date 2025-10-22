@@ -2,6 +2,7 @@
 import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Eye, EyeOff } from 'lucide-react'
+import { signIn } from "next-auth/react"
 
 const primary = '#ecab13'
 const textMuted = '#8d8d8d'
@@ -83,9 +84,23 @@ export default function LoginRegisterPage() {
       return
     }
 
-    alert(`✅ Login attempt with: ${email}`)
-  }
+    try {
+      const result = await signIn("credentials", {
+        redirect: false,
+        email,
+        password,
+      })
 
+      if (result.error) {
+        setError(result.error)
+      } else {
+        window.location.href = "/my-account" // or redirect to /my-account page later
+      }
+    } catch (err) {
+      console.error("Login error:", err)
+      setError("Login failed. Please try again.")
+    }
+  }
   const slideVariants = {
     initial: (dir) => ({
       x: dir === 'left' ? '100%' : '-100%',

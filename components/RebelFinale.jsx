@@ -85,14 +85,14 @@ export default function RebelFinale() {
               y: -4,
               boxShadow: '0 12px 36px 0 rgba(201,174,113,0.23),0_0_0_4px_#C9AE7144',
               background: 'linear-gradient(90deg,#FFE186 0%,#F6C868 100%)',
-              color: '#514536',
+              color: '#a07f2e',
               borderColor: '#C9AE71'
             }}
             whileTap={{ scale: 0.97, y: 2 }}
             transition={{ type: 'spring', stiffness: 360, damping: 20 }}
-            className="inline-block px-10 py-4 rounded-full bg-[#F9E6B9]/85 border border-[#C9AE71] text-[#B28C34] font-bold shadow-lg tracking-wide text-lg uppercase relative hover:ring-2 hover:ring-[#C9AE71]/20 transition-all duration-200"
+            className="inline-block px-10 py-4 rounded-full bg-[#B4933A] hover:bg-[#a07f2e]  text-white font-bold shadow-lg text-lg uppercase relative"
           >
-            Order REBEL now &mdash; 50ml
+            Order REBEL now
           </motion.a>
         </motion.div>
       </motion.div>
