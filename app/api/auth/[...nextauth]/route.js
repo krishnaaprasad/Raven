@@ -4,65 +4,58 @@ import connectToDatabase from "@/lib/mongodb";
 import User from "@/models/User";
 import bcrypt from "bcryptjs";
 
-const handler = NextAuth({
+export const authOptions = {
   providers: [
     CredentialsProvider({
       name: "Credentials",
       credentials: {
-        email: { label: "Email", type: "text" },
+        email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
         await connectToDatabase();
 
         const user = await User.findOne({ email: credentials.email });
-        if (!user) throw new Error("No user found");
+        if (!user) throw new Error("No user found with this email");
 
         const isValid = await bcrypt.compare(credentials.password, user.password);
         if (!isValid) throw new Error("Invalid password");
 
-        return { id: user._id, name: user.name, email: user.email };
+        return { id: user._id.toString(), name: user.name, email: user.email };
       },
     }),
   ],
-
-  session: {
-    strategy: "jwt",
-    maxAge: 30 * 24 * 60 * 60, // 30 days in seconds
-  },
-
-  jwt: {
-    secret: process.env.NEXTAUTH_SECRET,
-  },
 
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
+        token.name = user.name;
+        token.email = user.email;
       }
       return token;
     },
     async session({ session, token }) {
-      session.user.id = token.id;
+      session.user = {
+        id: token.id,
+        name: token.name,
+        email: token.email,
+      };
       return session;
     },
   },
 
   pages: {
-    signIn: "/login", // Optional custom login page
+    signIn: "/login",
   },
 
-  cookies: {
-    sessionToken: {
-      name: `next-auth.session-token`,
-      options: {
-        httpOnly: true,
-        sameSite: "lax",
-        path: "/",
-        secure: process.env.NODE_ENV === "production",
-      },
-    },
+  session: {
+    strategy: "jwt",
+    maxAge: 30 * 24 * 60 * 60, // 30 days
   },
-});
 
+  secret: process.env.NEXTAUTH_SECRET,
+};
+
+const handler = NextAuth(authOptions);
 export { handler as GET, handler as POST };
