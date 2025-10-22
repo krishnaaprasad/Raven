@@ -6,7 +6,6 @@ import { useCart } from '../app/context/cartcontext'
 import MiniCart from './MiniCart'
 import dynamic from 'next/dynamic'
 import { useSession, signOut } from 'next-auth/react'
-
 import {
   Disclosure,
   DisclosureButton,
@@ -17,6 +16,7 @@ import {
   XMarkIcon,
   ShoppingBagIcon,
   UserIcon,
+  ChevronDownIcon,
 } from '@heroicons/react/24/outline'
 
 const AuthModal = dynamic(() => import('../app/auth/modal'), { ssr: false })
@@ -32,14 +32,17 @@ function classNames(...classes) {
 }
 
 export default function NavBar() {
-  const { data: session } = useSession()
   const [showSearch, setShowSearch] = useState(false)
-  const searchRef = useRef(null)
-  const { cartCount } = useCart()
-  const [animateCart, setAnimateCart] = useState(false)
   const [showMiniCart, setShowMiniCart] = useState(false)
   const [showAuthModal, setShowAuthModal] = useState(false)
+  const [animateCart, setAnimateCart] = useState(false)
+  const [showAccountMenu, setShowAccountMenu] = useState(false)
+  const searchRef = useRef(null)
+  const dropdownRef = useRef(null)
+  const { cartCount } = useCart()
+  const { data: session } = useSession()
 
+  // Animate cart
   useEffect(() => {
     if (cartCount > 0) {
       setAnimateCart(true)
@@ -48,10 +51,22 @@ export default function NavBar() {
     }
   }, [cartCount])
 
+  // Close search on outside click
   useEffect(() => {
     function handleClickOutside(event) {
       if (searchRef.current && !searchRef.current.contains(event.target)) {
         setShowSearch(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
+  // Close account menu if clicked outside
+  useEffect(() => {
+    function handleClickOutside(e) {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setShowAccountMenu(false)
       }
     }
     document.addEventListener('mousedown', handleClickOutside)
@@ -76,7 +91,7 @@ export default function NavBar() {
                   </DisclosureButton>
                 </div>
 
-                {/* Middle: Logo & Nav */}
+                {/* Logo & Center Nav */}
                 <div className="flex flex-1 items-center justify-center sm:items-stretch sm:justify-start">
                   <div className="flex flex-shrink-0 items-center">
                     <Link href="/" className="flex items-center">
@@ -91,46 +106,68 @@ export default function NavBar() {
                       />
                     </Link>
                   </div>
+
                   <div className="hidden sm:flex sm:space-x-6 absolute left-1/2 transform -translate-x-1/2">
                     {navigation.map((item) => (
                       <Link
                         key={item.name}
                         href={item.href}
-                        className="
-                          relative
-                          text-base font-medium text-[#191919]
-                          hover:text-[#B4933A]
-                          after:absolute after:bottom-0 after:left-1/2 after:h-[2px] after:bg-[#B4933A] after:origin-center
-                          after:scale-x-0 after:w-full after:transition-transform after:duration-300
-                          hover:after:scale-x-100 hover:after:left-0
-                        "
+                        className="relative text-base font-medium text-[#191919] hover:text-[#B4933A] after:absolute after:bottom-0 after:left-1/2 after:h-[2px] after:bg-[#B4933A] after:origin-center after:scale-x-0 after:w-full after:transition-transform after:duration-300 hover:after:scale-x-100 hover:after:left-0"
                       >
                         {item.name}
                       </Link>
                     ))}
-                    {/* Show My Account only if logged in */}
-                    {session && (
-                      <Link
-                        href="/my-account"
-                        className="relative text-base font-medium text-[#191919] hover:text-[#B4933A]"
-                      >
-                        My Account
-                      </Link>
-                    )}
                   </div>
                 </div>
 
-                {/* Right side icons */}
+                {/* Right icons */}
                 <div className="flex items-center space-x-4">
-                  {/* Show login modal only if not logged in */}
-                  {!session && (
+                  {/* Account/Login */}
+                  {!session ? (
                     <button
                       onClick={() => setShowAuthModal(true)}
                       className="bg-transparent border-none outline-none"
                       aria-label="Login/Register"
                     >
-                      <UserIcon className="h-6 w-6 text-[#191919] hover:text-[#B4933A] cursor-pointer" />
+                      <UserIcon className="h-6 w-6 text-[#191919] hover:text-[#B4933A] cursor-pointer transition-transform hover:scale-110" />
                     </button>
+                  ) : (
+                    <div ref={dropdownRef} className="relative">
+                      <button
+                        onMouseEnter={() => setShowAccountMenu(true)}
+                        onClick={() => setShowAccountMenu((prev) => !prev)}
+                        className="flex items-center space-x-1 text-[#191919] hover:text-[#B4933A] transition-all duration-300"
+                        aria-label="My Account Menu"
+                      >
+                        <UserIcon className="h-6 w-6" />
+                        <ChevronDownIcon className="h-4 w-4 mt-[1px]" />
+                      </button>
+
+                      {showAccountMenu && (
+                        <div
+                          className="absolute right-0 mt-3 w-44 bg-white/95 backdrop-blur-md border border-[#e7dabf] rounded-xl shadow-[0_4px_14px_rgba(0,0,0,0.1)] py-2 z-50 animate-fadeIn"
+                          onMouseEnter={() => setShowAccountMenu(true)}
+                          onMouseLeave={() => setShowAccountMenu(false)}
+                        >
+                          <Link
+                            href="/my-account"
+                            className="block px-4 py-2 text-[15px] font-medium text-[#191919] hover:text-[#B4933A] hover:bg-[#FAF5E8] rounded-md transition-colors duration-200"
+                            onClick={() => setShowAccountMenu(false)}
+                          >
+                            My Account
+                          </Link>
+                          <button
+                            onClick={() => {
+                              setShowAccountMenu(false)
+                              signOut()
+                            }}
+                            className="w-full text-left block px-4 py-2 text-[15px] font-medium text-[#191919] hover:text-[#B4933A] hover:bg-[#FAF5E8] rounded-md transition-colors duration-200"
+                          >
+                            Logout
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   )}
 
                   {/* Cart */}
@@ -142,7 +179,9 @@ export default function NavBar() {
                     type="button"
                   >
                     <ShoppingBagIcon
-                      className={`h-6 w-6 text-[#191919] hover:text-[#B4933A] transition-transform duration-500 ${animateCart ? 'animate-bounce' : ''}`}
+                      className={`h-6 w-6 text-[#191919] hover:text-[#B4933A] transition-transform duration-500 ${
+                        animateCart ? 'animate-bounce' : ''
+                      }`}
                     />
                     {cartCount > 0 && (
                       <span className="absolute -top-2 -right-2 rounded-full bg-red-600 text-white text-xs w-5 h-5 flex items-center justify-center font-bold">
@@ -150,17 +189,10 @@ export default function NavBar() {
                       </span>
                     )}
                   </button>
-                  <MiniCart isOpen={showMiniCart} onClose={() => setShowMiniCart(false)} />
-
-                  {/* Logout if logged in */}
-                  {session && (
-                    <button
-                      onClick={() => signOut()}
-                      className="text-[#B4933A] font-medium hover:underline"
-                    >
-                      Logout
-                    </button>
-                  )}
+                  <MiniCart
+                    isOpen={showMiniCart}
+                    onClose={() => setShowMiniCart(false)}
+                  />
                 </div>
               </div>
             </div>
@@ -171,7 +203,7 @@ export default function NavBar() {
                 {navigation.map((item) => (
                   <DisclosureButton
                     key={item.name}
-                    as={Link}
+                    as="a"
                     href={item.href}
                     className="block rounded-md px-3 py-2 text-base font-semibold text-[#191919] hover:text-[#B4933A]"
                   >
@@ -179,21 +211,28 @@ export default function NavBar() {
                   </DisclosureButton>
                 ))}
                 {session && (
-                  <DisclosureButton
-                    as={Link}
-                    href="/my-account"
-                    className="block rounded-md px-3 py-2 text-base font-semibold text-[#191919] hover:text-[#B4933A]"
-                  >
-                    My Account
-                  </DisclosureButton>
+                  <>
+                    <Link
+                      href="/my-account"
+                      className="block rounded-md px-3 py-2 text-base font-semibold text-[#191919] hover:text-[#B4933A]"
+                    >
+                      My Account
+                    </Link>
+                    <button
+                      onClick={() => signOut()}
+                      className="w-full text-left block rounded-md px-3 py-2 text-base font-semibold text-[#191919] hover:text-[#B4933A]"
+                    >
+                      Logout
+                    </button>
+                  </>
                 )}
               </div>
             </DisclosurePanel>
           </>
         )}
       </Disclosure>
-      {/* Auth Modal rendered at top level */}
-      {!session && showAuthModal && <AuthModal onClose={() => setShowAuthModal(false)} />}
+
+      {showAuthModal && <AuthModal onClose={() => setShowAuthModal(false)} />}
     </>
   )
 }
