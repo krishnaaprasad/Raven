@@ -1,12 +1,12 @@
 const product = {
   id: 'luxury-parfum-smokey',
   brand: 'OG BEAUTY',
-  name: 'Luxury Eau De Parfum – Smokey',
+  name: 'REBEL - Eau de perfume',
   description: 'An elegantly blended fragrance with sophisticated smokey notes. Crafted with premium ingredients, cruelty free, and 100% vegan.',
   images: [
     {
-      original: '/smokey1.jpg',
-      thumbnail: '/smokey1_thumb.jpg',
+      original: '/rebel1.JPG',
+      thumbnail: '/rebel1.JPG',
     },
     {
       original: '/smokey2.jpg',

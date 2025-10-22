@@ -109,7 +109,7 @@ export default function ProductPage() {
           className="flex flex-col gap-6 w-full max-w-lg mx-auto"
         >
           {/* Title */}
-          <h1 className="font-serif font-bold text-3xl sm:text-4xl text-[#1E140B] leading-tight">
+          <h1 className="font-serif font-druzhba text-3xl sm:text-4xl text-[#1E140B] leading-tight">
             {product.name}
           </h1>
 
