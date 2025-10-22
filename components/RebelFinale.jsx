@@ -92,7 +92,7 @@ export default function RebelFinale() {
             transition={{ type: 'spring', stiffness: 360, damping: 20 }}
             className="inline-block px-10 py-4 rounded-full bg-[#B4933A] hover:bg-[#a07f2e]  text-white font-bold shadow-lg text-lg uppercase relative"
           >
-            Order REBEL now
+            Order now
           </motion.a>
         </motion.div>
       </motion.div>

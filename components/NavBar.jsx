@@ -111,7 +111,7 @@ export default function NavBar() {
                     {/* Show My Account only if logged in */}
                     {session && (
                       <Link
-                        href="/account"
+                        href="/my-account"
                         className="relative text-base font-medium text-[#191919] hover:text-[#B4933A]"
                       >
                         My Account
@@ -181,7 +181,7 @@ export default function NavBar() {
                 {session && (
                   <DisclosureButton
                     as={Link}
-                    href="/account"
+                    href="/my-account"
                     className="block rounded-md px-3 py-2 text-base font-semibold text-[#191919] hover:text-[#B4933A]"
                   >
                     My Account
