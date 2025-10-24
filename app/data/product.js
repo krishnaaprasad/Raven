@@ -9,12 +9,12 @@ const product = {
       thumbnail: '/rebel1.JPG',
     },
     {
-      original: '/smokey2.jpg',
-      thumbnail: '/smokey2_thumb.jpg',
+      original: '/rebel2.JPG',
+      thumbnail: '/rebel2.JPG',
     },
     {
-      original: '/smokey3.jpg',
-      thumbnail: '/smokey3_thumb.jpg',
+      original: '/rebel3.JPG',
+      thumbnail: '/rebel3.JPG',
     },
   ],
   rating: 4.9,
@@ -26,7 +26,7 @@ const product = {
     'Travel friendly & ideal for gifting purpose'
   ],
   variants: [
-    { size: '50ml', price: 5 }
+    { size: '50ml', price: 549 }
   ],
 }
 export default product
