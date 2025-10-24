@@ -3,10 +3,12 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { useCart } from '../context/cartcontext'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useRouter } from 'next/navigation'
 
 export default function CartPage() {
   const { cartItems, removeFromCart, clearCart, cartCount, updateQuantity } = useCart()
   const totalPrice = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
+  const router = useRouter()
 
   if (!cartItems.length) {
     return (
@@ -56,7 +58,6 @@ export default function CartPage() {
               transition={{ duration: 0.35, type: 'spring' }}
               className="flex flex-col sm:flex-row items-center justify-between py-6 border-b border-[#f1e6d8] gap-5"
             >
-              {/* Product Info */}
               <div className="flex items-center gap-4 w-full sm:w-auto">
                 <motion.div
                   whileHover={{ scale: 1.05 }}
@@ -64,7 +65,7 @@ export default function CartPage() {
                 >
                   {item.image && (
                     <Image
-                      src={item.image}
+                      src={item.image.original || item.image}
                       alt={item.name}
                       width={80}
                       height={80}
@@ -80,8 +81,6 @@ export default function CartPage() {
                     {item.name}
                   </Link>
                   <div className="text-xs text-[#857255] mt-1">Size: {item.size}</div>
-
-                  {/* Quantity Controls */}
                   <div className="flex items-center gap-3 mt-2">
                     <button
                       onClick={() => updateQuantity(item.id, item.size, item.quantity - 1)}
@@ -102,7 +101,6 @@ export default function CartPage() {
                 </div>
               </div>
 
-              {/* Price & Remove */}
               <div className="flex flex-col items-end gap-2 w-full sm:w-auto">
                 <span className="font-semibold text-[#B28C34] text-lg md:text-xl">
                   ₹{item.price * item.quantity}
@@ -119,7 +117,6 @@ export default function CartPage() {
           ))}
         </AnimatePresence>
 
-        {/* Total */}
         <div className="flex justify-between items-center py-6 mt-4 border-t border-[#f1e6d8]">
           <span className=" font-semibold text-[#3a2c19] text-lg">{`Total (${cartCount} items):`}</span>
           <motion.span
@@ -132,15 +129,16 @@ export default function CartPage() {
           </motion.span>
         </div>
 
-        {/* Buttons */}
         <div className="flex flex-col md:flex-row gap-4 mt-6">
           <motion.button
             whileHover={{ scale: 1.02, boxShadow: '0 4px 24px #00000022' }}
             whileTap={{ scale: 0.98 }}
             className="flex-1 px-6 py-3 rounded-lg bg-gradient-to-r from-[#2a1f18] to-[#1a1919] text-[#fafafa] font-semibold shadow-md hover:shadow-lg transition text-base tracking-wide"
+            onClick={() => router.push('/checkout')}
           >
             Proceed to Checkout
           </motion.button>
+
           <motion.button
             whileHover={{ scale: 1.03, backgroundColor: '#fdf7eb' }}
             whileTap={{ scale: 0.97 }}

@@ -14,6 +14,7 @@ import { motion } from 'framer-motion'
 import product from '../data/product'
 import { useCart } from '../context/cartcontext'
 import { toast } from 'react-hot-toast'
+import { useRouter } from 'next/navigation'
 
 export default function ProductPage() {
   const [selected, setSelected] = useState(product.variants[0])
@@ -24,13 +25,13 @@ export default function ProductPage() {
   const [isAdding, setIsAdding] = useState(false)
 
   const { addToCart } = useCart()
+  const router = useRouter()
 
   const increase = () => setQuantity((q) => q + 1)
   const decrease = () => setQuantity((q) => (q > 1 ? q - 1 : 1))
 
   const handleAddToCart = () => {
     setIsAdding(true)
-
     addToCart(
       {
         id: product.id,
@@ -41,10 +42,13 @@ export default function ProductPage() {
       },
       quantity
     )
-
     toast.success(`${product.name} (${selected.size}) added to cart!`)
-
     setTimeout(() => setIsAdding(false), 800)
+  }
+
+  const handleBuyNow = () => {
+    handleAddToCart()
+    router.push('/checkout')
   }
 
   return (
@@ -69,7 +73,7 @@ export default function ProductPage() {
                 }}
               >
                 <Image
-                  src={src}
+                  src={src.original}
                   alt={`Product Image ${i + 1}`}
                   width={500}
                   height={500}
@@ -79,7 +83,6 @@ export default function ProductPage() {
             ))}
           </Swiper>
 
-          {/* Thumbnails */}
           <Swiper
             onSwiper={setThumbsSwiper}
             spaceBetween={10}
@@ -90,7 +93,7 @@ export default function ProductPage() {
             {product.images.map((src, i) => (
               <SwiperSlide key={i} className="cursor-pointer">
                 <Image
-                  src={src}
+                  src={src.thumbnail}
                   alt={`Thumbnail ${i + 1}`}
                   width={100}
                   height={100}
@@ -108,17 +111,14 @@ export default function ProductPage() {
           transition={{ duration: 0.6 }}
           className="flex flex-col gap-6 w-full max-w-lg mx-auto"
         >
-          {/* Title */}
           <h1 className="font-serif font-druzhba text-3xl sm:text-4xl text-[#1E140B] leading-tight">
             {product.name}
           </h1>
 
-          {/* Subtitle */}
           <p className="text-[#755B00] text-sm md:text-base font-medium">
             Long lasting | Premium scent | Fragrance
           </p>
 
-          {/* Price */}
           <div>
             <p className="text-gray-700 text-xs font-semibold mb-1">
               MRP ₹{Math.round(selected.price * 1.365)} (Incl. of all taxes)
@@ -139,12 +139,11 @@ export default function ProductPage() {
                 <button
                   key={v.size}
                   onClick={() => setSelected(v)}
-                  className={`rounded-full px-4 py-2 text-sm font-semibold transition 
-                    ${
-                      selected.size === v.size
-                        ? 'bg-black text-white shadow'
-                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                    }`}
+                  className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
+                    selected.size === v.size
+                      ? 'bg-black text-white shadow'
+                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                  }`}
                 >
                   {v.size.toUpperCase()}
                 </button>
@@ -168,19 +167,9 @@ export default function ProductPage() {
           {/* Quantity + Add to Cart */}
           <div className="flex items-center gap-3 w-full">
             <div className="flex items-center border border-[#D0C5A3] rounded-full overflow-hidden bg-white">
-              <button
-                onClick={decrease}
-                className="px-4 py-2 text-lg font-semibold text-[#917B2E]"
-              >
-                −
-              </button>
+              <button onClick={decrease} className="px-4 py-2 text-lg font-semibold text-[#917B2E]">−</button>
               <span className="px-6 py-2 font-semibold">{quantity}</span>
-              <button
-                onClick={increase}
-                className="px-4 py-2 text-lg font-semibold text-[#917B2E]"
-              >
-                +
-              </button>
+              <button onClick={increase} className="px-4 py-2 text-lg font-semibold text-[#917B2E]">+</button>
             </div>
 
             <motion.button
@@ -198,18 +187,18 @@ export default function ProductPage() {
           <motion.button
             whileTap={{ scale: 0.95 }}
             className="w-full rounded-full bg-black text-white py-3 font-semibold uppercase tracking-wide hover:bg-gray-900 transition"
+            onClick={handleBuyNow}
           >
             Buy it Now
           </motion.button>
         </motion.div>
       </div>
 
-      {/* Lightbox */}
       {lightboxOpen && (
         <Lightbox
           open={lightboxOpen}
           close={() => setLightboxOpen(false)}
-          slides={product.images.map((src) => ({ src }))}
+          slides={product.images.map((src) => ({ src: src.original }))}
           index={lightboxIndex}
           on={{ view: ({ index }) => setLightboxIndex(index) }}
         />

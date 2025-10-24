@@ -7,15 +7,39 @@ const CART_EXPIRY_MS = 30 * 24 * 60 * 60 * 1000 // 30 days
 
 function loadCartFromStorage() {
   try {
-    const data = JSON.parse(localStorage.getItem('cart'))
-    if (data && data.expiry > Date.now()) {
-      return data.items || []
+    // Check for failed order retry first
+    const failedOrder = localStorage.getItem('failedOrder')
+    if (failedOrder) {
+      const parsed = JSON.parse(failedOrder)
+      if (parsed.cartItems && Array.isArray(parsed.cartItems)) {
+        return parsed.cartItems
+      }
     }
+
+    // Otherwise, load normal cart
+    const data = JSON.parse(localStorage.getItem('cart'))
+    if (data && data.expiry > Date.now() && Array.isArray(data.items)) {
+      return data.items
+    }
+
     localStorage.removeItem('cart')
   } catch (e) {
-    return []
+    console.error('Error loading cart:', e)
   }
+
   return []
+}
+
+// Helper to save failed order for retry
+export function saveFailedOrder(cartItems, userData) {
+  try {
+    localStorage.setItem(
+      'failedOrder',
+      JSON.stringify({ cartItems: Array.isArray(cartItems) ? cartItems : [], userData })
+    )
+  } catch (e) {
+    console.error('Error saving failed order:', e)
+  }
 }
 
 export function CartProvider({ children }) {
@@ -26,7 +50,7 @@ export function CartProvider({ children }) {
     setCartItems(loadCartFromStorage())
   }, [])
 
-  // Persist with expiry
+  // Persist cart with expiry
   useEffect(() => {
     const cartData = {
       items: cartItems,
@@ -70,10 +94,16 @@ export function CartProvider({ children }) {
   }
 
   // ✅ Clear all
-  const clearCart = () => setCartItems([])
+  const clearCart = () => {
+    setCartItems([])
+    localStorage.removeItem('cart')
+    localStorage.removeItem('failedOrder') // remove failed order on successful checkout
+  }
 
   // ✅ Cart count
-  const cartCount = cartItems.reduce((acc, item) => acc + item.quantity, 0)
+  const cartCount = Array.isArray(cartItems)
+    ? cartItems.reduce((acc, item) => acc + item.quantity, 0)
+    : 0
 
   return (
     <CartContext.Provider
@@ -81,7 +111,7 @@ export function CartProvider({ children }) {
         cartItems,
         addToCart,
         removeFromCart,
-        updateQuantity, // 👈 added
+        updateQuantity,
         clearCart,
         cartCount,
       }}
