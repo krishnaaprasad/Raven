@@ -2,7 +2,6 @@
 import { useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useCart } from '../context/cartcontext';
-import { load } from '@cashfreepayments/cashfree-js';
 
 export default function OrderSuccess() {
   const { clearCart } = useCart();
@@ -14,7 +13,6 @@ export default function OrderSuccess() {
   const [amount, setAmount] = useState(0);
   const [referenceId, setReferenceId] = useState('');
   const [showConfetti, setShowConfetti] = useState(false);
-  const [failedOrderData, setFailedOrderData] = useState(null);
 
   useEffect(() => {
     if (!orderId || !cfOrderId) {
@@ -45,7 +43,6 @@ export default function OrderSuccess() {
             user: JSON.parse(localStorage.getItem('checkoutUser')) || {},
           };
           localStorage.setItem('failedOrder', JSON.stringify(failedOrder));
-          setFailedOrderData(failedOrder);
         }
       } catch (err) {
         console.error(err);
@@ -54,7 +51,7 @@ export default function OrderSuccess() {
     }
 
     fetchOrder();
-  }, [orderId, cfOrderId]);
+  }, [orderId, cfOrderId, clearCart]);
 
   if (!status)
     return (
@@ -64,20 +61,21 @@ export default function OrderSuccess() {
     );
 
   const isSuccess = status === 'Payment Successful';
+  const shoppingURL = '/product'; // or dynamic via env: process.env.NEXT_PUBLIC_FRONTEND_URL + '/product'
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-[#FCF8F3] p-6 text-center relative overflow-hidden transition-all duration-500">
       {showConfetti && <ConfettiEffect />}
       {isSuccess ? (
-        <SuccessCard orderId={orderId} referenceId={referenceId} amount={amount} />
+        <SuccessCard orderId={orderId} referenceId={referenceId} amount={amount} shoppingURL={shoppingURL} />
       ) : (
-        <FailedCard failedOrderData={failedOrderData} />
+        <FailedCard retryURL="/checkout" />
       )}
     </div>
   );
 }
 
-function SuccessCard({ orderId, referenceId, amount }) {
+function SuccessCard({ orderId, referenceId, amount, shoppingURL }) {
   return (
     <div className="bg-white rounded-2xl shadow-lg border border-[#e6decf] p-10 max-w-md w-full animate-fadeIn relative z-10">
       <div className="w-20 h-20 mx-auto mb-6 flex items-center justify-center rounded-full bg-[#D4AF37]/20 border-4 border-[#D4AF37] animate-bounce-slow">
@@ -92,59 +90,14 @@ function SuccessCard({ orderId, referenceId, amount }) {
         <p className="text-[#6B4B1E] mb-1"><strong>Transaction ID:</strong> {referenceId}</p>
         <p className="text-[#6B4B1E]"><strong>Total Paid:</strong> ₹{amount}</p>
       </div>
-      <button onClick={() => (window.location.href = '/product')} className="mt-4 w-full py-3 bg-black text-white rounded-full font-semibold hover:bg-[#2c2c2c] transition-all">
+      <button onClick={() => (window.location.href = shoppingURL)} className="mt-4 w-full py-3 bg-black text-white rounded-full font-semibold hover:bg-[#2c2c2c] transition-all">
         Continue Shopping
       </button>
     </div>
   );
 }
 
-function FailedCard({ failedOrderData }) {
-  const [retryLoading, setRetryLoading] = useState(false);
-
-  const handleRetry = async () => {
-    if (!failedOrderData || !failedOrderData.cartItems?.length) {
-      alert('No previous order found to retry.');
-      return;
-    }
-
-    setRetryLoading(true);
-    try {
-      const shippingCharge = { standard: 50, express: 150, pickup: 0 }[failedOrderData.shipping || 'standard'];
-      const totalAmount =
-        failedOrderData.cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0) + shippingCharge;
-
-      const response = await fetch('/api/payment/create-order', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...failedOrderData.user,
-          cartItems: failedOrderData.cartItems,
-          shipping: failedOrderData.shipping,
-          shippingCharge,
-          totalAmount,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (data.payment_session_id) {
-        const cashfree = await load({ mode: process.env.NEXT_PUBLIC_CASHFREE_ENV || 'production' });
-        await cashfree.checkout({
-          paymentSessionId: data.payment_session_id,
-          redirectTarget: '_self',
-        });
-      } else {
-        alert('Failed to create payment session. Try again.');
-      }
-    } catch (err) {
-      console.error(err);
-      alert('Something went wrong. Try again.');
-    } finally {
-      setRetryLoading(false);
-    }
-  };
-
+function FailedCard({ retryURL }) {
   return (
     <div className="bg-white rounded-2xl shadow-lg border border-[#e6decf] p-10 max-w-md w-full animate-fadeIn">
       <div className="w-20 h-20 mx-auto mb-6 flex items-center justify-center rounded-full bg-red-100 border-4 border-red-500 animate-pulse">
@@ -154,18 +107,14 @@ function FailedCard({ failedOrderData }) {
       </div>
       <h1 className="text-3xl font-bold mb-3 text-[#6B4B1E]">Payment Failed</h1>
       <p className="text-[#8B6C3A] mb-6">We couldn’t process your payment. Please try again or contact support.</p>
-      <button
-        onClick={handleRetry}
-        disabled={retryLoading}
-        className="mt-4 w-full py-3 bg-black text-white rounded-full font-semibold hover:bg-[#2c2c2c] transition-all"
-      >
-        {retryLoading ? 'Processing...' : 'Retry Payment'}
+      <button onClick={() => (window.location.href = retryURL)} className="mt-4 w-full py-3 bg-black text-white rounded-full font-semibold hover:bg-[#2c2c2c] transition-all">
+        Try Again
       </button>
     </div>
   );
 }
 
-// 🎉 Confetti
+// Confetti Effect
 function ConfettiEffect() {
   const pieces = Array.from({ length: 30 });
   return (
@@ -187,7 +136,7 @@ function ConfettiEffect() {
   );
 }
 
-// ✨ Animations
+// Animations
 const styles = `
 @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes bounce-slow { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
