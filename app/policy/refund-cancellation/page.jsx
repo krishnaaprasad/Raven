@@ -94,31 +94,6 @@ export default function RefundCancellationPolicyPage() {
           </p>
         </section>
 
-        {/* Shipping & Delivery Policy */}
-        <section className="mb-8">
-          <h2 className="text-2xl font-semibold text-[#c49939] mb-4">
-            Shipping & Delivery Policy
-          </h2>
-          <p className="text-gray-600 mb-4">
-            <strong>Raven Fragrance</strong> ships to almost all locations
-            across India. Orders placed are shipped within <strong>24 hours</strong>{" "}
-            on all working days (excluding Sundays and national holidays).
-          </p>
-          <p className="text-gray-600 mb-4">
-            For metro cities, delivery typically takes 3–4 business days after
-            shipping. For remote areas, delivery may take 7–10 business days,
-            depending on the courier partner.
-          </p>
-          <p className="text-gray-600">
-            In rare cases, delivery may be delayed due to unforeseen logistical
-            challenges. <strong>Raven Fragrance (ABHISHEK SURESH AMBRE)</strong>{" "}
-            is not liable for such delays but will ensure continuous support. We
-            also reserve the right to cancel any order that cannot be fulfilled
-            due to logistics or inventory issues, and issue a full refund to the
-            source account.
-          </p>
-        </section>
-
         {/* Contact Info */}
         <section className="mt-10 border-t border-gray-200 pt-6 text-center">
           <h3 className="text-xl font-semibold text-[#c49939] mb-2">
