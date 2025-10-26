@@ -166,7 +166,7 @@ function ContactPageInner() {
               </div>
               <div>
                 <p className="text-[#B4933A] font-medium">Email</p>
-                <p className="text-[#191919] text-sm mt-1">support@ravenfragrance.in</p>
+                <p className="text-[#191919] text-sm mt-1">contact@ravenfragrance.in</p>
               </div>
             </div>
 

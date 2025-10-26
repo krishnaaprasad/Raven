@@ -79,7 +79,7 @@ export default function TermsConditionsPage() {
           <h2 className="text-2xl font-semibold text-[#c49939] mb-4">7. Contact</h2>
           <p>
             Contact us for any questions about these terms or your orders: <br />
-            <span className="text-[#ad563c] font-semibold">support@ravenfragrance.in</span><br />
+            <span className="text-[#ad563c] font-semibold">contact@ravenfragrance.in</span><br />
             Support Hours: Monday – Saturday, 10:00 AM – 6:00 PM
           </p>
         </div>
