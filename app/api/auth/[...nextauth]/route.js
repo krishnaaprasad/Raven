@@ -1,12 +1,19 @@
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
+import GoogleProvider from "next-auth/providers/google";
 import connectToDatabase from "@/lib/mongodb";
 import User from "@/models/User";
 import bcrypt from "bcryptjs";
 
-
 export const authOptions = {
   providers: [
+    // ✅ Google Sign-In
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    }),
+
+    // ✅ Manual Email/Password Login
     CredentialsProvider({
       name: "Credentials",
       credentials: {
@@ -15,8 +22,8 @@ export const authOptions = {
       },
       async authorize(credentials) {
         await connectToDatabase();
-
         const user = await User.findOne({ email: credentials.email });
+
         if (!user) throw new Error("No user found with this email");
 
         const isValid = await bcrypt.compare(credentials.password, user.password);
@@ -28,7 +35,12 @@ export const authOptions = {
   ],
 
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, account }) {
+      if (account?.provider === "google" && user) {
+        token.id = user.id;
+        token.name = user.name;
+        token.email = user.email;
+      }
       if (user) {
         token.id = user.id;
         token.name = user.name;
@@ -36,6 +48,7 @@ export const authOptions = {
       }
       return token;
     },
+
     async session({ session, token }) {
       session.user = {
         id: token.id,
@@ -52,7 +65,6 @@ export const authOptions = {
 
   session: {
     strategy: "jwt",
-    maxAge: 30 * 24 * 60 * 60, // 30 days
   },
 
   secret: process.env.NEXTAUTH_SECRET,

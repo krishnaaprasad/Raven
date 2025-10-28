@@ -94,7 +94,7 @@ export default function ProductPage() {
               <SwiperSlide key={i} className="cursor-pointer">
                 <Image
                   src={src.thumbnail}
-                  alt={`Thumbnail ${i + 1}`}
+                  alt={`REBEL ${i + 1}`}
                   width={100}
                   height={100}
                   className="object-contain w-full h-auto"
