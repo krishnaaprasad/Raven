@@ -38,7 +38,7 @@ export default function Footer() {
             {/* Social Icons */}
             <div className="flex justify-center sm:justify-start space-x-4 mt-5">
               <a
-                href="https://facebook.com"
+                href="https://www.facebook.com/Ravenfragrance"
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Facebook"
@@ -46,7 +46,7 @@ export default function Footer() {
                 <FaFacebookF className="h-5 w-5 text-neutral-400 hover:text-[#B4933A] transition" />
               </a>
               <a
-                href="https://instagram.com"
+                href="https://www.instagram.com/ravenfragrance.in/"
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Instagram"

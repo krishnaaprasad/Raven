@@ -48,9 +48,6 @@ export default function Home() {
   <RebelSpirit />
   <RebelFinale />
   <ScentStorySection />
-  
-  
-  
   </>
 
   );

@@ -22,9 +22,13 @@ export const authOptions = {
       },
       async authorize(credentials) {
         await connectToDatabase();
-        const user = await User.findOne({ email: credentials.email });
 
+        const user = await User.findOne({ email: credentials.email });
         if (!user) throw new Error("No user found with this email");
+
+        if (!user.password) {
+          throw new Error("Please sign in using Google.");
+        }
 
         const isValid = await bcrypt.compare(credentials.password, user.password);
         if (!isValid) throw new Error("Invalid password");
@@ -35,20 +39,41 @@ export const authOptions = {
   ],
 
   callbacks: {
-    async jwt({ token, user, account }) {
-      if (account?.provider === "google" && user) {
-        token.id = user.id;
-        token.name = user.name;
-        token.email = user.email;
+    // ✅ Handle JWT
+    async jwt({ token, user, account, profile }) {
+      // When logging in with Google
+      if (account?.provider === "google") {
+        await connectToDatabase();
+
+        // Check if user exists
+        let existingUser = await User.findOne({ email: profile.email });
+
+        // If not, create one
+        if (!existingUser) {
+          existingUser = await User.create({
+            name: profile.name || "Unnamed User",
+            email: profile.email,
+            password: null, // Google users don't have passwords
+          });
+          console.log("🟢 New Google user created:", existingUser.email);
+        }
+
+        token.id = existingUser._id.toString();
+        token.name = existingUser.name;
+        token.email = existingUser.email;
       }
+
+      // When using credentials login
       if (user) {
         token.id = user.id;
         token.name = user.name;
         token.email = user.email;
       }
+
       return token;
     },
 
+    // ✅ Handle Session
     async session({ session, token }) {
       session.user = {
         id: token.id,

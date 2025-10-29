@@ -97,7 +97,7 @@ export default function LoginRegisterPage({ onClose }) {
       if (result?.error) {
         setError(result.error);
       } else {
-        window.location.href = '/my-account';
+        window.location.href = '/';
       }
     } catch (err) {
       setError('Login failed. Please try again.');
@@ -108,7 +108,7 @@ export default function LoginRegisterPage({ onClose }) {
 
   // Google sign-in handler
   const handleGoogle = async () => {
-    await signIn('google', { callbackUrl: '/my-account' });
+    await signIn('google', { callbackUrl: '/' });
   };
 
   const slideVariants = {
@@ -301,7 +301,7 @@ export default function LoginRegisterPage({ onClose }) {
                   Please enter your details to sign in.
                 </p>
                 <GoogleButton label="Sign in with Google" />
-                <p className="text-sm text-gray-400 mb-2">or use your email</p>
+                <p className="text-sm text-gray-400 mb-2">Or with email and password</p>
                 <form className="space-y-5" onSubmit={handleLogin}>
                   <input
                     id="email"
