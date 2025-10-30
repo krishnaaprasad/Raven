@@ -44,7 +44,7 @@ export default function NavBar() {
 
   return (
     <>
-      <nav className="bg-[#FAF5E8]/95 backdrop-blur-md border-b border-[#e4d5b5] sticky top-0 z-[60] shadow-[0_1px_8px_rgba(0,0,0,0.04)]">
+      <nav className="relative bg-[#FAF5E8]/95 backdrop-blur-md border-b border-[#e4d5b5] top-0 z-[999] shadow-[0_1px_8px_rgba(0,0,0,0.04)]">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="relative flex h-14 items-center justify-between">
 
@@ -119,10 +119,11 @@ export default function NavBar() {
 
                   {showAccountMenu && (
                     <div
-                      className="absolute right-0 mt-3 w-44 bg-white/95 backdrop-blur-md border border-[#e7dabf] rounded-xl shadow-[0_4px_14px_rgba(0,0,0,0.1)] py-2 z-50 animate-fadeIn"
+                      className="absolute right-0 top-8 w-44 bg-white/95 backdrop-blur-md border border-[#e7dabf] rounded-xl shadow-[0_8px_18px_rgba(0,0,0,0.15)] py-2 z-[9999] animate-fadeIn"
                       onMouseEnter={() => setShowAccountMenu(true)}
                       onMouseLeave={() => setShowAccountMenu(false)}
                     >
+
                       <Link
                         href="/my-account"
                         className="block px-4 py-2 text-[15px] font-medium text-[#191919] hover:text-[#B4933A] hover:bg-[#FAF5E8] rounded-md transition-colors duration-200"

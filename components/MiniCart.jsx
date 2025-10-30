@@ -1,12 +1,23 @@
 'use client'
+
 import { useCart } from '../app/context/cartcontext'
 import Image from 'next/image'
 import Link from 'next/link'
-import { motion, AnimatePresence } from 'framer-motion'
+import { AnimatePresence, motion } from 'framer-motion'
+import { createPortal } from 'react-dom'
+import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { TrashIcon } from '@heroicons/react/24/outline'
 
-export default function MiniCart({ isOpen, onClose }) {
+function MiniCartDrawer({ isOpen, onClose }) {
   const { cartItems, removeFromCart, updateQuantity, cartCount } = useCart()
   const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
+  const router = useRouter()
+
+  const handleCheckout = () => {
+    onClose?.()
+    router.push('/checkout')
+  }
 
   return (
     <AnimatePresence>
@@ -14,7 +25,7 @@ export default function MiniCart({ isOpen, onClose }) {
         <>
           {/* Overlay */}
           <motion.div
-            className="fixed inset-0 bg-black/30 backdrop-blur-sm z-40"
+            className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[9998]"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -27,8 +38,9 @@ export default function MiniCart({ isOpen, onClose }) {
             initial={{ x: '100%' }}
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
-            transition={{ type: 'spring', stiffness: 300, damping: 28 }}
-            className="fixed top-0 right-0 h-full w-full sm:w-[380px] max-w-[92vw] bg-white shadow-2xl z-50 flex flex-col"
+            transition={{ type: 'spring', stiffness: 280, damping: 30 }}
+            className="fixed top-0 right-0 bottom-0 h-screen w-[92vw] sm:w-[380px] bg-white z-[9999] shadow-2xl flex flex-col outline-none"
+            style={{ boxSizing: 'border-box', borderLeft: '1px solid #e4d5b5' }}
           >
             {/* Header */}
             <div className="px-6 py-5 border-b flex justify-between items-center bg-[#FCF8F3]">
@@ -36,12 +48,13 @@ export default function MiniCart({ isOpen, onClose }) {
               <button
                 onClick={onClose}
                 className="text-3xl leading-none font-light text-[#4a3b25] hover:text-[#B28C34] transition"
+                aria-label="Close cart"
               >
                 &times;
               </button>
             </div>
 
-            {/* Items */}
+            {/* Items Section */}
             <div className="px-6 py-4 flex-1 overflow-y-auto">
               {cartCount === 0 ? (
                 <motion.div
@@ -52,67 +65,79 @@ export default function MiniCart({ isOpen, onClose }) {
                   Your cart is empty!
                 </motion.div>
               ) : (
-                cartItems.map((item, i) => (
-                  <motion.div
-                    key={i}
-                    initial={{ opacity: 0, x: 40 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -40 }}
-                    className="flex gap-4 mb-6 border-b pb-4"
-                  >
-                    {/* Image */}
-                    <div className="w-16 h-16 flex-shrink-0 rounded-md bg-[#FCF8F3] flex items-center justify-center border shadow-sm">
-                      <Image
-                        src={item.image}
-                        width={64}
-                        height={64}
-                        alt={item.name}
-                        className="object-contain rounded-md"
-                      />
-                    </div>
+                cartItems.map((item, i) => {
+                  // Fix potential image src issues, fallback to empty string if undefined
+                  const imageSrc = item.image || ''
 
-                    {/* Details */}
-                    <div className="flex-1">
-                      <Link
-                        href={`/product/${item.id}`}
-                        onClick={onClose}
-                        className="block font-serif font-semibold text-[#33270a] hover:text-[#B28C34] transition-colors leading-snug"
-                      >
-                        {item.name}
-                      </Link>
-                      <p className="text-xs text-[#665933]">Size: {item.size}</p>
-                      <p className="font-semibold text-[#B28C34] mt-1">
-                        ₹{(item.price * item.quantity).toLocaleString()}
-                      </p>
-
-                      {/* Quantity Controls */}
-                      <div className="flex items-center gap-2 mt-2">
-                        <button
-                          onClick={() => updateQuantity(item.id, item.size, Math.max(1, item.quantity - 1))}
-                          className="w-6 h-6 rounded-full border border-[#B28C34] text-[#B28C34] flex items-center justify-center hover:bg-[#B28C34] hover:text-white transition"
-                        >
-                          –
-                        </button>
-                        <span className="px-3 py-1 rounded bg-[#FDF7E2] text-[#33270a] text-sm font-medium">
-                          {item.quantity}
-                        </span>
-                        <button
-                          onClick={() => updateQuantity(item.id, item.size, item.quantity + 1)}
-                          className="w-6 h-6 rounded-full border border-[#B28C34] text-[#B28C34] flex items-center justify-center hover:bg-[#B28C34] hover:text-white transition"
-                        >
-                          +
-                        </button>
+                  return (
+                    <motion.div
+                      key={i}
+                      initial={{ opacity: 0, x: 40 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -40 }}
+                      className="flex gap-4 mb-6 border-b pb-4"
+                    >
+                      {/* Product Image */}
+                      <div className="w-16 h-16 flex-shrink-0 rounded-md bg-[#FCF8F3] flex items-center justify-center border shadow-sm">
+                        {imageSrc ? (
+                          <Image
+                            src={imageSrc}
+                            width={64}
+                            height={64}
+                            alt={item.name}
+                            className="object-contain rounded-md"
+                          />
+                        ) : (
+                          <div className="w-16 h-16 bg-gray-200 rounded-md" />
+                        )}
                       </div>
 
-                      <button
-                        onClick={() => removeFromCart(item.id, item.size)}
-                        className="text-xs underline text-red-600 hover:text-red-700 mt-2"
-                      >
-                        Remove
-                      </button>
-                    </div>
-                  </motion.div>
-                ))
+                      {/* Product Details */}
+                      <div className="flex-1 flex flex-col">
+                        <div className="flex justify-between items-center">
+                          <Link
+                            href={`/product/${item.id}`}
+                            onClick={onClose}
+                            className="block font-serif font-semibold text-[#33270a] hover:text-[#B28C34] transition-colors leading-snug"
+                          >
+                            {item.name}
+                          </Link>
+                          {/* Delete Icon Button */}
+                          <button
+                            onClick={() => removeFromCart(item.id, item.size)}
+                            className="ml-2 p-1 text-gray-600 hover:text-red-600 transition"
+                            aria-label="Remove item"
+                          >
+                            <TrashIcon className="h-5 w-5" />
+                          </button>
+                        </div>
+                        <p className="text-xs text-[#665933]">Size: {item.size}</p>
+                        <p className="font-semibold text-[#B28C34] mt-1">
+                          ₹{(item.price * item.quantity).toLocaleString()}
+                        </p>
+
+                        {/* Quantity Controls */}
+                        <div className="flex items-center gap-2 mt-2">
+                          <button
+                            onClick={() => updateQuantity(item.id, item.size, Math.max(1, item.quantity - 1))}
+                            className="w-6 h-6 rounded-full border border-[#B28C34] text-[#B28C34] flex items-center justify-center hover:bg-[#B28C34] hover:text-white transition"
+                          >
+                            –
+                          </button>
+                          <span className="px-3 py-1 rounded bg-[#FDF7E2] text-[#33270a] text-sm font-medium">
+                            {item.quantity}
+                          </span>
+                          <button
+                            onClick={() => updateQuantity(item.id, item.size, item.quantity + 1)}
+                            className="w-6 h-6 rounded-full border border-[#B28C34] text-[#B28C34] flex items-center justify-center hover:bg-[#B28C34] hover:text-white transition"
+                          >
+                            +
+                          </button>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )
+                })
               )}
             </div>
 
@@ -125,9 +150,14 @@ export default function MiniCart({ isOpen, onClose }) {
                     ₹{subtotal.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                   </span>
                 </div>
-                <button className="w-full py-3 rounded-lg bg-gradient-to-r from-[#242121] to-[#1a1919] text-white font-semibold shadow-sm hover:shadow-lg transition text-sm">
-                  Proceed to Checkout
+
+                <button
+                  className="w-full py-3 rounded-lg bg-[#1f1c1a] text-white font-semibold shadow-sm hover:shadow-md transition text-sm"
+                  onClick={() => { onClose(); router.push('/checkout') }}
+                >
+                  PROCEED TO CHECKOUT
                 </button>
+
                 <Link
                   href="/Cart"
                   onClick={onClose}
@@ -141,5 +171,21 @@ export default function MiniCart({ isOpen, onClose }) {
         </>
       )}
     </AnimatePresence>
+  )
+}
+
+export default function MiniCart({ isOpen, onClose }) {
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  // SSR check: only render portal on client
+  if (!mounted) return null
+
+  return createPortal(
+    <MiniCartDrawer isOpen={isOpen} onClose={onClose} />,
+    document.body
   )
 }

@@ -17,7 +17,7 @@ export default function HomeMarquee() {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -20 }}
           transition={{ duration: 0.6, ease: "easeInOut" }}
-          className="relative bg-black text-white text-sm py-2 sticky top-0 z-50 overflow-hidden"
+          className="relative bg-black text-white text-sm py-2 top-0 z-50 overflow-hidden"
         >
           {/* Left Fade */}
           <div className="absolute left-0 top-0 h-full w-17 bg-gradient-to-r from-black via-black/80 to-transparent z-10 pointer-events-none" />
