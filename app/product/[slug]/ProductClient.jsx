@@ -2,17 +2,26 @@
 import { useEffect, useState } from 'react'
 import Image from 'next/image'
 import { FaCheck, FaShoppingCart } from 'react-icons/fa'
+
+// ✅ FIX: import SwiperCore and register modules manually
+import SwiperCore from 'swiper'
 import { Swiper, SwiperSlide } from 'swiper/react'
 import { Thumbs, Pagination } from 'swiper/modules'
+
+// ✅ register modules before using Swiper
+SwiperCore.use([Thumbs, Pagination])
+
 import 'swiper/css'
 import 'swiper/css/thumbs'
 import 'swiper/css/pagination'
+
 import Lightbox from 'yet-another-react-lightbox'
 import 'yet-another-react-lightbox/styles.css'
 import { motion } from 'framer-motion'
 import { useCart } from '@/app/context/cartcontext'
 import { toast } from 'react-hot-toast'
 import { useRouter } from 'next/navigation'
+
 
 export default function ProductClient({ slug }) {
   const [product, setProduct] = useState(null)
@@ -27,27 +36,85 @@ export default function ProductClient({ slug }) {
   const { addToCart } = useCart()
   const router = useRouter()
 
-  useEffect(() => {
-    async function fetchProduct() {
-      try {
-        const res = await fetch(`/api/products/${slug}`)
-        const data = await res.json()
-        if (res.ok && data) {
-          setProduct(data)
-          setSelected(data.variants?.[0])
-        } else {
-          console.error(data.message || 'Product not found')
-        }
-      } catch (error) {
-        console.error('Error fetching product:', error)
+ useEffect(() => {
+  async function fetchProduct() {
+    try {
+      const res = await fetch(`/api/products/${slug}`)
+      const data = await res.json()
+      if (res.ok && data) {
+        setProduct(data)
+        setSelected(data.variants?.[0])
+      } else {
+        console.error(data.message || 'Product not found')
       }
+    } catch (error) {
+      console.error('Error fetching product:', error)
+    } finally {
+      setLoading(false) // <== Important! stop loading state here
     }
-    if (slug) fetchProduct()
-  }, [slug])
+  }
+  if (slug) fetchProduct()
+}, [slug])
 
   if (!product || !selected) {
-    return <p className="text-center py-20">Loading product...</p>
-  }
+  return (
+    <section className="min-h-screen bg-[#FCF8F3] py-12 flex justify-center">
+      <div className="w-full max-w-6xl grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-16 animate-pulse">
+        {/* Image Skeleton */}
+        <div className="w-full flex flex-col gap-4">
+          <div className="relative h-[500px] w-full rounded-xl overflow-hidden bg-[#eae2cf] shimmer"></div>
+          <div className="flex gap-2">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="bg-[#eae2cf] h-24 w-24 rounded-lg shimmer"></div>
+            ))}
+          </div>
+        </div>
+
+        {/* Text Skeleton */}
+        <div className="flex flex-col gap-5">
+          <div className="bg-[#eae2cf] h-8 w-2/3 rounded shimmer"></div>
+          <div className="bg-[#eae2cf] h-4 w-1/3 rounded shimmer"></div>
+          <div className="bg-[#eae2cf] h-6 w-1/2 rounded shimmer"></div>
+          <div className="space-y-3 mt-6">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="bg-[#eae2cf] h-3 rounded w-full shimmer"></div>
+            ))}
+          </div>
+          <div className="mt-6 flex gap-3">
+            <div className="bg-[#eae2cf] h-12 w-1/2 rounded-full shimmer"></div>
+            <div className="bg-[#eae2cf] h-12 w-1/2 rounded-full shimmer"></div>
+          </div>
+        </div>
+      </div>
+
+      <style jsx>{`
+        .shimmer {
+          position: relative;
+          overflow: hidden;
+        }
+        .shimmer::before {
+          content: "";
+          position: absolute;
+          top: 0;
+          left: -150px;
+          width: 100px;
+          height: 100%;
+          background: linear-gradient(90deg, transparent, rgba(255, 215, 140, 0.4), transparent);
+          animation: shimmer 1.5s infinite;
+        }
+        @keyframes shimmer {
+          0% {
+            left: -150px;
+          }
+          100% {
+            left: 100%;
+          }
+        }
+      `}</style>
+    </section>
+  )
+}
+
 
   const increase = () => setQuantity(q => q + 1)
   const decrease = () => setQuantity(q => (q > 1 ? q - 1 : 1))
@@ -76,28 +143,30 @@ export default function ProductClient({ slug }) {
   return (
     <section className="min-h-screen bg-[#FCF8F3] py-8 px-4 sm:px-8">
       <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-16 items-start">
-        {/* Gallery */}
         {/* Product Image Section */}
-<div className="lg:w-1/2 w-full">
-  {loading ? (
-    <p>Loading product...</p>
-  ) : product ? (
-    <>
-      {/* Main Image Swiper */}
+    <div className="w-full">
       <Swiper
-        spaceBetween={10}
-        navigation
-        thumbs={{ swiper: thumbsSwiper }}
-        className="mb-4 rounded-xl"
+       spaceBetween={10}
+       pagination={{ clickable: true }}
+       thumbs={{ swiper: thumbsSwiper }}
+       modules={[Thumbs, Pagination]}
+       className="mb-4 bg-white shadow rounded-xl"
       >
         {product.images.map((src, i) => {
           // Support both { original: "" } and plain string "/img.jpg"
-          const imageSrc = typeof src === "string" ? src : src.original
+          const imageSrc = src?.original || src;
           return (
-            <SwiperSlide key={i}>
+            <SwiperSlide
+                key={i}
+                className="flex items-center justify-center cursor-zoom-in"
+                onClick={() => {
+                  setLightboxIndex(i)
+                  setLightboxOpen(true)
+                }}
+              >
               <Image
                 src={imageSrc}
-                alt={`Product Image ${i + 1}`}
+                alt={`Raven Fragrance - ${product.name}`}
                 width={500}
                 height={500}
                 className="object-contain w-full h-auto max-h-[500px] rounded-xl"
@@ -117,12 +186,12 @@ export default function ProductClient({ slug }) {
         className="mt-2"
       >
         {product.images.map((src, i) => {
-          const thumbSrc = typeof src === "string" ? src : src.thumbnail
+          const thumbSrc = src?.thumbnail || src;
           return (
             <SwiperSlide key={i}>
               <Image
                 src={thumbSrc}
-                alt={`Thumbnail ${i + 1}`}
+                alt={`Raven Fragrance - ${product.name}`}
                 width={100}
                 height={100}
                 className="object-cover w-full h-24 rounded-lg border border-gray-200 hover:border-black cursor-pointer transition-all"
@@ -131,11 +200,8 @@ export default function ProductClient({ slug }) {
           )
         })}
       </Swiper>
-    </>
-  ) : (
-    <p>Product not found.</p>
-  )}
-</div>
+    </div>
+
 
 
         {/* Product Details */}
@@ -230,7 +296,7 @@ export default function ProductClient({ slug }) {
         <Lightbox
           open={lightboxOpen}
           close={() => setLightboxOpen(false)}
-          slides={product.images.map(src => ({ src }))}
+          slides={product.images.map(src => ({ src: src?.original || src }))}
           index={lightboxIndex}
           on={{ view: ({ index }) => setLightboxIndex(index) }}
         />
