@@ -1,238 +1,179 @@
-'use client'
-import React, { useState, useEffect, useRef } from 'react'
-import Image from 'next/image'
-import Link from 'next/link'
-import { useCart } from '../app/context/cartcontext'
-import MiniCart from './MiniCart'
-import dynamic from 'next/dynamic'
-import { useSession, signOut } from 'next-auth/react'
+'use client';
+import React, { useState, useEffect, useRef } from 'react';
+import Image from 'next/image';
+import Link from 'next/link';
+import { useCart } from '../app/context/cartcontext';
+import MiniCart from './MiniCart';
+import dynamic from 'next/dynamic';
+import { useSession, signOut } from 'next-auth/react';
 import {
-  Disclosure,
-  DisclosureButton,
-  DisclosurePanel,
-} from '@headlessui/react'
-import {
-  Bars3Icon,
-  XMarkIcon,
   ShoppingBagIcon,
   UserIcon,
   ChevronDownIcon,
-} from '@heroicons/react/24/outline'
+} from '@heroicons/react/24/outline';
+import { motion } from 'framer-motion'; // ✨ animation
 
-const AuthModal = dynamic(() => import('../app/auth/modal'), { ssr: false })
-
-const navigation = [
-  { name: 'Home', href: '/' },
-  { name: 'Shop', href: '/product' },
-  { name: 'Contact Us', href: '/contact-us' },
-]
-
-function classNames(...classes) {
-  return classes.filter(Boolean).join(' ')
-}
+const AuthModal = dynamic(() => import('../app/auth/modal'), { ssr: false });
 
 export default function NavBar() {
-  const [showSearch, setShowSearch] = useState(false)
-  const [showMiniCart, setShowMiniCart] = useState(false)
-  const [showAuthModal, setShowAuthModal] = useState(false)
-  const [animateCart, setAnimateCart] = useState(false)
-  const [showAccountMenu, setShowAccountMenu] = useState(false)
-  const searchRef = useRef(null)
-  const dropdownRef = useRef(null)
-  const { cartCount } = useCart()
-  const { data: session } = useSession()
+  const [showMiniCart, setShowMiniCart] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [animateCart, setAnimateCart] = useState(false);
+  const [showAccountMenu, setShowAccountMenu] = useState(false);
+  const dropdownRef = useRef(null);
+  const { cartCount } = useCart();
+  const { data: session } = useSession();
 
-  // Animate cart
   useEffect(() => {
     if (cartCount > 0) {
-      setAnimateCart(true)
-      const timer = setTimeout(() => setAnimateCart(false), 600)
-      return () => clearTimeout(timer)
+      setAnimateCart(true);
+      const timer = setTimeout(() => setAnimateCart(false), 600);
+      return () => clearTimeout(timer);
     }
-  }, [cartCount])
+  }, [cartCount]);
 
-  // Close search on outside click
-  useEffect(() => {
-    function handleClickOutside(event) {
-      if (searchRef.current && !searchRef.current.contains(event.target)) {
-        setShowSearch(false)
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [])
-
-  // Close account menu if clicked outside
   useEffect(() => {
     function handleClickOutside(e) {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
-        setShowAccountMenu(false)
+        setShowAccountMenu(false);
       }
     }
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [])
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   return (
     <>
-      <Disclosure as="nav" className="bg-[#FAF5E8] border-b border-[#e4d5b5]">
-        {({ open }) => (
-          <>
-            <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-              <div className="relative flex h-13 items-center justify-between">
-                {/* Left: Hamburger for mobile */}
-                <div className="absolute inset-y-0 left-0 flex items-center sm:hidden">
-                  <DisclosureButton className="inline-flex items-center justify-center rounded-md p-2 text-[#B4933A] hover:text-black focus:outline-none focus:ring-2 focus:ring-inset focus:ring-black">
-                    {open ? (
-                      <XMarkIcon className="block h-6 w-6" />
-                    ) : (
-                      <Bars3Icon className="block h-6 w-6" />
-                    )}
-                  </DisclosureButton>
-                </div>
+      <nav className="bg-[#FAF5E8]/95 backdrop-blur-md border-b border-[#e4d5b5] sticky top-0 z-[60] shadow-[0_1px_8px_rgba(0,0,0,0.04)]">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="relative flex h-14 items-center justify-between">
 
-                {/* Logo & Center Nav */}
-                <div className="flex flex-1 items-center justify-center sm:items-stretch sm:justify-start">
-                  <div className="flex flex-shrink-0 items-center">
-                    <Link href="/" className="flex items-center">
-                      <Image
-                        src="/logo.png"
-                        alt="Raven Fragrance Logo"
-                        width={80}
-                        height={20}
-                        className="h-5 sm:h-5 w-auto"
-                        priority={true}
-                        draggable={false}
-                      />
-                    </Link>
-                  </div>
+            {/* SHOP (Mobile) */}
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, ease: 'easeOut' }}
+              className="flex items-center sm:hidden"
+            >
+              <Link href="/product">
+                <button className="flex items-center justify-center min-w-[80px] h-8 px-4 rounded-md bg-[#f8f3e4] text-[#1A1A1A] text-[12px] font-semibold tracking-wider border border-[#e3d2a8] hover:bg-[#f0e5c8] active:scale-95 transition-all duration-300">
+                  SHOP
+                </button>
+              </Link>
+            </motion.div>
 
-                  <div className="hidden sm:flex sm:space-x-6 absolute left-1/2 transform -translate-x-1/2">
-                    {navigation.map((item) => (
-                      <Link
-                        key={item.name}
-                        href={item.href}
-                        className="relative text-base font-medium text-[#191919] hover:text-[#B4933A] after:absolute after:bottom-0 after:left-1/2 after:h-[2px] after:bg-[#B4933A] after:origin-center after:scale-x-0 after:w-full after:transition-transform after:duration-300 hover:after:scale-x-100 hover:after:left-0"
-                      >
-                        {item.name}
-                      </Link>
-                    ))}
-                  </div>
-                </div>
+            {/* CENTER (Logo) */}
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, ease: 'easeOut', delay: 0.15 }}
+              className="flex justify-center w-full absolute left-0 right-0 pointer-events-none"
+            >
+              <Link href="/" className="pointer-events-auto">
+                <Image
+                  src="/logo.png"
+                  alt="Raven Fragrance Logo"
+                  width={52}
+                  height={18}
+                  className="h-[18px] sm:h-[21px] w-auto object-contain transition-transform duration-300 hover:scale-[1.03]"
+                  priority
+                />
+              </Link>
+            </motion.div>
 
-                {/* Right icons */}
-                <div className="flex items-center space-x-4">
-                  {/* Account/Login */}
-                  {!session ? (
-                    <button
-                      onClick={() => setShowAuthModal(true)}
-                      className="bg-transparent border-none outline-none"
-                      aria-label="Login/Register"
+            {/* RIGHT (Icons + Desktop Shop Button) */}
+            <div className="ml-auto flex items-center space-x-3 sm:space-x-4">
+
+              {/* SHOP NOW (Desktop) */}
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2, ease: 'easeOut' }}
+              className="hidden sm:block"
+            >
+              <Link href="/product">
+                <button className="flex items-center justify-center min-w-[130px] h-9 px-5 rounded-md bg-[#f8f3e4] text-[#1A1A1A] text-[13px] font-semibold tracking-wider border border-[#e3d2a8] hover:bg-[#f0e5c8] active:scale-95 transition-all duration-300">
+                  SHOP NOW
+                </button>
+              </Link>
+            </motion.div>
+              {/* Account/Login */}
+              {!session ? (
+                <button
+                  onClick={() => setShowAuthModal(true)}
+                  className="bg-transparent border-none outline-none"
+                  aria-label="Login/Register"
+                >
+                  <UserIcon className="h-5 w-5 sm:h-6 sm:w-6 text-[#191919] hover:text-[#B4933A] cursor-pointer transition-transform hover:scale-110" />
+                </button>
+              ) : (
+                <div ref={dropdownRef} className="relative">
+                  <button
+                    onClick={() => setShowAccountMenu((prev) => !prev)}
+                    className="flex items-center space-x-1 text-[#191919] hover:text-[#B4933A] transition-all duration-300"
+                    aria-label="My Account Menu"
+                  >
+                    <UserIcon className="h-5 w-5 sm:h-6 sm:w-6" />
+                    <ChevronDownIcon className="h-4 w-4 mt-[1px]" />
+                  </button>
+
+                  {showAccountMenu && (
+                    <div
+                      className="absolute right-0 mt-3 w-44 bg-white/95 backdrop-blur-md border border-[#e7dabf] rounded-xl shadow-[0_4px_14px_rgba(0,0,0,0.1)] py-2 z-50 animate-fadeIn"
+                      onMouseEnter={() => setShowAccountMenu(true)}
+                      onMouseLeave={() => setShowAccountMenu(false)}
                     >
-                      <UserIcon className="h-6 w-6 text-[#191919] hover:text-[#B4933A] cursor-pointer transition-transform hover:scale-110" />
-                    </button>
-                  ) : (
-                    <div ref={dropdownRef} className="relative">
-                      <button
-                        onMouseEnter={() => setShowAccountMenu(true)}
-                        onClick={() => setShowAccountMenu((prev) => !prev)}
-                        className="flex items-center space-x-1 text-[#191919] hover:text-[#B4933A] transition-all duration-300"
-                        aria-label="My Account Menu"
+                      <Link
+                        href="/my-account"
+                        className="block px-4 py-2 text-[15px] font-medium text-[#191919] hover:text-[#B4933A] hover:bg-[#FAF5E8] rounded-md transition-colors duration-200"
+                        onClick={() => setShowAccountMenu(false)}
                       >
-                        <UserIcon className="h-6 w-6" />
-                        <ChevronDownIcon className="h-4 w-4 mt-[1px]" />
+                        My Account
+                      </Link>
+                      <button
+                        onClick={() => {
+                          setShowAccountMenu(false);
+                          signOut();
+                        }}
+                        className="w-full text-left block px-4 py-2 text-[15px] font-medium text-[#191919] hover:text-[#B4933A] hover:bg-[#FAF5E8] rounded-md transition-colors duration-200"
+                      >
+                        Logout
                       </button>
-
-                      {showAccountMenu && (
-                        <div
-                          className="absolute right-0 mt-3 w-44 bg-white/95 backdrop-blur-md border border-[#e7dabf] rounded-xl shadow-[0_4px_14px_rgba(0,0,0,0.1)] py-2 z-50 animate-fadeIn"
-                          onMouseEnter={() => setShowAccountMenu(true)}
-                          onMouseLeave={() => setShowAccountMenu(false)}
-                        >
-                          <Link
-                            href="/my-account"
-                            className="block px-4 py-2 text-[15px] font-medium text-[#191919] hover:text-[#B4933A] hover:bg-[#FAF5E8] rounded-md transition-colors duration-200"
-                            onClick={() => setShowAccountMenu(false)}
-                          >
-                            My Account
-                          </Link>
-                          <button
-                            onClick={() => {
-                              setShowAccountMenu(false)
-                              signOut()
-                            }}
-                            className="w-full text-left block px-4 py-2 text-[15px] font-medium text-[#191919] hover:text-[#B4933A] hover:bg-[#FAF5E8] rounded-md transition-colors duration-200"
-                          >
-                            Logout
-                          </button>
-                        </div>
-                      )}
                     </div>
                   )}
-
-                  {/* Cart */}
-                  <button
-                    aria-label="View Cart"
-                    id="cart-icon"
-                    className="relative cursor-pointer bg-transparent border-none outline-none"
-                    onClick={() => setShowMiniCart(true)}
-                    type="button"
-                  >
-                    <ShoppingBagIcon
-                      className={`h-6 w-6 text-[#191919] hover:text-[#B4933A] transition-transform duration-500 ${
-                        animateCart ? 'animate-bounce' : ''
-                      }`}
-                    />
-                    {cartCount > 0 && (
-                      <span className="absolute -top-2 -right-2 rounded-full bg-red-600 text-white text-xs w-5 h-5 flex items-center justify-center font-bold">
-                        {cartCount}
-                      </span>
-                    )}
-                  </button>
-                  <MiniCart
-                    isOpen={showMiniCart}
-                    onClose={() => setShowMiniCart(false)}
-                  />
                 </div>
-              </div>
-            </div>
+              )}
 
-            {/* Mobile Nav Links */}
-            <DisclosurePanel className="sm:hidden">
-              <div className="space-y-1 px-2 pt-2 pb-3">
-                {navigation.map((item) => (
-                  <DisclosureButton
-                    key={item.name}
-                    as="a"
-                    href={item.href}
-                    className="block rounded-md px-3 py-2 text-base font-semibold text-[#191919] hover:text-[#B4933A]"
-                  >
-                    {item.name}
-                  </DisclosureButton>
-                ))}
-                {session && (
-                  <>
-                    <Link
-                      href="/my-account"
-                      className="block rounded-md px-3 py-2 text-base font-semibold text-[#191919] hover:text-[#B4933A]"
-                    >
-                      My Account
-                    </Link>
-                    <button
-                      onClick={() => signOut()}
-                      className="w-full text-left block rounded-md px-3 py-2 text-base font-semibold text-[#191919] hover:text-[#B4933A]"
-                    >
-                      Logout
-                    </button>
-                  </>
+              {/* Cart */}
+              <button
+                aria-label="View Cart"
+                id="cart-icon"
+                className="relative cursor-pointer bg-transparent border-none outline-none"
+                onClick={() => setShowMiniCart(true)}
+                type="button"
+              >
+                <ShoppingBagIcon
+                  className={`h-5 w-5 sm:h-6 sm:w-6 text-[#191919] hover:text-[#B4933A] transition-transform duration-500 ${
+                    animateCart ? 'animate-bounce' : ''
+                  }`}
+                />
+                {cartCount > 0 && (
+                  <span className="absolute -top-2 -right-2 rounded-full bg-red-600 text-white text-xs w-5 h-5 flex items-center justify-center font-bold">
+                    {cartCount}
+                  </span>
                 )}
-              </div>
-            </DisclosurePanel>
-          </>
-        )}
-      </Disclosure>
+              </button>
+
+              <MiniCart
+                isOpen={showMiniCart}
+                onClose={() => setShowMiniCart(false)}
+              />
+            </div>
+          </div>
+        </div>
+      </nav>
 
       {showAuthModal && <AuthModal onClose={() => setShowAuthModal(false)} />}
     </>
-  )
+  );
 }

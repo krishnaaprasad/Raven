@@ -13,20 +13,6 @@ import FindYourScentSection from "@/components/FindYourScentSection";
 export default function Home() {
   return (
     <>
-    <div className="bg-black text-white text-sm py-2">
-     <Marquee
-      pauseOnHover={true}
-      pauseOnClick={true}
-      gradient={true}
-      gradientColor={[248, 251, 253]}
-      gradientWidth={200}
-      speed={60}
-    >
-      🔥 20% OFF on all perfumes today! &nbsp;&nbsp;&nbsp;
-      🚚 Free shipping on orders over ₹999! &nbsp;&nbsp;&nbsp;
-      🎁 Buy 1 Get 1 Free on selected items!
-    </Marquee></div>
-   
  <section className="relative w-full min-h-[320px] sm:min-h-[340px] md:min-h-[550px] flex items-center justify-center overflow-hidden">
   <video
     autoPlay
