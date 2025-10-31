@@ -32,6 +32,7 @@ export default function ProductClient({ slug }) {
   const [lightboxOpen, setLightboxOpen] = useState(false)
   const [lightboxIndex, setLightboxIndex] = useState(0)
   const [isAdding, setIsAdding] = useState(false)
+  const [activeTab, setActiveTab] = useState("Description");
 
   const { addToCart } = useCart()
   const router = useRouter()
@@ -291,6 +292,131 @@ export default function ProductClient({ slug }) {
           </motion.button>
         </motion.div>
       </div>
+
+    {/* Product Info Tabs Section */}
+<div className="max-w-4xl mx-auto mt-16 px-4 sm:px-6">
+  {/* Tabs */}
+  <div className="flex justify-center gap-6 sm:gap-10 border-b border-gray-300 overflow-x-auto">
+    {["Description", "Product Details", "Review"].map((tab) => (
+      <button
+        key={tab}
+        onClick={() => setActiveTab(tab)}
+        className={`relative py-3 text-sm sm:text-base font-semibold transition ${
+          activeTab === tab
+            ? "text-black after:absolute after:bottom-0 after:left-0 after:w-full after:h-[2px] after:bg-[#b28c34]"
+            : "text-gray-500 hover:text-black"
+        }`}
+      >
+        {tab}
+      </button>
+    ))}
+  </div>
+
+  {/* Content */}
+  <motion.div
+    key={activeTab}
+    initial={{ opacity: 0, y: 10 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.4 }}
+    className="mt-8 text-gray-700 leading-relaxed text-sm sm:text-base"
+  >
+    {/* 🪶 Description Tab */}
+    {activeTab === "Description" && (
+      <div>
+        <p>
+          {product.description ||
+            "Experience Raven’s signature blend — a long-lasting, radiant scent crafted with sophistication and bold character."}
+        </p>
+      </div>
+    )}
+
+    {/* 🌿 Product Details Tab */}
+    {activeTab === "Product Details" && (
+      <div>
+        <ul className="space-y-3 text-[#3b2f1d]/90">
+          {/* Dynamic Fields */}
+          {product.fragranceType && (
+            <li>
+              <span className="font-semibold">Fragrance Type:</span>{" "}
+              {product.fragranceType}
+            </li>
+          )}
+
+          {selected?.size && (
+            <li>
+              <span className="font-semibold">Volume:</span> {selected.size}
+            </li>
+          )}
+
+          {product.longevity && (
+            <li>
+              <span className="font-semibold">Longevity:</span>{" "}
+              {product.longevity}
+            </li>
+          )}
+
+          {product.sillage && (
+            <li>
+              <span className="font-semibold">Sillage:</span> {product.sillage}
+            </li>
+          )}
+
+          {product.topNotes?.length > 0 && (
+            <li>
+              <span className="font-semibold">Top Notes:</span>{" "}
+              {product.topNotes.join(", ")}
+            </li>
+          )}
+
+          {product.heartNotes?.length > 0 && (
+            <li>
+              <span className="font-semibold">Heart Notes:</span>{" "}
+              {product.heartNotes.join(", ")}
+            </li>
+          )}
+
+          {product.baseNotes?.length > 0 && (
+            <li>
+              <span className="font-semibold">Base Notes:</span>{" "}
+              {product.baseNotes.join(", ")}
+            </li>
+          )}
+
+          {product.ingredients?.length > 0 && (
+            <li>
+              <span className="font-semibold">Ingredients:</span>{" "}
+              {product.ingredients.join(", ")}
+            </li>
+          )}
+
+          {/* Static Fields */}
+          <li>
+            <span className="font-semibold">Country of Origin:</span> India
+          </li>
+          <li>
+            <span className="font-semibold">Manufacturer:</span> Raven Fragrance Co.
+          </li>
+        </ul>
+      </div>
+    )}
+
+    {/* ⭐ Review Tab */}
+    {activeTab === "Review" && (
+      <div className="space-y-3">
+        <p className="font-semibold">
+          ⭐ {product.rating || "4.8"}/5 based on {product.reviewCount || "126"} reviews
+        </p>
+        <p>
+          “Absolutely love this fragrance! Elegant and lasts all day.” — Aarti P.
+        </p>
+        <button className="mt-4 px-5 py-2 rounded-full border border-black text-black hover:bg-black hover:text-white transition text-sm">
+          Write a Review
+        </button>
+      </div>
+    )}
+  </motion.div>
+</div>
+
 
       {lightboxOpen && (
         <Lightbox
