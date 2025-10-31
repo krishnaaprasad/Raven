@@ -1,8 +1,9 @@
 'use client'
+
 import { useEffect, useState } from 'react'
 import Image from 'next/image'
 import { FaCheck, FaShoppingCart } from 'react-icons/fa'
-
+import ProductReviews from "@/components/ProductReviews";
 // ✅ FIX: import SwiperCore and register modules manually
 import SwiperCore from 'swiper'
 import { Swiper, SwiperSlide } from 'swiper/react'
@@ -17,7 +18,7 @@ import 'swiper/css/pagination'
 
 import Lightbox from 'yet-another-react-lightbox'
 import 'yet-another-react-lightbox/styles.css'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from "framer-motion"
 import { useCart } from '@/app/context/cartcontext'
 import { toast } from 'react-hot-toast'
 import { useRouter } from 'next/navigation'
@@ -203,8 +204,6 @@ export default function ProductClient({ slug }) {
       </Swiper>
     </div>
 
-
-
         {/* Product Details */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -293,10 +292,10 @@ export default function ProductClient({ slug }) {
         </motion.div>
       </div>
 
-    {/* Product Info Tabs Section */}
-<div className="max-w-4xl mx-auto mt-16 px-4 sm:px-6">
-  {/* Tabs */}
-  <div className="flex justify-center gap-6 sm:gap-10 border-b border-gray-300 overflow-x-auto">
+       {/* Product Info Tabs Section */}
+<div className="max-w-6.1xl mx-auto mt-16 px-4 sm:px-6">
+  {/* ✅ Desktop Tabs */}
+  <div className="hidden sm:flex justify-center gap-6 sm:gap-10 border-b border-gray-300">
     {["Description", "Product Details", "Review"].map((tab) => (
       <button
         key={tab}
@@ -312,111 +311,191 @@ export default function ProductClient({ slug }) {
     ))}
   </div>
 
-  {/* Content */}
-  <motion.div
-    key={activeTab}
-    initial={{ opacity: 0, y: 10 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ duration: 0.4 }}
-    className="mt-8 text-gray-700 leading-relaxed text-sm sm:text-base"
-  >
-    {/* 🪶 Description Tab */}
-    {activeTab === "Description" && (
-      <div>
-        <p>
-          {product.description ||
-            "Experience Raven’s signature blend — a long-lasting, radiant scent crafted with sophistication and bold character."}
-        </p>
-      </div>
-    )}
+  {/* ✅ Desktop Content */}
+  {activeTab && (
+    <motion.div
+      key={activeTab}
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4 }}
+      className="hidden sm:block mt-8 text-gray-700 leading-relaxed text-sm sm:text-base"
+    >
+      {/* 📝 Description */}
+      {activeTab === "Description" && product.description && (
+        <div dangerouslySetInnerHTML={{ __html: product.description }} />
+      )}
 
-    {/* 🌿 Product Details Tab */}
-    {activeTab === "Product Details" && (
-      <div>
-        <ul className="space-y-3 text-[#3b2f1d]/90">
-          {/* Dynamic Fields */}
+      {/* 🧴 Product Details */}
+      {activeTab === "Product Details" && (
+        <ul className="list-disc pl-5 space-y-2">
           {product.fragranceType && (
             <li>
               <span className="font-semibold">Fragrance Type:</span>{" "}
               {product.fragranceType}
             </li>
           )}
-
           {selected?.size && (
             <li>
               <span className="font-semibold">Volume:</span> {selected.size}
             </li>
           )}
-
           {product.longevity && (
             <li>
               <span className="font-semibold">Longevity:</span>{" "}
               {product.longevity}
             </li>
           )}
-
           {product.sillage && (
             <li>
               <span className="font-semibold">Sillage:</span> {product.sillage}
             </li>
           )}
-
           {product.topNotes?.length > 0 && (
             <li>
               <span className="font-semibold">Top Notes:</span>{" "}
               {product.topNotes.join(", ")}
             </li>
           )}
-
           {product.heartNotes?.length > 0 && (
             <li>
               <span className="font-semibold">Heart Notes:</span>{" "}
               {product.heartNotes.join(", ")}
             </li>
           )}
-
           {product.baseNotes?.length > 0 && (
             <li>
               <span className="font-semibold">Base Notes:</span>{" "}
               {product.baseNotes.join(", ")}
             </li>
           )}
-
           {product.ingredients?.length > 0 && (
             <li>
               <span className="font-semibold">Ingredients:</span>{" "}
               {product.ingredients.join(", ")}
             </li>
           )}
-
-          {/* Static Fields */}
           <li>
             <span className="font-semibold">Country of Origin:</span> India
           </li>
           <li>
-            <span className="font-semibold">Manufacturer:</span> Raven Fragrance Co.
+            <span className="font-semibold">Manufacturer:</span> Raven
+            Fragrance Co.
           </li>
         </ul>
-      </div>
-    )}
+      )}
 
-    {/* ⭐ Review Tab */}
-    {activeTab === "Review" && (
-      <div className="space-y-3">
-        <p className="font-semibold">
-          ⭐ {product.rating || "4.8"}/5 based on {product.reviewCount || "126"} reviews
-        </p>
-        <p>
-          “Absolutely love this fragrance! Elegant and lasts all day.” — Aarti P.
-        </p>
-        <button className="mt-4 px-5 py-2 rounded-full border border-black text-black hover:bg-black hover:text-white transition text-sm">
-          Write a Review
+      {/* ⭐ Review Tab (with review form + list) */}
+      {activeTab === "Review" && (
+        <div>
+          {/* 👇 Display Review Component only when Review tab active */}
+          {product?._id && (
+            <div className="mt-6">
+              <ProductReviews productId={product._id} />
+            </div>
+          )}
+        </div>
+      )}
+    </motion.div>
+  )}
+
+  {/* ✅ Mobile Accordion */}
+  <div className="sm:hidden mt-8 space-y-4">
+    {["Description", "Product Details", "Review"].map((tab) => (
+      <div key={tab} className="border-b border-gray-200 pb-3">
+        <button
+          onClick={() => setActiveTab(activeTab === tab ? "" : tab)}
+          className="w-full text-left flex justify-between items-center py-3 font-semibold text-gray-800"
+        >
+          {tab}
+          <span className="text-gray-500">{activeTab === tab ? "−" : "+"}</span>
         </button>
-      </div>
-    )}
-  </motion.div>
-</div>
 
+        {activeTab === tab && (
+          <motion.div
+            initial={{ opacity: 0, y: -5 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+            className="mt-2 text-gray-700 text-sm leading-relaxed"
+          >
+            {/* 📝 Description */}
+            {tab === "Description" && product.description && (
+              <div dangerouslySetInnerHTML={{ __html: product.description }} />
+            )}
+
+            {/* 🧴 Product Details */}
+            {tab === "Product Details" && (
+              <ul className="list-disc pl-5 space-y-2">
+                {product.fragranceType && (
+                  <li>
+                    <span className="font-semibold">Fragrance Type:</span>{" "}
+                    {product.fragranceType}
+                  </li>
+                )}
+                {selected?.size && (
+                  <li>
+                    <span className="font-semibold">Volume:</span>{" "}
+                    {selected.size}
+                  </li>
+                )}
+                {product.longevity && (
+                  <li>
+                    <span className="font-semibold">Longevity:</span>{" "}
+                    {product.longevity}
+                  </li>
+                )}
+                {product.sillage && (
+                  <li>
+                    <span className="font-semibold">Sillage:</span>{" "}
+                    {product.sillage}
+                  </li>
+                )}
+                {product.topNotes?.length > 0 && (
+                  <li>
+                    <span className="font-semibold">Top Notes:</span>{" "}
+                    {product.topNotes.join(", ")}
+                  </li>
+                )}
+                {product.heartNotes?.length > 0 && (
+                  <li>
+                    <span className="font-semibold">Heart Notes:</span>{" "}
+                    {product.heartNotes.join(", ")}
+                  </li>
+                )}
+                {product.baseNotes?.length > 0 && (
+                  <li>
+                    <span className="font-semibold">Base Notes:</span>{" "}
+                    {product.baseNotes.join(", ")}
+                  </li>
+                )}
+                {product.ingredients?.length > 0 && (
+                  <li>
+                    <span className="font-semibold">Ingredients:</span>{" "}
+                    {product.ingredients.join(", ")}
+                  </li>
+                )}
+                <li>
+                  <span className="font-semibold">Country of Origin:</span>{" "}
+                  India
+                </li>
+                <li>
+                  <span className="font-semibold">Manufacturer:</span> Raven
+                  Fragrance Co.
+                </li>
+              </ul>
+            )}
+
+            {/* ⭐ Review Tab (with component) */}
+            {tab === "Review" && (
+              <div className="mt-3">
+                {product?._id && <ProductReviews productId={product._id} />}
+              </div>
+            )}
+          </motion.div>
+        )}
+      </div>
+    ))}
+  </div>
+</div>
 
       {lightboxOpen && (
         <Lightbox
