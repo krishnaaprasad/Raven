@@ -37,6 +37,14 @@ export default function ProductClient({ slug }) {
 
   const { addToCart } = useCart()
   const router = useRouter()
+  const [openSections, setOpenSections] = useState({
+  Description: true, // default open
+  "Product Details": false,
+  Review: false,
+});
+
+const toggleSection = (tab) =>
+  setOpenSections((prev) => ({ ...prev, [tab]: !prev[tab] }));
 
  useEffect(() => {
   async function fetchProduct() {
@@ -122,20 +130,28 @@ export default function ProductClient({ slug }) {
   const decrease = () => setQuantity(q => (q > 1 ? q - 1 : 1))
 
   const handleAddToCart = () => {
-    setIsAdding(true)
+    setIsAdding(true);
+
+    // ✅ Handle both array & string images safely
+    const imageUrl = Array.isArray(product.images)
+      ? product.images[0]?.original || product.images[0]
+      : product.image || '';
+
     addToCart(
       {
         id: product._id,
         name: product.name,
-        size: selected.size,
-        price: selected.price,
-        image: product.images?.[0],
+        slug: product.slug, // ✅ include slug
+        price: selected.price, // ✅ use selected variant price
+        image: imageUrl, // ✅ use consistent image
+        size: selected.size, // ✅ corrected from selectedSize → selected.size
       },
       quantity
-    )
-    toast.success(`${product.name} (${selected.size}) added to cart!`)
-    setTimeout(() => setIsAdding(false), 800)
-  }
+    );
+
+    toast.success(`${product.name} (${selected.size}) added to cart!`);
+    setTimeout(() => setIsAdding(false), 800);
+  };
 
   const handleBuyNow = () => {
     handleAddToCart()
@@ -400,101 +416,102 @@ export default function ProductClient({ slug }) {
 
   {/* ✅ Mobile Accordion */}
   <div className="sm:hidden mt-8 space-y-4">
-    {["Description", "Product Details", "Review"].map((tab) => (
-      <div key={tab} className="border-b border-gray-200 pb-3">
-        <button
-          onClick={() => setActiveTab(activeTab === tab ? "" : tab)}
-          className="w-full text-left flex justify-between items-center py-3 font-semibold text-gray-800"
+  {["Description", "Product Details", "Review"].map((tab) => (
+    <div key={tab} className="border-b border-gray-200 pb-3">
+      <button
+        onClick={() => toggleSection(tab)}
+        className="w-full text-left flex justify-between items-center py-3 font-semibold text-gray-800"
+      >
+        {tab}
+        <span className="text-gray-500">
+          {openSections[tab] ? "−" : "+"}
+        </span>
+      </button>
+
+      {openSections[tab] && (
+        <motion.div
+          initial={{ opacity: 0, y: -5 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+          className="mt-2 text-gray-700 text-sm leading-relaxed"
         >
-          {tab}
-          <span className="text-gray-500">{activeTab === tab ? "−" : "+"}</span>
-        </button>
+          {/* 📝 Description */}
+          {tab === "Description" && product.description && (
+            <div dangerouslySetInnerHTML={{ __html: product.description }} />
+          )}
 
-        {activeTab === tab && (
-          <motion.div
-            initial={{ opacity: 0, y: -5 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3 }}
-            className="mt-2 text-gray-700 text-sm leading-relaxed"
-          >
-            {/* 📝 Description */}
-            {tab === "Description" && product.description && (
-              <div dangerouslySetInnerHTML={{ __html: product.description }} />
-            )}
-
-            {/* 🧴 Product Details */}
-            {tab === "Product Details" && (
-              <ul className="list-disc pl-5 space-y-2">
-                {product.fragranceType && (
-                  <li>
-                    <span className="font-semibold">Fragrance Type:</span>{" "}
-                    {product.fragranceType}
-                  </li>
-                )}
-                {selected?.size && (
-                  <li>
-                    <span className="font-semibold">Volume:</span>{" "}
-                    {selected.size}
-                  </li>
-                )}
-                {product.longevity && (
-                  <li>
-                    <span className="font-semibold">Longevity:</span>{" "}
-                    {product.longevity}
-                  </li>
-                )}
-                {product.sillage && (
-                  <li>
-                    <span className="font-semibold">Sillage:</span>{" "}
-                    {product.sillage}
-                  </li>
-                )}
-                {product.topNotes?.length > 0 && (
-                  <li>
-                    <span className="font-semibold">Top Notes:</span>{" "}
-                    {product.topNotes.join(", ")}
-                  </li>
-                )}
-                {product.heartNotes?.length > 0 && (
-                  <li>
-                    <span className="font-semibold">Heart Notes:</span>{" "}
-                    {product.heartNotes.join(", ")}
-                  </li>
-                )}
-                {product.baseNotes?.length > 0 && (
-                  <li>
-                    <span className="font-semibold">Base Notes:</span>{" "}
-                    {product.baseNotes.join(", ")}
-                  </li>
-                )}
-                {product.ingredients?.length > 0 && (
-                  <li>
-                    <span className="font-semibold">Ingredients:</span>{" "}
-                    {product.ingredients.join(", ")}
-                  </li>
-                )}
+          {/* 🧴 Product Details */}
+          {tab === "Product Details" && (
+            <ul className="list-disc pl-5 space-y-2">
+              {product.fragranceType && (
                 <li>
-                  <span className="font-semibold">Country of Origin:</span>{" "}
-                  India
+                  <span className="font-semibold">Fragrance Type:</span>{" "}
+                  {product.fragranceType}
                 </li>
+              )}
+              {selected?.size && (
                 <li>
-                  <span className="font-semibold">Manufacturer:</span> Raven
-                  Fragrance Co.
+                  <span className="font-semibold">Volume:</span>{" "}
+                  {selected.size}
                 </li>
-              </ul>
-            )}
+              )}
+              {product.longevity && (
+                <li>
+                  <span className="font-semibold">Longevity:</span>{" "}
+                  {product.longevity}
+                </li>
+              )}
+              {product.sillage && (
+                <li>
+                  <span className="font-semibold">Sillage:</span>{" "}
+                  {product.sillage}
+                </li>
+              )}
+              {product.topNotes?.length > 0 && (
+                <li>
+                  <span className="font-semibold">Top Notes:</span>{" "}
+                  {product.topNotes.join(", ")}
+                </li>
+              )}
+              {product.heartNotes?.length > 0 && (
+                <li>
+                  <span className="font-semibold">Heart Notes:</span>{" "}
+                  {product.heartNotes.join(", ")}
+                </li>
+              )}
+              {product.baseNotes?.length > 0 && (
+                <li>
+                  <span className="font-semibold">Base Notes:</span>{" "}
+                  {product.baseNotes.join(", ")}
+                </li>
+              )}
+              {product.ingredients?.length > 0 && (
+                <li>
+                  <span className="font-semibold">Ingredients:</span>{" "}
+                  {product.ingredients.join(", ")}
+                </li>
+              )}
+              <li>
+                <span className="font-semibold">Country of Origin:</span> India
+              </li>
+              <li>
+                <span className="font-semibold">Manufacturer:</span> Raven
+                Fragrance Co.
+              </li>
+            </ul>
+          )}
 
-            {/* ⭐ Review Tab (with component) */}
-            {tab === "Review" && (
-              <div className="mt-3">
-                {product?._id && <ProductReviews productId={product._id} />}
-              </div>
-            )}
-          </motion.div>
-        )}
-      </div>
-    ))}
-  </div>
+          {/* ⭐ Review Tab */}
+          {tab === "Review" && (
+            <div className="mt-3">
+              {product?._id && <ProductReviews productId={product._id} />}
+            </div>
+          )}
+        </motion.div>
+      )}
+    </div>
+  ))}
+</div>
 </div>
 
       {lightboxOpen && (
