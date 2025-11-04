@@ -50,7 +50,7 @@ export default function NavBar() {
 
             {/* SHOP (Mobile) */}
             <motion.div
-              initial={{ opacity: 0, y: -10 }}
+              initial={{ opacity: 0, y: 0 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, ease: 'easeOut' }}
               className="flex items-center sm:hidden"
@@ -64,7 +64,7 @@ export default function NavBar() {
 
             {/* CENTER (Logo) */}
             <motion.div
-              initial={{ opacity: 0, y: -10 }}
+              initial={{ opacity: 0, y: 0 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, ease: 'easeOut', delay: 0.15 }}
               className="flex justify-center w-full absolute left-0 right-0 pointer-events-none"
@@ -86,12 +86,12 @@ export default function NavBar() {
 
               {/* SHOP NOW (Desktop) */}
             <motion.div
-              initial={{ opacity: 0, y: -10 }}
+              initial={{ opacity: 0, y: 0 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.2, ease: 'easeOut' }}
               className="hidden sm:block"
             >
-              <Link href="/product">
+              <Link href="/product/rebel">
                 <button className="flex items-center justify-center min-w-[130px] h-9 px-5 rounded-md bg-[#f8f3e4] text-[#1A1A1A] text-[13px] font-semibold tracking-wider border border-[#e3d2a8] hover:bg-[#f0e5c8] active:scale-95 transition-all duration-300">
                   SHOP NOW
                 </button>

@@ -13,9 +13,9 @@ export default function HomeMarquee() {
       {isHomePage && (
         <motion.div
           key="homepage-marquee"
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -20 }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
           transition={{ duration: 0.6, ease: "easeInOut" }}
           className="relative bg-black text-white text-sm py-2 top-0 z-50 overflow-hidden"
         >
@@ -27,7 +27,7 @@ export default function HomeMarquee() {
           <Marquee
             pauseOnHover
             pauseOnClick
-            gradient={false} // disable built-in gradient
+            gradient={false}
             speed={60}
             className="px-8"
           >
