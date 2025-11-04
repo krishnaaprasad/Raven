@@ -38,8 +38,8 @@ export default function CartPage() {
   return (
     <main className="min-h-screen bg-[#fcfbf8] font-[Manrope,sans-serif] text-[#1b180d] px-4 sm:px-6 lg:px-8 py-6">
       {/* 🏷 Page Title */}
-      <h1 className="text-[32px] sm:text-[34px] font-extrabold mb-6 text-[#1b180d] tracking-tight">
-        My Bag
+      <h1 className="text-[30px] sm:text-[30px] font-extrabold mb-6 text-[#1b180d] tracking-tight">
+        My Shopping Cart
       </h1>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 items-start">
