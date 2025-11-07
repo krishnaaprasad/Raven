@@ -55,7 +55,7 @@ export default function NavBar() {
               transition={{ duration: 0.6, ease: 'easeOut' }}
               className="flex items-center sm:hidden"
             >
-              <Link href="/product">
+              <Link href="/product/rebel">
                 <button className="flex items-center justify-center min-w-[80px] h-8 px-4 rounded-md bg-[#f8f3e4] text-[#1A1A1A] text-[12px] font-semibold tracking-wider border border-[#e3d2a8] hover:bg-[#f0e5c8] active:scale-95 transition-all duration-300">
                   SHOP
                 </button>
@@ -113,8 +113,8 @@ export default function NavBar() {
                     className="flex items-center space-x-1 text-[#191919] hover:text-[#B4933A] transition-all duration-300"
                     aria-label="My Account Menu"
                   >
-                    <UserIcon className="h-5 w-5 sm:h-6 sm:w-6" />
-                    <ChevronDownIcon className="h-4 w-4 mt-[1px]" />
+                    <UserIcon className="h-6 w-6 sm:h-6 sm:w-6" />
+                    <ChevronDownIcon className="h-5 w-5 mt-[1px]" />
                   </button>
 
                   {showAccountMenu && (
@@ -154,7 +154,7 @@ export default function NavBar() {
                 type="button"
               >
                 <ShoppingBagIcon
-                  className={`h-5 w-5 sm:h-6 sm:w-6 text-[#191919] hover:text-[#B4933A] transition-transform duration-500 ${
+                  className={`h-6 w-6 sm:h-6 sm:w-6 text-[#191919] hover:text-[#B4933A] transition-transform duration-500 ${
                     animateCart ? 'animate-bounce' : ''
                   }`}
                 />

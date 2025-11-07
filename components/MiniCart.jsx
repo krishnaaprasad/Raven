@@ -19,7 +19,7 @@ function MiniCartDrawer({ isOpen, onClose }) {
     router.push('/checkout')
   }
 
-  // ✨ Shimmer Placeholder (CSS)
+  // shimmer placeholder for images
   const shimmer =
     'data:image/svg+xml;base64,' +
     btoa(`
@@ -41,7 +41,7 @@ function MiniCartDrawer({ isOpen, onClose }) {
     <AnimatePresence>
       {isOpen && (
         <>
-          {/* Overlay */}
+          {/* Dim background */}
           <motion.div
             className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[9998]"
             initial={{ opacity: 0 }}
@@ -57,10 +57,10 @@ function MiniCartDrawer({ isOpen, onClose }) {
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'spring', stiffness: 260, damping: 25 }}
-            className="fixed top-0 right-0 bottom-0 h-screen w-[92vw] sm:w-[380px] bg-white z-[9999] shadow-2xl flex flex-col border-l border-[#e4d5b5]"
+            className="fixed top-0 right-0 h-[100dvh] w-[92vw] sm:w-[380px] bg-white z-[9999] shadow-2xl flex flex-col border-l border-[#e4d5b5]"
           >
             {/* Header */}
-            <div className="px-6 py-5 border-b flex justify-between items-center bg-[#FCF8F3]">
+            <div className="px-6 py-5 border-b flex justify-between items-center bg-[#FCF8F3] shrink-0">
               <h3 className="text-xl font-bold text-[#B28C34] tracking-wide">Perfume Cart</h3>
               <button
                 onClick={onClose}
@@ -71,8 +71,8 @@ function MiniCartDrawer({ isOpen, onClose }) {
               </button>
             </div>
 
-            {/* Items */}
-            <div className="px-6 py-4 flex-1 overflow-y-auto">
+            {/* Cart items (scrollable section) */}
+            <div className="px-6 py-4 flex-1 overflow-y-auto overscroll-contain">
               {cartCount === 0 ? (
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
@@ -83,7 +83,7 @@ function MiniCartDrawer({ isOpen, onClose }) {
                 </motion.div>
               ) : (
                 cartItems.map((item, i) => {
-                  const imageSrc = item.image?.original || item.image 
+                  const imageSrc = item.image?.original || item.image
 
                   return (
                     <motion.div
@@ -93,7 +93,7 @@ function MiniCartDrawer({ isOpen, onClose }) {
                       exit={{ opacity: 0, x: -40 }}
                       className="flex gap-4 mb-6 border-b pb-4"
                     >
-                      {/* Image with shimmer */}
+                      {/* Product image */}
                       <div className="w-16 h-16 flex-shrink-0 rounded-md bg-[#FCF8F3] flex items-center justify-center border shadow-sm overflow-hidden">
                         <Image
                           src={imageSrc}
@@ -106,7 +106,7 @@ function MiniCartDrawer({ isOpen, onClose }) {
                         />
                       </div>
 
-                      {/* Info */}
+                      {/* Product Info */}
                       <div className="flex-1 flex flex-col">
                         <div className="flex justify-between items-center">
                           <Link
@@ -129,7 +129,7 @@ function MiniCartDrawer({ isOpen, onClose }) {
                           ₹{(item.price * item.quantity).toLocaleString()}
                         </p>
 
-                        {/* Quantity */}
+                        {/* Quantity Controls */}
                         <div className="flex items-center gap-2 mt-2">
                           <button
                             onClick={() =>
@@ -156,9 +156,9 @@ function MiniCartDrawer({ isOpen, onClose }) {
               )}
             </div>
 
-            {/* Footer */}
+            {/* Footer (always visible) */}
             {cartCount > 0 && (
-              <div className="border-t px-6 py-5 bg-[#FCF8F3]">
+              <div className="border-t px-6 py-5 bg-[#FCF8F3] sticky bottom-0">
                 <div className="flex justify-between items-center mb-3">
                   <span className="text-[#665933] font-medium">Subtotal</span>
                   <span className="font-bold text-lg text-[#B28C34]">
