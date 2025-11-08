@@ -113,8 +113,8 @@ export default function NavBar() {
                     className="flex items-center space-x-1 text-[#191919] hover:text-[#B4933A] transition-all duration-300"
                     aria-label="My Account Menu"
                   >
-                    <UserIcon className="h-6 w-6 sm:h-6 sm:w-6" />
-                    <ChevronDownIcon className="h-5 w-5 mt-[1px]" />
+                    <UserIcon className="h-5 w-5 sm:h-6 sm:w-6" />
+                    <ChevronDownIcon className="h-4 w-4 mt-[1px]" />
                   </button>
 
                   {showAccountMenu && (
@@ -154,7 +154,7 @@ export default function NavBar() {
                 type="button"
               >
                 <ShoppingBagIcon
-                  className={`h-6 w-6 sm:h-6 sm:w-6 text-[#191919] hover:text-[#B4933A] transition-transform duration-500 ${
+                  className={`h-5 w-5 sm:h-6 sm:w-6 text-[#191919] hover:text-[#B4933A] transition-transform duration-500 ${
                     animateCart ? 'animate-bounce' : ''
                   }`}
                 />

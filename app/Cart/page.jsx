@@ -2,16 +2,22 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
+import usePageMetadata from '../hooks/usePageMetadata';
 import { useCart } from '../context/cartcontext';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { MdDelete } from 'react-icons/md';
 
 export default function CartPage() {
+  usePageMetadata(
+    'Shopping Cart - Raven Fragrance',
+    'Review your selected Raven Fragrance perfumes, manage quantities, and proceed to secure checkout.'
+  );
+
   const { cartItems, removeFromCart, updateQuantity } = useCart();
   const router = useRouter();
   const [discount, setDiscount] = useState('');
-
+  
   const totalPrice = cartItems.reduce(
     (sum, item) => sum + item.price * item.quantity,
     0

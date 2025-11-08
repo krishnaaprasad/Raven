@@ -7,7 +7,7 @@ import { signIn } from 'next-auth/react';
 const primary = '#ecab13';
 const textMuted = '#8d8d8d';
 
-export default function LoginRegisterPage({ onClose }) {
+export default function LoginRegisterPage({ onClose, onLoginSuccess }) {
   const [isRegistering, setIsRegistering] = useState(false);
   const [direction, setDirection] = useState('right');
   const [formData, setFormData] = useState({
@@ -90,14 +90,16 @@ export default function LoginRegisterPage({ onClose }) {
 
     try {
       const result = await signIn('credentials', {
-        redirect: false,
+        redirect: false, // ✅ stay on same page
         email,
         password,
       });
       if (result?.error) {
         setError(result.error);
       } else {
-        window.location.href = '/';
+        // ✅ trigger success callback without redirect
+        if (onLoginSuccess) onLoginSuccess(email);
+        if (onClose) onClose();
       }
     } catch (err) {
       setError('Login failed. Please try again.');
@@ -106,9 +108,12 @@ export default function LoginRegisterPage({ onClose }) {
     }
   };
 
-  // Google sign-in handler
+  // ✅ Stay on same page for Google sign-in too
   const handleGoogle = async () => {
-    await signIn('google', { callbackUrl: '/' });
+    await signIn('google', {
+      redirect: false,
+      callbackUrl: window.location.href, // Stay on same page
+    });
   };
 
   const slideVariants = {
@@ -122,7 +127,6 @@ export default function LoginRegisterPage({ onClose }) {
       type="button"
       onClick={handleGoogle}
       className="w-full flex items-center justify-center gap-3 py-2 px-4 rounded-lg border border-gray-200 bg-white font-semibold text-[#3b3b3b] shadow hover:shadow-md transition duration-150 mb-2"
-      style={{ marginTop: 4 }}
     >
       <img
         src="https://www.svgrepo.com/show/355037/google.svg"
@@ -149,18 +153,14 @@ export default function LoginRegisterPage({ onClose }) {
           boxShadow: '0 8px 40px rgba(0,0,0,.08)',
         }}
       >
-        {/* Close button (only when onClose prop exists) */}
         {onClose && (
           <button
             onClick={onClose}
-            className="absolute top-3.5 right-2.5 md:top-3.5 md:right-2.5
-            text-[#000000] bg-[#dba015] border-none
-            rounded-full w-8 h-8 md:w-9 md:h-9 flex items-center justify-center
+            className="absolute top-3.5 right-2.5
+            text-[#000000] bg-[#dba015]
+            rounded-full w-8 h-8 flex items-center justify-center
             shadow-[0_2px_8px_rgba(178,140,52,0.25)]
-            cursor-pointer transition-all duration-200
-            hover:bg-[#bb9433]
-            z-20"
-           
+            hover:bg-[#bb9433] transition-all duration-200"
           >
             <X size={18} />
           </button>
@@ -185,16 +185,12 @@ export default function LoginRegisterPage({ onClose }) {
                 <h2 className="text-2xl font-bold text-stone-900 mb-1 text-center">
                   Create Account
                 </h2>
-                <p
-                  className="text-base mb-5 text-center"
-                  style={{ color: textMuted }}
-                >
+                <p className="text-base mb-5 text-center" style={{ color: textMuted }}>
                   Let’s get you started.
                 </p>
                 <GoogleButton label="Sign up with Google" />
-                <p className="text-sm text-gray-400 mb-2">
-                  or use email registration
-                </p>
+                <p className="text-sm text-gray-400 mb-2">or use email registration</p>
+
                 <form className="space-y-5" onSubmit={handleRegister}>
                   <input
                     id="name"
@@ -202,11 +198,7 @@ export default function LoginRegisterPage({ onClose }) {
                     onChange={handleChange}
                     type="text"
                     placeholder="Full Name"
-                    className="w-full border rounded-lg p-3 focus:ring-2 focus:ring-yellow-400 font-medium"
-                    style={{
-                      backgroundColor: '#f7f7f7',
-                      borderColor: '#efefef',
-                    }}
+                    className="w-full border rounded-lg p-3 bg-[#f7f7f7] border-[#efefef] focus:ring-2 focus:ring-yellow-400 font-medium"
                   />
                   <input
                     id="email"
@@ -214,11 +206,7 @@ export default function LoginRegisterPage({ onClose }) {
                     onChange={handleChange}
                     type="email"
                     placeholder="Email"
-                    className="w-full border rounded-lg p-3 focus:ring-2 focus:ring-yellow-400 font-medium"
-                    style={{
-                      backgroundColor: '#f7f7f7',
-                      borderColor: '#efefef',
-                    }}
+                    className="w-full border rounded-lg p-3 bg-[#f7f7f7] border-[#efefef] focus:ring-2 focus:ring-yellow-400 font-medium"
                   />
                   <div className="grid grid-cols-2 gap-3">
                     <input
@@ -227,11 +215,7 @@ export default function LoginRegisterPage({ onClose }) {
                       onChange={handleChange}
                       type="password"
                       placeholder="Password"
-                      className="w-full border rounded-lg p-3 focus:ring-2 focus:ring-yellow-400 font-medium"
-                      style={{
-                        backgroundColor: '#f7f7f7',
-                        borderColor: '#efefef',
-                      }}
+                      className="border rounded-lg p-3 bg-[#f7f7f7] border-[#efefef] focus:ring-2 focus:ring-yellow-400 font-medium"
                     />
                     <input
                       id="confirmPassword"
@@ -239,43 +223,22 @@ export default function LoginRegisterPage({ onClose }) {
                       onChange={handleChange}
                       type="password"
                       placeholder="Confirm"
-                      className="w-full border rounded-lg p-3 focus:ring-2 focus:ring-yellow-400 font-medium"
-                      style={{
-                        backgroundColor: '#f7f7f7',
-                        borderColor: '#efefef',
-                      }}
+                      className="border rounded-lg p-3 bg-[#f7f7f7] border-[#efefef] focus:ring-2 focus:ring-yellow-400 font-medium"
                     />
                   </div>
-                  {error && (
-                    <p className="text-red-600 text-sm font-medium mt-1">
-                      {error}
-                    </p>
-                  )}
+                  {error && <p className="text-red-600 text-sm font-medium">{error}</p>}
                   <button
                     type="submit"
                     disabled={loading}
-                    className="w-full font-bold py-3 px-4 rounded-lg mt-2"
-                    style={{
-                      backgroundColor: primary,
-                      color: '#191919',
-                      fontWeight: 700,
-                      fontSize: '1.05rem',
-                      boxShadow: '0 2px 18px rgba(236,171,19, 0.12)',
-                    }}
+                    className="w-full font-bold py-3 px-4 rounded-lg mt-2 bg-[#ecab13] text-[#191919] shadow-md"
                   >
                     {loading ? 'Processing...' : 'Register'}
                   </button>
                 </form>
-                <p
-                  className="text-center text-sm mt-5"
-                  style={{ color: textMuted }}
-                >
+
+                <p className="text-center text-sm mt-5" style={{ color: textMuted }}>
                   Already have an account?{' '}
-                  <button
-                    onClick={() => handleSwitch(false)}
-                    className="font-medium hover:underline"
-                    style={{ color: primary }}
-                  >
+                  <button onClick={() => handleSwitch(false)} className="font-medium hover:underline" style={{ color: primary }}>
                     Sign in
                   </button>
                 </p>
@@ -291,17 +254,13 @@ export default function LoginRegisterPage({ onClose }) {
                 transition={{ duration: 0.28, ease: 'easeInOut' }}
                 className="absolute inset-0 flex flex-col justify-center px-4 py-8 bg-white"
               >
-                <h2 className="text-2xl font-bold text-stone-900 mb-2 text-center">
-                  Welcome Back
-                </h2>
-                <p
-                  className="text-base mb-5 text-center"
-                  style={{ color: textMuted }}
-                >
+                <h2 className="text-2xl font-bold text-stone-900 mb-2 text-center">Welcome Back</h2>
+                <p className="text-base mb-5 text-center" style={{ color: textMuted }}>
                   Please enter your details to sign in.
                 </p>
                 <GoogleButton label="Sign in with Google" />
                 <p className="text-sm text-gray-400 mb-2">Or with email and password</p>
+
                 <form className="space-y-5" onSubmit={handleLogin}>
                   <input
                     id="email"
@@ -309,11 +268,7 @@ export default function LoginRegisterPage({ onClose }) {
                     onChange={handleChange}
                     type="email"
                     placeholder="Email"
-                    className="w-full border rounded-lg p-3 focus:ring-2 focus:ring-yellow-400 font-medium"
-                    style={{
-                      backgroundColor: '#f7f7f7',
-                      borderColor: '#efefef',
-                    }}
+                    className="w-full border rounded-lg p-3 bg-[#f7f7f7] border-[#efefef] focus:ring-2 focus:ring-yellow-400 font-medium"
                   />
                   <div className="relative">
                     <input
@@ -322,11 +277,7 @@ export default function LoginRegisterPage({ onClose }) {
                       onChange={handleChange}
                       type={showPassword ? 'text' : 'password'}
                       placeholder="Password"
-                      className="w-full border rounded-lg p-3 pr-10 focus:ring-2 focus:ring-yellow-400 font-medium"
-                      style={{
-                        backgroundColor: '#f7f7f7',
-                        borderColor: '#efefef',
-                      }}
+                      className="w-full border rounded-lg p-3 pr-10 bg-[#f7f7f7] border-[#efefef] focus:ring-2 focus:ring-yellow-400 font-medium"
                     />
                     <button
                       type="button"
@@ -336,36 +287,19 @@ export default function LoginRegisterPage({ onClose }) {
                       {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                     </button>
                   </div>
-                  {error && (
-                    <p className="text-red-600 text-sm font-medium mt-1">
-                      {error}
-                    </p>
-                  )}
+                  {error && <p className="text-red-600 text-sm font-medium">{error}</p>}
                   <button
                     type="submit"
                     disabled={loading}
-                    className="w-full font-bold py-3 px-4 rounded-lg"
-                    style={{
-                      backgroundColor: primary,
-                      color: '#191919',
-                      fontWeight: 700,
-                      fontSize: '1.05rem',
-                      boxShadow: '0 2px 18px rgba(236,171,19, 0.12)',
-                    }}
+                    className="w-full font-bold py-3 px-4 rounded-lg bg-[#ecab13] text-[#191919] shadow-md"
                   >
                     {loading ? 'Signing in...' : 'Sign In'}
                   </button>
                 </form>
-                <p
-                  className="text-center text-sm mt-6"
-                  style={{ color: textMuted }}
-                >
+
+                <p className="text-center text-sm mt-6" style={{ color: textMuted }}>
                   Don’t have an account?{' '}
-                  <button
-                    onClick={() => handleSwitch(true)}
-                    className="font-medium hover:underline"
-                    style={{ color: primary }}
-                  >
+                  <button onClick={() => handleSwitch(true)} className="font-medium hover:underline" style={{ color: primary }}>
                     Sign up
                   </button>
                 </p>
