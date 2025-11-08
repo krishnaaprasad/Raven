@@ -106,18 +106,24 @@ export default function CheckoutPage() {
   // Close phone tooltip & state dropdown on outside click
   useEffect(() => {
   const handleClickOutside = (e) => {
-    // Use setTimeout to delay check until after onClick finishes
-    setTimeout(() => {
-      if (tooltipRef.current && !tooltipRef.current.contains(e.target)) {
-        setShowPhoneTip(false);
-      }
-      if (stateDropdownRef.current && !stateDropdownRef.current.contains(e.target)) {
-        setShowStateList(false);
-      }
-    }, 0);
+    // Only close if tooltip is open and click is *not* on the icon or tooltip
+    if (
+      tooltipRef.current &&
+      !tooltipRef.current.contains(e.target)
+    ) {
+      setShowPhoneTip(false);
+    }
+
+    if (
+      stateDropdownRef.current &&
+      !stateDropdownRef.current.contains(e.target)
+    ) {
+      setShowStateList(false);
+    }
   };
-  document.addEventListener('click', handleClickOutside);
-  return () => document.removeEventListener('click', handleClickOutside);
+
+  document.addEventListener('mousedown', handleClickOutside);
+  return () => document.removeEventListener('mousedown', handleClickOutside);
 }, []);
 
   // Scroll to first error
@@ -220,8 +226,7 @@ export default function CheckoutPage() {
               {label}
             </label>
 
-            {/* Phone tooltip */}
-            {/* ✅ Phone tooltip with proper z-index and click handling */}
+          {/* ✅ Reliable phone tooltip */}
           {isPhone && (
             <div ref={tooltipRef} className="absolute right-3 top-[10px] z-[9999]">
               <button
@@ -229,6 +234,7 @@ export default function CheckoutPage() {
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
+                  console.log("Tooltip toggled!"); // ✅ Debug check
                   setShowPhoneTip((prev) => !prev);
                 }}
                 className="text-[#9a864c] hover:text-[#1b180d] focus:outline-none"
@@ -238,7 +244,7 @@ export default function CheckoutPage() {
 
               {showPhoneTip && (
                 <div
-                  className="absolute left-[-230px] top-[-4px] bg-white border border-[#e7e1cf] text-[#1b180d] text-xs rounded-md shadow-lg p-2 w-[220px] animate-fadeIn"
+                  className="absolute left-[-240px] top-[-6px] bg-white border border-[#e7e1cf] text-[#1b180d] text-xs rounded-md shadow-lg p-2 w-[220px] animate-fadeIn"
                   style={{
                     zIndex: 999999,
                     boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
@@ -249,7 +255,6 @@ export default function CheckoutPage() {
               )}
             </div>
           )}
-          
             {hasError && <p className="mt-1 text-xs text-red-600">{errors[name].message}</p>}
 
             <style jsx>{`
