@@ -1,6 +1,6 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../auth/[...nextauth]/route";
-import { connectToDatabase } from "@/lib/mongodb";
+import connectToDatabase from "@/lib/mongodb";
 import User from "@/models/User";
 
 export async function POST(req) {
