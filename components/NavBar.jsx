@@ -57,7 +57,7 @@ export default function NavBar() {
             >
               <Link href="/product/rebel">
                 <button
-                  className="relative group flex items-center justify-center min-w-[90px] h-9 px-4 rounded-md overflow-hidden text-xs font-semibold tracking-wide uppercase text-[#1b180d] transition-all shadow-[0_2px_8px_rgba(0,0,0,0.08)] hover:shadow-[0_3px_10px_rgba(0,0,0,0.12)] font-[Manrope,sans-serif]"
+                  className="relative group flex items-center justify-center min-w-[90px] h-9 px-4 rounded-md overflow-hidden text-xs font-semibold tracking-wide uppercase text-[#1b180d] transition-all shadow-[0_2px_8px_rgba(0,0,0,0.08)] hover:shadow-[0_3px_10px_rgba(0,0,0,0.12)] font-[Manrope,sans-serif] cursor-pointer"
                   style={{
                     background: 'linear-gradient(45deg, #a66d30, #ffe58e 50%, #e0b057)',
                   }}
@@ -100,7 +100,7 @@ export default function NavBar() {
               >
                 <Link href="/product/rebel">
                   <button
-                    className="relative group flex items-center justify-center min-w-[130px] h-10 px-6 rounded-md overflow-hidden text-sm font-semibold tracking-wide uppercase text-[#1b180d] transition-all shadow-[0_4px_10px_rgba(0,0,0,0.1)] hover:shadow-[0_6px_15px_rgba(0,0,0,0.15)] font-[Manrope,sans-serif]"
+                    className="relative group flex items-center justify-center min-w-[130px] h-10 px-6 rounded-md overflow-hidden text-sm font-semibold tracking-wide uppercase text-[#1b180d] transition-all shadow-[0_4px_10px_rgba(0,0,0,0.1)] hover:shadow-[0_6px_15px_rgba(0,0,0,0.15)] font-[Manrope,sans-serif] cursor-pointer"
                     style={{
                       background:
                         'linear-gradient(45deg, #a66d30, #ffe58e 50%, #e0b057)',

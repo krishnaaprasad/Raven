@@ -291,7 +291,7 @@ const toggleSection = (tab) =>
             <button
               onClick={handleAddToCart}
               disabled={isAdding}
-              className="relative group flex-1 h-12 rounded-full overflow-hidden text-sm font-semibold tracking-wide uppercase text-[#1b180d] transition-all shadow-[0_4px_10px_rgba(0,0,0,0.1)] hover:shadow-[0_6px_15px_rgba(0,0,0,0.15)] font-[Manrope,sans-serif]"
+              className="relative group flex-1 h-12 rounded-full overflow-hidden text-sm font-semibold tracking-wide uppercase text-[#1b180d] transition-all shadow-[0_4px_10px_rgba(0,0,0,0.1)] hover:shadow-[0_6px_15px_rgba(0,0,0,0.15)] font-[Manrope,sans-serif] cursor-pointer"
               style={{
                 background: 'linear-gradient(45deg, #a66d30, #ffe58e 50%, #e0b057)',
               }}
@@ -309,47 +309,47 @@ const toggleSection = (tab) =>
           {/* Buy Now Button */}
           <button
             onClick={handleBuyNow}
-            className="relative flex-1 h-12 rounded-full bg-black text-white text-sm font-semibold uppercase tracking-wide transition-all hover:bg-[#111] flex flex-col justify-center  font-[Manrope,sans-serif]"
+            className="relative flex-1 h-12 rounded-full bg-black text-white text-sm font-semibold uppercase tracking-wide transition-all hover:bg-[#111] flex flex-col justify-center  font-[Manrope,sans-serif] cursor-pointer"
           >
             <div className="flex items-center justify-center gap-2">
-      Buy Now
-      <Image
-        src="https://fastrr-boost-ui.pickrr.com/assets/images/boost_button/upi_options.svg"
-        alt="UPI Options"
-        width={50}
-        height={10}
-        className="ml-1 my-0.75"
-      />
-    </div>
-            <p className="text-[7px] mt-1 items-right opacity-70 font-normal">
-              Powered by Cashfree
-            </p>
-          </button>
-          {/* Shimmer Keyframes */}
-          <style jsx>{`
-            @keyframes shineSlow {
-              0% {
-                left: -80%;
-                opacity: 0.9;
-              }
-              25% {
-                opacity: 0.9;
-              }
-              50% {
-                left: 120%;
-                opacity: 0.6;
-              }
-              100% {
-                left: 120%;
-                opacity: 0;
-              }
-            }
-            .animate-shine-slow {
-              animation: shineSlow 4s ease-in-out infinite;
-            }
-          `}</style>
-        </motion.div>
-      </div>
+              Buy Now
+              <Image
+                src="https://fastrr-boost-ui.pickrr.com/assets/images/boost_button/upi_options.svg"
+                alt="UPI Options"
+                width={50}
+                height={10}
+                className="ml-1 my-0.75"
+              />
+            </div>
+                <p className="text-[7px] mt-1 items-right opacity-70 font-normal">
+                  Powered by Cashfree
+                </p>
+              </button>
+              {/* Shimmer Keyframes */}
+              <style jsx>{`
+                @keyframes shineSlow {
+                  0% {
+                    left: -80%;
+                    opacity: 0.9;
+                  }
+                  25% {
+                    opacity: 0.9;
+                  }
+                  50% {
+                    left: 120%;
+                    opacity: 0.6;
+                  }
+                  100% {
+                    left: 120%;
+                    opacity: 0;
+                  }
+                }
+                .animate-shine-slow {
+                  animation: shineSlow 4s ease-in-out infinite;
+                }
+              `}</style>
+            </motion.div>
+          </div>
 
        {/* Product Info Tabs Section */}
 <div className="max-w-6.1xl mx-auto mt-16 px-4 sm:px-6">
