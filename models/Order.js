@@ -42,10 +42,10 @@ const orderSchema = new mongoose.Schema(
     cf_order_id: { type: String, default: null },
     payment_session_id: { type: String, default: null },
     referenceId: { type: String, default: null },
+    paymentMethod: { type: String, default: "Cashfree" },
     transactionDate: { type: Date },
     order_status: { type: String, default: "ACTIVE" },
     verified: { type: Boolean, default: false },
-    paymentDetails: { type: String, default: "" },
   },
   { timestamps: true }
 );

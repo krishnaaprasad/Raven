@@ -140,31 +140,39 @@ export default function OrderSuccess() {
             </div>
 
             {/* Shipping / Payment Info */}
-            <div className="border-t border-[#e7e1cf] p-6 md:p-8 grid md:grid-cols-2 gap-8">
+            <div className="border-t border-[#e7e5e1] p-6 md:p-8 grid md:grid-cols-2 gap-8">
+              {/* SHIPPING */}
               <div>
-                <h3 className="text-base font-bold">Shipping Address</h3>
-                <p className="mt-2 text-[#6b6654] leading-relaxed">
-                  {orderData.userName}
+                <h3 className="text-base font-bold text-[#1b180d]">Shipping Address</h3>
+                <p className="mt-3 text-[#6b6654] leading-relaxed text-[15px]">
+                  {orderData.userName || 'Customer Name'}
                   <br />
-                  {orderData.address}
+                  {[orderData.addressDetails?.address1, orderData.addressDetails?.address2]
+                    .filter(Boolean)
+                    .join(', ')}
+                  <br />
+                  {[
+                    orderData.addressDetails?.city,
+                    orderData.addressDetails?.state,
+                    orderData.addressDetails?.pincode,
+                  ]
+                    .filter(Boolean)
+                    .join(', ')}
                   <br />
                   India
                 </p>
               </div>
+
               <div>
                 <h3 className="text-base font-bold">Payment Method</h3>
-                  <div className="flex items-center gap-3 mt-2">
-                    <div className="w-10 h-6 bg-gray-200 rounded border border-[#e7e1cf] flex items-center justify-center">
-                      <span className="text-xs font-mono text-[#6b6654]">
-                        {orderData?.paymentGateway || 'Cashfree'}
-                      </span>
-                    </div>
-                    <p className="text-[#6b6654] text-sm">
-                      {orderData?.paymentDetails
-                        ? orderData.paymentDetails
-                        : `Ref ID: ${referenceId}`}
-                    </p>
+                <div className="flex items-center gap-3 mt-2">
+                  <div className="w-10 h-6 bg-gray-200 rounded border border-[#e7e1cf] flex items-center justify-center">
+                    <span className="text-xs font-mono text-[#6b6654]">
+                      {orderData?.paymentMethod?.split(" ")[0] || "Cashfree"}
+                    </span>
                   </div>
+                  <p className="text-[#6b6654]">{orderData?.paymentMethod}</p>
+                </div>
               </div>
             </div>
 

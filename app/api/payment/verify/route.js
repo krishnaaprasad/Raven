@@ -26,12 +26,12 @@ export async function GET(req) {
       );
     }
 
-    const baseUrl =
-      process.env.NEXT_PUBLIC_CASHFREE_ENV === "production"
-        ? "https://api.cashfree.com/pg/orders"
-        : "https://sandbox.cashfree.com/pg/orders";
+    const isProduction = process.env.NEXT_PUBLIC_CASHFREE_ENV === "production";
+    const baseUrl = isProduction
+      ? "https://api.cashfree.com/pg/orders"
+      : "https://sandbox.cashfree.com/pg/orders";
 
-    // ✅ Step 1: Verify payment status
+    // 1️⃣ Verify payment status
     const cfResponse = await axios.get(`${baseUrl}/${cfOrderId}`, {
       headers: {
         "x-client-id": process.env.CASHFREE_APP_ID,
@@ -46,61 +46,71 @@ export async function GET(req) {
       cfData.order_status?.toUpperCase() === "SUCCESS";
 
     let paymentMethod = "Cashfree";
-    let paymentDetails = "";
-    let referenceId =
-      cfData.reference_id ||
-      cfData.cf_order_id ||
-      cfData.order_id ||
-      "N/A";
 
-    // ✅ Step 2: If paid, fetch detailed payment info
+    // 2️⃣ Get more detailed payment info if possible
     if (isPaid) {
       try {
-        const paymentsRes = await axios.get(
-          `${baseUrl}/${cfOrderId}/payments`,
-          {
-            headers: {
-              "x-client-id": process.env.CASHFREE_APP_ID,
-              "x-client-secret": process.env.CASHFREE_SECRET_KEY,
-              "x-api-version": "2022-09-01",
-            },
-          }
-        );
+        const paymentRes = await axios.get(`${baseUrl}/${cfOrderId}/payments`, {
+          headers: {
+            "x-client-id": process.env.CASHFREE_APP_ID,
+            "x-client-secret": process.env.CASHFREE_SECRET_KEY,
+            "x-api-version": "2022-09-01",
+          },
+        });
 
-        const payments = paymentsRes.data?.payments || [];
-        const latest = payments[0]; // usually only 1 successful payment
+        const payments = Array.isArray(paymentRes.data)
+          ? paymentRes.data
+          : paymentRes.data?.data || [];
 
-        if (latest) {
-          const method = latest.payment_method?.toLowerCase();
+        const payment = payments[0];
 
-          if (method === "upi" && latest.upi?.upi_id) {
-            paymentMethod = "UPI";
-            paymentDetails = latest.upi.upi_id;
-          } else if (method === "card" && latest.card) {
-            const { network, last4 } = latest.card;
-            paymentMethod = network || "Card";
-            paymentDetails = `ending in ${last4}`;
-          } else if (method === "netbanking" && latest.netbanking) {
-            paymentMethod = "NetBanking";
-            paymentDetails = latest.netbanking.bank_name || "";
+        if (payment) {
+          const method = payment.payment_method?.toUpperCase();
+
+          if (method === "UPI") {
+            const upiId = payment.upi?.upi_id || "test@upi";
+            paymentMethod = `UPI (${upiId})`;
+          } else if (method === "CARD") {
+            const network = payment.card?.card_network || "VISA";
+            const last4 = payment.card?.card_last4 || "XXXX";
+            paymentMethod = `${network} ending in ${last4}`;
+          } else if (method === "NETBANKING") {
+            const bank = payment.bank_code || "Bank";
+            paymentMethod = `NetBanking (${bank})`;
+          } else if (method === "WALLET") {
+            const wallet = payment.wallet?.provider || "Wallet";
+            paymentMethod = `Wallet (${wallet})`;
           } else {
-            paymentMethod = method?.toUpperCase() || "Cashfree";
+            paymentMethod = method || "Cashfree";
           }
-
-          if (latest.cf_payment_id) referenceId = latest.cf_payment_id;
+        } else if (!isProduction) {
+          paymentMethod = "UPI (test@upi)";
         }
       } catch (err) {
         console.warn("⚠️ Could not fetch payment details:", err.message);
+        if (!isProduction) paymentMethod = "UPI (test@upi)";
       }
     }
 
-    // ✅ Step 3: Save everything in MongoDB
+    const referenceId =
+      cfData.reference_id ||
+      cfData.cf_order_id ||
+      cfData.order_id ||
+      order.referenceId ||
+      "N/A";
+
+    // ✅ Always store string
+    if (typeof paymentMethod !== "string") {
+      paymentMethod = JSON.stringify(paymentMethod);
+    }
+
+    // 3️⃣ Update DB safely
     await Order.findByIdAndUpdate(orderId, {
       status: isPaid ? "PAID" : "FAILED",
       referenceId,
       transactionDate: new Date(),
-      paymentGateway: paymentMethod,
-      paymentDetails,
+      paymentMethod: String(paymentMethod),
+      verified: isPaid,
     });
 
     return NextResponse.json({
@@ -109,8 +119,9 @@ export async function GET(req) {
       amount: order.totalAmount,
       referenceId,
       paymentMethod,
-      paymentDetails,
-      message: isPaid ? "Payment verified successfully" : "Payment failed",
+      message: isPaid
+        ? "Payment verified successfully"
+        : "Payment verification failed",
     });
   } catch (error) {
     console.error("❌ Verify API error:", error.response?.data || error.message);
