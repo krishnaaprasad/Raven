@@ -287,24 +287,67 @@ const toggleSection = (tab) =>
               <button onClick={increase} className="px-4 py-2 text-lg font-semibold text-[#917B2E]">+</button>
             </div>
 
-            <motion.button
+            {/* Add to Cart Button */}
+            <button
               onClick={handleAddToCart}
-              whileTap={{ scale: 0.9 }}
-              animate={isAdding ? { scale: [1, 1.2, 1] } : {}}
-              transition={{ duration: 0.9 }}
-              className="flex-1 flex items-center justify-center gap-2 rounded-full border border-black py-3 font-semibold text-xs uppercase bg-white hover:bg-black hover:text-white transition"
+              disabled={isAdding}
+              className="relative group flex-1 h-12 rounded-full overflow-hidden text-sm font-semibold tracking-wide uppercase text-[#1b180d] transition-all shadow-[0_4px_10px_rgba(0,0,0,0.1)] hover:shadow-[0_6px_15px_rgba(0,0,0,0.15)] font-[Manrope,sans-serif]"
+              style={{
+                background: 'linear-gradient(45deg, #a66d30, #ffe58e 50%, #e0b057)',
+              }}
             >
-              <FaShoppingCart /> {isAdding ? 'Added!' : 'Add to Cart'}
-            </motion.button>
+              <span className="relative z-10 flex items-center justify-center gap-2">
+                {isAdding ? 'Added!' : 'Add to Cart'}
+                <FaShoppingCart size={16} />
+              </span>
+
+              {/* Luxurious diagonal shimmer */}
+              <span className="absolute top-0 left-[-80%] w-[60%] h-full bg-gradient-to-tr from-transparent via-white/50 to-transparent rotate-[25deg] opacity-0 group-hover:opacity-100 animate-shine-slow"></span>
+            </button>
           </div>
 
-          <motion.button
-            whileTap={{ scale: 0.95 }}
-            className="w-full rounded-full bg-black text-white py-3 font-semibold uppercase tracking-wide hover:bg-gray-900 transition"
+          {/* Buy Now Button */}
+          <button
             onClick={handleBuyNow}
+            className="relative flex-1 h-12 rounded-full bg-black text-white text-sm font-semibold uppercase tracking-wide transition-all hover:bg-[#111] flex flex-col justify-center  font-[Manrope,sans-serif]"
           >
-            Buy it Now
-          </motion.button>
+            <div className="flex items-center justify-center gap-2">
+      Buy Now
+      <Image
+        src="https://fastrr-boost-ui.pickrr.com/assets/images/boost_button/upi_options.svg"
+        alt="UPI Options"
+        width={50}
+        height={10}
+        className="ml-1 my-0.75"
+      />
+    </div>
+            <p className="text-[7px] mt-1 items-right opacity-70 font-normal">
+              Powered by Cashfree
+            </p>
+          </button>
+          {/* Shimmer Keyframes */}
+          <style jsx>{`
+            @keyframes shineSlow {
+              0% {
+                left: -80%;
+                opacity: 0.9;
+              }
+              25% {
+                opacity: 0.9;
+              }
+              50% {
+                left: 120%;
+                opacity: 0.6;
+              }
+              100% {
+                left: 120%;
+                opacity: 0;
+              }
+            }
+            .animate-shine-slow {
+              animation: shineSlow 4s ease-in-out infinite;
+            }
+          `}</style>
         </motion.div>
       </div>
 
