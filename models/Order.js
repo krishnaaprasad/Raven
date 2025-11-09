@@ -18,14 +18,19 @@ const orderSchema = new mongoose.Schema(
       enum: ["standard", "express", "pickup"],
       required: [true, "Delivery type is required"],
     },
+
+    // ✅ Cart Items with image + slug support
     cartItems: [
       {
         name: { type: String, required: true },
         size: { type: String },
         price: { type: Number, required: true },
         quantity: { type: Number, required: true },
+        image: { type: String }, // ✅ new
+        slug: { type: String },  // ✅ optional for linking product
       },
     ],
+
     shippingCharge: { type: Number, required: true },
     totalAmount: { type: Number, required: true },
     status: {
@@ -36,9 +41,11 @@ const orderSchema = new mongoose.Schema(
     paymentGateway: { type: String, default: "Cashfree" },
     cf_order_id: { type: String, default: null },
     payment_session_id: { type: String, default: null },
-    referenceId: { type: String, default: null }, // Transaction reference ID
+    referenceId: { type: String, default: null },
     transactionDate: { type: Date },
     order_status: { type: String, default: "ACTIVE" },
+    verified: { type: Boolean, default: false },
+    paymentDetails: { type: String, default: "" },
   },
   { timestamps: true }
 );

@@ -1,200 +1,220 @@
-"use client";
-import { useEffect, useState } from "react";
-import { useCart } from "../context/cartcontext";
+'use client';
+import { useEffect, useState, useRef } from 'react';
+import Link from 'next/link';
+import { useCart } from '../context/cartcontext';
+import { useSession } from 'next-auth/react';
 
 export default function OrderSuccess() {
+  const { data: session } = useSession();
   const { clearCart } = useCart();
 
-  // ✅ Freeze query params on mount — avoids infinite rerenders
-  const [params] = useState(() => {
-    if (typeof window !== "undefined") {
-      const sp = new URLSearchParams(window.location.search);
-      return {
-        orderId: sp.get("orderId"),
-        cfOrderId: sp.get("cfOrderId"),
-      };
-    }
-    return { orderId: null, cfOrderId: null };
-  });
-
-  const { orderId, cfOrderId } = params;
-  const [status, setStatus] = useState("");
-  const [amount, setAmount] = useState(0);
-  const [referenceId, setReferenceId] = useState("");
-  const [showConfetti, setShowConfetti] = useState(false);
+  const [status, setStatus] = useState('');
+  const [orderData, setOrderData] = useState(null);
+  const [referenceId, setReferenceId] = useState('');
+  const hasFetched = useRef(false);
 
   useEffect(() => {
-    if (!orderId || !cfOrderId) {
-      setStatus("Payment Failed");
-      return;
-    }
+    const run = async () => {
+      if (hasFetched.current) return;
+      hasFetched.current = true;
 
-    async function fetchOrder() {
-      try {
-        const res = await fetch(
-          `/api/payment/verify?orderId=${orderId}&cfOrderId=${cfOrderId}`
-        );
-        const data = await res.json();
+      const params = new URLSearchParams(window.location.search);
+      const orderId = params.get('orderId');
+      const cfOrderId = params.get('cfOrderId');
 
-        if (data.success && data.paid) {
-          setStatus("Payment Successful");
-          setAmount(data.amount);
-          setReferenceId(data.referenceId || "N/A");
-          clearCart();
-          localStorage.removeItem("failedOrder");
-          setShowConfetti(true);
-          setTimeout(() => setShowConfetti(false), 3000);
-        } else {
-          setStatus("Payment Failed");
-          const failedOrder = {
-            cartItems: JSON.parse(localStorage.getItem("cart")) || [],
-            shipping:
-              JSON.parse(localStorage.getItem("checkoutShipping")) ||
-              "standard",
-            user: JSON.parse(localStorage.getItem("checkoutUser")) || {},
-          };
-          localStorage.setItem("failedOrder", JSON.stringify(failedOrder));
-        }
-      } catch (err) {
-        console.error("Verification error:", err);
-        setStatus("Payment Failed");
+      if (!orderId || !cfOrderId) {
+        setStatus('failed');
+        return;
       }
-    }
 
-    fetchOrder();
-  }, [orderId]); // ✅ depends only on orderId (frozen)
+      try {
+        const verifyRes = await fetch(`/api/payment/verify?orderId=${orderId}&cfOrderId=${cfOrderId}`);
+        const verifyData = await verifyRes.json();
+
+        const orderRes = await fetch(`/api/order/${orderId}`);
+        const orderJson = await orderRes.json();
+
+        if (verifyData.success && orderJson.success) {
+          setStatus('success');
+          setOrderData(orderJson.order);
+          setReferenceId(verifyData.referenceId || 'N/A');
+          clearCart();
+        } else {
+          setStatus('failed');
+        }
+      } catch (e) {
+        console.error('Order success load error:', e);
+        setStatus('failed');
+      }
+    };
+
+    run();
+  }, [clearCart]);
 
   if (!status)
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#FCF8F3] text-[#6B4B1E] text-xl font-medium animate-pulse">
-        Processing your payment...
+      <div className="min-h-screen flex items-center justify-center bg-[#fcfbf8] text-[#9a864c] text-lg font-medium animate-pulse">
+        Verifying your payment...
       </div>
     );
 
-  const isSuccess = status === "Payment Successful";
-  const shoppingURL = "/product";
+  const isSuccess = status === 'success';
+  const items = orderData?.cartItems || [];
+  const subtotal = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
+  const shipping = orderData?.shippingCharge || 0;
+  const total = subtotal + shipping;
+
+  const handlePrint = () => window.print();
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-[#FCF8F3] p-6 text-center relative overflow-hidden transition-all duration-500">
-      {showConfetti && <ConfettiEffect />}
-      {isSuccess ? (
-        <SuccessCard
-          orderId={orderId}
-          referenceId={referenceId}
-          amount={amount}
-          shoppingURL={shoppingURL}
-        />
-      ) : (
-        <FailedCard retryURL="/checkout" />
-      )}
-    </div>
-  );
-}
+    <section className="bg-[#fcfbf8] min-h-screen font-[Manrope,sans-serif] text-[#1b180d]">
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
+        {/* Title */}
+        <div className="text-center max-w-3xl mx-auto">
+          <h1 className="text-[32px] md:text-5xl font-bold leading-tight tracking-tight">
+            {isSuccess ? 'Thank you for your order!' : 'Payment Failed'}
+          </h1>
+          <p className="text-[#6b6654] text-base md:text-lg mt-3">
+            {isSuccess
+              ? 'Your confirmation and order details have been sent to your email.'
+              : 'We couldn’t process your payment. Please try again.'}
+          </p>
+        </div>
 
-function SuccessCard({ orderId, referenceId, amount, shoppingURL }) {
-  return (
-    <div className="bg-white rounded-2xl shadow-lg border border-[#e6decf] p-10 max-w-md w-full animate-fadeIn relative z-10">
-      <div className="w-20 h-20 mx-auto mb-6 flex items-center justify-center rounded-full bg-[#D4AF37]/20 border-4 border-[#D4AF37] animate-bounce-slow">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-          strokeWidth={2}
-          stroke="#D4AF37"
-          className="w-10 h-10"
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-        </svg>
-      </div>
-      <h1 className="text-3xl font-bold mb-3 text-[#6B4B1E] tracking-wide">
-        Thank You for Your Purchase!
-      </h1>
-      <p className="text-[#8B6C3A] mb-6">
-        Your order has been placed successfully. We’ll send you a confirmation
-        email soon.
-      </p>
-      <div className="text-left bg-[#FCF8F3] rounded-xl p-4 border border-[#e6decf] mb-4">
-        <p className="text-[#6B4B1E] mb-1">
-          <strong>Order ID:</strong> {orderId}
-        </p>
-        <p className="text-[#6B4B1E] mb-1">
-          <strong>Transaction ID:</strong> {referenceId}
-        </p>
-        <p className="text-[#6B4B1E]">
-          <strong>Total Paid:</strong> ₹{amount}
-        </p>
-      </div>
-      <button
-        onClick={() => (window.location.href = shoppingURL)}
-        className="mt-4 w-full py-3 bg-black text-white rounded-full font-semibold hover:bg-[#2c2c2c] transition-all"
-      >
-        Continue Shopping
-      </button>
-    </div>
-  );
-}
+        {/* Order Card */}
+        {orderData && (
+          <div className="max-w-4xl mx-auto mt-10 bg-white rounded-xl border border-[#e7e1cf] shadow-sm">
+            <div className="p-6 md:p-8">
+              <h2 className="text-[20px] md:text-[22px] font-bold tracking-tight">
+                Order #{orderData._id}
+              </h2>
+            </div>
 
-function FailedCard({ retryURL }) {
-  return (
-    <div className="bg-white rounded-2xl shadow-lg border border-[#e6decf] p-10 max-w-md w-full animate-fadeIn">
-      <div className="w-20 h-20 mx-auto mb-6 flex items-center justify-center rounded-full bg-red-100 border-4 border-red-500 animate-pulse">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-          strokeWidth={2}
-          stroke="red"
-          className="w-10 h-10"
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-        </svg>
-      </div>
-      <h1 className="text-3xl font-bold mb-3 text-[#6B4B1E]">Payment Failed</h1>
-      <p className="text-[#8B6C3A] mb-6">
-        We couldn’t process your payment. Please try again or contact support.
-      </p>
-      <button
-        onClick={() => (window.location.href = retryURL)}
-        className="mt-4 w-full py-3 bg-black text-white rounded-full font-semibold hover:bg-[#2c2c2c] transition-all"
-      >
-        Try Again
-      </button>
-    </div>
-  );
-}
+            {/* Items */}
+            <div className="border-t border-[#e7e1cf] p-6 md:p-8">
+              <div className="space-y-4">
+                {items.map((item, i) => (
+                  <div key={i} className="flex items-start justify-between gap-4">
+                    <div className="flex items-start gap-4">
+                      <div
+                        className="w-18 h-18 rounded-lg border border-[#e7e1cf] bg-center bg-cover shrink-0"
+                        style={{
+                          backgroundImage: item.image
+                            ? `url(${item.image})`
+                            : `url("/placeholder.png")`,
+                        }}
+                      />
+                      <div className="flex flex-col justify-center pt-1">
+                        <p className="text-base font-medium">{item.name}</p>
+                        <p className="text-sm text-[#6b6654]">
+                          {item.size} | Qty: {item.quantity}
+                        </p>
+                      </div>
+                    </div>
+                    <p className="text-base font-medium">
+                      ₹{item.price * item.quantity}
+                    </p>
+                  </div>
+                ))}
+              </div>
 
-function ConfettiEffect() {
-  const pieces = Array.from({ length: 30 });
-  return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
-      {pieces.map((_, i) => (
-        <span
-          key={i}
-          className="confetti-piece"
-          style={{
-            left: Math.random() * 100 + "%",
-            animationDelay: Math.random() * 2 + "s",
-            animationDuration: 2 + Math.random() * 2 + "s",
-            backgroundColor: Math.random() > 0.5 ? "#D4AF37" : "#E8C547",
-            opacity: 0.7 + Math.random() * 0.3,
-          }}
-        />
-      ))}
-    </div>
-  );
-}
+              {/* Totals */}
+              <div className="mt-8 border-t border-[#e7e1cf] pt-6 flex justify-end">
+                <div className="w-full max-w-xs space-y-3 text-sm">
+                  <div className="flex justify-between text-[#6b6654]">
+                    <span>Subtotal</span>
+                    <span className="text-[#1b180d]">₹{subtotal}</span>
+                  </div>
+                  <div className="flex justify-between text-[#6b6654]">
+                    <span>Shipping ({orderData.deliveryType})</span>
+                    <span className="text-[#1b180d]">
+                      {shipping ? `₹${shipping}` : 'Free'}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-[#1b180d] font-bold border-t border-[#e7e1cf] pt-3 mt-2">
+                    <span>Total</span>
+                    <span>₹{total}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
 
-// Inline styles for animation
-const styles = `
-@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-@keyframes bounce-slow { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
-@keyframes fall { 0% { transform: translateY(-10%) rotate(0deg); opacity: 1; } 100% { transform: translateY(110vh) rotate(720deg); opacity: 0; } }
-.animate-fadeIn { animation: fadeIn 0.8s ease forwards; }
-.animate-bounce-slow { animation: bounce-slow 2s infinite; }
-.confetti-piece { position: absolute; top: 0; width: 6px; height: 12px; border-radius: 2px; animation: fall linear forwards; }
-`;
-if (typeof document !== "undefined") {
-  const styleTag = document.createElement("style");
-  styleTag.innerHTML = styles;
-  document.head.appendChild(styleTag);
+            {/* Shipping / Payment Info */}
+            <div className="border-t border-[#e7e1cf] p-6 md:p-8 grid md:grid-cols-2 gap-8">
+              <div>
+                <h3 className="text-base font-bold">Shipping Address</h3>
+                <p className="mt-2 text-[#6b6654] leading-relaxed">
+                  {orderData.userName}
+                  <br />
+                  {orderData.address}
+                  <br />
+                  India
+                </p>
+              </div>
+              <div>
+                <h3 className="text-base font-bold">Payment Method</h3>
+                  <div className="flex items-center gap-3 mt-2">
+                    <div className="w-10 h-6 bg-gray-200 rounded border border-[#e7e1cf] flex items-center justify-center">
+                      <span className="text-xs font-mono text-[#6b6654]">
+                        {orderData?.paymentGateway || 'Cashfree'}
+                      </span>
+                    </div>
+                    <p className="text-[#6b6654] text-sm">
+                      {orderData?.paymentDetails
+                        ? orderData.paymentDetails
+                        : `Ref ID: ${referenceId}`}
+                    </p>
+                  </div>
+              </div>
+            </div>
+
+            {/* Centered Actions */}
+            <div className="border-t border-[#e7e1cf] p-6 flex flex-col items-center gap-3 sm:flex-row sm:justify-center sm:gap-6">
+              <Link
+                href="/"
+                className="bg-[#eebd2b] text-black font-semibold py-2.5 px-6 rounded-lg hover:opacity-90 transition"
+              >
+                Continue Shopping
+              </Link>
+
+              <button
+                onClick={handlePrint}
+                className="text-[#6b6654] hover:text-[#1b180d] font-medium transition"
+              >
+                Print Receipt
+              </button>
+
+              {session?.user && (
+                <Link
+                  href="/my-account"
+                  className="text-[#6b6654] hover:text-[#1b180d] font-medium transition"
+                >
+                  View Order History
+                </Link>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Delivery note */}
+        {isSuccess && (
+          <p className="text-center text-sm text-[#6b6654] mt-8">
+            Your order is expected to be delivered within 5–7 business days. You’ll
+            receive a tracking link via email once it ships.
+          </p>
+        )}
+
+        {!isSuccess && (
+          <div className="text-center mt-8">
+            <Link
+              href="/checkout"
+              className="inline-block bg-red-500 text-white font-bold py-3 px-8 rounded-lg hover:bg-red-600 transition"
+            >
+              Try Again
+            </Link>
+          </div>
+        )}
+      </main>
+    </section>
+  );
 }

@@ -143,6 +143,9 @@ export default function CheckoutPage() {
     setLoading(true);
     try {
       localStorage.setItem('checkoutUser', JSON.stringify(formData));
+      localStorage.setItem('cart', JSON.stringify(cartItems)); // ✅ cart data
+      localStorage.setItem('shipping', shipping); // ✅ selected shipping
+      localStorage.setItem('shippingCharge', shippingCharges[shipping]); // ✅ cost
 
       if (session?.user?.email && saveAddress) {
         await fetch('/api/user/update', {
@@ -157,7 +160,14 @@ export default function CheckoutPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...formData,
-          cartItems,
+          cartItems: cartItems.map(item => ({
+            name: item.name,
+            size: item.size,
+            price: item.price,
+            quantity: item.quantity,
+            image: item.image, // ✅ ensure image is included
+            slug: item.slug,   // optional for linking later
+          })),
           shipping,
           shippingCharge: shippingCharges[shipping],
           totalAmount: total,
@@ -166,6 +176,17 @@ export default function CheckoutPage() {
 
       const data = await res.json();
       if (data.payment_session_id) {
+         // ✅ Save full order data for success page
+        localStorage.setItem(
+          'orderPreview',
+          JSON.stringify({
+            cartItems,
+            shipping,
+            shippingCharge: shippingCharges[shipping],
+            totalAmount: total,
+            user: formData,
+          })
+        );
         const mode = process.env.NEXT_PUBLIC_CASHFREE_ENV || 'sandbox';
         const cashfree = await load({ mode });
         await cashfree.checkout({

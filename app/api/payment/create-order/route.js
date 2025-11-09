@@ -52,7 +52,14 @@ export async function POST(req) {
       address: fullAddress,
       addressDetails: { address1, address2, city, state, pincode },
       deliveryType: shipping,
-      cartItems,
+      cartItems: cartItems.map((item) => ({
+        name: item.name,
+        size: item.size,
+        price: item.price,
+        quantity: item.quantity,
+        image: item.image, // ✅ preserve image
+        slug: item.slug,   // ✅ optional
+      })),
       shippingCharge,
       totalAmount,
       status: "PENDING",
