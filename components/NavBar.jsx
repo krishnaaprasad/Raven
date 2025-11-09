@@ -11,7 +11,7 @@ import {
   UserIcon,
   ChevronDownIcon,
 } from '@heroicons/react/24/outline';
-import { motion } from 'framer-motion'; // ✨ animation
+import { motion } from 'framer-motion';
 
 const AuthModal = dynamic(() => import('../app/auth/modal'), { ssr: false });
 
@@ -56,8 +56,15 @@ export default function NavBar() {
               className="flex items-center sm:hidden"
             >
               <Link href="/product/rebel">
-                <button className="flex items-center justify-center min-w-[80px] h-8 px-4 rounded-md bg-[#f8f3e4] text-[#1A1A1A] text-[12px] font-semibold tracking-wider border border-[#e3d2a8] hover:bg-[#f0e5c8] active:scale-95 transition-all duration-300">
-                  SHOP
+                <button
+                  className="relative group flex items-center justify-center min-w-[90px] h-9 px-4 rounded-md overflow-hidden text-xs font-semibold tracking-wide uppercase text-[#1b180d] transition-all shadow-[0_2px_8px_rgba(0,0,0,0.08)] hover:shadow-[0_3px_10px_rgba(0,0,0,0.12)] font-[Manrope,sans-serif]"
+                  style={{
+                    background: 'linear-gradient(45deg, #a66d30, #ffe58e 50%, #e0b057)',
+                  }}
+                >
+                  <span className="relative z-10">SHOP</span>
+                  {/* Shine Effect */}
+                  <span className="absolute top-0 left-[-80%] w-[60%] h-full bg-gradient-to-tr from-transparent via-white/50 to-transparent rotate-[25deg] opacity-0 group-hover:opacity-100 animate-shine-slow"></span>
                 </button>
               </Link>
             </motion.div>
@@ -85,18 +92,27 @@ export default function NavBar() {
             <div className="ml-auto flex items-center space-x-3 sm:space-x-4">
 
               {/* SHOP NOW (Desktop) */}
-            <motion.div
-              initial={{ opacity: 0, y: 0 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2, ease: 'easeOut' }}
-              className="hidden sm:block"
-            >
-              <Link href="/product/rebel">
-                <button className="flex items-center justify-center min-w-[130px] h-9 px-5 rounded-md bg-[#f8f3e4] text-[#1A1A1A] text-[13px] font-semibold tracking-wider border border-[#e3d2a8] hover:bg-[#f0e5c8] active:scale-95 transition-all duration-300">
-                  SHOP NOW
-                </button>
-              </Link>
-            </motion.div>
+              <motion.div
+                initial={{ opacity: 0, y: 0 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.2, ease: 'easeOut' }}
+                className="hidden sm:block"
+              >
+                <Link href="/product/rebel">
+                  <button
+                    className="relative group flex items-center justify-center min-w-[130px] h-10 px-6 rounded-md overflow-hidden text-sm font-semibold tracking-wide uppercase text-[#1b180d] transition-all shadow-[0_4px_10px_rgba(0,0,0,0.1)] hover:shadow-[0_6px_15px_rgba(0,0,0,0.15)] font-[Manrope,sans-serif]"
+                    style={{
+                      background:
+                        'linear-gradient(45deg, #a66d30, #ffe58e 50%, #e0b057)',
+                    }}
+                  >
+                    <span className="relative z-10">SHOP NOW</span>
+                    {/* Shine Effect */}
+                    <span className="absolute top-0 left-[-80%] w-[60%] h-full bg-gradient-to-tr from-transparent via-white/50 to-transparent rotate-[25deg] opacity-0 group-hover:opacity-100 animate-shine-slow"></span>
+                  </button>
+                </Link>
+              </motion.div>
+
               {/* Account/Login */}
               {!session ? (
                 <button
@@ -123,7 +139,6 @@ export default function NavBar() {
                       onMouseEnter={() => setShowAccountMenu(true)}
                       onMouseLeave={() => setShowAccountMenu(false)}
                     >
-
                       <Link
                         href="/my-account"
                         className="block px-4 py-2 text-[15px] font-medium text-[#191919] hover:text-[#B4933A] hover:bg-[#FAF5E8] rounded-md transition-colors duration-200"
@@ -175,6 +190,30 @@ export default function NavBar() {
       </nav>
 
       {showAuthModal && <AuthModal onClose={() => setShowAuthModal(false)} />}
+
+      {/* Shared Shine Animation */}
+      <style jsx global>{`
+        @keyframes shineSlow {
+          0% {
+            left: -80%;
+            opacity: 0.05;
+          }
+          25% {
+            opacity: 0.3;
+          }
+          50% {
+            left: 120%;
+            opacity: 0.25;
+          }
+          100% {
+            left: 120%;
+            opacity: 0;
+          }
+        }
+        .animate-shine-slow {
+          animation: shineSlow 3.8s ease-in-out infinite;
+        }
+      `}</style>
     </>
   );
 }
