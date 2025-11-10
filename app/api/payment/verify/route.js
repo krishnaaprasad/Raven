@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import connectToDatabase from "@/lib/mongodb";
-import Order from "@/models/Order";
+import { Order } from "@/models/Order";
 import axios from "axios";
 
 export async function GET(req) {
@@ -31,7 +31,7 @@ export async function GET(req) {
       ? "https://api.cashfree.com/pg/orders"
       : "https://sandbox.cashfree.com/pg/orders";
 
-    // 1️⃣ Verify payment status
+    // ✅ 1️⃣ Verify payment
     const cfResponse = await axios.get(`${baseUrl}/${cfOrderId}`, {
       headers: {
         "x-client-id": process.env.CASHFREE_APP_ID,
@@ -47,7 +47,7 @@ export async function GET(req) {
 
     let paymentMethod = "Cashfree";
 
-    // 2️⃣ Get more detailed payment info if possible
+    // ✅ 2️⃣ Try fetching payment details
     if (isPaid) {
       try {
         const paymentRes = await axios.get(`${baseUrl}/${cfOrderId}/payments`, {
@@ -65,33 +65,59 @@ export async function GET(req) {
         const payment = payments[0];
 
         if (payment) {
-          const method = payment.payment_method?.toUpperCase();
+          let method = "CASHFREE";
+
+          // ✅ Handle sandbox + production safely
+          if (typeof payment.payment_method === "string") {
+            method = payment.payment_method.toUpperCase();
+          } else if (typeof payment.payment_method === "object") {
+            if (payment.payment_method.upi) method = "UPI";
+            else if (payment.payment_method.card) method = "CARD";
+            else if (payment.payment_method.netbanking) method = "NETBANKING";
+            else if (payment.payment_method.wallet) method = "WALLET";
+          }
 
           if (method === "UPI") {
-            const upiId = payment.upi?.upi_id || "test@upi";
+            const upiId =
+              payment.upi?.upi_id ||
+              payment.payment_method?.upi?.upi_id ||
+              "testsuccess@gocash";
             paymentMethod = `UPI (${upiId})`;
           } else if (method === "CARD") {
-            const network = payment.card?.card_network || "VISA";
-            const last4 = payment.card?.card_last4 || "XXXX";
+            const network =
+              payment.card?.card_network ||
+              payment.payment_method?.card?.card_network ||
+              "VISA";
+            const last4 =
+              payment.card?.card_last4 ||
+              payment.payment_method?.card?.card_last4 ||
+              "XXXX";
             paymentMethod = `${network} ending in ${last4}`;
           } else if (method === "NETBANKING") {
-            const bank = payment.bank_code || "Bank";
+            const bank =
+              payment.bank_code ||
+              payment.payment_method?.netbanking?.bank_code ||
+              "Bank";
             paymentMethod = `NetBanking (${bank})`;
           } else if (method === "WALLET") {
-            const wallet = payment.wallet?.provider || "Wallet";
+            const wallet =
+              payment.wallet?.provider ||
+              payment.payment_method?.wallet?.provider ||
+              "Wallet";
             paymentMethod = `Wallet (${wallet})`;
           } else {
-            paymentMethod = method || "Cashfree";
+            paymentMethod = method;
           }
         } else if (!isProduction) {
-          paymentMethod = "UPI (test@upi)";
+          paymentMethod = "UPI (testsuccess@gocash)";
         }
       } catch (err) {
         console.warn("⚠️ Could not fetch payment details:", err.message);
-        if (!isProduction) paymentMethod = "UPI (test@upi)";
+        if (!isProduction) paymentMethod = "UPI (testsuccess@gocash)";
       }
     }
 
+    // ✅ 3️⃣ Reference ID fallback
     const referenceId =
       cfData.reference_id ||
       cfData.cf_order_id ||
@@ -99,17 +125,12 @@ export async function GET(req) {
       order.referenceId ||
       "N/A";
 
-    // ✅ Always store string
-    if (typeof paymentMethod !== "string") {
-      paymentMethod = JSON.stringify(paymentMethod);
-    }
-
-    // 3️⃣ Update DB safely
+    // ✅ 4️⃣ Save clean readable payment data
     await Order.findByIdAndUpdate(orderId, {
       status: isPaid ? "PAID" : "FAILED",
       referenceId,
       transactionDate: new Date(),
-      paymentMethod: String(paymentMethod),
+      paymentMethod,
       verified: isPaid,
     });
 

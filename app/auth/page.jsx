@@ -22,6 +22,7 @@ export default function LoginRegisterPage({ onClose, onLoginSuccess }) {
 
   const handleChange = (e) =>
     setFormData({ ...formData, [e.target.id]: e.target.value });
+
   const validateEmail = (email) => /\S+@\S+\.\S+/.test(email);
 
   const handleSwitch = (registering) => {
@@ -61,7 +62,6 @@ export default function LoginRegisterPage({ onClose, onLoginSuccess }) {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Registration failed.');
-
       alert('✅ Registration successful! Please login.');
       handleSwitch(false);
     } catch (err) {
@@ -90,16 +90,15 @@ export default function LoginRegisterPage({ onClose, onLoginSuccess }) {
 
     try {
       const result = await signIn('credentials', {
-        redirect: false, // ✅ stay on same page
+        redirect: false,
         email,
         password,
       });
       if (result?.error) {
         setError(result.error);
       } else {
-        // ✅ trigger success callback without redirect
-        if (onLoginSuccess) onLoginSuccess(email);
-        if (onClose) onClose();
+        onLoginSuccess?.(email);
+        onClose?.();
       }
     } catch (err) {
       setError('Login failed. Please try again.');
@@ -108,11 +107,10 @@ export default function LoginRegisterPage({ onClose, onLoginSuccess }) {
     }
   };
 
-  // ✅ Stay on same page for Google sign-in too
   const handleGoogle = async () => {
     await signIn('google', {
       redirect: false,
-      callbackUrl: window.location.href, // Stay on same page
+      callbackUrl: window.location.href,
     });
   };
 
@@ -120,6 +118,12 @@ export default function LoginRegisterPage({ onClose, onLoginSuccess }) {
     initial: (dir) => ({ x: dir === 'left' ? '100%' : '-100%', opacity: 0 }),
     animate: { x: 0, opacity: 1 },
     exit: (dir) => ({ x: dir === 'left' ? '-100%' : '100%', opacity: 0 }),
+  };
+
+  const modalAnimation = {
+    initial: { opacity: 0, y: 40, scale: 0.98 },
+    animate: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.35, ease: 'easeOut' } },
+    exit: { opacity: 0, y: 40, scale: 0.98, transition: { duration: 0.25, ease: 'easeIn' } },
   };
 
   const GoogleButton = ({ label }) => (
@@ -131,45 +135,40 @@ export default function LoginRegisterPage({ onClose, onLoginSuccess }) {
       <img
         src="https://www.svgrepo.com/show/355037/google.svg"
         alt="Google"
-        className="w-5 h-5"
-        style={{ background: 'white', borderRadius: '50%' }}
+        className="w-5 h-5 rounded-full"
       />
       <span className="text-base font-medium">{label}</span>
     </button>
   );
 
   return (
-    <div
-      className="flex items-center justify-center px-3 bg-transparent text-center"
+    <motion.div
+      {...modalAnimation}
+      className="flex items-center justify-center w-full h-full px-3 sm:px-4"
       style={{
         fontFamily: 'Manrope, sans-serif',
         minHeight: '540px',
+        maxHeight: '90vh',
       }}
     >
       <div
-        className="max-w-sm w-full bg-white rounded-3xl shadow-2xl flex flex-col overflow-hidden relative"
-        style={{
-          borderRadius: '20px',
-          boxShadow: '0 8px 40px rgba(0,0,0,.08)',
-        }}
+        className="relative max-w-sm w-full bg-white rounded-2xl shadow-2xl overflow-hidden border border-[#f3f1ea]"
+        style={{ boxShadow: '0 8px 40px rgba(0,0,0,.08)' }}
       >
+        {/* Close Button */}
         {onClose && (
           <button
             onClick={onClose}
-            className="absolute top-3.5 right-2.5
-            text-[#000000] bg-[#dba015]
+            className="absolute top-3 right-3 z-50 text-white bg-[#d4a017]
             rounded-full w-8 h-8 flex items-center justify-center
-            shadow-[0_2px_8px_rgba(178,140,52,0.25)]
-            hover:bg-[#bb9433] transition-all duration-200"
+            shadow-md hover:bg-[#b88b11] border border-white transition-all duration-200"
           >
             <X size={18} />
           </button>
         )}
 
-        <div
-          className="relative w-full flex items-center justify-center"
-          style={{ minHeight: '520px', overflow: 'hidden' }}
-        >
+        {/* Forms */}
+        <div className="relative w-full flex items-center justify-center min-h-[520px]">
           <AnimatePresence mode="wait" custom={direction}>
             {isRegistering ? (
               <motion.div
@@ -179,8 +178,8 @@ export default function LoginRegisterPage({ onClose, onLoginSuccess }) {
                 initial="initial"
                 animate="animate"
                 exit="exit"
-                transition={{ duration: 0.28, ease: 'easeInOut' }}
-                className="absolute inset-0 flex flex-col justify-center px-4 py-8 bg-white"
+                transition={{ duration: 0.3, ease: 'easeInOut' }}
+                className="absolute inset-0 flex flex-col justify-center px-5 py-8 bg-white"
               >
                 <h2 className="text-2xl font-bold text-stone-900 mb-1 text-center">
                   Create Account
@@ -189,7 +188,9 @@ export default function LoginRegisterPage({ onClose, onLoginSuccess }) {
                   Let’s get you started.
                 </p>
                 <GoogleButton label="Sign up with Google" />
-                <p className="text-sm text-gray-400 mb-2">or use email registration</p>
+                <p className="text-sm text-gray-400 mb-3 text-center">
+                  or use email registration
+                </p>
 
                 <form className="space-y-5" onSubmit={handleRegister}>
                   <input
@@ -198,7 +199,7 @@ export default function LoginRegisterPage({ onClose, onLoginSuccess }) {
                     onChange={handleChange}
                     type="text"
                     placeholder="Full Name"
-                    className="w-full border rounded-lg p-3 bg-[#f7f7f7] border-[#efefef] focus:ring-2 focus:ring-yellow-400 font-medium"
+                    className="w-full border rounded-lg p-3 bg-[#f8f8f8] border-[#efefef] focus:ring-2 focus:ring-yellow-400 font-medium"
                   />
                   <input
                     id="email"
@@ -206,7 +207,7 @@ export default function LoginRegisterPage({ onClose, onLoginSuccess }) {
                     onChange={handleChange}
                     type="email"
                     placeholder="Email"
-                    className="w-full border rounded-lg p-3 bg-[#f7f7f7] border-[#efefef] focus:ring-2 focus:ring-yellow-400 font-medium"
+                    className="w-full border rounded-lg p-3 bg-[#f8f8f8] border-[#efefef] focus:ring-2 focus:ring-yellow-400 font-medium"
                   />
                   <div className="grid grid-cols-2 gap-3">
                     <input
@@ -215,7 +216,7 @@ export default function LoginRegisterPage({ onClose, onLoginSuccess }) {
                       onChange={handleChange}
                       type="password"
                       placeholder="Password"
-                      className="border rounded-lg p-3 bg-[#f7f7f7] border-[#efefef] focus:ring-2 focus:ring-yellow-400 font-medium"
+                      className="border rounded-lg p-3 bg-[#f8f8f8] border-[#efefef] focus:ring-2 focus:ring-yellow-400 font-medium"
                     />
                     <input
                       id="confirmPassword"
@@ -223,22 +224,25 @@ export default function LoginRegisterPage({ onClose, onLoginSuccess }) {
                       onChange={handleChange}
                       type="password"
                       placeholder="Confirm"
-                      className="border rounded-lg p-3 bg-[#f7f7f7] border-[#efefef] focus:ring-2 focus:ring-yellow-400 font-medium"
+                      className="border rounded-lg p-3 bg-[#f8f8f8] border-[#efefef] focus:ring-2 focus:ring-yellow-400 font-medium"
                     />
                   </div>
                   {error && <p className="text-red-600 text-sm font-medium">{error}</p>}
                   <button
                     type="submit"
                     disabled={loading}
-                    className="w-full font-bold py-3 px-4 rounded-lg mt-2 bg-[#ecab13] text-[#191919] shadow-md"
+                    className="w-full font-bold py-3 rounded-lg mt-2 bg-[#ecab13] text-[#191919] shadow-md"
                   >
                     {loading ? 'Processing...' : 'Register'}
                   </button>
                 </form>
 
-                <p className="text-center text-sm mt-5" style={{ color: textMuted }}>
+                <p className="text-center text-sm mt-5 text-[#8d8d8d]">
                   Already have an account?{' '}
-                  <button onClick={() => handleSwitch(false)} className="font-medium hover:underline" style={{ color: primary }}>
+                  <button
+                    onClick={() => handleSwitch(false)}
+                    className="font-medium hover:underline text-[#ecab13]"
+                  >
                     Sign in
                   </button>
                 </p>
@@ -251,15 +255,19 @@ export default function LoginRegisterPage({ onClose, onLoginSuccess }) {
                 initial="initial"
                 animate="animate"
                 exit="exit"
-                transition={{ duration: 0.28, ease: 'easeInOut' }}
-                className="absolute inset-0 flex flex-col justify-center px-4 py-8 bg-white"
+                transition={{ duration: 0.3, ease: 'easeInOut' }}
+                className="absolute inset-0 flex flex-col justify-center px-5 py-8 bg-white"
               >
-                <h2 className="text-2xl font-bold text-stone-900 mb-2 text-center">Welcome Back</h2>
+                <h2 className="text-2xl font-bold text-stone-900 mb-2 text-center">
+                  Welcome Back
+                </h2>
                 <p className="text-base mb-5 text-center" style={{ color: textMuted }}>
                   Please enter your details to sign in.
                 </p>
                 <GoogleButton label="Sign in with Google" />
-                <p className="text-sm text-gray-400 mb-2">Or with email and password</p>
+                <p className="text-sm text-gray-400 mb-3 text-center">
+                  or with email and password
+                </p>
 
                 <form className="space-y-5" onSubmit={handleLogin}>
                   <input
@@ -268,7 +276,7 @@ export default function LoginRegisterPage({ onClose, onLoginSuccess }) {
                     onChange={handleChange}
                     type="email"
                     placeholder="Email"
-                    className="w-full border rounded-lg p-3 bg-[#f7f7f7] border-[#efefef] focus:ring-2 focus:ring-yellow-400 font-medium"
+                    className="w-full border rounded-lg p-3 bg-[#f8f8f8] border-[#efefef] focus:ring-2 focus:ring-yellow-400 font-medium"
                   />
                   <div className="relative">
                     <input
@@ -277,7 +285,7 @@ export default function LoginRegisterPage({ onClose, onLoginSuccess }) {
                       onChange={handleChange}
                       type={showPassword ? 'text' : 'password'}
                       placeholder="Password"
-                      className="w-full border rounded-lg p-3 pr-10 bg-[#f7f7f7] border-[#efefef] focus:ring-2 focus:ring-yellow-400 font-medium"
+                      className="w-full border rounded-lg p-3 pr-10 bg-[#f8f8f8] border-[#efefef] focus:ring-2 focus:ring-yellow-400 font-medium"
                     />
                     <button
                       type="button"
@@ -291,15 +299,18 @@ export default function LoginRegisterPage({ onClose, onLoginSuccess }) {
                   <button
                     type="submit"
                     disabled={loading}
-                    className="w-full font-bold py-3 px-4 rounded-lg bg-[#ecab13] text-[#191919] shadow-md"
+                    className="w-full font-bold py-3 rounded-lg bg-[#ecab13] text-[#191919] shadow-md"
                   >
                     {loading ? 'Signing in...' : 'Sign In'}
                   </button>
                 </form>
 
-                <p className="text-center text-sm mt-6" style={{ color: textMuted }}>
+                <p className="text-center text-sm mt-6 text-[#8d8d8d]">
                   Don’t have an account?{' '}
-                  <button onClick={() => handleSwitch(true)} className="font-medium hover:underline" style={{ color: primary }}>
+                  <button
+                    onClick={() => handleSwitch(true)}
+                    className="font-medium hover:underline text-[#ecab13]"
+                  >
                     Sign up
                   </button>
                 </p>
@@ -308,6 +319,6 @@ export default function LoginRegisterPage({ onClose, onLoginSuccess }) {
           </AnimatePresence>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }

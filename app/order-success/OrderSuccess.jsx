@@ -3,6 +3,12 @@ import { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
 import { useCart } from '../context/cartcontext';
 import { useSession } from 'next-auth/react';
+import { CreditCard, Banknote, Wallet } from "lucide-react";
+
+const formatAmount = (amount) => {
+  if (!amount || isNaN(amount)) return "0.00";
+  return parseFloat(amount).toFixed(2);
+};
 
 export default function OrderSuccess() {
   const { data: session } = useSession();
@@ -85,8 +91,8 @@ export default function OrderSuccess() {
         {orderData && (
           <div className="max-w-4xl mx-auto mt-10 bg-white rounded-xl border border-[#e7e1cf] shadow-sm">
             <div className="p-6 md:p-8">
-              <h2 className="text-[20px] md:text-[22px] font-bold tracking-tight">
-                Order #{orderData._id}
+              <h2 className="text-[22px] font-bold leading-tight tracking-tight">
+                Order #{orderData.customOrderId || orderData._id}
               </h2>
             </div>
 
@@ -112,7 +118,7 @@ export default function OrderSuccess() {
                       </div>
                     </div>
                     <p className="text-base font-medium">
-                      ₹{item.price * item.quantity}
+                      ₹{formatAmount(item.price * item.quantity)}
                     </p>
                   </div>
                 ))}
@@ -123,17 +129,17 @@ export default function OrderSuccess() {
                 <div className="w-full max-w-xs space-y-3 text-sm">
                   <div className="flex justify-between text-[#6b6654]">
                     <span>Subtotal</span>
-                    <span className="text-[#1b180d]">₹{subtotal}</span>
+                    <span className="text-[#1b180d]">₹{formatAmount(subtotal)}</span>
                   </div>
                   <div className="flex justify-between text-[#6b6654]">
                     <span>Shipping ({orderData.deliveryType})</span>
                     <span className="text-[#1b180d]">
-                      {shipping ? `₹${shipping}` : 'Free'}
+                      {shipping ? `₹${formatAmount(shipping)}` : 'Free'}
                     </span>
                   </div>
-                  <div className="flex justify-between text-[#1b180d] font-bold border-t border-[#e7e1cf] pt-3 mt-2">
+                  <div className="flex justify-between text-[#1b180d] text-base font-bold border-t border-[#e7e1cf] pt-3 mt-2">
                     <span>Total</span>
-                    <span>₹{total}</span>
+                    <span>₹{formatAmount(total)}</span>
                   </div>
                 </div>
               </div>
@@ -144,85 +150,100 @@ export default function OrderSuccess() {
               {/* SHIPPING */}
               <div>
                 <h3 className="text-base font-bold text-[#1b180d]">Shipping Address</h3>
-                <p className="mt-3 text-[#6b6654] leading-relaxed text-[15px]">
-                  {orderData.userName || 'Customer Name'}
-                  <br />
-                  {[orderData.addressDetails?.address1, orderData.addressDetails?.address2]
-                    .filter(Boolean)
-                    .join(', ')}
-                  <br />
-                  {[
-                    orderData.addressDetails?.city,
-                    orderData.addressDetails?.state,
-                    orderData.addressDetails?.pincode,
-                  ]
-                    .filter(Boolean)
-                    .join(', ')}
-                  <br />
-                  India
+                <p className="mt-3 text-[#6b6654] text-[15px] leading-relaxed">
+                  <span className="block font-medium text-[#1b180d]">{orderData.userName}</span>
+                  <span className="block">
+                    {[orderData.addressDetails?.address1, orderData.addressDetails?.address2]
+                      .filter(Boolean)
+                      .join(', ')}
+                  </span>
+                  <span className="block">
+                    {[orderData.addressDetails?.city, orderData.addressDetails?.state, orderData.addressDetails?.pincode]
+                      .filter(Boolean)
+                      .join(', ')}
+                  </span>
+                  <span className="block">India</span>
                 </p>
               </div>
 
               <div>
                 <h3 className="text-base font-bold">Payment Method</h3>
-                <div className="flex items-center gap-3 mt-2">
-                  <div className="w-10 h-6 bg-gray-200 rounded border border-[#e7e1cf] flex items-center justify-center">
-                    <span className="text-xs font-mono text-[#6b6654]">
-                      {orderData?.paymentMethod?.split(" ")[0] || "Cashfree"}
-                    </span>
+                <div className="mt-3 flex items-start gap-3">
+                  {orderData.paymentMethod?.includes("UPI") && (
+                    <Banknote size={18} className="text-[#b28c34] mt-0.5" />
+                  )}
+                  {orderData.paymentMethod?.includes("NetBanking") && (
+                    <Wallet size={18} className="text-[#b28c34] mt-0.5" />
+                  )}
+                  {(orderData.paymentMethod?.includes("VISA") ||
+                    orderData.paymentMethod?.includes("CARD")) && (
+                    <CreditCard size={18} className="text-[#b28c34] mt-0.5" />
+                  )}
+
+                  <div>
+                    <p className="text-[#1b180d] font-medium text-[15px] leading-snug">
+                      {orderData.paymentMethod || "Cashfree"}
+                    </p>
+                    <p className="text-[#6b6654] text-sm mt-1">Ref ID: {referenceId}</p>
                   </div>
-                  <p className="text-[#6b6654]">{orderData?.paymentMethod}</p>
                 </div>
               </div>
             </div>
 
-            {/* Centered Actions */}
-            <div className="border-t border-[#e7e1cf] p-6 flex flex-col items-center gap-3 sm:flex-row sm:justify-center sm:gap-6">
-              <Link
-                href="/"
-                className="bg-[#eebd2b] text-black font-semibold py-2.5 px-6 rounded-lg hover:opacity-90 transition"
-              >
-                Continue Shopping
-              </Link>
+            {/* ✅ Elegant Action Buttons Section */}
+            <div className="max-w-4xl mx-auto mt-10 text-center print:hidden">
+              {isSuccess ? (
+                <>
+                  {/* Responsive Button Group */}
+                  <div className="flex flex-col items-center gap-3 sm:gap-4 md:flex-row md:justify-center md:items-center md:gap-5">
+                    {/* Continue Shopping */}
+                    <Link
+                      href="/"
+                      className="bg-[#eebd2b] text-[#1b180d] font-semibold py-2 px-6 rounded-md hover:bg-[#d8a91a] transition-all duration-200 text-sm sm:text-[15px] shadow-sm w-[75%] sm:w-auto"
+                    >
+                      Continue Shopping
+                    </Link>
 
-              <button
-                onClick={handlePrint}
-                className="text-[#6b6654] hover:text-[#1b180d] font-medium transition"
-              >
-                Print Receipt
-              </button>
+                    {/* Sub-buttons (Print + Order History) */}
+                    <div className="flex justify-center gap-3 w-[75%] sm:w-auto">
+                      {/* Print Receipt */}
+                      <button
+                        onClick={() => window.print()}
+                        className="flex-1 sm:flex-none border border-[#b28c34] text-[#1b180d] font-medium py-2 px-4 rounded-md hover:bg-[#fcf8ef] hover:border-[#9a864c] transition-all duration-200 text-sm sm:text-[15px]"
+                      >
+                        Print Receipt
+                      </button>
 
-              {session?.user && (
+                      {/* View Order History — only if logged in */}
+                      {session && (
+                        <Link
+                          href="/my-account"
+                          className="flex-1 sm:flex-none border border-[#b28c34] text-[#1b180d] font-medium py-2 px-4 rounded-md hover:bg-[#fcf8ef] hover:border-[#9a864c] transition-all duration-200 text-sm sm:text-[15px]"
+                        >
+                          View Order History
+                        </Link>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Delivery Info */}
+                  <p className="text-xs sm:text-sm text-[#6b6654] mt-6 leading-relaxed max-w-md mx-auto mb-5">
+                    Your order is expected to be delivered within 5–7 business days.
+                    You’ll receive a tracking link via email once it ships.
+                  </p>
+                </>
+              ) : (
                 <Link
-                  href="/my-account"
-                  className="text-[#6b6654] hover:text-[#1b180d] font-medium transition"
+                  href="/checkout"
+                  className="inline-block bg-red-500 text-white font-semibold py-2.5 px-6 rounded-md hover:bg-red-600 transition-all duration-200 text-sm sm:text-base"
                 >
-                  View Order History
+                  Try Again
                 </Link>
               )}
             </div>
-          </div>
-        )}
-
-        {/* Delivery note */}
-        {isSuccess && (
-          <p className="text-center text-sm text-[#6b6654] mt-8">
-            Your order is expected to be delivered within 5–7 business days. You’ll
-            receive a tracking link via email once it ships.
-          </p>
-        )}
-
-        {!isSuccess && (
-          <div className="text-center mt-8">
-            <Link
-              href="/checkout"
-              className="inline-block bg-red-500 text-white font-bold py-3 px-8 rounded-lg hover:bg-red-600 transition"
-            >
-              Try Again
-            </Link>
-          </div>
-        )}
-      </main>
-    </section>
-  );
-}
+                      </div>
+                    )}
+                  </main>
+                </section>
+              );
+            }

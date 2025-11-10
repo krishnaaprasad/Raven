@@ -6,21 +6,19 @@ import LoginRegister from './page';
 export default function AuthModal({ onClose }) {
   const { data: session, status } = useSession();
 
-  // ✅ Auto close modal when user logs in
+  // ✅ Auto-close when logged in successfully
   useEffect(() => {
     if (status === 'authenticated' && session?.user) {
-      onClose?.(); // Close modal
-      // ✅ Refresh checkout page so prefill happens instantly
-      window.location.reload();
+      onClose?.();
+      window.location.reload(); // refresh to update session UI
     }
   }, [status, session, onClose]);
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
-      style={{ background: 'rgba(0,0,0,0.2)' }}
+      className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40 backdrop-blur-sm"
     >
-      <div className="bg-transparent relative pointer-events-auto w-full max-w-md">
+      <div className="relative w-full max-w-md mx-auto px-3 sm:px-0">
         <LoginRegister onClose={onClose} />
       </div>
     </div>

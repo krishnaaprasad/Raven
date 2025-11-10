@@ -1,7 +1,11 @@
 import mongoose from "mongoose";
 
+// ========================
+// 🧩 ORDER SCHEMA
+// ========================
 const orderSchema = new mongoose.Schema(
   {
+    customOrderId: { type: String, unique: true },
     userName: { type: String, required: [true, "User name is required"] },
     email: { type: String, required: [true, "Email is required"] },
     phone: { type: String, required: [true, "Phone number is required"] },
@@ -18,19 +22,16 @@ const orderSchema = new mongoose.Schema(
       enum: ["standard", "express", "pickup"],
       required: [true, "Delivery type is required"],
     },
-
-    // ✅ Cart Items with image + slug support
     cartItems: [
       {
         name: { type: String, required: true },
         size: { type: String },
         price: { type: Number, required: true },
         quantity: { type: Number, required: true },
-        image: { type: String }, // ✅ new
-        slug: { type: String },  // ✅ optional for linking product
+        image: { type: String },
+        slug: { type: String },
       },
     ],
-
     shippingCharge: { type: Number, required: true },
     totalAmount: { type: Number, required: true },
     status: {
@@ -39,10 +40,10 @@ const orderSchema = new mongoose.Schema(
       default: "PENDING",
     },
     paymentGateway: { type: String, default: "Cashfree" },
+    paymentMethod: { type: mongoose.Schema.Types.Mixed, default: "Cashfree" }, // ✅ FIX: Allow object or string
     cf_order_id: { type: String, default: null },
     payment_session_id: { type: String, default: null },
     referenceId: { type: String, default: null },
-    paymentMethod: { type: String, default: "Cashfree" },
     transactionDate: { type: Date },
     order_status: { type: String, default: "ACTIVE" },
     verified: { type: Boolean, default: false },
@@ -52,5 +53,21 @@ const orderSchema = new mongoose.Schema(
 
 orderSchema.index({ email: 1, status: 1, createdAt: -1 });
 
-const Order = mongoose.models.Order || mongoose.model("Order", orderSchema);
-export default Order;
+// ========================
+// 🧩 COUNTER SCHEMA
+// ========================
+const orderCounterSchema = new mongoose.Schema({
+  prefix: { type: String, required: true, unique: true },
+  date: { type: String, required: true },
+  seq: { type: Number, default: 1 },
+});
+
+// ========================
+// ✅ EXPORT MODELS
+// ========================
+export const Order =
+  mongoose.models.Order || mongoose.model("Order", orderSchema);
+
+export const OrderCounter =
+  mongoose.models.OrderCounter ||
+  mongoose.model("OrderCounter", orderCounterSchema);
