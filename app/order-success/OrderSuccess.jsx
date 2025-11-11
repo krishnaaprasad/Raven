@@ -3,7 +3,7 @@ import { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
 import { useCart } from '../context/cartcontext';
 import { useSession } from 'next-auth/react';
-import { CreditCard, Banknote, Wallet } from "lucide-react";
+import { CreditCard, Banknote, Wallet, AlertCircle, HelpCircle } from "lucide-react";
 
 const formatAmount = (amount) => {
   if (!amount || isNaN(amount)) return "0.00";
@@ -12,50 +12,89 @@ const formatAmount = (amount) => {
 
 export default function OrderSuccess() {
   const { data: session } = useSession();
-  const { clearCart } = useCart();
+  const { clearCart, cart, saveCart } = useCart();
 
   const [status, setStatus] = useState('');
   const [orderData, setOrderData] = useState(null);
   const [referenceId, setReferenceId] = useState('');
+  const [failureReason, setFailureReason] = useState('');
   const hasFetched = useRef(false);
 
   useEffect(() => {
-    const run = async () => {
-      if (hasFetched.current) return;
-      hasFetched.current = true;
+  const run = async () => {
+    if (hasFetched.current) return;
+    hasFetched.current = true;
 
-      const params = new URLSearchParams(window.location.search);
-      const orderId = params.get('orderId');
-      const cfOrderId = params.get('cfOrderId');
+    const params = new URLSearchParams(window.location.search);
+    const orderId = params.get("orderId");
+    const cfOrderId = params.get("cfOrderId");
 
-      if (!orderId || !cfOrderId) {
-        setStatus('failed');
-        return;
-      }
+    if (!orderId || !cfOrderId) {
+      setStatus("failed");
+      return;
+    }
 
-      try {
-        const verifyRes = await fetch(`/api/payment/verify?orderId=${orderId}&cfOrderId=${cfOrderId}`);
-        const verifyData = await verifyRes.json();
+    try {
+      const verifyRes = await fetch(`/api/payment/verify?orderId=${orderId}&cfOrderId=${cfOrderId}`);
+      const verifyData = await verifyRes.json();
 
-        const orderRes = await fetch(`/api/order/${orderId}`);
-        const orderJson = await orderRes.json();
+      // ✅ Use the updated order after verify, not stale one
+      const orderRes = await fetch(`/api/order/${orderId}?t=${Date.now()}`);
+      const orderJson = await orderRes.json();
 
-        if (verifyData.success && orderJson.success) {
-          setStatus('success');
-          setOrderData(orderJson.order);
-          setReferenceId(verifyData.referenceId || 'N/A');
+      const mergedOrder = {
+        ...orderJson.order,
+        paymentMethod: verifyData.paymentMethod,
+        paymentDetails: verifyData.paymentDetails,
+      };
+
+      setOrderData(mergedOrder);
+      setReferenceId(verifyData.referenceId || "N/A");
+
+        if (verifyData?.success === true && orderJson?.success === true) {
           clearCart();
+            localStorage.removeItem("failedOrder");
+            localStorage.removeItem("checkoutUser");
+            localStorage.removeItem("orderPreview");
+            localStorage.removeItem("shipping");
+            localStorage.removeItem("shippingCharge"); 
+            // ✅ cleanup any previous failed order data
+          setStatus("success");
         } else {
-          setStatus('failed');
-        }
-      } catch (e) {
-        console.error('Order success load error:', e);
-        setStatus('failed');
-      }
-    };
+        setStatus("failed");
+        setFailureReason(verifyData.message || "Payment verification failed");
 
-    run();
-  }, [clearCart]);
+        // ✅ Save cart & user data for retry
+        const failedCart = orderJson.order?.cartItems || [];
+        const failedUser = {
+          firstName: orderJson.order?.userName?.split(" ")[0] || "",
+          lastName: orderJson.order?.userName?.split(" ")[1] || "",
+          email: orderJson.order?.email,
+          phone: orderJson.order?.phone,
+          address1: orderJson.order?.addressDetails?.address1 || "",
+          address2: orderJson.order?.addressDetails?.address2 || "",
+          city: orderJson.order?.addressDetails?.city || "",
+          state: orderJson.order?.addressDetails?.state || "",
+          pincode: orderJson.order?.addressDetails?.pincode || "",
+        };
+
+        if (failedCart.length > 0) {
+          localStorage.setItem(
+            "failedOrder",
+            JSON.stringify({ cartItems: failedCart, userData: failedUser })
+          );
+          window.dispatchEvent(new Event("storage")); // ✅ notify CartContext immediately
+        }
+
+      }
+    } catch (e) {
+      console.error("Order success load error:", e);
+      setStatus("failed");
+    }
+  };
+
+  run();
+}, [clearCart]);
 
   if (!status)
     return (
@@ -70,11 +109,23 @@ export default function OrderSuccess() {
   const shipping = orderData?.shippingCharge || 0;
   const total = subtotal + shipping;
 
-  const handlePrint = () => window.print();
-
   return (
     <section className="bg-[#fcfbf8] min-h-screen font-[Manrope,sans-serif] text-[#1b180d]">
       <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
+
+        {/* 🔴 Payment Failed Banner */}
+        {!isSuccess && (
+          <div className="max-w-3xl mx-auto mb-6 bg-red-100 border border-red-300 text-red-700 rounded-lg p-4 flex items-start gap-3">
+            <AlertCircle size={20} className="shrink-0 mt-0.5" />
+            <div>
+              <p className="font-semibold text-[16px]">Payment Failed</p>
+              <p className="text-sm text-[#7a4f4f] leading-snug">
+                {failureReason || "We couldn’t process your payment. Please try again."}
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* Title */}
         <div className="text-center max-w-3xl mx-auto">
           <h1 className="text-[32px] md:text-5xl font-bold leading-tight tracking-tight">
@@ -83,11 +134,11 @@ export default function OrderSuccess() {
           <p className="text-[#6b6654] text-base md:text-lg mt-3">
             {isSuccess
               ? 'Your confirmation and order details have been sent to your email.'
-              : 'We couldn’t process your payment. Please try again.'}
+              : 'Your order attempt has been recorded. Please retry payment or contact support.'}
           </p>
         </div>
 
-        {/* Order Card */}
+        {/* ✅ Show order details for both success & failed */}
         {orderData && (
           <div className="max-w-4xl mx-auto mt-10 bg-white rounded-xl border border-[#e7e1cf] shadow-sm">
             <div className="p-6 md:p-8">
@@ -145,9 +196,8 @@ export default function OrderSuccess() {
               </div>
             </div>
 
-            {/* Shipping / Payment Info */}
+            {/* Shipping & Payment Info */}
             <div className="border-t border-[#e7e5e1] p-6 md:p-8 grid md:grid-cols-2 gap-8">
-              {/* SHIPPING */}
               <div>
                 <h3 className="text-base font-bold text-[#1b180d]">Shipping Address</h3>
                 <p className="mt-3 text-[#6b6654] text-[15px] leading-relaxed">
@@ -166,84 +216,152 @@ export default function OrderSuccess() {
                 </p>
               </div>
 
-              <div>
-                <h3 className="text-base font-bold">Payment Method</h3>
-                <div className="mt-3 flex items-start gap-3">
-                  {orderData.paymentMethod?.includes("UPI") && (
-                    <Banknote size={18} className="text-[#b28c34] mt-0.5" />
-                  )}
-                  {orderData.paymentMethod?.includes("NetBanking") && (
-                    <Wallet size={18} className="text-[#b28c34] mt-0.5" />
-                  )}
-                  {(orderData.paymentMethod?.includes("VISA") ||
-                    orderData.paymentMethod?.includes("CARD")) && (
-                    <CreditCard size={18} className="text-[#b28c34] mt-0.5" />
-                  )}
+              {/* ✅ Bulletproof Payment Method Display */}
+<div>
+  <h3 className="text-base font-bold text-[#1b180d]">Payment Method</h3>
+  <div className="mt-3 flex items-start gap-3">
+    {(() => {
+      const methodRaw = orderData?.paymentMethod || "";
+      const method = methodRaw.toUpperCase();
+      const details = orderData?.paymentDetails || {};
+      let icon = <CreditCard size={18} className="text-[#b28c34] mt-0.5" />;
+      let label = "Cashfree Payment";
 
-                  <div>
-                    <p className="text-[#1b180d] font-medium text-[15px] leading-snug">
-                      {orderData.paymentMethod || "Cashfree"}
-                    </p>
-                    <p className="text-[#6b6654] text-sm mt-1">Ref ID: {referenceId}</p>
-                  </div>
-                </div>
-              </div>
+      // 🟡 UPI
+      if (method.includes("UPI") || details?.upi_id) {
+        icon = <Banknote size={18} className="text-[#b28c34] mt-0.5" />;
+        const upiId =
+          details?.upiId ||
+          details?.upi_id ||
+          methodRaw.match(/[a-zA-Z0-9._-]+@[a-zA-Z]+/)?.[0];
+        label = upiId ? `UPI Payment (${upiId})` : "UPI Payment";
+      }
+
+      // 🟢 NetBanking
+      else if (method.includes("NETBANKING") || details?.type === "NETBANKING") {
+        icon = <Wallet size={18} className="text-[#b28c34] mt-0.5" />;
+        label = details?.bankCode
+          ? `NetBanking (${details.bankCode})`
+          : "NetBanking Payment";
+      }
+
+      // 🔵 Card
+      else if (details?.type === "CARD" || method.includes("CARD")) {
+        const last4 = details?.last4 || "XXXX";
+        const network = details?.network || "Card";
+        const bank = details?.bank ? ` – ${details.bank}` : "";
+        icon = <CreditCard size={18} className="text-[#b28c34] mt-0.5" />;
+        label = `${network} (ending in ${last4})`;
+      }
+
+      // 🪙 Wallet
+      else if (details?.type === "WALLET") {
+        icon = <Wallet size={18} className="text-[#b28c34] mt-0.5" />;
+        label = details?.provider
+          ? `Wallet (${details.provider})`
+          : "Wallet Payment";
+      }
+
+      // ⚪️ Default Fallback
+      else {
+        icon = <CreditCard size={18} className="text-[#b28c34] mt-0.5" />;
+        label = "Online Payment (via Cashfree)";
+      }
+
+      return (
+        <>
+          {icon}
+          <div>
+            <p className="text-[#1b180d] font-medium text-[15px] leading-snug">
+              {label}
+            </p>
+          </div>
+        </>
+      );
+    })()}
+  </div>
+</div>
             </div>
-
-            {/* ✅ Elegant Action Buttons Section */}
+            {/* ✅ Buttons */}
             <div className="max-w-4xl mx-auto mt-10 text-center print:hidden">
               {isSuccess ? (
                 <>
-                  {/* Responsive Button Group */}
-                  <div className="flex flex-col items-center gap-3 sm:gap-4 md:flex-row md:justify-center md:items-center md:gap-5">
-                    {/* Continue Shopping */}
+                  <div className="flex flex-col items-center gap-3 sm:gap-4 md:flex-row md:justify-center md:items-center md:gap-5 mb-5">
                     <Link
                       href="/"
                       className="bg-[#eebd2b] text-[#1b180d] font-semibold py-2 px-6 rounded-md hover:bg-[#d8a91a] transition-all duration-200 text-sm sm:text-[15px] shadow-sm w-[75%] sm:w-auto"
                     >
                       Continue Shopping
                     </Link>
-
-                    {/* Sub-buttons (Print + Order History) */}
                     <div className="flex justify-center gap-3 w-[75%] sm:w-auto">
-                      {/* Print Receipt */}
                       <button
                         onClick={() => window.print()}
-                        className="flex-1 sm:flex-none border border-[#b28c34] text-[#1b180d] font-medium py-2 px-4 rounded-md hover:bg-[#fcf8ef] hover:border-[#9a864c] transition-all duration-200 text-sm sm:text-[15px]"
+                        className="flex-1 sm:flex-none border border-[#b28c34] text-[#1b180d] font-medium py-2 px-6 rounded-md hover:bg-[#fcf8ef] hover:border-[#9a864c] transition-all duration-200 text-sm sm:text-[13px] text-[13px] cursor-pointer"
                       >
                         Print Receipt
                       </button>
-
-                      {/* View Order History — only if logged in */}
                       {session && (
                         <Link
                           href="/my-account"
-                          className="flex-1 sm:flex-none border border-[#b28c34] text-[#1b180d] font-medium py-2 px-4 rounded-md hover:bg-[#fcf8ef] hover:border-[#9a864c] transition-all duration-200 text-sm sm:text-[15px]"
+                          className="flex-1 sm:flex-none border border-[#b28c34] text-[#1b180d] font-medium py-2 px-6 rounded-md hover:bg-[#fcf8ef] hover:border-[#9a864c] transition-all duration-200 text-sm sm:text-[13px] text-[13px] cursor-pointer"
                         >
                           View Order History
                         </Link>
                       )}
                     </div>
                   </div>
-
-                  {/* Delivery Info */}
-                  <p className="text-xs sm:text-sm text-[#6b6654] mt-6 leading-relaxed max-w-md mx-auto mb-5">
-                    Your order is expected to be delivered within 5–7 business days.
-                    You’ll receive a tracking link via email once it ships.
-                  </p>
                 </>
               ) : (
-                <Link
-                  href="/checkout"
-                  className="inline-block bg-red-500 text-white font-semibold py-2.5 px-6 rounded-md hover:bg-red-600 transition-all duration-200 text-sm sm:text-base"
-                >
-                  Try Again
-                </Link>
+                <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4">
+                  <Link
+                    href="/checkout"
+                    className="bg-red-500 text-white font-medium py-2 px-6 rounded-md hover:bg-red-600 transition-all duration-200 text-sm sm:text-base"
+                  >
+                    Retry Payment
+                  </Link>
+                  <Link
+                    href="/Cart"
+                    className="border border-[#b28c34] text-[#1b180d] font-medium py-2 px-6 rounded-md hover:bg-[#fcf8ef] transition-all duration-200 text-sm sm:text-base"
+                  >
+                    Return to Cart
+                  </Link>
+                  <Link
+                    href="/"
+                    className="bg-[#eebd2b] text-[#1b180d] font-medium py-2 px-6 rounded-md hover:bg-[#d8a91a] transition-all duration-200 text-sm sm:text-base"
+                  >
+                    Continue Shopping
+                  </Link>
+                </div>
               )}
             </div>
-                      </div>
-                    )}
-                  </main>
-                </section>
-              );
-            }
+
+            {/* 💬 Support Section */}
+            {!isSuccess && (
+              <div className="max-w-4xl mx-auto mt-8 text-center border-t border-[#e7e1cf] pt-8">
+                <div className="flex flex-col items-center gap-2">
+                  <HelpCircle size={22} className="text-[#b28c34]" />
+                  <p className="text-sm text-[#6b6654] leading-relaxed max-w-md">
+                    Need help with your payment? <br />
+                    Reach out to our <span className="text-[#b28c34] font-medium">Support Team</span> at <br />
+                    <a href="mailto:support@ravenfragrance.in" className="text-[#1b180d] hover:underline">
+                      support@ravenfragrance.in
+                    </a>{' '}
+                    or{' '}
+                    <a
+                      href="https://wa.me/919999999999"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[#1b180d] hover:underline"
+                    >
+                      WhatsApp Us
+                    </a>
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </main>
+    </section>
+  );
+}

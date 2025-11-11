@@ -11,6 +11,7 @@ import { useForm, Controller } from 'react-hook-form';
 import usePageMetadata from '../hooks/usePageMetadata';
 import { useSession } from 'next-auth/react';
 import AuthModal from '../auth/modal';
+import { loadFailedOrderData } from '../context/cartcontext';
 
 export default function CheckoutPage() {
   usePageMetadata(
@@ -19,6 +20,26 @@ export default function CheckoutPage() {
   );
 
   const { cartItems } = useCart();
+  // ✅ Restore failed cart if cartItems is empty but failedOrder exists
+  useEffect(() => {
+    if (!cartItems?.length) {
+      const failed = localStorage.getItem("failedOrder");
+      if (failed) {
+        const parsed = JSON.parse(failed);
+        if (parsed?.cartItems?.length) {
+          localStorage.setItem(
+            "cart",
+            JSON.stringify({
+              items: parsed.cartItems,
+              expiry: Date.now() + 30 * 24 * 60 * 60 * 1000,
+            })
+          );
+          window.dispatchEvent(new Event("storage")); // trigger CartContext reload
+        }
+      }
+    }
+  }, [cartItems]);
+
   const router = useRouter();
   const { data: session } = useSession();
 
@@ -32,6 +53,7 @@ export default function CheckoutPage() {
   const stateDropdownRef = useRef(null);
   const fieldRefs = useRef({});
   const [saveAddress, setSaveAddress] = useState(true);
+  const [hasUserEdited, setHasUserEdited] = useState(false);
 
   const {
     handleSubmit,
@@ -39,6 +61,7 @@ export default function CheckoutPage() {
     formState: { errors },
     trigger,
     setValue,
+    watch
   } = useForm({
     mode: 'onBlur',
     reValidateMode: 'onBlur',
@@ -54,6 +77,36 @@ export default function CheckoutPage() {
       pincode: '',
     },
   });
+  
+  // 🧠 Auto-save form data locally while typing
+useEffect(() => {
+  const subscription = watch((value, { name }) => {
+    // Only save if user has started typing
+    if (!hasUserEdited) return;
+
+    // Debounce: wait until user pauses typing for 800ms
+    const handler = setTimeout(() => {
+      const nonEmptyData = Object.fromEntries(
+        Object.entries(value).filter(([_, v]) => v && v.trim() !== "")
+      );
+
+      // Only update localStorage if something actually changed
+      const current = localStorage.getItem("checkoutUser");
+      const parsed = current ? JSON.parse(current) : {};
+      const isSame = JSON.stringify(parsed) === JSON.stringify(nonEmptyData);
+      if (!isSame && Object.keys(nonEmptyData).length > 0) {
+        localStorage.setItem("checkoutUser", JSON.stringify(nonEmptyData));
+        // ✅ Don’t trigger any reactivity that causes re-render
+      }
+    }, 800);
+
+    return () => clearTimeout(handler);
+  });
+
+  return () => subscription.unsubscribe();
+}, [watch, hasUserEdited]);
+
+
 
   const shippingCharges = { standard: 50, express: 120, pickup: 0 };
   const subtotal = cartItems.reduce((sum, i) => sum + i.price * i.quantity, 0);
@@ -73,35 +126,58 @@ export default function CheckoutPage() {
   // Prefill user data
   useEffect(() => {
     const prefillData = async () => {
-      if (session?.user?.email) {
+      // 1️⃣ First, check failedOrder (highest priority)
+      const failedOrderData = loadFailedOrderData();
+      if (failedOrderData && Object.keys(failedOrderData).length) {
+        console.log("Restoring from failed order data:", failedOrderData);
+        Object.entries(failedOrderData).forEach(([key, value]) => {
+          if (value) setValue(key, value);
+        });
+        localStorage.removeItem("failedOrder");
+        return;
+      }
+
+      // 2️⃣ Next, try saved checkoutUser (manual typed data)
+      const savedCheckoutData = localStorage.getItem("checkoutUser");
+      if (savedCheckoutData) {
+        const parsed = JSON.parse(savedCheckoutData);
+        if (Object.keys(parsed).length > 0) {
+          console.log("Restoring from saved checkoutUser data:", parsed);
+          Object.entries(parsed).forEach(([key, value]) => {
+            if (value) setValue(key, value);
+          });
+          return;
+        }
+      }
+
+      // 3️⃣ Finally, try DB (only if user logged in)
+      if (session?.user?.email && !hasUserEdited) {
         try {
-          const res = await fetch('/api/user/me');
+          const res = await fetch("/api/user/me");
           const data = await res.json();
           if (data?.email) {
-            const [first, ...rest] = (data.name || '').split(' ');
-            setValue('email', data.email || '');
-            setValue('firstName', first || '');
-            setValue('lastName', rest.join(' ') || '');
-            setValue('phone', data.phone || '');
-            setValue('address1', data.address1 || '');
-            setValue('address2', data.address2 || '');
-            setValue('city', data.city || '');
-            setValue('state', data.state || '');
-            setValue('pincode', data.pincode || '');
+            const [first, ...rest] = (data.name || "").split(" ");
+            setValue("email", data.email || "");
+            setValue("firstName", first || "");
+            setValue("lastName", rest.join(" ") || "");
+            setValue("phone", data.phone || "");
+            setValue("address1", data.address1 || "");
+            setValue("address2", data.address2 || "");
+            setValue("city", data.city || "");
+            setValue("state", data.state || "");
+            setValue("pincode", data.pincode || "");
+            console.log("Restored from DB /api/user/me");
           }
         } catch {
-          console.warn('Could not load user data');
-        }
-      } else {
-        const saved = localStorage.getItem('checkoutUser');
-        if (saved) {
-          const data = JSON.parse(saved);
-          Object.keys(data).forEach((key) => setValue(key, data[key]));
+          console.warn("Could not load user data");
         }
       }
     };
+
     prefillData();
-  }, [session, setValue]);
+  }, [session, setValue, hasUserEdited]);
+
+
 
   // Close phone tooltip & state dropdown on outside click
   useEffect(() => {
@@ -143,7 +219,10 @@ export default function CheckoutPage() {
     setLoading(true);
     try {
       localStorage.setItem('checkoutUser', JSON.stringify(formData));
-      localStorage.setItem('cart', JSON.stringify(cartItems)); // ✅ cart data
+      localStorage.setItem('cart', JSON.stringify({
+        items: cartItems,
+        expiry: Date.now() + 30 * 24 * 60 * 60 * 1000, // 30 days
+      })); // ✅ cart data
       localStorage.setItem('shipping', shipping); // ✅ selected shipping
       localStorage.setItem('shippingCharge', shippingCharges[shipping]); // ✅ cost
 
@@ -216,6 +295,7 @@ export default function CheckoutPage() {
           let val = e.target.value;
           if (name === 'phone') val = val.replace(/[^0-9]/g, '').slice(0, 10);
           if (name === 'pincode') val = val.replace(/[^0-9]/g, '').slice(0, 6);
+          setHasUserEdited(true); // ✅ Mark as user started typing
           onChange(val);
         };
 
@@ -227,7 +307,10 @@ export default function CheckoutPage() {
               maxLength={maxLength}
               value={value}
               onChange={handleChange}
-              onBlur={() => trigger(name)}
+              onBlur={() => {
+                if (name !== "address1") trigger(name);
+              }}
+
               placeholder=" "
               className={`peer w-full h-[44px] px-4 pr-10 text-[15px] text-[#1b180d] bg-[#fcfbf8] rounded-md border outline-none transition-all
                 ${
@@ -309,6 +392,7 @@ export default function CheckoutPage() {
       </div>
     );
 
+
   return (
     <>
       {showAuthModal && <AuthModal onClose={() => setShowAuthModal(false)} />}
@@ -354,7 +438,7 @@ export default function CheckoutPage() {
               <Controller
                 name="state"
                 control={control}
-                rules={{ required: 'State is required' }}
+                rules={{ required: '' }}
                 render={({ field }) => {
                   const filteredStates = indianStates.filter((s) =>
                     s.toLowerCase().includes(stateSearch.toLowerCase())

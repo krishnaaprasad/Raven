@@ -4,24 +4,25 @@ import React, { createContext, useContext, useState, useEffect } from 'react'
 const CartContext = createContext()
 const CART_EXPIRY_MS = 30 * 24 * 60 * 60 * 1000 // 30 days
 
+// ✅ Load cart or failed order data from storage
 function loadCartFromStorage() {
   try {
-    // 🧾 Check for failed order retry first
+    // 🧾 If failed order exists, restore its cart items first
     const failedOrder = localStorage.getItem('failedOrder')
     if (failedOrder) {
       const parsed = JSON.parse(failedOrder)
       if (parsed.cartItems && Array.isArray(parsed.cartItems)) {
+        console.log('🛒 Restored cart from failed order:', parsed.cartItems)
         return parsed.cartItems
       }
     }
 
-    // 🛒 Otherwise load normal cart
+    // 🛒 Otherwise, load normal cart
     const data = JSON.parse(localStorage.getItem('cart'))
     if (data && data.expiry > Date.now() && Array.isArray(data.items)) {
       return data.items.map(item => ({
         ...item,
-        // ✅ Ensure backward compatibility
-        slug: item.slug || '', 
+        slug: item.slug || '',
         image: item.image || '',
       }))
     }
@@ -34,30 +35,61 @@ function loadCartFromStorage() {
   return []
 }
 
-// 🧩 Helper to save failed order for retry
+// 🧩 Save full failed order (cart + address)
 export function saveFailedOrder(cartItems, userData) {
   try {
+    if (!cartItems?.length) return
     localStorage.setItem(
       'failedOrder',
       JSON.stringify({
         cartItems: Array.isArray(cartItems) ? cartItems : [],
-        userData,
+        userData: userData || {},
       })
     )
+    console.log('💾 Saved failed order for retry')
   } catch (e) {
     console.error('Error saving failed order:', e)
   }
 }
 
+// 🧩 Load failed order address data
+export function loadFailedOrderData() {
+  try {
+    const data = JSON.parse(localStorage.getItem('failedOrder'))
+    return data?.userData || null
+  } catch {
+    return null
+  }
+}
+
+// ✅ Clear failed order explicitly
+export function clearFailedOrder() {
+  localStorage.removeItem('failedOrder')
+}
+
 export function CartProvider({ children }) {
   const [cartItems, setCartItems] = useState([])
 
-  // 🔹 Load cart once
-  useEffect(() => {
-    setCartItems(loadCartFromStorage())
-  }, [])
+  // ✅ Always attempt to load on mount
+    useEffect(() => {
+    const loadCart = () => {
+      const storedCart = loadCartFromStorage();
+      setCartItems(storedCart);
+    };
 
-  // 🔹 Persist cart with expiry
+    // ✅ Load immediately
+    loadCart();
+
+    // ✅ Re-sync if failedOrder is saved later (like from OrderSuccess)
+    window.addEventListener('storage', loadCart);
+
+    return () => {
+      window.removeEventListener('storage', loadCart);
+    };
+  }, []);
+
+
+  // ✅ Persist cart in localStorage on change
   useEffect(() => {
     const cartData = {
       items: cartItems,
@@ -66,7 +98,7 @@ export function CartProvider({ children }) {
     localStorage.setItem('cart', JSON.stringify(cartData))
   }, [cartItems])
 
-  // ✅ Add product (with slug)
+  // ✅ Add product
   const addToCart = (product, quantity) => {
     setCartItems(prev => {
       const idx = prev.findIndex(
@@ -77,7 +109,6 @@ export function CartProvider({ children }) {
         updated[idx].quantity += quantity
         return updated
       }
-
       return [
         ...prev,
         {
@@ -97,7 +128,7 @@ export function CartProvider({ children }) {
     )
   }
 
-  // ✅ Update product quantity
+  // ✅ Update quantity
   const updateQuantity = (productId, size, newQty) => {
     if (newQty < 1) return
     setCartItems(prev =>
@@ -109,14 +140,21 @@ export function CartProvider({ children }) {
     )
   }
 
-  // ✅ Clear all
+  // ✅ Clear cart (but not failed order)
   const clearCart = () => {
     setCartItems([])
     localStorage.removeItem('cart')
-    localStorage.removeItem('failedOrder')
   }
 
-  // ✅ Cart count
+  // ✅ Save specific cart
+  const saveCart = (items) => {
+    setCartItems(items)
+    localStorage.setItem(
+      'cart',
+      JSON.stringify({ items, expiry: Date.now() + CART_EXPIRY_MS })
+    )
+  }
+
   const cartCount = Array.isArray(cartItems)
     ? cartItems.reduce((acc, item) => acc + item.quantity, 0)
     : 0
@@ -129,6 +167,7 @@ export function CartProvider({ children }) {
         removeFromCart,
         updateQuantity,
         clearCart,
+        saveCart,
         cartCount,
       }}
     >
