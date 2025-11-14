@@ -294,12 +294,13 @@ export default function OrderSuccess() {
                       Continue Shopping
                     </Link>
                     <div className="flex justify-center gap-3 w-[75%] sm:w-auto">
-                      <button
-                        onClick={() => window.print()}
-                        className="flex-1 sm:flex-none border border-[#b28c34] text-[#1b180d] font-medium py-2 px-6 rounded-md hover:bg-[#fcf8ef] hover:border-[#9a864c] transition-all duration-200 text-sm sm:text-[13px] text-[13px] cursor-pointer"
+                      <Link
+                        href={`/api/invoice?orderId=${orderData._id}`}
+                        target="_blank"
+                        className="flex-1 sm:flex-none border border-[#b28c34] text-[#1b180d] font-medium py-2 px-6 rounded-md hover:bg-[#fcf8ef] hover:border-[#9a864c] transition-all duration-200 text-sm sm:text-[13px] cursor-pointer text-center"
                       >
-                        Print Receipt
-                      </button>
+                        View Receipt (PDF)
+                      </Link>
                       {session && (
                         <Link
                           href="/my-account"

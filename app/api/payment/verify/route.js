@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import connectToDatabase from "@/lib/mongodb";
 import { Order } from "@/models/Order";
 import axios from "axios";
+import { generateInvoice } from "@/lib/invoice/generateInvoice"; // ✅ correct path
 
 export async function GET(req) {
   try {
@@ -31,7 +32,9 @@ export async function GET(req) {
       ? "https://api.cashfree.com/pg/orders"
       : "https://sandbox.cashfree.com/pg/orders";
 
-    // ✅ 1️⃣ Verify base order
+    // -----------------------------------------
+    // 1️⃣ VERIFY ORDER WITH CASHFREE
+    // -----------------------------------------
     const cfResponse = await axios.get(`${baseUrl}/${cfOrderId}`, {
       headers: {
         "x-client-id": process.env.CASHFREE_APP_ID,
@@ -48,7 +51,9 @@ export async function GET(req) {
     let paymentMethod = "Cashfree";
     let paymentDetails = {};
 
-    // ✅ 2️⃣ Fetch detailed payment info if paid
+    // -----------------------------------------
+    // 2️⃣ GET PAYMENT DETAILS (UPI / CARD / NB)
+    // -----------------------------------------
     if (isPaid) {
       try {
         const paymentRes = await axios.get(`${baseUrl}/${cfOrderId}/payments`, {
@@ -67,55 +72,50 @@ export async function GET(req) {
         console.log("✅ Cashfree payment data:", payment);
 
         if (payment) {
-          // 🟢 UPI
+          // UPI
           if (payment.payment_method?.upi) {
             const upiId = payment.payment_method.upi?.upi_id || "unknown@upi";
             paymentMethod = `UPI (${upiId})`;
             paymentDetails = { type: "UPI", upiId };
           }
 
-          // 🔵 Card
+          // CARD
           else if (payment.payment_method?.card) {
-            const cardData = payment.payment_method.card;
-            const fullCard = cardData?.card_number || "";
+            const card = payment.payment_method.card;
             const last4 =
-              fullCard.slice(-4) || "XXXX"; // ✅ Extract from masked number
-            const network =
-              cardData?.card_network?.toUpperCase() || "CARD";
-            const bankName = cardData?.card_bank_name || "Bank";
+              (card?.card_number || "").slice(-4) || "XXXX";
+            const network = card?.card_network?.toUpperCase() || "CARD";
+            const bank = card?.card_bank_name || "Bank";
 
             paymentMethod = `${network} ending in ${last4}`;
             paymentDetails = {
               type: "CARD",
-              network,
               last4,
-              bank: bankName,
+              network,
+              bank,
             };
           }
 
-          // 🟠 Netbanking
+          // NETBANKING
           else if (payment.payment_method?.netbanking) {
-            const bankCode =
-              payment.payment_method.netbanking?.bank_code || "BANK";
+            const bankCode = payment.payment_method.netbanking?.bank_code || "BANK";
             paymentMethod = `NetBanking (${bankCode})`;
             paymentDetails = { type: "NETBANKING", bankCode };
           }
 
-          // 🪙 Wallet
+          // WALLET
           else if (payment.payment_method?.wallet) {
-            const provider =
-              payment.payment_method.wallet?.provider || "Wallet";
+            const provider = payment.payment_method.wallet?.provider || "Wallet";
             paymentMethod = `Wallet (${provider})`;
             paymentDetails = { type: "WALLET", provider };
           }
 
-          // ⚪️ Default fallback
+          // DEFAULT
           else {
             paymentMethod = "Online Payment (Cashfree)";
             paymentDetails = { type: "OTHER" };
           }
         } else if (!isProduction) {
-          // Sandbox fallback
           paymentMethod = "UPI (testsuccess@gocash)";
           paymentDetails = { type: "UPI", upiId: "testsuccess@gocash" };
         }
@@ -128,7 +128,9 @@ export async function GET(req) {
       }
     }
 
-    // ✅ 3️⃣ Reference ID
+    // -----------------------------------------
+    // 3️⃣ REFERENCE ID
+    // -----------------------------------------
     const referenceId =
       cfData.reference_id ||
       cfData.cf_order_id ||
@@ -136,7 +138,9 @@ export async function GET(req) {
       order.referenceId ||
       "N/A";
 
-    // ✅ 4️⃣ Save clean structured info
+    // -----------------------------------------
+    // 4️⃣ UPDATE ORDER IN DB
+    // -----------------------------------------
     await Order.findByIdAndUpdate(orderId, {
       status: isPaid ? "PAID" : "FAILED",
       referenceId,
@@ -145,6 +149,44 @@ export async function GET(req) {
       paymentDetails,
       verified: isPaid,
     });
+
+ // -----------------------------------------
+// 5️⃣ SEND EMAIL (ONLY IF PAID) — NON BLOCKING
+// -----------------------------------------
+if (isPaid) {
+  try {
+    const updatedOrder = await Order.findById(orderId);
+
+    const emailPayload = {
+      email: updatedOrder.email,
+      name: updatedOrder.userName,
+      orderId: updatedOrder.customOrderId || updatedOrder._id.toString(),
+      paymentMethod,
+      subtotal: updatedOrder.cartItems.reduce(
+        (acc, item) => acc + item.price * item.quantity,
+        0
+      ),
+      shippingCost: updatedOrder.shippingCharge,
+      totalAmount: updatedOrder.totalAmount,
+      items: updatedOrder.cartItems,
+      shipping: updatedOrder.deliveryType,
+      address: updatedOrder.addressDetails,
+    };
+
+    // 🚀 NON-BLOCKING EMAIL TRIGGER (SUPER FAST)
+    fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/send-confirmation-mail`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(emailPayload),
+    })
+      .then(() => console.log("📨 Background email triggered"))
+      .catch((err) => console.error("📩 Background email error:", err));
+
+  } catch (mailErr) {
+    console.error("❌ Email Sending Error:", mailErr);
+  }
+}
+
 
     return NextResponse.json({
       success: isPaid,
