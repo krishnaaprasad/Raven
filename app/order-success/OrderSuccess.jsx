@@ -337,8 +337,8 @@ export default function OrderSuccess() {
 
             {/* 💬 Support Section */}
             {!isSuccess && (
-              <div className="max-w-4xl mx-auto mt-8 text-center border-t border-[#e7e1cf] pt-8">
-                <div className="flex flex-col items-center gap-2">
+              <div className="max-w-4xl mx-auto mt-8 text-center border-t border-[#e7e1cf] pt-4">
+                <div className="flex flex-col items-center gap-2 mb-3">
                   <HelpCircle size={22} className="text-[#b28c34]" />
                   <p className="text-sm text-[#6b6654] leading-relaxed max-w-md">
                     Need help with your payment? <br />

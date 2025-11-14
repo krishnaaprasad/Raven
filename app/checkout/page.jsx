@@ -13,6 +13,11 @@ import { useSession } from 'next-auth/react';
 import AuthModal from '../auth/modal';
 import { loadFailedOrderData } from '../context/cartcontext';
 
+const formatAmount = (amount) => {
+  if (!amount || isNaN(amount)) return "0.00";
+  return parseFloat(amount).toFixed(2);
+};
+
 export default function CheckoutPage() {
   usePageMetadata(
     'Checkout - Raven Fragrance',
@@ -20,21 +25,22 @@ export default function CheckoutPage() {
   );
 
   const { cartItems } = useCart();
-  // ✅ Restore failed cart if cartItems is empty but failedOrder exists
+
+  // ✅ Restore failed cart if cartItems is empty
   useEffect(() => {
     if (!cartItems?.length) {
-      const failed = localStorage.getItem("failedOrder");
+      const failed = localStorage.getItem('failedOrder');
       if (failed) {
         const parsed = JSON.parse(failed);
         if (parsed?.cartItems?.length) {
           localStorage.setItem(
-            "cart",
+            'cart',
             JSON.stringify({
               items: parsed.cartItems,
               expiry: Date.now() + 30 * 24 * 60 * 60 * 1000,
             })
           );
-          window.dispatchEvent(new Event("storage")); // trigger CartContext reload
+          window.dispatchEvent(new Event('storage'));
         }
       }
     }
@@ -61,7 +67,7 @@ export default function CheckoutPage() {
     formState: { errors },
     trigger,
     setValue,
-    watch
+    watch,
   } = useForm({
     mode: 'onBlur',
     reValidateMode: 'onBlur',
@@ -77,99 +83,116 @@ export default function CheckoutPage() {
       pincode: '',
     },
   });
-  
-  // 🧠 Auto-save form data locally while typing
-useEffect(() => {
-  const subscription = watch((value, { name }) => {
-    // Only save if user has started typing
-    if (!hasUserEdited) return;
 
-    // Debounce: wait until user pauses typing for 800ms
-    const handler = setTimeout(() => {
-      const nonEmptyData = Object.fromEntries(
-        Object.entries(value).filter(([_, v]) => v && v.trim() !== "")
-      );
-
-      // Only update localStorage if something actually changed
-      const current = localStorage.getItem("checkoutUser");
-      const parsed = current ? JSON.parse(current) : {};
-      const isSame = JSON.stringify(parsed) === JSON.stringify(nonEmptyData);
-      if (!isSame && Object.keys(nonEmptyData).length > 0) {
-        localStorage.setItem("checkoutUser", JSON.stringify(nonEmptyData));
-        // ✅ Don’t trigger any reactivity that causes re-render
-      }
-    }, 800);
-
-    return () => clearTimeout(handler);
-  });
-
-  return () => subscription.unsubscribe();
-}, [watch, hasUserEdited]);
-
-
+  // ✅ Auto-save locally (debounced, doesn’t break focus)
+  useEffect(() => {
+    const subscription = watch((value) => {
+      if (!hasUserEdited) return;
+      clearTimeout(window._checkoutSaveTimer);
+      window._checkoutSaveTimer = setTimeout(() => {
+        const nonEmptyData = Object.fromEntries(
+          Object.entries(value).filter(([_, v]) => v && v.trim() !== '')
+        );
+        localStorage.setItem('checkoutUser', JSON.stringify(nonEmptyData));
+      }, 800);
+    });
+    return () => subscription.unsubscribe();
+  }, [watch, hasUserEdited]);
 
   const shippingCharges = { standard: 50, express: 120, pickup: 0 };
   const subtotal = cartItems.reduce((sum, i) => sum + i.price * i.quantity, 0);
   const total = subtotal + (shippingCharges[shipping] || 0);
 
   const indianStates = [
-    'Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chhattisgarh',
-    'Goa', 'Gujarat', 'Haryana', 'Himachal Pradesh', 'Jharkhand', 'Karnataka',
-    'Kerala', 'Madhya Pradesh', 'Maharashtra', 'Manipur', 'Meghalaya',
-    'Mizoram', 'Nagaland', 'Odisha', 'Punjab', 'Rajasthan', 'Sikkim',
-    'Tamil Nadu', 'Telangana', 'Tripura', 'Uttar Pradesh', 'Uttarakhand',
-    'West Bengal', 'Andaman and Nicobar Islands', 'Chandigarh',
-    'Dadra and Nagar Haveli and Daman and Diu', 'Delhi', 'Jammu and Kashmir',
-    'Ladakh', 'Lakshadweep', 'Puducherry'
+    'Andhra Pradesh',
+    'Arunachal Pradesh',
+    'Assam',
+    'Bihar',
+    'Chhattisgarh',
+    'Goa',
+    'Gujarat',
+    'Haryana',
+    'Himachal Pradesh',
+    'Jharkhand',
+    'Karnataka',
+    'Kerala',
+    'Madhya Pradesh',
+    'Maharashtra',
+    'Manipur',
+    'Meghalaya',
+    'Mizoram',
+    'Nagaland',
+    'Odisha',
+    'Punjab',
+    'Rajasthan',
+    'Sikkim',
+    'Tamil Nadu',
+    'Telangana',
+    'Tripura',
+    'Uttar Pradesh',
+    'Uttarakhand',
+    'West Bengal',
+    'Andaman and Nicobar Islands',
+    'Chandigarh',
+    'Dadra and Nagar Haveli and Daman and Diu',
+    'Delhi',
+    'Jammu and Kashmir',
+    'Ladakh',
+    'Lakshadweep',
+    'Puducherry',
   ];
 
-  // Prefill user data
+  // ✅ Fixed Prefill Logic (stops overwriting mid-typing)
   useEffect(() => {
+    let hasPrefilled = false;
+
     const prefillData = async () => {
-      // 1️⃣ First, check failedOrder (highest priority)
+      if (hasUserEdited || hasPrefilled) return; // stop if user already typed
+
+      // 1️⃣ Failed order
       const failedOrderData = loadFailedOrderData();
       if (failedOrderData && Object.keys(failedOrderData).length) {
-        console.log("Restoring from failed order data:", failedOrderData);
         Object.entries(failedOrderData).forEach(([key, value]) => {
-          if (value) setValue(key, value);
+          if (value) setValue(key, value, { shouldDirty: false });
         });
-        localStorage.removeItem("failedOrder");
+        localStorage.removeItem('failedOrder');
+        hasPrefilled = true;
         return;
       }
 
-      // 2️⃣ Next, try saved checkoutUser (manual typed data)
-      const savedCheckoutData = localStorage.getItem("checkoutUser");
+      // 2️⃣ Local saved data
+      const savedCheckoutData = localStorage.getItem('checkoutUser');
       if (savedCheckoutData) {
         const parsed = JSON.parse(savedCheckoutData);
         if (Object.keys(parsed).length > 0) {
-          console.log("Restoring from saved checkoutUser data:", parsed);
           Object.entries(parsed).forEach(([key, value]) => {
-            if (value) setValue(key, value);
+            if (value) setValue(key, value, { shouldDirty: false });
           });
+          hasPrefilled = true;
           return;
         }
       }
 
-      // 3️⃣ Finally, try DB (only if user logged in)
-      if (session?.user?.email && !hasUserEdited) {
+      // 3️⃣ DB user data
+      if (session?.user?.email) {
         try {
-          const res = await fetch("/api/user/me");
+          const res = await fetch('/api/user/me');
           const data = await res.json();
           if (data?.email) {
-            const [first, ...rest] = (data.name || "").split(" ");
-            setValue("email", data.email || "");
-            setValue("firstName", first || "");
-            setValue("lastName", rest.join(" ") || "");
-            setValue("phone", data.phone || "");
-            setValue("address1", data.address1 || "");
-            setValue("address2", data.address2 || "");
-            setValue("city", data.city || "");
-            setValue("state", data.state || "");
-            setValue("pincode", data.pincode || "");
-            console.log("Restored from DB /api/user/me");
+            const [first, ...rest] = (data.name || '').split(' ');
+            setValue('email', data.email || '', { shouldDirty: false });
+            setValue('firstName', first || '', { shouldDirty: false });
+            setValue('lastName', rest.join(' ') || '', { shouldDirty: false });
+            setValue('phone', data.phone || '', { shouldDirty: false });
+            setValue('address1', data.address1 || '', { shouldDirty: false });
+            setValue('address2', data.address2 || '', { shouldDirty: false });
+            setValue('city', data.city || '', { shouldDirty: false });
+            setValue('state', data.state || '', { shouldDirty: false });
+            setValue('pincode', data.pincode || '', { shouldDirty: false });
           }
-        } catch {
-          console.warn("Could not load user data");
+          hasPrefilled = true;
+        } catch (err) {
+          console.warn('Could not load user data:', err);
         }
       }
     };
@@ -177,54 +200,40 @@ useEffect(() => {
     prefillData();
   }, [session, setValue, hasUserEdited]);
 
-
-
-  // Close phone tooltip & state dropdown on outside click
+  // ✅ Close tooltip/dropdown on outside click
   useEffect(() => {
-  const handleClickOutside = (e) => {
-    // Only close if tooltip is open and click is *not* on the icon or tooltip
-    if (
-      tooltipRef.current &&
-      !tooltipRef.current.contains(e.target)
-    ) {
-      setShowPhoneTip(false);
-    }
+    const handleClickOutside = (e) => {
+      if (tooltipRef.current && !tooltipRef.current.contains(e.target))
+        setShowPhoneTip(false);
+      if (stateDropdownRef.current && !stateDropdownRef.current.contains(e.target))
+        setShowStateList(false);
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
-    if (
-      stateDropdownRef.current &&
-      !stateDropdownRef.current.contains(e.target)
-    ) {
-      setShowStateList(false);
-    }
-  };
-
-  document.addEventListener('mousedown', handleClickOutside);
-  return () => document.removeEventListener('mousedown', handleClickOutside);
-}, []);
-
-  // Scroll to first error
   const scrollToError = () => {
     const firstError = Object.keys(errors)[0];
     if (firstError && fieldRefs.current[firstError]) {
-      fieldRefs.current[firstError].scrollIntoView({
-        behavior: 'smooth',
-        block: 'center',
-      });
+      fieldRefs.current[firstError].scrollIntoView({ behavior: 'smooth', block: 'center' });
       fieldRefs.current[firstError].focus();
     }
   };
 
-  // Payment handler
+  // ✅ Payment handler
   const handlePayment = async (formData) => {
     setLoading(true);
     try {
       localStorage.setItem('checkoutUser', JSON.stringify(formData));
-      localStorage.setItem('cart', JSON.stringify({
-        items: cartItems,
-        expiry: Date.now() + 30 * 24 * 60 * 60 * 1000, // 30 days
-      })); // ✅ cart data
-      localStorage.setItem('shipping', shipping); // ✅ selected shipping
-      localStorage.setItem('shippingCharge', shippingCharges[shipping]); // ✅ cost
+      localStorage.setItem(
+        'cart',
+        JSON.stringify({
+          items: cartItems,
+          expiry: Date.now() + 30 * 24 * 60 * 60 * 1000,
+        })
+      );
+      localStorage.setItem('shipping', shipping);
+      localStorage.setItem('shippingCharge', shippingCharges[shipping]);
 
       if (session?.user?.email && saveAddress) {
         await fetch('/api/user/update', {
@@ -239,13 +248,13 @@ useEffect(() => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...formData,
-          cartItems: cartItems.map(item => ({
+          cartItems: cartItems.map((item) => ({
             name: item.name,
             size: item.size,
             price: item.price,
             quantity: item.quantity,
-            image: item.image, // ✅ ensure image is included
-            slug: item.slug,   // optional for linking later
+            image: item.image,
+            slug: item.slug,
           })),
           shipping,
           shippingCharge: shippingCharges[shipping],
@@ -255,7 +264,6 @@ useEffect(() => {
 
       const data = await res.json();
       if (data.payment_session_id) {
-         // ✅ Save full order data for success page
         localStorage.setItem(
           'orderPreview',
           JSON.stringify({
@@ -280,13 +288,13 @@ useEffect(() => {
     }
   };
 
-  // Floating Input
+  // ✅ Floating Input (stable version)
   const FloatingInput = ({ name, label, type = 'text', inputMode, maxLength, rules }) => (
     <Controller
       name={name}
       control={control}
       rules={rules}
-      render={({ field: { onChange, onBlur, value } }) => {
+      render={({ field: { onChange, value } }) => {
         const hasError = Boolean(errors[name]);
         const hasValue = value?.trim() !== '';
         const isPhone = name === 'phone';
@@ -295,7 +303,7 @@ useEffect(() => {
           let val = e.target.value;
           if (name === 'phone') val = val.replace(/[^0-9]/g, '').slice(0, 10);
           if (name === 'pincode') val = val.replace(/[^0-9]/g, '').slice(0, 6);
-          setHasUserEdited(true); // ✅ Mark as user started typing
+          setHasUserEdited(true);
           onChange(val);
         };
 
@@ -305,13 +313,10 @@ useEffect(() => {
               type={type}
               inputMode={inputMode}
               maxLength={maxLength}
-              value={value}
+              value={value ?? ''}
               onChange={handleChange}
-              onBlur={() => {
-                if (name !== "address1") trigger(name);
-              }}
-
               placeholder=" "
+              autoComplete="off"
               className={`peer w-full h-[44px] px-4 pr-10 text-[15px] text-[#1b180d] bg-[#fcfbf8] rounded-md border outline-none transition-all
                 ${
                   hasError
@@ -329,56 +334,33 @@ useEffect(() => {
             >
               {label}
             </label>
-
-          {/* ✅ Reliable phone tooltip */}
-          {isPhone && (
-            <div ref={tooltipRef} className="absolute right-3 top-[10px] z-[9999]">
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  console.log("Tooltip toggled!"); // ✅ Debug check
-                  setShowPhoneTip((prev) => !prev);
-                }}
-                className="text-[#9a864c] hover:text-[#1b180d] focus:outline-none"
-              >
-                <FiHelpCircle size={18} />
-              </button>
-
-              {showPhoneTip && (
-                <div
-                  className="absolute left-[-240px] top-[-6px] bg-white border border-[#e7e1cf] text-[#1b180d] text-xs rounded-md shadow-lg p-2 w-[220px] animate-fadeIn"
-                  style={{
-                    zIndex: 999999,
-                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+            {isPhone && (
+              <div ref={tooltipRef} className="absolute right-3 top-[10px] z-[9999]">
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setShowPhoneTip((prev) => !prev);
                   }}
+                  className="text-[#9a864c] hover:text-[#1b180d] focus:outline-none"
                 >
-                  In case we need to contact you about your order.
-                </div>
-              )}
-            </div>
-          )}
+                  <FiHelpCircle size={18} />
+                </button>
+                {showPhoneTip && (
+                  <div
+                    className="absolute left-[-240px] top-[-6px] bg-white border border-[#e7e1cf] text-[#1b180d] text-xs rounded-md shadow-lg p-2 w-[220px] animate-fadeIn"
+                    style={{
+                      zIndex: 999999,
+                      boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                    }}
+                  >
+                    In case we need to contact you about your order.
+                  </div>
+                )}
+              </div>
+            )}
             {hasError && <p className="mt-1 text-xs text-red-600">{errors[name].message}</p>}
-
-            <style jsx>{`
-              @keyframes fadeIn {
-                from {
-                  opacity: 0;
-                  transform: translateY(-4px);
-                }
-                to {
-                  opacity: 1;
-                  transform: translateY(0);
-                }
-              }
-              .animate-fadeIn {
-                animation: fadeIn 0.25s ease-in-out;
-              }
-              .tooltip-box {
-                box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
-              }
-            `}</style>
           </div>
         );
       }}
@@ -392,17 +374,15 @@ useEffect(() => {
       </div>
     );
 
-
   return (
     <>
       {showAuthModal && <AuthModal onClose={() => setShowAuthModal(false)} />}
-
       <main className="min-h-screen bg-[#fcfbf8] text-[#1b180d] font-[Manrope,sans-serif] px-4 sm:px-6 lg:px-10 py-10">
         <form
           onSubmit={handleSubmit(handlePayment, scrollToError)}
           className="grid grid-cols-1 lg:grid-cols-12 gap-x-12 gap-y-10 max-w-6xl mx-auto"
         >
-          {/* Left Form Section */}
+          {/* LEFT SIDE */}
           <section className="lg:col-span-7">
             <div className="flex items-center justify-between mb-8">
               <h2 className="text-[24px] font-bold">Shipping Information</h2>
@@ -419,7 +399,6 @@ useEffect(() => {
               )}
             </div>
 
-            {/* Form Fields */}
             <div className="space-y-4">
               <FloatingInput name="email" label="Email Address" type="email" rules={{
                 required: 'Email is required',
@@ -434,7 +413,8 @@ useEffect(() => {
               <FloatingInput name="address1" label="Street Address" rules={{ required: 'Street address is required' }} />
               <FloatingInput name="address2" label="Apartment, suite, etc. (Optional)" />
               <FloatingInput name="city" label="City" rules={{ required: 'City is required' }} />
-              {/* ✅ SEARCHABLE STATE DROPDOWN */}
+
+              {/* STATE DROPDOWN */}
               <Controller
                 name="state"
                 control={control}
@@ -443,7 +423,6 @@ useEffect(() => {
                   const filteredStates = indianStates.filter((s) =>
                     s.toLowerCase().includes(stateSearch.toLowerCase())
                   );
-
                   return (
                     <div ref={stateDropdownRef} className="relative mb-5 w-[95%] max-w-[640px]">
                       <div
@@ -491,9 +470,7 @@ useEffect(() => {
                             </div>
                           ))}
                           {filteredStates.length === 0 && (
-                            <p className="p-3 text-sm text-gray-400 text-center">
-                              No results found
-                            </p>
+                            <p className="p-3 text-sm text-gray-400 text-center">No results found</p>
                           )}
                         </div>
                       )}
@@ -502,12 +479,12 @@ useEffect(() => {
                   );
                 }}
               />
+
               <FloatingInput name="pincode" label="PIN Code" inputMode="numeric" rules={{
                 required: 'Pincode is required',
                 pattern: { value: /^\d{6}$/, message: 'Pincode must be 6 digits' },
               }} />
 
-              {/* Save Address Checkbox */}
               {session && (
                 <div className="flex items-center gap-2 mt-2">
                   <input
@@ -523,7 +500,6 @@ useEffect(() => {
                 </div>
               )}
 
-              {/* Country */}
               <div className="relative mb-4 w-[95%] max-w-[640px]">
                 <input
                   value="India"
@@ -535,7 +511,7 @@ useEffect(() => {
                 </span>
               </div>
 
-              {/* Shipping Method */}
+              {/* SHIPPING */}
               <div className="w-[95%] max-w-[640px]">
                 <h3 className="text-[17px] font-bold mb-3">Shipping Method</h3>
                 <div className="space-y-3">
@@ -546,8 +522,11 @@ useEffect(() => {
                   }).map(([key, [title, desc, price]]) => (
                     <label
                       key={key}
-                      className={`flex justify-between items-center p-3 border rounded-md cursor-pointer transition-all duration-200
-                        ${shipping === key ? 'border-[#b28c34] bg-[#fff9e5]' : 'border-[#e7e1cf] hover:bg-[#fffaf0] hover:border-[#b28c34]'}`}
+                      className={`flex justify-between items-center p-3 border rounded-md cursor-pointer transition-all duration-200 ${
+                        shipping === key
+                          ? 'border-[#b28c34] bg-[#fff9e5]'
+                          : 'border-[#e7e1cf] hover:bg-[#fffaf0] hover:border-[#b28c34]'
+                      }`}
                     >
                       <div className="flex items-center gap-3">
                         <input
@@ -567,7 +546,6 @@ useEffect(() => {
                 </div>
               </div>
 
-              {/* Return to Cart */}
               <div className="mt-5">
                 <Link href="/Cart" className="text-sm text-[#9a864c] underline hover:text-[#1b180d] transition">
                   ← Return to Cart
@@ -576,7 +554,7 @@ useEffect(() => {
             </div>
           </section>
 
-          {/* RIGHT ORDER SUMMARY */}
+          {/* RIGHT SUMMARY */}
           <aside className="lg:col-span-5 border border-[#e7e1cf] rounded-lg p-6 bg-white shadow-sm h-fit sticky top-10">
             <h3 className="text-[20px] font-bold mb-4">Order Summary</h3>
             <div className="space-y-4">
@@ -599,7 +577,9 @@ useEffect(() => {
                     <p className="text-[15px] font-medium text-[#1b180d] font-serif">{item.name}</p>
                     <p className="text-xs text-[#9a864c]">{item.size}</p>
                   </div>
-                  <p className="text-[15px] font-semibold text-[#1b180d]">₹{item.price * item.quantity}</p>
+                  <p className="text-[15px] font-semibold text-[#1b180d]">
+                    ₹{formatAmount(item.price * item.quantity)}
+                  </p>
                 </div>
               ))}
             </div>
@@ -608,17 +588,17 @@ useEffect(() => {
             <div className="text-[15px] space-y-1">
               <div className="flex justify-between">
                 <span className="text-[#9a864c]">Subtotal</span>
-                <span>₹{subtotal}</span>
+                <span>₹{formatAmount(subtotal)}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-[#9a864c]">Shipping</span>
-                <span>₹{shippingCharges[shipping]}</span>
+                <span>₹{formatAmount(shippingCharges[shipping])}</span>
               </div>
             </div>
             <div className="my-4 border-t border-[#e7e1cf]" />
             <div className="flex justify-between items-center text-[16px] font-bold">
               <span>Total</span>
-              <span>₹{total}</span>
+              <span>₹{formatAmount(total)}</span>
             </div>
             <button
               type="submit"

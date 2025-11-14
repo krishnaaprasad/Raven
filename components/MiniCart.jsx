@@ -9,6 +9,12 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { TrashIcon } from '@heroicons/react/24/outline'
 
+// ✅ Utility to ensure .00 formatting
+const formatAmount = (amount) => {
+  if (!amount || isNaN(amount)) return "0.00"
+  return parseFloat(amount).toFixed(2)
+}
+
 function MiniCartDrawer({ isOpen, onClose }) {
   const { cartItems, removeFromCart, updateQuantity, cartCount } = useCart()
   const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
@@ -126,7 +132,7 @@ function MiniCartDrawer({ isOpen, onClose }) {
                         </div>
                         <p className="text-xs text-[#665933]">Size: {item.size}</p>
                         <p className="font-semibold text-[#B28C34] mt-1">
-                          ₹{(item.price * item.quantity).toLocaleString()}
+                          ₹{formatAmount(item.price * item.quantity).toLocaleString()}
                         </p>
 
                         {/* Quantity Controls */}
@@ -162,7 +168,7 @@ function MiniCartDrawer({ isOpen, onClose }) {
                 <div className="flex justify-between items-center mb-3">
                   <span className="text-[#665933] font-medium">Subtotal</span>
                   <span className="font-bold text-lg text-[#B28C34]">
-                    ₹{subtotal.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                    ₹{formatAmount(subtotal).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                   </span>
                 </div>
 
