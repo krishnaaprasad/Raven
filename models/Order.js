@@ -47,6 +47,7 @@ const orderSchema = new mongoose.Schema(
     transactionDate: { type: Date },
     order_status: { type: String, default: "ACTIVE" },
     verified: { type: Boolean, default: false },
+    emailSent: { type: Boolean, default: false }
   },
   { timestamps: true }
 );

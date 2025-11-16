@@ -150,43 +150,55 @@ export async function GET(req) {
       verified: isPaid,
     });
 
- // -----------------------------------------
-// 5️⃣ SEND EMAIL (ONLY IF PAID) — NON BLOCKING
+// -----------------------------------------
+// 5️⃣ SEND EMAIL ONLY ONCE AFTER SUCCESSFUL PAYMENT
 // -----------------------------------------
 if (isPaid) {
   try {
-    const updatedOrder = await Order.findById(orderId);
+    // Always read fresh from database
+    let updatedOrder = await Order.findById(orderId);
 
-    const emailPayload = {
-      email: updatedOrder.email,
-      name: updatedOrder.userName,
-      orderId: updatedOrder.customOrderId || updatedOrder._id.toString(),
-      paymentMethod,
-      subtotal: updatedOrder.cartItems.reduce(
-        (acc, item) => acc + item.price * item.quantity,
-        0
-      ),
-      shippingCost: updatedOrder.shippingCharge,
-      totalAmount: updatedOrder.totalAmount,
-      items: updatedOrder.cartItems,
-      shipping: updatedOrder.deliveryType,
-      address: updatedOrder.addressDetails,
-    };
+    // 🚫 Already emailed? Do NOT send again
+    if (updatedOrder.emailSent === true) {
+      console.log("📨 Email already sent earlier — skipping.");
+    } else {
+      console.log("📨 Sending confirmation mail for FIRST time...");
 
-    // 🚀 NON-BLOCKING EMAIL TRIGGER (SUPER FAST)
-    fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/send-confirmation-mail`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(emailPayload),
-    })
-      .then(() => console.log("📨 Background email triggered"))
-      .catch((err) => console.error("📩 Background email error:", err));
+      const emailPayload = {
+        email: updatedOrder.email,
+        name: updatedOrder.userName,
+        orderId: updatedOrder.customOrderId || updatedOrder._id.toString(),
+        paymentMethod,
+        subtotal: updatedOrder.cartItems.reduce(
+          (acc, item) => acc + item.price * item.quantity,
+          0
+        ),
+        shippingCost: updatedOrder.shippingCharge,
+        totalAmount: updatedOrder.totalAmount,
+        items: updatedOrder.cartItems,
+        shipping: updatedOrder.deliveryType,
+        address: updatedOrder.addressDetails,
+      };
+
+      // Fire-and-forget email trigger
+      fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/send-confirmation-mail`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(emailPayload),
+      })
+        .then(() => console.log("📨 Email triggered successfully"))
+        .catch((err) => console.error("📩 Email trigger error:", err));
+
+      // 🚀 Mark as sent (critical!)
+      updatedOrder.emailSent = true;
+      await updatedOrder.save();
+      console.log("✅ emailSent flag saved in DB");
+    }
 
   } catch (mailErr) {
     console.error("❌ Email Sending Error:", mailErr);
   }
 }
-
 
     return NextResponse.json({
       success: isPaid,

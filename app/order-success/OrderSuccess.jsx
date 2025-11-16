@@ -345,11 +345,11 @@ export default function OrderSuccess() {
                     Need help with your payment? <br />
                     Reach out to our <span className="text-[#b28c34] font-medium">Support Team</span> at <br />
                     <a href="mailto:support@ravenfragrance.in" className="text-[#1b180d] hover:underline">
-                      support@ravenfragrance.in
+                      contact@ravenfragrance.in
                     </a>{' '}
                     or{' '}
                     <a
-                      href="https://wa.me/919999999999"
+                      href="https://wa.me/918424832375"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-[#1b180d] hover:underline"
