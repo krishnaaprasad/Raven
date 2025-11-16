@@ -2,12 +2,45 @@
 import { useSession, signOut } from "next-auth/react";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-
+import { useSearchParams } from "next/navigation";
+import OrdersList from "@/components/OrdersList";
 export default function AccountPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
 
-  const [activeTab, setActiveTab] = useState("Account Info");
+  const searchParams = useSearchParams();
+  const defaultTab = searchParams.get("tab") || "Account Info";
+
+  const [activeTab, setActiveTab] = useState(defaultTab);
+  
+  useEffect(() => {
+    if (status === "unauthenticated") router.push("/");
+    if (session?.user) {
+      const fetchUserInfo = async () => {
+        try {
+          const res = await fetch("/api/auth/get-user");
+          if (!res.ok) throw new Error("Failed to fetch user info");
+          const data = await res.json();
+          setFormData({
+            name: data.user.name,
+            email: data.user.email,
+            phone: data.user.phone,
+            address: data.user.address
+          });
+        } catch (err) {
+          console.error(err);
+        }
+      };
+      fetchUserInfo();
+    }
+  }, [session, status, router]);
+
+  // ✅ ADD THIS — This keeps tab synced with URL
+  useEffect(() => {
+    const tab = searchParams.get("tab");
+    if (tab) setActiveTab(tab);
+  }, [searchParams]);
+
   const [formData, setFormData] = useState({ name: "", email: "", phone: "", address: "" });
   const [passwords, setPasswords] = useState({ currentPassword: "", newPassword: "", confirmNewPassword: "" });
 
@@ -96,7 +129,13 @@ export default function AccountPage() {
             </form>
           )}
 
-          {activeTab==="Orders" && (<div className="text-[#1b180d] px-2 py-3"><h3 className="text-lg font-bold pb-2">Your Orders</h3><p>You have no orders yet.</p></div>)}
+          {activeTab === "Orders" && (
+            <div className="text-[#1b180d] px-2 py-3">
+              <h3 className="text-lg font-bold pb-2">Your Orders</h3>
+
+              <OrdersList />
+            </div>
+          )}
 
           {activeTab==="Change Password" && (
             <div className="max-w-lg px-2 py-3">

@@ -303,8 +303,8 @@ export default function OrderSuccess() {
                       </Link>
                       {session && (
                         <Link
-                          href="/my-account"
-                          className="flex-1 sm:flex-none border border-[#b28c34] text-[#1b180d] font-medium py-2 px-6 rounded-md hover:bg-[#fcf8ef] hover:border-[#9a864c] transition-all duration-200 text-sm sm:text-[13px] text-[13px] cursor-pointer"
+                          href="/my-account?tab=Orders"
+                          className="flex-1 sm:flex-none border border-[#b28c34] text-[#1b180d] font-medium py-2 px-6 rounded-md hover:bg-[#fcf8ef] hover:border-[#9a864c] transition-all duration-200 text-sm sm:text-[13px] cursor-pointer"
                         >
                           View Order History
                         </Link>
