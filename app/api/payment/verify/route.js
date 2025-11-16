@@ -177,7 +177,10 @@ if (isPaid) {
         totalAmount: updatedOrder.totalAmount,
         items: updatedOrder.cartItems,
         shipping: updatedOrder.deliveryType,
-        address: updatedOrder.addressDetails,
+        address: {
+          ...updatedOrder.addressDetails,
+          phone: updatedOrder.phone,   // ✅ Force phone number into address object
+        },
       };
 
       // Fire-and-forget email trigger
