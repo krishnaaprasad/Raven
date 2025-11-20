@@ -524,19 +524,19 @@ const toggleSection = (tab) =>
                   {product.baseNotes.join(", ")}
                 </li>
               )}
-              {product.ingredients?.length > 0 && (
+              {/* {product.ingredients?.length > 0 && (
                 <li>
                   <span className="font-semibold">Ingredients:</span>{" "}
                   {product.ingredients.join(", ")}
                 </li>
-              )}
+              )} */}
               <li>
-                <span className="font-semibold">Country of Origin:</span> India
+                <span className="font-semibold">Designed In:</span> United Arab Emirates (UAE)
               </li>
-              <li>
+              {/* <li>
                 <span className="font-semibold">Manufacturer:</span> Raven
                 Fragrance Co.
-              </li>
+              </li> */}
             </ul>
           )}
 
