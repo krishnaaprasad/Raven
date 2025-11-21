@@ -45,7 +45,7 @@ const orderSchema = new mongoose.Schema(
     payment_session_id: { type: String, default: null },
     referenceId: { type: String, default: null },
     transactionDate: { type: Date },
-    order_status: { type: String, default: "ACTIVE" },
+    order_status: { type: String, default: "Paid" },
     verified: { type: Boolean, default: false },
     emailSent: { type: Boolean, default: false }
   },
