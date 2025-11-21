@@ -6,12 +6,12 @@ const container = {
   hidden: { opacity: 0, y: 32 },
   show: {
     opacity: 1, y: 0,
-    transition: { staggerChildren: 0.18, duration: 0.85, ease: 'easeOut' }
+    transition: { staggerChildren: 0.18, duration: 0.65, ease: 'easeOut' }
   }
 }
 const fade = {
   hidden: { opacity: 0, y: 32 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.7, ease: 'easeOut' } }
+  show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: 'easeOut' } }
 }
 
 export default function WhyChooseRaven() {
