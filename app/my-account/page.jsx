@@ -5,6 +5,7 @@ import { useSession, signOut } from "next-auth/react";
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import OrdersList from "@/components/OrdersList";
+import OrderDetails from "@/components/OrderDetails";
 
 /* ============================================================
    WRAPPER COMPONENT (Suspense-safe)
@@ -230,14 +231,23 @@ function AccountPage() {
             </form>
           )}
 
-          {/* ================= ORDERS TAB ================= */}
+          {/* ================= ORDER DETAILS TAB (in-tab) ================= */}
           {activeTab === "Orders" && (
             <div className="text-[#1b180d] px-2 py-3">
-              <h3 className="text-lg font-bold pb-2">Your Orders</h3>
-              <OrdersList />
+              {!searchParams.get("orderId") && (
+                <>
+                  <h3 className="text-lg font-bold pb-2">Your Orders</h3>
+                  <OrdersList />
+                </>
+              )}
+
+              {searchParams.get("orderId") && (
+                <OrderDetails orderId={searchParams.get("orderId")} />
+              )}
+
             </div>
           )}
-
+          
           {/* ================= CHANGE PASSWORD TAB ================= */}
           {activeTab === "Change Password" && (
             <div className="max-w-lg px-2 py-3">

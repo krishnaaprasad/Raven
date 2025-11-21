@@ -2,13 +2,16 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 
 export default function OrdersList() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
   useEffect(() => {
+    
     const loadOrders = async () => {
       try {
         const res = await fetch("/api/order/user");
@@ -30,7 +33,7 @@ export default function OrdersList() {
       </div>
     );
   }
-
+  
   if (!orders.length) {
     return (
       <div className="py-6">
@@ -79,7 +82,7 @@ const statusBadge = (status) => {
         return (
           <div
             key={order._id}
-            className="bg-white rounded-xl border border-[#e7e1cf] shadow-sm flex flex-col sm:flex-row overflow-hidden"
+            className="bg-white rounded-xlh border border-[#e7e1cf] shadow-sm flex flex-col sm:flex-row overflow-hidden"
           >
             {/* DESKTOP IMAGE */}
             <div className="hidden sm:flex items-center justify-center w-40 p-4">
@@ -131,12 +134,12 @@ const statusBadge = (status) => {
 
             {/* RIGHT BUTTON (DESKTOP) + FULL WIDTH (MOBILE) */}
             <div className="bg-[#fff8e1] sm:w-48 flex items-center justify-center px-5 py-4">
-              <Link
-                href={`/my-account/order/${order._id}`}
+              <button
+                onClick={() => router.push(`/my-account?tab=Orders&orderId=${order._id}`)}
                 className="w-full text-center py-3 rounded-lg bg-[#eebd2b] text-[#1b180d] font-semibold text-sm hover:brightness-95 transition-all"
               >
                 View Details
-              </Link>
+              </button>
             </div>
           </div>
         );
