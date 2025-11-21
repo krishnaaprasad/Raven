@@ -18,8 +18,43 @@ const geistMono = Geist_Mono({
 
 export const metadata = {
   title: "Raven Fragrance",
-  description: "Luxury perfumes for the rebel woman",
+  
+  description:
+    "Buy premium long-lasting perfumes online. Luxury fragrances, signature scents, elegant packaging, and fast delivery across India. Shop exclusive perfumes at Raven Fragrance.",
+
+  icons: {
+    icon: "/favicon.ico",
+    shortcut: "/favicon.ico",
+    apple: "/apple-touch-icon.png",
+  },
+
+  openGraph: {
+    title: "Raven Fragrance — Premium Long-Lasting Perfumes",
+    description:
+      "Buy premium long-lasting perfumes online. Luxury fragrances, signature scents, elegant packaging, and fast delivery across India.",
+    url: "https://www.ravenfragrance.in",
+    siteName: "Raven Fragrance",
+    images: [
+      {
+        url: "/IMG_9377.PNG", // ⭐ use the image you uploaded (place in public/)
+        width: 1200,
+        height: 630,
+        alt: "Raven Fragrance Logo",
+      },
+    ],
+    locale: "en_IN",
+    type: "website",
+  },
+
+  twitter: {
+    card: "summary_large_image",
+    title: "Raven Fragrance — Premium Long-Lasting Perfumes",
+    description:
+      "Buy premium long-lasting perfumes online. Luxury fragrances, signature scents, elegant packaging, and fast delivery across India.",
+    images: ["/IMG_9377.PNG"],
+  },
 };
+
 
 export default function RootLayout({ children }) {
   return (
