@@ -1,8 +1,5 @@
 'use client';
 
-export const dynamic = 'force-dynamic';
-export const fetchCache = 'force-no-store';
-
 import { useEffect, useRef, useState } from 'react';
 import { useCart } from '../context/cartcontext';
 import { useRouter } from 'next/navigation';
@@ -15,8 +12,6 @@ import usePageMetadata from '../hooks/usePageMetadata';
 import { useSession } from 'next-auth/react';
 import AuthModal from '../auth/modal';
 import { loadFailedOrderData } from '../context/cartcontext';
-import { useSearchParams } from 'next/navigation';
-import { Suspense } from "react";
 
 
 const formatAmount = (amount) => {
@@ -24,16 +19,19 @@ const formatAmount = (amount) => {
   return parseFloat(amount).toFixed(2);
 };
 
-export default function CheckoutPage() {
+export default function CheckoutPage({ searchParams }) {
   usePageMetadata(
     'Checkout - Raven Fragrance',
     'Complete your Raven Fragrance order by adding your shipping details and securely paying through Cashfree.'
   );
+  
+  const [mode, setMode] = useState(null);
+   useEffect(() => {
+    setMode(searchParams?.mode || null);
+  }, [searchParams]);
 
   const { cartItems: cartContextItems } = useCart();
-  const params = useSearchParams();
-  const mode = params.get("mode");
-
+  
   // Store items checkout will use
   const [checkoutItems, setCheckoutItems] = useState([]);
 
@@ -400,7 +398,6 @@ export default function CheckoutPage() {
 
   return (
     <>
-      <Suspense fallback={<div className="min-h-screen bg-[#fcfbf8]"></div>}>
       {showAuthModal && <AuthModal onClose={() => setShowAuthModal(false)} />}
       <main className="min-h-screen bg-[#fcfbf8] text-[#1b180d] font-[Manrope,sans-serif] px-4 sm:px-6 lg:px-10 py-10">
         <form
@@ -636,7 +633,6 @@ export default function CheckoutPage() {
           </aside>
         </form>
       </main>
-      </Suspense>
     </>
   );
 }
