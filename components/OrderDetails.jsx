@@ -137,12 +137,15 @@ useEffect(() => {
             </div>
           </div>
 
-          <div className="w-full md:w-auto mt-4 md:mt-0">
-            <button className="w-full sm:w-auto flex cursor-pointer items-center justify-center rounded-lg h-10 px-4 bg-[#eebd2b] text-[#1b180d] gap-2 text-xs font-bold hover:opacity-90">
-              <Truck className="w-5 h-5" />
-              Track Order
-            </button>
-          </div>
+          {/* TRACK ORDER — hide for FAILED/CANCELLED */}
+          {order.order_status !== "FAILED" && order.order_status !== "CANCELLED" && (
+            <div className="w-full md:w-auto mt-4 md:mt-0">
+              <button className="w-full sm:w-auto flex cursor-pointer items-center justify-center rounded-lg h-10 px-4 bg-[#eebd2b] text-[#1b180d] gap-2 text-xs font-bold hover:opacity-90">
+                <Truck className="w-5 h-5" />
+                Track Order
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Items */}
@@ -176,14 +179,16 @@ useEffect(() => {
         <div className="flex flex-col sm:flex-row flex-wrap gap-4 pt-2 items-center justify-between">
 
           <div className="flex flex-wrap gap-4">
-            {/* PRINT */}
-            <button
-              onClick={() => window.open(`/api/invoice?orderId=${order._id}`, "_blank")}
-              className="flex cursor-pointer items-center justify-center rounded-lg h-10 px-4 border border-[#e7e1cf] text-[#1b180d] gap-2 text-xs font-bold"
-            >
-              <Printer className="w-4 h-4" />
-              Print Invoice
-            </button>
+            {/* PRINT BUTTON – only show if NOT cancelled */}
+              {order.order_status !== "FAILED" && order.order_status !== "CANCELLED" && (
+                <button
+                  onClick={() => window.open(`/api/invoice?orderId=${order._id}`, "_blank")}
+                  className="flex cursor-pointer items-center justify-center rounded-lg h-10 px-4 border border-[#e7e1cf] text-[#1b180d] gap-2 text-xs font-bold"
+                >
+                  <Printer className="w-4 h-4" />
+                  Print Invoice
+                </button>
+              )}
 
             {/* NEED HELP */}
             <button
@@ -206,7 +211,7 @@ useEffect(() => {
               onClick={() => router.push("/Cart")}
               className="w-full sm:w-auto flex cursor-pointer items-center justify-center rounded-lg h-10 px-4 bg-red-500 text-white gap-2 text-sm font-bold hover:bg-red-600 transition"
             >
-              Retry Payment
+              Retry Order
             </button>
           )}
 

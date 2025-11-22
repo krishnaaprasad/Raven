@@ -42,34 +42,48 @@ export default function OrdersList() {
     );
   }
 
-const statusBadge = (status) => {
-  const s = (status || "").toLowerCase();
+    const statusBadge = (status) => {
+      const s = (status || "").toUpperCase();
 
-  if (s.includes("delivered") || s.includes("paid")) {
-    return (
-      <span className="inline-flex flex-row items-center gap-2 px-3 py-1 rounded-full bg-green-100 text-green-700 text-sm font-medium whitespace-nowrap">
-        <span className="text-lg leading-none">✓</span>
-        <span>Delivered</span>
-      </span>
-    );
-  }
+      // ✅ PAID
+      if (s === "PAID") {
+        return (
+          <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-green-100 text-green-700 text-sm font-medium">
+            <span className="text-lg leading-none">✓</span>
+            <span>Paid</span>
+          </span>
+        );
+      }
 
-  if (s.includes("shipped")) {
-    return (
-      <span className="inline-flex flex-row items-center gap-2 px-3 py-1 rounded-full bg-orange-100 text-orange-700 text-sm font-medium whitespace-nowrap">
-        <span className="text-lg leading-none">🚚</span>
-        <span>Shipped</span>
-      </span>
-    );
-  }
+      // 🟠 SHIPPED
+      if (s === "SHIPPED") {
+        return (
+          <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-100 text-orange-700 text-sm font-medium">
+            <span className="text-lg leading-none">🚚</span>
+            <span>Shipped</span>
+          </span>
+        );
+      }
 
-  return (
-    <span className="inline-flex flex-row items-center gap-2 px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-sm font-medium whitespace-nowrap">
-      <span className="text-lg leading-none">⏳</span>
-      <span>Processing</span>
-    </span>
-  );
-};
+      // ❌ FAILED / CANCELLED
+      if (s === "FAILED" || s === "CANCELLED") {
+        return (
+          <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-100 text-red-700 text-sm font-medium">
+            <span className="text-lg leading-none">✕</span>
+            <span>Cancelled</span>
+          </span>
+        );
+      }
+
+      // ⏳ DEFAULT (Processing)
+      return (
+        <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-sm font-medium">
+          <span className="text-lg leading-none">⏳</span>
+          <span>Processing</span>
+        </span>
+      );
+    };
+
 
 
   return (
@@ -112,7 +126,7 @@ const statusBadge = (status) => {
                 <h3 className="text-lg font-bold text-[#1b180d] leading-tight">
                   Order #{orderId}
                 </h3>
-                <div>{statusBadge(order.status)}</div>
+                <div>{statusBadge(order.order_status || order.status)}</div>
               </div>
 
               <div className="grid grid-cols-2 gap-y-1 text-sm">

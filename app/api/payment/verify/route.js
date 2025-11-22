@@ -44,9 +44,20 @@ export async function GET(req) {
     });
 
     const cfData = cfResponse.data;
-    const isPaid =
-      cfData.order_status?.toUpperCase() === "PAID" ||
-      cfData.order_status?.toUpperCase() === "SUCCESS";
+
+    const statusRaw = cfData?.order_status?.toUpperCase() || "";
+    // SUCCESS STATUSES
+    const isPaid = statusRaw === "PAID" || statusRaw === "SUCCESS";
+
+    // FAILURE STATUSES
+    const isFailed =
+      statusRaw === "FAILED" ||
+      statusRaw === "CANCELLED" ||
+      statusRaw === "USER_DROPPED" ||
+      statusRaw === "TIMED_OUT" ||
+      statusRaw === "VOID" ||
+      (!isPaid && statusRaw !== "PAID");
+
 
     let paymentMethod = "Cashfree";
     let paymentDetails = {};
@@ -143,10 +154,11 @@ export async function GET(req) {
     // -----------------------------------------
     await Order.findByIdAndUpdate(orderId, {
       status: isPaid ? "PAID" : "FAILED",
+      order_status: isPaid ? "PAID" : "CANCELLED",  // 👈 Force UI to show CANCELLED
       referenceId,
       transactionDate: new Date(),
-      paymentMethod,
-      paymentDetails,
+      paymentMethod: isPaid ? paymentMethod : "Payment Failed",
+      paymentDetails: isPaid ? paymentDetails : {},
       verified: isPaid,
     });
 
