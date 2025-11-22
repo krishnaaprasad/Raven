@@ -42,3 +42,7 @@ next-env.d.ts
 
 # Environment variables file
 .env.local
+
+.tmp.driveupload/
+.driveupload/
+*.tmp

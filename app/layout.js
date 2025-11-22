@@ -2,6 +2,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import NavBar from "@/components/NavBar";
 import Footer from "@/components/Footer";
 import "./globals.css";
+import { SpeedInsights } from '@vercel/speed-insights/next';
 import Providers from "./Providers";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import HomeMarquee from "@/components/HomeMarquee"; // ✅ new client component
@@ -68,6 +69,7 @@ export default function RootLayout({ children }) {
           <HomeMarquee /> {/* ✅ Client component handles fade + homepage check */}
           <NavBar />
           {children}
+          <SpeedInsights />
           <Footer />
         </Providers>
         <WhatsAppButton />
