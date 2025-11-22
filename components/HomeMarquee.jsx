@@ -31,8 +31,8 @@ export default function HomeMarquee() {
             speed={60}
             className="px-8"
           >
-            20% OFF ON ALL PERFUMES TODAY! &nbsp;&nbsp;&nbsp;
-            FREE SHIPPING ON ORDERS OVER ₹999! &nbsp;&nbsp;&nbsp;
+            FLAT ₹ 200/- OFF ON ALL PERFUME TODAY! &nbsp;&nbsp;&nbsp;
+            FREE SHIPPING ON ORDERS OVER ₹1499! &nbsp;&nbsp;&nbsp;
           </Marquee>
         </motion.div>
       )}
