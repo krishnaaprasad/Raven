@@ -17,6 +17,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
+  metadataBase: new URL("https://www.ravenfragrance.in"),
+
   title: "Raven Fragrance",
   
   description:

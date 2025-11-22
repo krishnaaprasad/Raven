@@ -233,7 +233,7 @@ function AccountPage() {
 
           {/* ================= ORDER DETAILS TAB (in-tab) ================= */}
           {activeTab === "Orders" && (
-            <div className="text-[#1b180d] px-2 py-3">
+            <div className="text-[#1b180d] px-2 py-1">
               {!searchParams.get("orderId") && (
                 <>
                   <h3 className="text-lg font-bold pb-2">Your Orders</h3>
