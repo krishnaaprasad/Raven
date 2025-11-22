@@ -117,10 +117,24 @@ useEffect(() => {
               })}
             </p>
 
-            <p className="text-[#9a864c] text-sm">Order Status</p>
-            <span className="bg-[#eebd2b]/20 text-[#1b180d] text-xs font-bold px-2.5 py-1 rounded-full w-fit">
-              {order.order_status || "Processing"}
-            </span>
+           <p className="text-[#9a864c] text-sm">Order Status</p>
+            <div className="flex flex-col">
+              <span
+                className={`px-2.5 py-1 rounded-full text-xs font-bold w-fit ${
+                  order.order_status === "FAILED" || order.order_status === "CANCELLED"
+                    ? "bg-red-100 text-red-700"
+                    : "bg-[#eebd2b]/20 text-[#1b180d]"
+                }`}
+              >
+                {order.order_status || "Processing"}
+              </span>
+
+              {(order.order_status === "FAILED" || order.order_status === "CANCELLED") && (
+                <p className="text-[#b54747] text-xs font-medium mt-1">
+                  Order cancelled due to payment failure. Any deducted amount will be refunded in 5–7 business days.
+                </p>
+              )}
+            </div>
           </div>
 
           <div className="w-full md:w-auto mt-4 md:mt-0">
@@ -162,6 +176,7 @@ useEffect(() => {
         <div className="flex flex-col sm:flex-row flex-wrap gap-4 pt-2 items-center justify-between">
 
           <div className="flex flex-wrap gap-4">
+            {/* PRINT */}
             <button
               onClick={() => window.open(`/api/invoice?orderId=${order._id}`, "_blank")}
               className="flex cursor-pointer items-center justify-center rounded-lg h-10 px-4 border border-[#e7e1cf] text-[#1b180d] gap-2 text-xs font-bold"
@@ -170,15 +185,12 @@ useEffect(() => {
               Print Invoice
             </button>
 
+            {/* NEED HELP */}
             <button
               onClick={() => {
                 const orderNo = order.customOrderId || order._id;
-                const userName = order.userName || "";
-                const userEmail = order.email || "";
-
                 const subject = `Support Request for Order ${orderNo}`;
-                const body = `Hello Raven Support,%0D%0A%0D%0AI need help with my order.%0D%0A%0D%0AOrder ID: ${orderNo}%0D%0AName: ${userName}%0D%0AEmail: ${userEmail}%0D%0A%0D%0APlease assist me.%0D%0A%0D%0AThank you.`;
-
+                const body = `Hello Raven Support,%0D%0A%0D%0AI need help with my order.%0D%0AOrder ID: ${orderNo}%0D%0AThank you.`;
                 window.location.href = `mailto:contact@ravenfragrance.in?subject=${subject}&body=${body}`;
               }}
               className="flex cursor-pointer items-center justify-center rounded-lg h-10 px-4 border border-[#e7e1cf] text-[#1b180d] gap-2 text-xs font-bold hover:bg-[#fcf8ef]"
@@ -188,15 +200,29 @@ useEffect(() => {
             </button>
           </div>
 
-          <button
-            onClick={handleReorder}
-            className="w-full sm:w-auto flex cursor-pointer items-center justify-center rounded-lg h-10 px-4 bg-[#eebd2b] text-[#1b180d] gap-2 text-sm font-bold hover:opacity-90"
-          >
-            <RotateCcw className="w-5 h-5" />
-            Reorder
-          </button>
-        </div>
+          {/* 🔴 FAILED — RETRY PAYMENT */}
+          {(order.order_status === "FAILED" || order.order_status === "CANCELLED") && (
+            <button
+              onClick={() => router.push("/Cart")}
+              className="w-full sm:w-auto flex cursor-pointer items-center justify-center rounded-lg h-10 px-4 bg-red-500 text-white gap-2 text-sm font-bold hover:bg-red-600 transition"
+            >
+              Retry Payment
+            </button>
+          )}
 
+          {/* 🟡 SUCCESS — REORDER */}
+          {(order.order_status !== "FAILED" &&
+            order.order_status !== "CANCELLED") && (
+            <button
+              onClick={handleReorder}
+              className="w-full sm:w-auto flex cursor-pointer items-center justify-center rounded-lg h-10 px-4 bg-[#eebd2b] text-[#1b180d] gap-2 text-sm font-bold hover:opacity-90"
+            >
+              <RotateCcw className="w-5 h-5" />
+              Reorder
+            </button>
+          )}
+
+        </div>
       </div>
 
       {/* RIGHT SIDE */}

@@ -33,6 +33,7 @@ export async function GET(request, context) {
         paymentMethod: order.paymentMethod,
         referenceId: order.referenceId,
         status: order.status,
+        order_status: order.order_status,
         createdAt: order.createdAt,
       },
     });
