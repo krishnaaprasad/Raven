@@ -154,9 +154,26 @@ const toggleSection = (tab) =>
   };
 
   const handleBuyNow = () => {
-    handleAddToCart()
-    router.push('/checkout')
-  }
+  // Create Buy Now product object
+  const buyNowItem = {
+    id: product._id,
+    name: product.name,
+    slug: product.slug,
+    price: selected.price,
+    image: Array.isArray(product.images)
+      ? product.images[0]?.original || product.images[0]
+      : product.image || '',
+    size: selected.size,
+    quantity,
+  };
+
+  // Save separately (does NOT touch cart)
+  sessionStorage.setItem("buyNowItem", JSON.stringify(buyNowItem));
+
+  // Redirect with a mode flag
+  router.push('/checkout?mode=buynow');
+};
+
 
   return (
     <section className="min-h-screen bg-[#FCF8F3] py-8 px-4 sm:px-8">

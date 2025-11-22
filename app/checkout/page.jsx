@@ -12,6 +12,8 @@ import usePageMetadata from '../hooks/usePageMetadata';
 import { useSession } from 'next-auth/react';
 import AuthModal from '../auth/modal';
 import { loadFailedOrderData } from '../context/cartcontext';
+import { useSearchParams } from 'next/navigation';
+
 
 const formatAmount = (amount) => {
   if (!amount || isNaN(amount)) return "0.00";
@@ -24,27 +26,45 @@ export default function CheckoutPage() {
     'Complete your Raven Fragrance order by adding your shipping details and securely paying through Cashfree.'
   );
 
-  const { cartItems } = useCart();
+  const { cartItems: cartContextItems } = useCart();
+  const params = useSearchParams();
+  const mode = params.get("mode");
 
-  // ✅ Restore failed cart if cartItems is empty
+  // Store items checkout will use
+  const [checkoutItems, setCheckoutItems] = useState([]);
+
   useEffect(() => {
-    if (!cartItems?.length) {
-      const failed = localStorage.getItem('failedOrder');
-      if (failed) {
-        const parsed = JSON.parse(failed);
-        if (parsed?.cartItems?.length) {
-          localStorage.setItem(
-            'cart',
-            JSON.stringify({
-              items: parsed.cartItems,
-              expiry: Date.now() + 30 * 24 * 60 * 60 * 1000,
-            })
-          );
-          window.dispatchEvent(new Event('storage'));
-        }
+    if (mode === "buynow") {
+      const item = JSON.parse(sessionStorage.getItem("buyNowItem"));
+      if (item) {
+        setCheckoutItems([item]);  // ONLY this Buy Now item
+        return;
       }
     }
-  }, [cartItems]);
+
+    // Otherwise normal cart
+    setCheckoutItems(cartContextItems);
+  }, [mode, cartContextItems]);
+
+  // ✅ Restore failed cart if cartItems is empty
+    useEffect(() => {
+      if (!cartContextItems?.length) {
+        const failed = localStorage.getItem('failedOrder');
+        if (failed) {
+          const parsed = JSON.parse(failed);
+          if (parsed?.cartItems?.length) {
+            localStorage.setItem(
+              'cart',
+              JSON.stringify({
+                items: parsed.cartItems,
+                expiry: Date.now() + 30 * 24 * 60 * 60 * 1000,
+              })
+            );
+            window.dispatchEvent(new Event('storage'));
+          }
+        }
+      }
+    }, [cartContextItems]);
 
   const router = useRouter();
   const { data: session } = useSession();
@@ -100,7 +120,7 @@ export default function CheckoutPage() {
   }, [watch, hasUserEdited]);
 
   const shippingCharges = { standard: 50, express: 120, pickup: 0 };
-  const subtotal = cartItems.reduce((sum, i) => sum + i.price * i.quantity, 0);
+  const subtotal = checkoutItems.reduce((sum, i) => sum + i.price * i.quantity, 0);
   const total = subtotal + (shippingCharges[shipping] || 0);
 
   const indianStates = [
@@ -228,7 +248,7 @@ export default function CheckoutPage() {
       localStorage.setItem(
         'cart',
         JSON.stringify({
-          items: cartItems,
+           items: checkoutItems,
           expiry: Date.now() + 30 * 24 * 60 * 60 * 1000,
         })
       );
@@ -248,7 +268,7 @@ export default function CheckoutPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...formData,
-          cartItems: cartItems.map((item) => ({
+          cartItems: checkoutItems.map((item) => ({
             name: item.name,
             size: item.size,
             price: item.price,
@@ -267,7 +287,7 @@ export default function CheckoutPage() {
         localStorage.setItem(
           'orderPreview',
           JSON.stringify({
-            cartItems,
+            checkoutItems,
             shipping,
             shippingCharge: shippingCharges[shipping],
             totalAmount: total,
@@ -367,7 +387,7 @@ export default function CheckoutPage() {
     />
   );
 
-  if (!cartItems.length)
+  if (!checkoutItems.length)
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#fcfbf8]">
         <h1 className="text-lg font-semibold text-[#9a864c]">Your cart is empty</h1>
@@ -558,7 +578,7 @@ export default function CheckoutPage() {
           <aside className="lg:col-span-5 border border-[#e7e1cf] rounded-lg p-6 bg-white shadow-sm h-fit sticky top-10">
             <h3 className="text-[20px] font-bold mb-4">Order Summary</h3>
             <div className="space-y-4">
-              {cartItems.map((item, i) => (
+              {checkoutItems.map((item, i) => (
                 <div key={i} className="flex items-center gap-3">
                   <div className="relative">
                     <Image
@@ -576,6 +596,7 @@ export default function CheckoutPage() {
                   <div className="flex-1">
                     <p className="text-[15px] font-medium text-[#1b180d] font-serif">{item.name}</p>
                     <p className="text-xs text-[#9a864c]">{item.size}</p>
+                    <p className="text-xs text-[#9a864c]">Qty × {item.quantity}</p>
                   </div>
                   <p className="text-[15px] font-semibold text-[#1b180d]">
                     ₹{formatAmount(item.price * item.quantity)}
