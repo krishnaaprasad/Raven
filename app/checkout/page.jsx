@@ -1,7 +1,4 @@
 'use client';
-export const dynamic = 'force-dynamic';
-export const fetchCache = 'force-no-store';
-export const revalidate = 0;
 
 import { useEffect, useRef, useState } from 'react';
 import { useCart } from '../context/cartcontext';
@@ -16,6 +13,7 @@ import { useSession } from 'next-auth/react';
 import AuthModal from '../auth/modal';
 import { loadFailedOrderData } from '../context/cartcontext';
 import { useSearchParams } from 'next/navigation';
+import { Suspense } from "react";
 
 
 const formatAmount = (amount) => {
@@ -399,6 +397,7 @@ export default function CheckoutPage() {
 
   return (
     <>
+      <Suspense fallback={<div className="min-h-screen bg-[#fcfbf8]"></div>}>
       {showAuthModal && <AuthModal onClose={() => setShowAuthModal(false)} />}
       <main className="min-h-screen bg-[#fcfbf8] text-[#1b180d] font-[Manrope,sans-serif] px-4 sm:px-6 lg:px-10 py-10">
         <form
@@ -634,6 +633,7 @@ export default function CheckoutPage() {
           </aside>
         </form>
       </main>
+      </Suspense>
     </>
   );
 }
