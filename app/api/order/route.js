@@ -1,6 +1,6 @@
 // app/api/orders/route.js
 import { authOptions } from "../auth/[...nextauth]/route";
-import Order from "@/models/Order";
+import { Order } from "@/models/Order";
 import connectToDatabase from "@/lib/mongodb"; // ✅ default import
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";

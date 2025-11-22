@@ -1,5 +1,8 @@
 'use client';
 
+export const dynamic = 'force-dynamic';
+export const fetchCache = 'force-no-store';
+
 import { useEffect, useRef, useState } from 'react';
 import { useCart } from '../context/cartcontext';
 import { useRouter } from 'next/navigation';
