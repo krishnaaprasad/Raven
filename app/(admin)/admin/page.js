@@ -1,13 +1,73 @@
-export const metadata = {
-  title: "Admin Dashboard - Raven Fragrance",
-  description: "Admin dashboard",
-};
+// app/admin/page.jsx
+"use client";
 
-export default function AdminDashboard() {
+import { useEffect, useState } from "react";
+import KpiCards from "./dashboard/KpiCards";
+import RevenueChart from "./dashboard/RevenueChart";
+import MarqueeManager from "./dashboard/MarqueeManager";
+import RecentActivity from "./dashboard/RecentActivity";
+
+export default function AdminDashboardPage() {
+  const [stats, setStats] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch KPI stats dynamically
+  useEffect(() => {
+    let mounted = true;
+
+    async function loadStats() {
+      try {
+        const res = await fetch("/api/admin/dashboard-stats");
+        const data = await res.json();
+        if (mounted) setStats(data);
+      } catch (e) {
+        console.error("Stats Load Failed:", e);
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    }
+
+    loadStats();
+    return () => (mounted = false);
+  }, []);
+
+  if (loading || !stats) {
+    return (
+      <div className="min-h-[70vh] p-6">
+        <div className="animate-pulse space-y-4">
+          <div className="h-6 w-40 bg-[#eee] rounded" />
+          <div className="h-40 bg-[#f8f8f8] rounded" />
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div>
-      <h1 className="text-3xl font-serif mb-4">Dashboard</h1>
-      <p className="text-[#1b180d]">Welcome to the Raven Fragrance Admin Panel.</p>
+    <div className="min-h-[70vh]">
+      {/* Header */}
+      <div className="flex items-center justify-between border-b border-[#e7e1cf] pb-4 mb-6">
+        <div>
+          <h1 className="text-2xl font-serif text-[#1b180d]">Dashboard Overview</h1>
+          <p className="text-sm text-[#9a864c] mt-1">Overview of store performance</p>
+        </div>
+      </div>
+
+      {/* Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        {/* Left side (KPI + Chart) */}
+        <div className="lg:col-span-2 space-y-6">
+          <KpiCards stats={stats} />
+          <RevenueChart />
+        </div>
+
+        {/* Right side widgets */}
+        <aside className="space-y-6">
+          <MarqueeManager />
+          <RecentActivity />
+        </aside>
+
+      </div>
     </div>
   );
 }
