@@ -12,10 +12,14 @@ import {
   ChevronDownIcon,
 } from '@heroicons/react/24/outline';
 import { motion } from 'framer-motion';
+import { usePathname } from "next/navigation"; 
 
 const AuthModal = dynamic(() => import('../app/auth/modal'), { ssr: false });
 
 export default function NavBar() {
+  const pathname = usePathname(); // ⭐ ADDED
+  if (pathname.startsWith("/admin")) return null;
+  
   const [showMiniCart, setShowMiniCart] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [animateCart, setAnimateCart] = useState(false);
