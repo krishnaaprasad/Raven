@@ -1,9 +1,5 @@
 "use client";
 
-export const metadata = {
-  title: "Discounts - Raven Fragrance",
-  description: "Discounts and offers",
-};
 
 export default function DiscountsPage() {
   return (

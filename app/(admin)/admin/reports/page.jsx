@@ -1,10 +1,5 @@
 "use client";
 
-export const metadata = {
-  title: "Reports - Raven Fragrance",
-  description: "Analytics and revenue reports",
-};
-
 export default function ReportsPage() {
   return (
     <div>
