@@ -4,8 +4,12 @@ import { FaFacebookF, FaInstagram, FaWhatsapp } from "react-icons/fa6";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
+import { usePathname } from "next/navigation"; 
 
 export default function Footer() {
+  const pathname = usePathname(); // ⭐ ADDED
+  if (pathname.startsWith("/admin")) return null;
+  
   const [email, setEmail] = useState("");
 
   const handleSubscribe = (e) => {

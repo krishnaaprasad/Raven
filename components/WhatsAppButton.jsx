@@ -1,7 +1,11 @@
 "use client";
 import { FaWhatsapp } from "react-icons/fa";
+import { usePathname } from "next/navigation"; 
 
 export default function WhatsAppButton() {
+  const pathname = usePathname(); // ⭐ ADDED
+  if (pathname.startsWith("/admin")) return null;
+
   const phoneNumber = "918424832375"; // 🔹 Replace with your WhatsApp number
   const message = "Hi, I’m interested in Raven Fragrance!"; // Default message
   const whatsappURL = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
