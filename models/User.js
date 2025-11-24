@@ -7,8 +7,15 @@ const UserSchema = new mongoose.Schema({
   password: { type: String, required: false }, // ✅ Make optional for Google users
   phone: { type: String, default: "" },
   address: { type: String, default: "" },
-});
-
+  // 🔥 IMPORTANT
+    role: {
+      type: String,
+      enum: ["USER", "ADMIN"],
+      default: "USER",
+    },
+  },
+  { timestamps: true }
+);
 // ✅ Hash password before saving (only if it exists)
 UserSchema.pre("save", async function (next) {
   if (!this.isModified("password") || !this.password) return next();

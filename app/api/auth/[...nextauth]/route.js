@@ -1,19 +1,20 @@
 import NextAuth from "next-auth";
-import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
+import CredentialsProvider from "next-auth/providers/credentials";
 import connectToDatabase from "@/lib/mongodb";
 import User from "@/models/User";
 import bcrypt from "bcryptjs";
 
 export const authOptions = {
   providers: [
-    // ✅ Google Sign-In
+    // GOOGLE LOGIN
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      allowDangerousEmailAccountLinking: true,
     }),
 
-    // ✅ Manual Email/Password Login
+    // CREDENTIAL LOGIN
     CredentialsProvider({
       name: "Credentials",
       credentials: {
@@ -23,73 +24,88 @@ export const authOptions = {
       async authorize(credentials) {
         await connectToDatabase();
 
-        const user = await User.findOne({ email: credentials.email });
-        if (!user) throw new Error("No user found with this email");
+        const email = credentials.email.toLowerCase();
+        const user = await User.findOne({ email });
 
-        if (!user.password) {
-          throw new Error("Please sign in using Google.");
-        }
+        if (!user) throw new Error("User not found");
+        if (!user.password) throw new Error("Use Google login");
 
-        const isValid = await bcrypt.compare(credentials.password, user.password);
-        if (!isValid) throw new Error("Invalid password");
+        const valid = await bcrypt.compare(credentials.password, user.password);
+        if (!valid) throw new Error("Invalid password");
 
-        return { id: user._id.toString(), name: user.name, email: user.email };
+        return {
+          id: user._id.toString(),
+          email,
+          name: user.name,
+        };
       },
     }),
   ],
 
   callbacks: {
-    // ✅ Handle JWT
-    async jwt({ token, user, account, profile }) {
-      // When logging in with Google
-      if (account?.provider === "google") {
-        await connectToDatabase();
+    // 🔥 JWT CALLBACK (App Router correct signature)
+    async jwt({ token, user, account, trigger, profile }) {
+      await connectToDatabase();
 
-        // Check if user exists
-        let existingUser = await User.findOne({ email: profile.email });
+      /* -----------------------
+         🔵 GOOGLE SIGN-IN
+      ------------------------ */
+      if (trigger === "signIn" && account?.provider === "google") {
+        const email = profile.email.toLowerCase();
 
-        // If not, create one
+        let existingUser = await User.findOne({ email });
+
         if (!existingUser) {
           existingUser = await User.create({
-            name: profile.name || "Unnamed User",
-            email: profile.email,
-            password: null, // Google users don't have passwords
+            name: profile.name,
+            email,
+            password: null,
+            role: "USER",
           });
-          console.log("🟢 New Google user created:", existingUser.email);
         }
 
         token.id = existingUser._id.toString();
-        token.name = existingUser.name;
         token.email = existingUser.email;
+        token.name = existingUser.name;
+        token.role = existingUser.role;
+
+        console.log("GOOGLE LOGIN ROLE:", token.role);
+        return token;
       }
 
-      // When using credentials login
+      /* ------------------------------
+         🔵 CREDENTIALS LOGIN (normal)
+      ------------------------------ */
       if (user) {
-        token.id = user.id;
-        token.name = user.name;
-        token.email = user.email;
+        const dbUser = await User.findById(user.id);
+
+        token.id = dbUser._id.toString();
+        token.email = dbUser.email;
+        token.name = dbUser.name;
+        token.role = dbUser.role;
+
+        return token;
       }
 
       return token;
     },
 
-    // ✅ Handle Session
+    // SESSION CALLBACK
     async session({ session, token }) {
-      session.user = {
-        id: token.id,
-        name: token.name,
-        email: token.email,
-      };
+      session.user.id = token.id;
+      session.user.email = token.email;
+      session.user.name = token.name;
+      session.user.role = token.role;
       return session;
     },
   },
 
-  pages: {
-    signIn: "/login",
-  },
-
   session: {
     strategy: "jwt",
+  },
+
+  pages: {
+    signIn: "/login",
   },
 
   secret: process.env.NEXTAUTH_SECRET,
