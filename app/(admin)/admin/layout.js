@@ -7,20 +7,19 @@ import AdminHeader from "./components/AdminHeader";
 export default function AdminLayout({ children }) {
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  // Prevent body scroll when sidebar is open
   useEffect(() => {
     document.body.style.overflow = mobileOpen ? "hidden" : "auto";
   }, [mobileOpen]);
 
   return (
     <div className="min-h-screen flex bg-[#fcfbf8] text-[#1b180d] font-[Manrope,sans-serif]">
-      
+
       {/* Desktop Sidebar */}
-      <aside className="hidden md:block w-64 border-r border-[#e7e1cf] bg-[#fcfbf8]">
+      <aside className="hidden md:block w-64 shrink-0 border-r border-[#e7e1cf] bg-[#fcfbf8] h-screen sticky top-0">
         <AdminSidebar />
       </aside>
 
-      {/* Mobile Slide-in Sidebar */}
+      {/* Mobile Sidebar */}
       <aside
         className={`fixed inset-y-0 left-0 z-40 w-64 bg-[#fcfbf8] border-r border-[#e7e1cf] transform transition-transform duration-300 md:hidden ${
           mobileOpen ? "translate-x-0" : "-translate-x-full"
@@ -29,7 +28,6 @@ export default function AdminLayout({ children }) {
         <AdminSidebar closeMobile={() => setMobileOpen(false)} />
       </aside>
 
-      {/* Mobile Backdrop */}
       {mobileOpen && (
         <div
           className="fixed inset-0 bg-black/40 backdrop-blur-sm z-30 md:hidden"
@@ -37,15 +35,18 @@ export default function AdminLayout({ children }) {
         />
       )}
 
-      {/* Main Content */}
-      <main className="flex-1 flex flex-col">
+      {/* MAIN CONTENT FIXED */}
+      <main className="flex-1 min-h-screen flex flex-col overflow-hidden">
 
-        {/* Header (passes toggle button) */}
+        {/* Sticky Header */}
         <AdminHeader onToggleMobile={() => setMobileOpen(!mobileOpen)} />
 
-        {/* Page Content */}
-        <div className="p-6">{children}</div>
+        {/* Scrollable content */}
+        <div className="flex-1 overflow-y-auto overflow-x-hidden p-6">
+          {children}
+        </div>
       </main>
+
     </div>
   );
 }

@@ -10,4 +10,3 @@ export default function CheckoutPage() {
 
   return <CheckoutClient mode={mode} />;
 }
-

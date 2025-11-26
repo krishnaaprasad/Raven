@@ -43,20 +43,18 @@ export default function OrdersList() {
   }
 
     const statusBadge = (status) => {
-      const s = (status || "").toUpperCase();
+      const s = (status || "").toLowerCase();
 
-      // ✅ PAID
-      if (s === "PAID") {
+      if (s === "delivered") {
         return (
           <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-green-100 text-green-700 text-sm font-medium">
             <span className="text-lg leading-none">✓</span>
-            <span>Paid</span>
+            <span>Delivered</span>
           </span>
         );
       }
 
-      // 🟠 SHIPPED
-      if (s === "SHIPPED") {
+      if (s === "shipped") {
         return (
           <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-100 text-orange-700 text-sm font-medium">
             <span className="text-lg leading-none">🚚</span>
@@ -65,8 +63,34 @@ export default function OrdersList() {
         );
       }
 
-      // ❌ FAILED / CANCELLED
-      if (s === "FAILED" || s === "CANCELLED") {
+      if (s === "out for delivery") {
+        return (
+          <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-yellow-100 text-yellow-700 text-sm font-medium">
+            <span className="text-lg leading-none">📦</span>
+            <span>Out for Delivery</span>
+          </span>
+        );
+      }
+
+      if (s === "processing") {
+        return (
+          <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-sm font-medium">
+            <span className="text-lg leading-none">⏳</span>
+            <span>Processing</span>
+          </span>
+        );
+      }
+
+      if (s === "payment awaiting") {
+        return (
+          <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gray-200 text-gray-700 text-sm font-medium">
+            <span className="text-lg leading-none">💳</span>
+            <span>Payment Awaiting</span>
+          </span>
+        );
+      }
+
+      if (s === "cancelled" || s === "failed") {
         return (
           <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-100 text-red-700 text-sm font-medium">
             <span className="text-lg leading-none">✕</span>
@@ -75,7 +99,6 @@ export default function OrdersList() {
         );
       }
 
-      // ⏳ DEFAULT (Processing)
       return (
         <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-sm font-medium">
           <span className="text-lg leading-none">⏳</span>
@@ -83,7 +106,6 @@ export default function OrdersList() {
         </span>
       );
     };
-
 
 
   return (

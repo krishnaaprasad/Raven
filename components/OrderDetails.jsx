@@ -118,27 +118,34 @@ useEffect(() => {
             </p>
 
            <p className="text-[#9a864c] text-sm">Order Status</p>
-            <div className="flex flex-col">
-              <span
-                className={`px-2.5 py-1 rounded-full text-xs font-bold w-fit ${
-                  order.order_status === "FAILED" || order.order_status === "CANCELLED"
-                    ? "bg-red-100 text-red-700"
-                    : "bg-[#eebd2b]/20 text-[#1b180d]"
-                }`}
-              >
-                {order.order_status || "Processing"}
-              </span>
+              <div className="flex flex-col">
+                <span
+                  className={`px-2.5 py-1 rounded-full text-xs font-bold w-fit
+                    ${
+                      order.order_status === "Cancelled"
+                        ? "bg-red-100 text-red-700"
+                        : order.order_status === "Delivered"
+                        ? "bg-green-100 text-green-700"
+                        : order.order_status === "Shipped" ||
+                          order.order_status === "Out for Delivery"
+                        ? "bg-blue-100 text-blue-700"
+                        : "bg-[#fff4dd] text-[#b28c34]"
+                    }`}
+                >
+                  {order.order_status || "Processing"}
+                </span>
 
-              {(order.order_status === "FAILED" || order.order_status === "CANCELLED") && (
-                <p className="text-[#b54747] text-xs font-medium mt-1">
-                  Order cancelled due to payment failure. Any deducted amount will be refunded in 5–7 business days.
-                </p>
-              )}
-            </div>
+                {order.order_status === "Cancelled" && (
+                  <p className="text-[#b54747] text-xs font-medium mt-1">
+                    Order cancelled due to payment failure or manual update.
+                    If amount deducted, refund will reflect within 5–7 working days.
+                  </p>
+                )}
+              </div>
           </div>
 
           {/* TRACK ORDER — hide for FAILED/CANCELLED */}
-          {order.order_status !== "FAILED" && order.order_status !== "CANCELLED" && (
+          {order.order_status !== "Cancelled" && (
             <div className="w-full md:w-auto mt-4 md:mt-0">
               <button className="w-full sm:w-auto flex cursor-pointer items-center justify-center rounded-lg h-10 px-4 bg-[#eebd2b] text-[#1b180d] gap-2 text-xs font-bold hover:opacity-90">
                 <Truck className="w-5 h-5" />
@@ -180,7 +187,7 @@ useEffect(() => {
 
           <div className="flex flex-wrap gap-4">
             {/* PRINT BUTTON – only show if NOT cancelled */}
-              {order.order_status !== "FAILED" && order.order_status !== "CANCELLED" && (
+              {order.order_status !== "Cancelled" && (
                 <button
                   onClick={() => window.open(`/api/invoice?orderId=${order._id}`, "_blank")}
                   className="flex cursor-pointer items-center justify-center rounded-lg h-10 px-4 border border-[#e7e1cf] text-[#1b180d] gap-2 text-xs font-bold"
@@ -206,7 +213,7 @@ useEffect(() => {
           </div>
 
           {/* 🔴 FAILED — RETRY PAYMENT */}
-          {(order.order_status === "FAILED" || order.order_status === "CANCELLED") && (
+          {order.order_status === "Cancelled" && (
             <button
               onClick={() => router.push("/Cart")}
               className="w-full sm:w-auto flex cursor-pointer items-center justify-center rounded-lg h-10 px-4 bg-red-500 text-white gap-2 text-sm font-bold hover:bg-red-600 transition"
@@ -216,8 +223,7 @@ useEffect(() => {
           )}
 
           {/* 🟡 SUCCESS — REORDER */}
-          {(order.order_status !== "FAILED" &&
-            order.order_status !== "CANCELLED") && (
+          {order.order_status !== "Cancelled" && (
             <button
               onClick={handleReorder}
               className="w-full sm:w-auto flex cursor-pointer items-center justify-center rounded-lg h-10 px-4 bg-[#eebd2b] text-[#1b180d] gap-2 text-sm font-bold hover:opacity-90"

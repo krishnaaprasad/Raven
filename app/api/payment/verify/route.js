@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import connectToDatabase from "@/lib/mongodb";
 import { Order } from "@/models/Order";
 import axios from "axios";
-import { generateInvoice } from "@/lib/invoice/generateInvoice"; // ✅ correct path
+import { generateInvoice } from "@/lib/invoice/generateInvoice"; // ✅ still here
 
 export async function GET(req) {
   try {
@@ -45,19 +45,11 @@ export async function GET(req) {
 
     const cfData = cfResponse.data;
 
-    const statusRaw = cfData?.order_status?.toUpperCase() || "";
-    // SUCCESS STATUSES
-    const isPaid = statusRaw === "PAID" || statusRaw === "SUCCESS";
+    // This is the Cashfree "order_status" / payment state
+    const state = (cfData?.order_status || "").toUpperCase();
 
-    // FAILURE STATUSES
-    const isFailed =
-      statusRaw === "FAILED" ||
-      statusRaw === "CANCELLED" ||
-      statusRaw === "USER_DROPPED" ||
-      statusRaw === "TIMED_OUT" ||
-      statusRaw === "VOID" ||
-      (!isPaid && statusRaw !== "PAID");
-
+    // SUCCESS flag (used for email + old logic)
+    const isPaid = state === "PAID" || state === "SUCCESS";
 
     let paymentMethod = "Cashfree";
     let paymentDetails = {};
@@ -93,8 +85,7 @@ export async function GET(req) {
           // CARD
           else if (payment.payment_method?.card) {
             const card = payment.payment_method.card;
-            const last4 =
-              (card?.card_number || "").slice(-4) || "XXXX";
+            const last4 = (card?.card_number || "").slice(-4) || "XXXX";
             const network = card?.card_network?.toUpperCase() || "CARD";
             const bank = card?.card_bank_name || "Bank";
 
@@ -109,14 +100,16 @@ export async function GET(req) {
 
           // NETBANKING
           else if (payment.payment_method?.netbanking) {
-            const bankCode = payment.payment_method.netbanking?.bank_code || "BANK";
+            const bankCode =
+              payment.payment_method.netbanking?.bank_code || "BANK";
             paymentMethod = `NetBanking (${bankCode})`;
             paymentDetails = { type: "NETBANKING", bankCode };
           }
 
           // WALLET
           else if (payment.payment_method?.wallet) {
-            const provider = payment.payment_method.wallet?.provider || "Wallet";
+            const provider =
+              payment.payment_method.wallet?.provider || "Wallet";
             paymentMethod = `Wallet (${provider})`;
             paymentDetails = { type: "WALLET", provider };
           }
@@ -150,80 +143,132 @@ export async function GET(req) {
       "N/A";
 
     // -----------------------------------------
-    // 4️⃣ UPDATE ORDER IN DB
+    // 4️⃣ NEW MAPPING: payment_state → payment_status → order_status
     // -----------------------------------------
-    await Order.findByIdAndUpdate(orderId, {
-      status: isPaid ? "PAID" : "FAILED",
-      order_status: isPaid ? "PAID" : "CANCELLED",  // 👈 Force UI to show CANCELLED
-      referenceId,
-      transactionDate: new Date(),
-      paymentMethod: isPaid ? paymentMethod : "Payment Failed",
-      paymentDetails: isPaid ? paymentDetails : {},
-      verified: isPaid,
-    });
 
-// -----------------------------------------
-// 5️⃣ SEND EMAIL ONLY ONCE AFTER SUCCESSFUL PAYMENT
-// -----------------------------------------
-if (isPaid) {
-  try {
-    // Always read fresh from database
-    let updatedOrder = await Order.findById(orderId);
+    // Raw state from Cashfree (SUCCESS, PENDING, FAILED, CANCELLED, VOID, USER_DROPPED, etc.)
+    const payment_state = state || "NOT_ATTEMPTED";
 
-    // 🚫 Already emailed? Do NOT send again
-    if (updatedOrder.emailSent === true) {
-      console.log("📨 Email already sent earlier — skipping.");
+    let payment_status = "PENDING";
+
+    if (payment_state === "SUCCESS" || payment_state === "PAID") {
+      payment_status = "PAID";
+    } else if (
+      payment_state === "PENDING" ||
+      payment_state === "NOT_ATTEMPTED"
+    ) {
+      payment_status = "PENDING";
+    } else if (["CANCELLED", "VOID"].includes(payment_state)) {
+      payment_status = "CANCELLED";
     } else {
-      console.log("📨 Sending confirmation mail for FIRST time...");
-
-      const emailPayload = {
-        email: updatedOrder.email,
-        name: updatedOrder.userName,
-        orderId: updatedOrder.customOrderId || updatedOrder._id.toString(),
-        paymentMethod,
-        subtotal: updatedOrder.cartItems.reduce(
-          (acc, item) => acc + item.price * item.quantity,
-          0
-        ),
-        shippingCost: updatedOrder.shippingCharge,
-        totalAmount: updatedOrder.totalAmount,
-        items: updatedOrder.cartItems,
-        shipping: updatedOrder.deliveryType,
-        address: {
-          ...updatedOrder.addressDetails,
-          phone: updatedOrder.phone,   // ✅ Force phone number into address object
-        },
-      };
-
-      // Fire-and-forget email trigger
-      fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/send-confirmation-mail`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(emailPayload),
-      })
-        .then(() => console.log("📨 Email triggered successfully"))
-        .catch((err) => console.error("📩 Email trigger error:", err));
-
-      // 🚀 Mark as sent (critical!)
-      updatedOrder.emailSent = true;
-      await updatedOrder.save();
-      console.log("✅ emailSent flag saved in DB");
+      // FAILED, FLAGGED, USER_DROPPED, TIMED_OUT, etc.
+      payment_status = "FAILED";
     }
 
-  } catch (mailErr) {
-    console.error("❌ Email Sending Error:", mailErr);
-  }
-}
+    let order_status = "Payment Awaiting";
+    if (payment_status === "PAID") {
+      order_status = "Processing";
+    } else if (
+      payment_status === "FAILED" ||
+      payment_status === "CANCELLED"
+    ) {
+      order_status = "Cancelled";
+    }
+
+    // Legacy `status` field kept in sync for old code
+    const legacyStatusMap = {
+      PAID: "PAID",
+      PENDING: "PENDING",
+      FAILED: "FAILED",
+      CANCELLED: "CANCELLED",
+    };
+    const legacyStatus = legacyStatusMap[payment_status] || "PENDING";
+
+    // -----------------------------------------
+    // 5️⃣ UPDATE ORDER IN DB
+    // -----------------------------------------
+    await Order.findByIdAndUpdate(orderId, {
+      payment_state,
+      payment_status,
+      order_status,
+      status: legacyStatus,
+      referenceId,
+      transactionDate: new Date(),
+      paymentMethod: payment_status === "PAID" ? paymentMethod : "Payment Failed",
+      paymentDetails: payment_status === "PAID" ? paymentDetails : {},
+      verified: payment_status === "PAID",
+    });
+
+    // -----------------------------------------
+    // 6️⃣ SEND EMAIL ONLY ONCE AFTER SUCCESSFUL PAYMENT
+    // -----------------------------------------
+    if (payment_status === "PAID") {
+      try {
+        // Always read fresh from database
+        let updatedOrder = await Order.findById(orderId);
+
+        if (updatedOrder.emailSent === true) {
+          console.log("📨 Email already sent earlier — skipping.");
+        } else {
+          console.log("📨 Sending confirmation mail for FIRST time...");
+
+          const emailPayload = {
+            email: updatedOrder.email,
+            name: updatedOrder.userName,
+            orderId:
+              updatedOrder.customOrderId || updatedOrder._id.toString(),
+            paymentMethod,
+            subtotal: updatedOrder.cartItems.reduce(
+              (acc, item) => acc + item.price * item.quantity,
+              0
+            ),
+            shippingCost: updatedOrder.shippingCharge,
+            totalAmount: updatedOrder.totalAmount,
+            items: updatedOrder.cartItems,
+            shipping: updatedOrder.deliveryType,
+            address: {
+              ...updatedOrder.addressDetails,
+              phone: updatedOrder.phone,
+            },
+          };
+
+          // Fire-and-forget email trigger
+          fetch(
+            `${process.env.NEXT_PUBLIC_BASE_URL}/api/send-confirmation-mail`,
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(emailPayload),
+            }
+          )
+            .then(() => console.log("📨 Email triggered successfully"))
+            .catch((err) =>
+              console.error("📩 Email trigger error:", err)
+            );
+
+          // Mark as sent
+          updatedOrder.emailSent = true;
+          await updatedOrder.save();
+          console.log("✅ emailSent flag saved in DB");
+        }
+      } catch (mailErr) {
+        console.error("❌ Email Sending Error:", mailErr);
+      }
+    }
 
     return NextResponse.json({
-      success: isPaid,
-      paid: isPaid,
+      success: payment_status === "PAID",
+      paid: payment_status === "PAID",
       referenceId,
       paymentMethod,
       paymentDetails,
-      message: isPaid
-        ? "Payment verified successfully"
-        : "Payment verification failed",
+      payment_state,
+      payment_status,
+      order_status,
+      message:
+        payment_status === "PAID"
+          ? "Payment verified successfully"
+          : "Payment verification failed",
     });
   } catch (error) {
     console.error("❌ Verify API error:", error.response?.data || error.message);
