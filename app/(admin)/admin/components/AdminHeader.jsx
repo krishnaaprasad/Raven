@@ -24,7 +24,7 @@ export default function AdminHeader({ onToggleMobile }) {
       </div>
 
       {/* Right section */}
-      <div className="flex items-center gap-6">
+      <div className="flex items-center gap-2">
 
         {/* Search bar (hidden on mobile) */}
         <div className="hidden md:flex items-center border border-[#e7e1cf] rounded-lg px-3 h-10 bg-white w-72">

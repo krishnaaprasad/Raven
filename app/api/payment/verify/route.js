@@ -147,22 +147,22 @@ export async function GET(req) {
     // -----------------------------------------
 
     // Raw state from Cashfree (SUCCESS, PENDING, FAILED, CANCELLED, VOID, USER_DROPPED, etc.)
-    const payment_state = state || "NOT_ATTEMPTED";
+    // Normalized gateway state
+    let payment_state = state || "NOT_ATTEMPTED";
 
+    // Business display status
     let payment_status = "PENDING";
 
-    if (payment_state === "SUCCESS" || payment_state === "PAID") {
-      payment_status = "PAID";
-    } else if (
-      payment_state === "PENDING" ||
-      payment_state === "NOT_ATTEMPTED"
-    ) {
+    // Convert Cashfree PAID → SUCCESS for schema compatibility
+    if (payment_state === "PAID" || payment_state === "SUCCESS") {
+      payment_state = "SUCCESS";       // MongoDB friendly enum
+      payment_status = "PAID";         // Shown in UI
+    } else if (payment_state === "PENDING" || payment_state === "NOT_ATTEMPTED") {
       payment_status = "PENDING";
     } else if (["CANCELLED", "VOID"].includes(payment_state)) {
       payment_status = "CANCELLED";
     } else {
-      // FAILED, FLAGGED, USER_DROPPED, TIMED_OUT, etc.
-      payment_status = "FAILED";
+      payment_status = "FAILED";       // FAILED, USER_DROPPED, FLAGGED, etc.
     }
 
     let order_status = "Payment Awaiting";
@@ -202,7 +202,7 @@ export async function GET(req) {
     // -----------------------------------------
     // 6️⃣ SEND EMAIL ONLY ONCE AFTER SUCCESSFUL PAYMENT
     // -----------------------------------------
-    if (payment_status === "PAID") {
+    if (payment_status === "PAID" || payment_state === "SUCCESS") {
       try {
         // Always read fresh from database
         let updatedOrder = await Order.findById(orderId);

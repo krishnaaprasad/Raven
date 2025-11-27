@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import connectToDatabase from "@/lib/mongodb";
 import { Order, OrderCounter } from "@/models/Order";
 import axios from "axios";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
 // =============================
 // Helper → Generate Sequential Custom Order ID
@@ -47,6 +49,8 @@ export async function POST(req) {
   try {
     await connectToDatabase();
 
+    const session = await getServerSession(authOptions);
+
     const body = await req.json();
     const {
       firstName,
@@ -88,6 +92,7 @@ export async function POST(req) {
     const fullAddress = `${address1}, ${address2 || ""}, ${city}, ${state}, ${pincode}`;
     const newOrder = await Order.create({
       customOrderId,
+      userId: session?.user?.id || null,
       userName: `${firstName} ${lastName}`,
       email,
       phone,

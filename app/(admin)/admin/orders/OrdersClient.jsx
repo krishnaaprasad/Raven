@@ -452,9 +452,9 @@ const exportCSV = async () => {
 
       </div>
 
-      {/* TABLE */}
-      <div className="rounded-lg border border-[#e7e1cf] bg-white overflow-hidden">
-        <table className="w-full text-[15px]">
+      {/* TABLE WRAPPER for mobile horizontal scroll */}
+      <div className="rounded-lg border border-[#e7e1cf] bg-white overflow-x-auto w-full">
+        <table className="min-w-[900px] w-full text-[15px]">
           <thead className="bg-[#fcfbf8] text-[12px] uppercase text-[#1b180d]/60">
             <tr>
               <th className="px-6 py-4 text-left min-w-[120px]">Order ID</th>
@@ -476,7 +476,11 @@ const exportCSV = async () => {
               </tr>
             ) : orders.length ? (
               orders.map((o) => (
-                <OrderRow key={o._id} order={o} onStatusUpdated={() => fetchOrders(meta.page)} />
+                <OrderRow
+                  key={o._id}
+                  order={o}
+                  onStatusUpdated={() => fetchOrders(meta.page)}
+                />
               ))
             ) : (
               <tr>
@@ -535,3 +539,14 @@ const exportCSV = async () => {
     </div>
   );
 }
+
+<style jsx>{`
+  @media (max-width: 768px) {
+    table {
+      font-size: 12px;
+    }
+    th, td {
+      padding: 8px !important;
+    }
+  }
+`}</style>

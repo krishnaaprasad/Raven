@@ -86,6 +86,23 @@ export async function POST(req) {
       ],
     });
 
+    // 2️⃣ Send admin copy
+    await transporter.sendMail({
+      from: `Raven Fragrance <${process.env.EMAIL_USER}>`,
+      to: "contact@ravenfragrance.in",
+      subject: `New Order Received - ${orderId}`,
+      html: `
+        <h2>New Order Received</h2>
+        <p><strong>Customer:</strong> ${name}</p>
+        <p><strong>Order ID:</strong> ${orderId}</p>
+        <p><strong>Email:</strong> ${email}</p>
+        <p><strong>Phone:</strong> ${address.phone}</p>
+        <p><strong>Total Amount:</strong> ₹${totalAmount}</p>
+        <br/>
+        <p>Please login to Admin Panel for details.</p>
+      `,
+    });
+
     return Response.json({ success: true });
   } catch (error) {
     console.error("❌ MAIL ERROR:", error);

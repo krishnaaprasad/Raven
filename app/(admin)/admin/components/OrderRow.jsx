@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";  // ⭐ FIX FOR MODAL OUTSIDE TBODY
 import { ChevronDown } from "lucide-react";
 import { toast } from "react-hot-toast";
 
@@ -50,7 +51,6 @@ export default function OrderRow({ order, onStatusUpdated }) {
 
   const dropdownRef = useRef(null);
 
-  // Close dropdown outside click
   useEffect(() => {
     const handler = (e) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
@@ -61,13 +61,12 @@ export default function OrderRow({ order, onStatusUpdated }) {
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  // When user selects an option from dropdown
   const handleStatusSelect = (value) => {
     if (value === currentStatus) return setOpen(false);
 
     setSelectedStatus(value);
-    setConfirmModal(true); // show popup
-    setOpen(false); // close dropdown
+    setConfirmModal(true);
+    setOpen(false);
   };
 
   const handleUpdateStatus = async () => {
@@ -109,97 +108,87 @@ export default function OrderRow({ order, onStatusUpdated }) {
   const customerType = order.userId ? "Logged User" : "Guest User";
 
   return (
-  <>
-    <tr className="hover:bg-[#fff9eb] transition border-b border-[#e7e1cf] text-[13px]">
-      <td className="px-5 py-3 font-semibold text-[#1b180d] min-w-[130px]">
-        {displayId}
-      </td>
+    <>
+      <tr className="hover:bg-[#fff9eb] transition border-b border-[#e7e1cf] text-[13px]">
+        <td className="px-5 py-3 font-semibold text-[#1b180d] min-w-[130px]">
+          {displayId}
+        </td>
 
-      <td className="px-5 py-3 min-w-[170px]">
-        <div className="flex flex-col leading-tight">
-          <span className="font-semibold text-[14px] text-[#1b180d]">
-            {order.userName}
-          </span>
-          <span className="text-[11px] text-[#8b8b8b]">{customerType}</span>
-        </div>
-      </td>
+        <td className="px-5 py-3 min-w-[170px]">
+          <div className="flex flex-col leading-tight">
+            <span className="font-semibold text-[14px] text-[#1b180d]">{order.userName}</span>
+            <span className="text-[11px] text-[#8b8b8b]">{customerType}</span>
+          </div>
+        </td>
 
-      <td className="px-5 py-3 whitespace-nowrap min-w-[150px]">{createdAt}</td>
+        <td className="px-5 py-3 whitespace-nowrap min-w-[150px]">{createdAt}</td>
 
-      <td className="px-5 py-3 font-semibold">₹{amount}</td>
+        <td className="px-5 py-3 font-semibold">₹{amount}</td>
 
-      <td className="px-5 py-3">
-        <PaymentBadge status={order.payment_status || order.status} />
-      </td>
+        <td className="px-5 py-3">
+          <PaymentBadge status={order.payment_status || order.status} />
+        </td>
 
-      {/* STATUS DROPDOWN */}
-      <td className="px-5 py-3 min-w-[120px] relative" ref={dropdownRef}>
-        <button
-          onClick={() => setOpen((v) => !v)}
-          className="flex items-center justify-between w-[140px] px-3 py-1.5 text-[12px] border border-[#b28c34] text-[#1b180d] rounded-lg hover:bg-[#fff4dd]"
-        >
-          <span
-            className={`px-2 py-[2px] rounded-full font-medium ${ORDER_COLORS[currentStatus]}`}
+        {/* DROPDOWN */}
+        <td className="px-5 py-3 min-w-[120px] relative " ref={dropdownRef} >
+          <button
+            onClick={() => setOpen((v) => !v)}
+            className="flex items-center justify-between w-[140px] px-3 py-1.5 text-[12px] border border-[#b28c34] text-[#1b180d] rounded-lg hover:bg-[#fff4dd] cursor-pointer"
           >
-            {currentStatus}
-          </span>
-          <ChevronDown size={14} className="text-[#b28c34]" />
-        </button>
+            <span className={`px-2 py-[2px] rounded-full font-medium ${ORDER_COLORS[currentStatus]}`}>{currentStatus}</span>
+            <ChevronDown size={14} className="text-[#b28c34]" />
+          </button>
 
-        {open && (
-          <div className="absolute mt-2 w-[160px] bg-white border border-[#e7e1cf] rounded-lg shadow-lg z-40">
-            {allowed.map((s) => (
-              <div
-                key={s}
-                className="px-3 py-2 text-[12px] cursor-pointer hover:bg-[#fff4dd]"
-                onClick={() => handleStatusSelect(s)}
-              >
-                {s}
+          {open && (
+            <div
+              className={`absolute w-[160px] bg-white border border-[#e7e1cf] rounded-lg shadow-lg z-40 cursor-pointer
+                ${dropdownRef.current?.getBoundingClientRect().bottom + 180 > window.innerHeight
+                  ? "bottom-full mb-2"
+                  : "mt-2"
+                }
+              `}
+            >
+              {allowed.map((s) => (
+                <div
+                  key={s}
+                  className="px-3 py-2 text-[12px] cursor-pointer hover:bg-[#fff4dd]"
+                  onClick={() => handleStatusSelect(s)}
+                >
+                  {s}
+                </div>
+              ))}
+            </div>
+          )}
+        </td>
+
+        <td className="px-5 py-3 text-left min-w-[110px]">
+          <a href={`/admin/orders/${order._id}`} className="text-[#b28c34] text-[13px] font-medium hover:underline">
+            View Details
+          </a>
+        </td>
+      </tr>
+
+      {/* PORTAL — FIXES HYDRATION ERROR */}
+      {confirmModal &&
+        createPortal(
+          <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
+            <div className="bg-white p-6 rounded-xl w-[350px] shadow-xl text-center">
+              <h3 className="text-lg font-semibold text-[#1b180d] mb-2">Confirm Update</h3>
+              <p className="text-sm text-[#6b6654] mb-4">
+                Do you want to update status to <b>{selectedStatus}</b>?
+              </p>
+              <div className="flex justify-center gap-4">
+                <button className="px-4 py-2 rounded-lg bg-[#b28c34] text-white cursor-pointer" onClick={handleUpdateStatus}>
+                  Yes, Update
+                </button>
+                <button className="px-4 py-2 rounded-lg border border-[#e7e1cf] cursor-pointer" onClick={() => setConfirmModal(false)}>
+                  Cancel
+                </button>
               </div>
-            ))}
-          </div>
+            </div>
+          </div>,
+          document.body
         )}
-      </td>
-
-      <td className="px-5 py-3 text-left min-w-[110px]">
-        <a
-          href={`/admin/orders/${order._id}`}
-          className="text-[#b28c34] text-[13px] font-medium hover:underline"
-        >
-          View Details
-        </a>
-      </td>
-    </tr>
-
-    {/* MODAL OUTSIDE tbody (fixes hydration issue) */}
-    {confirmModal && (
-      <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
-        <div className="bg-white p-6 rounded-xl w-[350px] shadow-xl text-center">
-          <h3 className="text-lg font-semibold text-[#1b180d] mb-2">
-            Confirm Update
-          </h3>
-          <p className="text-sm text-[#6b6654] mb-4">
-            Do you want to update status to <b>{selectedStatus}</b>?
-          </p>
-
-          <div className="flex justify-center gap-4">
-            <button
-              className="px-4 py-2 rounded-lg bg-[#b28c34] text-white"
-              onClick={handleUpdateStatus}
-            >
-              Yes, Update
-            </button>
-
-            <button
-              className="px-4 py-2 rounded-lg border border-[#e7e1cf]"
-              onClick={() => setConfirmModal(false)}
-            >
-              Cancel
-            </button>
-          </div>
-        </div>
-      </div>
-    )}
-  </>
-);
+    </>
+  );
 }
