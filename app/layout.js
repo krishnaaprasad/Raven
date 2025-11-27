@@ -3,6 +3,7 @@ import NavBar from "@/components/NavBar";
 import Footer from "@/components/Footer";
 import "./globals.css";
 import { SpeedInsights } from '@vercel/speed-insights/next';
+import { Analytics } from "@vercel/analytics/next"
 import Providers from "./Providers";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import HomeMarquee from "@/components/HomeMarquee"; // ✅ new client component
@@ -70,6 +71,7 @@ export default function RootLayout({ children }) {
           <NavBar />
           {children}
           <SpeedInsights />
+          <Analytics/>
           <Footer />
         </Providers>
         <WhatsAppButton />
