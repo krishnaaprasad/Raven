@@ -25,19 +25,19 @@ export default function ProductRow({ product, refresh }) {
     >
       <td className="p-4">
         <div
-          className="size-14 rounded-lg bg-cover bg-center"
+          className="size-17 rounded-lg bg-cover bg-center"
           style={{ backgroundImage: `url(${product.images?.[0]?.thumbnail || product.images?.[0]?.original})` }}
         ></div>
       </td>
 
-      <td className="p-4 font-medium">{product.name}</td>
-      <td className="p-4 text-[#6d6d6d]">{product.slug}</td>
-      <td className="p-4 text-[#6d6d6d]">{product.brand}</td>
-      <td className="p-4 font-semibold">₹{Number(basePrice).toLocaleString("en-IN")}</td>
+      <td className="p-4 font-extralight">{product.name}</td>
+      <td className="p-4 text-[#6d6d6d] text-base">{product.slug}</td>
+      <td className="p-4 text-[#6d6d6d] text-base">{product.brand}</td>
+      <td className="p-4 font-semibold text-base">₹{Number(basePrice).toLocaleString("en-IN")}</td>
 
       <td className="p-4">
         <span
-          className={`px-2 py-1 text-[12px] rounded-full font-medium ${
+          className={`px-2 py-1 text-[14px] rounded-full font-semibold ${
             totalStock > 50
               ? "bg-green-100 text-green-800"
               : totalStock > 0
