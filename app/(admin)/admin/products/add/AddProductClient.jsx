@@ -41,10 +41,6 @@ import { CSS } from "@dnd-kit/utilities";
 
 const CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
 const UPLOAD_PRESET = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
-  
-
-
-
 
 // ---------- Helpers ----------
 function slugify(value) {
@@ -424,8 +420,6 @@ const DescriptionEditor = useMemo(() => {
     />
   );
 }, []); // only mount once
-
-
 
   // ---------- Render ----------
   return (

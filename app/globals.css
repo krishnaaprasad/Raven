@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+@import "froala-editor/css/froala_editor.pkgd.min.css";
+@import "froala-editor/css/froala_style.min.css";
+
+
 :root {
   --background: #ffffff;
   --foreground: #171717;
