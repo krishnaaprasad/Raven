@@ -22,6 +22,7 @@
     "bcryptjs": "^3.0.2",
     "cashfree-dropjs": "^1.1.5",
     "cashfree-sdk": "^0.1.1",
+    "cloudinary": "^2.8.0",
     "framer-motion": "^12.23.9",
     "froala-editor": "^4.7.1",
     "jquery": "^3.7.1",
