@@ -186,11 +186,11 @@ export default function OrderDetailsClient({ orderFromServer }) {
                 Products Ordered
               </h3>
               <div className="flex items-center gap-2">
-                <span className="text-xs lg:text-sm text-[#6b6654]">
+                <span className="text-sm lg:text-sm text-[#6b6654]">
                   Payment Status:
                 </span>
                 <span
-                  className={`px-2.5 py-1 text-xs font-semibold rounded-full ${paymentBadgeClass}`}
+                  className={`px-2.5 py-1 text-sm font-semibold rounded-full ${paymentBadgeClass}`}
                 >
                   {paymentStatus}
                 </span>
@@ -214,9 +214,9 @@ export default function OrderDetailsClient({ orderFromServer }) {
                       key={idx}
                       className="border-b last:border-b-0 border-[#f0e9d9]"
                     >
-                      <td className="px-3 lg:px-4 py-4">
+                      <td className="px-4 lg:px-4 py-4">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-lg overflow-hidden border border-[#f0e9d9] bg-[#f9f4e8]">
+                          <div className="w-14 h-14 lg:w-14 lg:h-14 rounded-lg overflow-hidden border border-[#f0e9d9] bg-[#f9f4e8]">
                             {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img
                               src={item.image}
@@ -225,24 +225,24 @@ export default function OrderDetailsClient({ orderFromServer }) {
                             />
                           </div>
                           <div>
-                            <p className="text-xs lg:text-sm font-medium text-[#1b180d]">
+                            <p className="text-sm lg:text-sm font-medium text-[#1b180d]">
                               {item.name}
                             </p>
                             {item.size && (
-                              <p className="text-[11px] text-[#9a864c]">
+                              <p className="text-[12px] text-[#9a864c]">
                                 Size: {item.size}
                               </p>
                             )}
                           </div>
                         </div>
                       </td>
-                      <td className="px-3 lg:px-4 py-4 text-center">
+                      <td className="px-4 lg:px-4 py-4 text-center">
                         {item.quantity}
                       </td>
-                      <td className="px-3 lg:px-4 py-4 text-right">
+                      <td className="px-4 lg:px-4 py-4 text-right">
                         ₹{formatAmount(item.price)}
                       </td>
-                      <td className="px-3 lg:px-4 py-4 text-right font-semibold">
+                      <td className="px-4 lg:px-4 py-4 text-right font-semibold">
                         ₹{formatAmount(item.price * item.quantity)}
                       </td>
                     </tr>
@@ -253,7 +253,7 @@ export default function OrderDetailsClient({ orderFromServer }) {
 
             {/* Summary */}
             <div className="flex justify-end pt-5">
-              <div className="w-full max-w-sm space-y-2 text-xs lg:text-sm">
+              <div className="w-full max-w-sm space-y-2 text-sm lg:text-sm">
                 <div className="flex justify-between">
                   <span className="text-[#6b6654]">Subtotal</span>
                   <span className="text-[#1b180d]">
@@ -288,7 +288,7 @@ export default function OrderDetailsClient({ orderFromServer }) {
               <h3 className="text-lg font-bold text-[#1b180d] mb-4">
                 Customer Details
               </h3>
-              <div className="space-y-4 text-sm">
+              <div className="space-y-4 text-base">
                 <div className="flex items-center justify-between">
                   <p className="font-semibold text-[#1b180d]">
                     {order.userName}
@@ -298,7 +298,7 @@ export default function OrderDetailsClient({ orderFromServer }) {
                     {customerType}
                   </span>
                 </div>
-                <div className="text-xs lg:text-sm text-[#6b6654] space-y-1">
+                <div className="text-sm lg:text-sm text-[#6b6654] space-y-1">
                   <p>{order.email}</p>
                   <p>{order.phone}</p>
                 </div>
@@ -306,7 +306,7 @@ export default function OrderDetailsClient({ orderFromServer }) {
                 <button
                   onClick={handleSendMailAgain}
                   disabled={sendingMail}
-                  className="w-full inline-flex items-center justify-center gap-2 px-4 py-2 text-xs lg:text-sm font-semibold border border-[#e7e1cf] rounded-lg text-[#1b180d] hover:bg-[#f5f1e6] disabled:opacity-60 cursor-pointer"
+                  className="w-full inline-flex items-center justify-center gap-2 px-4 py-2 text-sm lg:text-sm font-semibold border border-[#e7e1cf] rounded-lg text-[#1b180d] hover:bg-[#f5f1e6] disabled:opacity-60 cursor-pointer"
                 >
                   <Mail className="w-4 h-4" />
                   {sendingMail ? "Sending..." : "Send Confirmation Mail"}
@@ -319,7 +319,7 @@ export default function OrderDetailsClient({ orderFromServer }) {
               <h3 className="text-lg font-bold text-[#1b180d] mb-4">
                 Billing &amp; Shipping
               </h3>
-              <div className="space-y-4 text-xs lg:text-sm text-[#6b6654]">
+              <div className="space-y-4 text-sm lg:text-sm text-[#6b6654]">
                 <div>
                   <p className="font-semibold text-[#1b180d] mb-1">
                     Shipping Address
@@ -358,11 +358,11 @@ export default function OrderDetailsClient({ orderFromServer }) {
 
             <div className="space-y-4 text-sm">
               <div className="flex items-center gap-2">
-                <span className="text-xs lg:text-sm font-medium text-[#6b6654]">
+                <span className="text-sm lg:text-sm font-medium text-[#6b6654]">
                   Current Status:
                 </span>
                 <span
-                  className={`px-2.5 py-1 text-xs font-semibold rounded-full ${currentOrderColor}`}
+                  className={`px-2.5 py-1 text-sm font-semibold rounded-full ${currentOrderColor}`}
                 >
                   {order.order_status}
                 </span>
@@ -372,7 +372,7 @@ export default function OrderDetailsClient({ orderFromServer }) {
                 <select
                   value={selectedStatus}
                   onChange={(e) => setSelectedStatus(e.target.value)}
-                  className="block w-full rounded-lg border border-[#e7e1cf] bg-[#fcfbf8] text-xs lg:text-sm px-3 py-2 pr-8 focus:outline-none focus:ring-1 focus:ring-[#b28c34] cursor-pointer"
+                  className="block w-full rounded-lg border border-[#e7e1cf] bg-[#fcfbf8] text-sm lg:text-sm px-3 py-2 pr-8 focus:outline-none focus:ring-1 focus:ring-[#b28c34] cursor-pointer"
                 >
                   {ORDER_FLOW.map((s) => (
                     <option key={s} value={s}>
@@ -385,7 +385,7 @@ export default function OrderDetailsClient({ orderFromServer }) {
               <button
                 onClick={handleUpdateStatus}
                 disabled={updating}
-                className="w-full mt-1 inline-flex items-center justify-center px-4 py-2.5 text-xs lg:text-sm font-semibold rounded-lg bg-[#b28c34] text-white hover:bg-[#9a864c] disabled:opacity-60 cursor-pointer"
+                className="w-full mt-1 inline-flex items-center justify-center px-4 py-2.5 text-sm lg:text-sm font-semibold rounded-lg bg-[#b28c34] text-white hover:bg-[#9a864c] disabled:opacity-60 cursor-pointer"
               >
                 {updating ? "Updating..." : "Update Status"}
               </button>
@@ -399,7 +399,7 @@ export default function OrderDetailsClient({ orderFromServer }) {
             </h3>
 
             {history.length === 0 ? (
-              <p className="text-xs lg:text-sm text-[#6b6654]">
+              <p className="text-sm lg:text-sm text-[#6b6654]">
                 No manual status updates yet. Order placed on{" "}
                 {createdAt.toLocaleString("en-IN", {
                   day: "2-digit",
@@ -431,7 +431,7 @@ export default function OrderDetailsClient({ orderFromServer }) {
                             <Clock3 className="w-3 h-3" />
                           )}
                         </div>
-                        <div className="text-xs lg:text-sm">
+                        <div className="text-sm lg:text-sm">
                           <p className="font-semibold text-[#1b180d]">
                             {h.from} → {h.to}
                           </p>
