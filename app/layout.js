@@ -8,6 +8,11 @@ import Providers from "./Providers";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import HomeMarquee from "@/components/HomeMarquee"; // ✅ new client component
 
+import "froala-editor/css/froala_style.min.css";
+import "froala-editor/css/froala_editor.pkgd.min.css";
+import "froala-editor/css/themes/gray.min.css"; // premium theme
+
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],

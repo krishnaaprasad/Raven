@@ -8,6 +8,7 @@ import RebelSpirit  from '@/components/RebelSpirit';
 import RebelFinale from '@/components/RebelFinale';
 import RavenBadge from '@/components/RavenBadge'
 
+
 import FindYourScentSection from "@/components/FindYourScentSection";
 
 export default function Home() {

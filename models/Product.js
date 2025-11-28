@@ -1,4 +1,11 @@
+// models/Product.js
 import mongoose from "mongoose";
+
+const VariantSchema = new mongoose.Schema({
+  size: { type: String, required: true },
+  price: { type: Number, required: true },
+  stock: { type: Number, default: 0 },   // <-- New
+});
 
 const ProductSchema = new mongoose.Schema(
   {
@@ -7,7 +14,6 @@ const ProductSchema = new mongoose.Schema(
     name: { type: String, required: true },
     description: { type: String },
 
-    // 🖼️ Product images
     images: [
       {
         original: String,
@@ -15,22 +21,10 @@ const ProductSchema = new mongoose.Schema(
       },
     ],
 
-    // ⭐ Ratings
-    rating: { type: Number, default: 0 },
-    reviewCount: { type: Number, default: 0 },
-
-    // 🌿 Benefits section
     benefits: [String],
 
-    // 💰 Product variants (size, price)
-    variants: [
-      {
-        size: String,
-        price: Number,
-      },
-    ],
+    variants: [VariantSchema],  // includes stock
 
-    // ✨ Dynamic perfume attributes
     fragranceType: { type: String },
     longevity: { type: String },
     sillage: { type: String },
@@ -38,9 +32,11 @@ const ProductSchema = new mongoose.Schema(
     heartNotes: [String],
     baseNotes: [String],
     ingredients: [String],
+
+    // SOFT DELETE
+    deleted: { type: Boolean, default: false },
   },
   { timestamps: true }
 );
 
-// ✅ Prevent model overwrite errors in Next.js hot reload
-export default mongoose.models?.Product || mongoose.model("Product", ProductSchema);
+export default mongoose.models.Product || mongoose.model("Product", ProductSchema);
