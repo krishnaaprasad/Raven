@@ -8,6 +8,7 @@ import ProductReviews from "@/components/ProductReviews";
 import SwiperCore from 'swiper'
 import { Swiper, SwiperSlide } from 'swiper/react'
 import { Thumbs, Pagination } from 'swiper/modules'
+import { redirect } from "next/navigation";
 
 // ✅ register modules before using Swiper
 SwiperCore.use([Thumbs, Pagination])
@@ -46,25 +47,30 @@ export default function ProductClient({ slug }) {
 const toggleSection = (tab) =>
   setOpenSections((prev) => ({ ...prev, [tab]: !prev[tab] }));
 
- useEffect(() => {
-  async function fetchProduct() {
-    try {
-      const res = await fetch(`/api/products/${slug}`)
-      const data = await res.json()
-      if (res.ok && data) {
-        setProduct(data)
-        setSelected(data.variants?.[0])
-      } else {
-        console.error(data.message || 'Product not found')
+  useEffect(() => {
+    async function fetchProduct() {
+      try {
+        const res = await fetch(`/api/products/${slug}`);
+        const data = await res.json();
+
+        if (res.ok && data) {
+          setProduct(data);
+          setSelected(data.variants?.[0]);
+        } else {
+          router.replace("/");
+          toast.error("This product is no longer available");
+        }
+      } catch (error) {
+        router.replace("/"); //no product found, redirect to home
+        toast.error("This product is unavailable");
+        console.error("Error fetching product:", error);
+      } finally {
+        setLoading(false);
       }
-    } catch (error) {
-      console.error('Error fetching product:', error)
-    } finally {
-      setLoading(false) // <== Important! stop loading state here
     }
-  }
-  if (slug) fetchProduct()
-}, [slug])
+
+    if (slug) fetchProduct();
+  }, [slug]);
 
   if (!product || !selected) {
   return (

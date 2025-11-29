@@ -80,7 +80,7 @@ export default function ProductsPage() {
               <tr>
                 <th className="p-4">Image</th>
                 <th className="p-4">Product Name</th>
-                <th className="p-4">Slug</th>
+                <th className="p-4">URL</th>
                 <th className="p-4">Brand</th>
                 <th className="p-4">Base Price</th>
                 <th className="p-4">Stock</th>

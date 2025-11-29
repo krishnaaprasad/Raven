@@ -27,7 +27,7 @@ export async function GET(req) {
     };
 
     const total = await Product.countDocuments(query);
-    const products = await Product.find(query)
+    const products = await Product.find()
       .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
       .limit(limit)

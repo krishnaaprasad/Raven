@@ -8,7 +8,7 @@ export async function GET(request, context) {
     // ✅ Await the params object first
     const { slug } = await context.params;
 
-    const product = await Product.findOne({ slug });
+    const product = await Product.findOne({ slug, deleted: { $ne: true } });
 
     if (!product) {
       return new Response(
@@ -29,3 +29,4 @@ export async function GET(request, context) {
     );
   }
 }
+
