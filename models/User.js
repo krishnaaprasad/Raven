@@ -8,6 +8,16 @@ const UserSchema = new mongoose.Schema({
   phone: { type: String, default: "" },
   address: { type: String, default: "" },
   // 🔥 IMPORTANT
+
+   // 🔥 NEW FIELDS FOR ADMIN
+    isBanned: {
+      type: Boolean,
+      default: false,
+    },
+    lastLogin: {
+      type: Date,
+      default: null,
+    },
     role: {
       type: String,
       enum: ["USER", "ADMIN"],

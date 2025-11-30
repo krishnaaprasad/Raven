@@ -1,11 +1,10 @@
-"use client";
+import CustomersClient from "./CustomersClient";
 
+export const metadata = {
+  title: "Customer Management - Raven Fragrance Admin",
+  description: "View and manage Raven Fragrance customers",
+};
 
 export default function CustomersPage() {
-  return (
-    <div>
-      <h1 className="text-2xl font-semibold mb-4">Customers</h1>
-      <p>Customer records will be shown here…</p>
-    </div>
-  );
+  return <CustomersClient />;
 }

@@ -73,6 +73,12 @@ export const authOptions = {
         return token;
       }
 
+      // Track login timestamp
+      if (trigger === "signIn") {
+        await User.findByIdAndUpdate(token.id, { lastLogin: new Date() });
+      }
+
+
       /* ------------------------------
          🔵 CREDENTIALS LOGIN (normal)
       ------------------------------ */
