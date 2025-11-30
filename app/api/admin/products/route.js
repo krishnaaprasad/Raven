@@ -106,7 +106,9 @@ export async function POST(req) {
     const formattedVariants = variants.map((v) => ({
       size: v.size,
       price: Number(v.price),
+      mrp: Number(v.mrp),
       stock: Number(v.stock) || 0,
+        
     }));
 
     // Create product

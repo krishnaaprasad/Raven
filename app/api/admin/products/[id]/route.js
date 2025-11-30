@@ -107,6 +107,7 @@ export async function PATCH(req, { params }) {
     const formattedVariants = (variants || []).map((v) => ({
       size: v.size,
       price: Number(v.price),
+      mrp: Number(v.mrp),
       stock: Number(v.stock) || 0,
     }));
 

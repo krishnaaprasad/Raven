@@ -2,23 +2,16 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { useMemo } from "react";
-import dynamic from "next/dynamic";
 import {
   ArrowLeft,
   UploadCloud,
   Plus,
   Trash2,
-  Bold,
-  Italic,
-  Underline,
-  List,
-  ListOrdered,
-  GripVertical, // 🆕 drag handle icon
+  GripVertical, // drag handle icon
 } from "lucide-react";
 import { toast } from "react-hot-toast";
 
-// 🆕 Drag & drop imports
+// Drag & drop imports
 import {
   DndContext,
   closestCenter,
@@ -34,10 +27,12 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 
-// Froala (rich text)
-  const FroalaEditor = dynamic(() => import("react-froala-wysiwyg"), {
-    ssr: false,
-  });
+// Tiptap Imports
+import { useEditor, EditorContent } from "@tiptap/react";
+import StarterKit from "@tiptap/starter-kit";
+import Link from "@tiptap/extension-link";
+import Image from "@tiptap/extension-image";
+import Underline from "@tiptap/extension-underline";
 
 const CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
 const UPLOAD_PRESET = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
@@ -60,7 +55,7 @@ function splitCsv(str) {
     .filter(Boolean);
 }
 
-// 🆕 Sortable thumbnail component with drag handle (A style)
+// Sortable thumbnail component with drag handle (A style)
 function SortableImageCard({ image, onRemove }) {
   const {
     attributes,
@@ -100,7 +95,7 @@ function SortableImageCard({ image, onRemove }) {
         className="w-full h-24 object-cover"
       />
 
-      {/* DELETE BUTTON (top-right, as you had) */}
+      {/* DELETE BUTTON (top-right) */}
       <button
         type="button"
         onClick={(e) => {
@@ -118,6 +113,22 @@ function SortableImageCard({ image, onRemove }) {
 export default function AddProductClient() {
   const router = useRouter();
 
+  // SSR → avoid hydration issues
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
+  // Tiptap editor (no description state, we read HTML on submit)
+  const editor = useEditor({
+    extensions: [
+      StarterKit,
+      Underline,
+      Link.configure({ openOnClick: true }),
+      Image.configure({ inline: false }),
+    ],
+    content: "",
+    immediatelyRender: false, // 👈 important for Next.js
+  });
+
   // Refs for validation focus/scroll
   const nameRef = useRef();
   const slugRef = useRef();
@@ -125,13 +136,11 @@ export default function AddProductClient() {
   const imageRef = useRef();
   const variantRef = useRef();
 
-
   // Core fields
   const [name, setName] = useState("");
   const [slug, setSlug] = useState("");
   const [slugTouched, setSlugTouched] = useState(false);
   const [brand, setBrand] = useState("");
-  const [description, setDescription] = useState("");
 
   // Fragrance profile
   const [fragranceType, setFragranceType] = useState("Eau de Parfum");
@@ -151,9 +160,8 @@ export default function AddProductClient() {
 
   // Variants
   const [variants, setVariants] = useState([
-    { size: "", price: "", stock: "" },
+    { size: "", price: "", mrp: "", stock: "" },
   ]);
-
 
   // Images (with id for drag & drop)
   const [images, setImages] = useState([]); // {id, original, thumbnail}
@@ -162,8 +170,7 @@ export default function AddProductClient() {
 
   const [saving, setSaving] = useState(false);
 
-
-  // 🆕 DnD sensors (small drag distance so user doesn't accidentally drag)
+  // DnD sensors
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
   );
@@ -185,7 +192,10 @@ export default function AddProductClient() {
   };
 
   const addVariantRow = () => {
-    setVariants((prev) => [...prev, { size: "", price: "", stock: "" }]);
+    setVariants((prev) => [
+      ...prev,
+      { size: "", price: "", mrp: "", stock: "" },
+    ]);
   };
 
   const removeVariantRow = (idx) => {
@@ -256,7 +266,7 @@ export default function AddProductClient() {
           return {
             id: data.public_id || data.asset_id || data.secure_url,
             original: data.secure_url,
-            thumbnail: data.secure_url, // later you can swap to a transformation URL
+            thumbnail: data.secure_url, // can swap to transformation URL
           };
         })
       );
@@ -291,7 +301,7 @@ export default function AddProductClient() {
     setImages((prev) => prev.filter((img) => img.id !== id));
   };
 
-  // 🆕 Drag end handler (reorder images)
+  // Drag end handler (reorder images)
   const handleDragEnd = (event) => {
     const { active, over } = event;
     if (!over || active.id === over.id) return;
@@ -303,123 +313,102 @@ export default function AddProductClient() {
       return arrayMove(prev, oldIndex, newIndex);
     });
   };
-//submit
-const handleSubmit = async () => {
-  const finalSlug = slugify(slug || name);
 
-  if (!name.trim()) {
-    toast.error("Product name is required");
-    nameRef.current?.focus();
-    return;
-  }
+  // ---------- Submit ----------
+  const handleSubmit = async () => {
+    const finalSlug = slugify(slug || name);
 
-  if (!finalSlug) {
-    toast.error("Slug is required");
-    slugRef.current?.focus();
-    return;
-  }
-
-  if (!brand.trim()) {
-    toast.error("Brand is required");
-    brandRef.current?.focus();
-    return;
-  }
-
-  if (!description.trim()) {
-    toast.error("Description is required");
-    window.scrollTo({ top: 0, behavior: "smooth" });
-    return;
-  }
-
-  if (!images.length) {
-    toast.error("Upload at least one product image");
-    imageRef.current?.scrollIntoView({ behavior: "smooth" });
-    return;
-  }
-
-  if (!variants.some((v) => v.size && v.price)) {
-    toast.error("Add at least one valid variant");
-    variantRef.current?.scrollIntoView({ behavior: "smooth" });
-    return;
-  }
-
-  const payload = {
-    name: name.trim(),
-    slug: finalSlug,
-    brand: brand.trim(),
-    description,
-    images,
-    benefits,
-    variants: variants
-      .filter((v) => v.size && v.price)
-      .map((v) => ({
-        size: v.size.trim(),
-        price: Number(v.price),
-        stock: Number(v.stock) || 0,
-      })),
-    fragranceType,
-    longevity,
-    sillage,
-    topNotes: splitCsv(topNotesInput),
-    heartNotes: splitCsv(heartNotesInput),
-    baseNotes: splitCsv(baseNotesInput),
-    ingredients, // optional, no validation
-  };
-
-  setSaving(true);
-
-  try {
-    const res = await fetch("/api/admin/products", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
-
-    const data = await res.json();
-    if (!res.ok || !data.success) {
-      throw new Error(data.error || "Failed to create product");
+    if (!name.trim()) {
+      toast.error("Product name is required");
+      nameRef.current?.focus();
+      return;
     }
 
-    toast.success("Product created successfully");
-    router.push("/admin/products");
-  } catch (err) {
-    toast.error(err.message || "Error creating product");
-  } finally {
-    setSaving(false);
-  }
-};
+    if (!finalSlug) {
+      toast.error("Slug is required");
+      slugRef.current?.focus();
+      return;
+    }
+
+    if (!brand.trim()) {
+      toast.error("Brand is required");
+      brandRef.current?.focus();
+      return;
+    }
+
+    if (!editor || editor.isEmpty) {
+      toast.error("Description is required");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
+
+    if (!images.length) {
+      toast.error("Upload at least one product image");
+      imageRef.current?.scrollIntoView({ behavior: "smooth" });
+      return;
+    }
+
+    if (!variants.some((v) => v.size && v.price)) {
+      toast.error("Add at least one valid variant");
+      variantRef.current?.scrollIntoView({ behavior: "smooth" });
+      return;
+    }
+
+    const descriptionHtml = editor.getHTML();
+
+    const payload = {
+      name: name.trim(),
+      slug: finalSlug,
+      brand: brand.trim(),
+      description: descriptionHtml,
+      images,
+      benefits,
+      variants: variants
+        .filter((v) => v.size && v.price)
+        .map((v) => ({
+          size: v.size.trim(),
+          price: Number(v.price),
+          mrp: v.mrp ? Number(v.mrp) : undefined,
+          stock: Number(v.stock) || 0,
+        })),
+      fragranceType,
+      longevity,
+      sillage,
+      topNotes: splitCsv(topNotesInput),
+      heartNotes: splitCsv(heartNotesInput),
+      baseNotes: splitCsv(baseNotesInput),
+      ingredients, // optional
+    };
+
+    setSaving(true);
+
+    try {
+      const res = await fetch("/api/admin/products", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || "Failed to create product");
+      }
+
+      toast.success("Product created successfully");
+      router.push("/admin/products");
+    } catch (err) {
+      toast.error(err.message || "Error creating product");
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const handleCancel = () => {
     router.push("/admin/products");
   };
 
-const DescriptionEditor = useMemo(() => {
-  return (
-    <FroalaEditor
-      tag="textarea"
-      model={description}
-      onModelChange={(val) => setDescription(val)}
-      config={{
-        theme: "gray",
-        placeholderText: "Describe the fragrance, mood, and experience...",
-        heightMin: 200,
-        toolbarButtons: [
-          "bold",
-          "italic",
-          "underline",
-          "formatOL",
-          "formatUL",
-          "align",
-          "insertImage",
-          "insertLink",
-          "undo",
-          "redo",
-        ],
-        imageUpload: false,
-      }}
-    />
-  );
-}, []); // only mount once
+  // Avoid SSR mismatch: wait until mounted
+  if (!mounted) return null;
 
   // ---------- Render ----------
   return (
@@ -433,9 +422,7 @@ const DescriptionEditor = useMemo(() => {
           >
             <ArrowLeft className="w-4 h-4 text-[#1b180d]" />
           </button>
-          <h1 className="text-xl font-bold text-[#1b180d]">
-            Add New Product
-          </h1>
+          <h1 className="text-xl font-bold text-[#1b180d]">Add New Product</h1>
         </div>
       </header>
 
@@ -453,7 +440,7 @@ const DescriptionEditor = useMemo(() => {
                 <label className="block text-sm font-medium mb-1.5 text-[#6b6654]">
                   Product Name
                 </label>
-                <input 
+                <input
                   ref={nameRef}
                   value={name}
                   onChange={(e) => setName(e.target.value)}
@@ -493,15 +480,113 @@ const DescriptionEditor = useMemo(() => {
               </div>
             </div>
 
-            {/* Description with Froala */}
+            {/* Description (Tiptap) */}
             <div>
               <label className="block text-sm font-medium mb-1.5 text-[#6b6654]">
                 Description
               </label>
 
               <div className="rounded-lg border border-[#e7e1cf] overflow-hidden bg-white">
-                {DescriptionEditor}
+                {/* Toolbar */}
+                <div className="flex flex-wrap items-center gap-2 border-b border-[#e7e1cf] p-2 bg-white text-[#1b180d]">
+                  <button
+                    type="button"
+                    onClick={() => editor?.chain().focus().toggleBold().run()}
+                    className="p-1 px-2 hover:bg-gray-200 rounded font-bold text-sm"
+                  >
+                    B
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      editor?.chain().focus().toggleItalic().run()
+                    }
+                    className="p-1 px-2 hover:bg-gray-200 rounded italic text-sm"
+                  >
+                    I
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      editor?.chain().focus().toggleUnderline().run()
+                    }
+                    className="p-1 px-2 hover:bg-gray-200 rounded underline text-sm"
+                  >
+                    U
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      editor?.chain().focus().toggleBulletList().run()
+                    }
+                    className="p-1 px-2 hover:bg-gray-200 rounded text-sm"
+                  >
+                    •
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      editor?.chain().focus().toggleOrderedList().run()
+                    }
+                    className="p-1 px-2 hover:bg-gray-200 rounded text-sm"
+                  >
+                    1.
+                  </button>
+
+                  {/* Upload Image Button */}
+                  <button
+                    type="button"
+                    className="ml-auto px-3 py-1 bg-[#b28c34] rounded text-white text-sm hover:bg-[#9a864c]"
+                    onClick={async () => {
+                      if (!editor) return;
+                      const input = document.createElement("input");
+                      input.type = "file";
+                      input.accept = "image/*";
+                      input.click();
+
+                      input.onchange = async () => {
+                        const file = input.files?.[0];
+                        if (!file) return;
+
+                        const form = new FormData();
+                        form.append("file", file);
+                        form.append(
+                          "upload_preset",
+                          process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET
+                        );
+
+                        try {
+                          const res = await fetch(
+                            `https://api.cloudinary.com/v1_1/${
+                              process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME
+                            }/image/upload`,
+                            { method: "POST", body: form }
+                          );
+                          const data = await res.json();
+                          if (!res.ok) throw new Error(data.error?.message);
+                          editor
+                            .chain()
+                            .focus()
+                            .setImage({ src: data.secure_url })
+                            .run();
+                        } catch (err) {
+                          console.error(err);
+                          toast.error(
+                            err.message || "Failed to upload image to editor"
+                          );
+                        }
+                      };
+                    }}
+                  >
+                    Upload Image
+                  </button>
                 </div>
+
+                {/* Editor */}
+                <div className="min-h-[180px] max-h-[420px] overflow-y-auto">
+                  {editor && <EditorContent editor={editor} />}
+                </div>
+              </div>
             </div>
           </section>
 
@@ -536,7 +621,10 @@ const DescriptionEditor = useMemo(() => {
                 document.getElementById("image-upload-input")?.click()
               }
             >
-              <div ref={imageRef} className="flex items-center justify-center w-12 h-12 rounded-full bg-[#fff3cd] text-[#b28c34] mb-2">
+              <div
+                ref={imageRef}
+                className="flex items-center justify-center w-12 h-12 rounded-full bg-[#fff3cd] text-[#b28c34] mb-2"
+              >
                 <UploadCloud className="w-6 h-6" />
               </div>
               <p className="font-semibold text-[#1b180d]">
@@ -587,14 +675,17 @@ const DescriptionEditor = useMemo(() => {
           </section>
 
           {/* Variants */}
-          <section className="bg-[#fcfbf8] border border-[#e7e1cf] rounded-xl shadow-sm p-6">
+          <section
+            ref={variantRef}
+            className="bg-[#fcfbf8] border border-[#e7e1cf] rounded-xl shadow-sm p-6"
+          >
             <h2 className="text-lg font-bold mb-4 text-[#1b180d]">Variants</h2>
 
             <div className="space-y-3">
               {variants.map((v, idx) => (
                 <div
                   key={idx}
-                  className="flex flex-col sm:flex-row items-end gap-3"
+                  className="flex flex-col sm:flex-row items-start gap-3"
                 >
                   <div className="flex-1">
                     <label className="block text-sm font-medium mb-1.5 text-[#6b6654]">
@@ -622,6 +713,21 @@ const DescriptionEditor = useMemo(() => {
                       }
                       className="w-full h-11 rounded-lg border border-[#e7e1cf] bg-white px-4 text-sm text-[#1b180d] focus:outline-none focus:ring-2 focus:ring-[#b28c34]/60"
                       placeholder="e.g., 4999"
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <label className="block text-sm font-medium mb-1.5 text-[#6b6654]">
+                      MRP (₹)
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      value={v.mrp}
+                      onChange={(e) =>
+                        updateVariant(idx, "mrp", e.target.value)
+                      }
+                      className="w-full h-11 rounded-lg border border-[#e7e1cf] bg-white px-4 text-sm text-[#1b180d]"
+                      placeholder="e.g., 5999"
                     />
                   </div>
                   <div className="flex-1">

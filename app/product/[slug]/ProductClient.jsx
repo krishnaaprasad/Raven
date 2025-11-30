@@ -148,7 +148,7 @@ const toggleSection = (tab) =>
         id: product._id,
         name: product.name,
         slug: product.slug, // ✅ include slug
-        price: selected.price, // ✅ use selected variant price
+        price: selected.price, 
         image: imageUrl, // ✅ use consistent image
         size: selected.size, // ✅ corrected from selectedSize → selected.size
       },
@@ -166,6 +166,7 @@ const toggleSection = (tab) =>
     name: product.name,
     slug: product.slug,
     price: selected.price,
+    mrp: selected.mrp,
     image: Array.isArray(product.images)
       ? product.images[0]?.original || product.images[0]
       : product.image || '',
@@ -260,12 +261,12 @@ const toggleSection = (tab) =>
 
           <div>
             <p className="text-gray-700 text-xs font-semibold mb-1">
-              MRP ₹{Math.round(selected.price * 1.365)} (Incl. of all taxes)
+              MRP ₹{selected.mrp} (Incl. of all taxes)
             </p>
             <div className="flex items-center gap-3">
               <span className="text-2xl font-extrabold text-[#B28C34]">₹{selected.price}</span>
               <span className="text-gray-400 line-through text-lg">
-                ₹{Math.round(selected.price * 1.365)}
+                ₹{selected.mrp}
               </span>
             </div>
           </div>
