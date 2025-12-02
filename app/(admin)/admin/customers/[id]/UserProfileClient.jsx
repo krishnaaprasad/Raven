@@ -27,6 +27,13 @@ export default function UserProfileClient({ userId }) {
   const [showBanModal, setShowBanModal] = useState(false);
   const [banLoading, setBanLoading] = useState(false);
 
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editLoading, setEditLoading] = useState(false);
+
+  const [dbCart, setDbCart] = useState([]);
+  const [cartMeta, setCartMeta] = useState(null);
+
+
   // 🔁 Fetch user + orders
   useEffect(() => {
     let ignore = false;
@@ -52,6 +59,12 @@ export default function UserProfileClient({ userId }) {
 
         setUser(data.user);
         setOrders(data.orders || []);
+
+        const cartRes = await fetch(`/api/admin/customers/${userId}/cart`);
+        const cartData = await cartRes.json();
+
+        setDbCart(cartData.cart?.items || []);
+        setCartMeta({ mode: cartData.mode, lastUpdated: cartData.lastUpdated });
 
         const meta = data.ordersMeta || {};
         setOrdersTotal(meta.total || 0);
@@ -83,6 +96,40 @@ export default function UserProfileClient({ userId }) {
     setOrdersSearch("");
     setOrdersPage(1);
   };
+
+  async function handleEditDetails(payload) {
+    try {
+      setEditLoading(true);
+      const res = await fetch(`/api/admin/customers/${userId}/edit`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await res.json();
+      if (!data.success) throw new Error(data.message);
+
+      setUser(data.user);
+      setShowEditModal(false);
+    } catch (err) {
+      console.error("Update failed:", err);
+    } finally {
+      setEditLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    async function loadCart() {
+      try {
+        const res = await fetch(`/api/admin/customers/${userId}/cart`);
+        const data = await res.json();
+        if (data.success) setDbCart(data.cart?.items || []);
+      } catch (e) {
+        console.log("Cart fetch error:", e);
+      }
+    }
+    loadCart();
+  }, [userId]);
 
   async function handleBanToggle() {
     if (!user) return;
@@ -191,7 +238,10 @@ export default function UserProfileClient({ userId }) {
           <div className="bg-[#fcfbf8] border border-[#e7e1cf] rounded-xl p-6">
             <h3 className="text-lg font-bold mb-4">Admin Actions</h3>
             <div className="flex flex-col gap-3">
-              <button className="h-10 rounded-lg bg-[#e7e1cf] text-[#1b180d] text-sm font-semibold">
+              <button
+                className="h-10 rounded-lg bg-[#e7e1cf] text-[#1b180d] text-sm font-semibold"
+                onClick={() => setShowEditModal(true)}
+              >
                 Edit Details
               </button>
               <button className="h-10 rounded-lg bg-[#e7e1cf] text-[#1b180d] text-sm font-semibold">
@@ -203,9 +253,6 @@ export default function UserProfileClient({ userId }) {
                 onClick={() => setShowBanModal(true)}
               >
                 {user.isBanned ? "Unban User" : "Ban User"}
-              </button>
-              <button className="h-10 rounded-lg bg-red-500 text-white text-sm font-semibold">
-                Delete User Credentials
               </button>
             </div>
           </div>
@@ -325,17 +372,43 @@ export default function UserProfileClient({ userId }) {
         {/* RIGHT: Shopping cart placeholder */}
         <aside className="bg-[#fcfbf8] border border-[#e7e1cf] rounded-xl p-6 h-fit">
           <div className="flex justify-between items-center mb-4">
-            <h3 className="text-lg font-bold">Shopping Cart</h3>
-            <span className="px-3 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
-              Registered
-            </span>
-          </div>
-          <p className="text-sm text-gray-500">
-            Cart tracking is currently stored on the customer device via
-            localStorage (CartContext). To see live carts in admin, we’d need to
-            persist cart snapshots in MongoDB. For now, this section is a
-            design-only placeholder.
-          </p>
+          <h3 className="text-lg font-bold">Shopping Cart</h3>
+
+          <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+            cartMeta?.mode === "guest"
+              ? "bg-orange-100 text-orange-800"
+              : "bg-emerald-100 text-emerald-800"
+          }`}>
+            {cartMeta?.mode === "guest" ? "Guest" : "Registered"}
+          </span>
+        </div>
+
+        <p className="text-xs text-[#9a864c] mb-3">
+          Last updated: {cartMeta?.lastUpdated ? new Date(cartMeta.lastUpdated).toLocaleString() : "—"}
+        </p>
+
+          {dbCart && dbCart.length > 0 ? (
+            <div className="flex flex-col gap-4">
+              {dbCart.map((item, i) => (
+                <div key={i} className="flex items-center gap-4">
+                  <div
+                    className="w-14 h-14 rounded-lg bg-cover bg-center border border-[#e7e1cf]"
+                    style={{ backgroundImage: `url(${item.image})` }}
+                  ></div>
+                  <div className="flex-grow">
+                    <p className="font-semibold text-sm">{item.name}</p>
+                    <p className="text-xs text-[#9a864c]">Qty: {item.quantity}</p>
+                    <p className="text-xs text-[#9a864c]">Size: {item.size}</p>
+                  </div>
+                  <p className="font-semibold text-sm">
+                    ₹{(item.price * item.quantity).toLocaleString("en-IN")}
+                  </p>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-gray-500">Cart Empty</p>
+          )}
         </aside>
       </main>
 
@@ -349,6 +422,15 @@ export default function UserProfileClient({ userId }) {
             await handleBanToggle();
             setShowBanModal(false);
           }}
+        />
+      )}
+
+      {showEditModal && (
+        <EditDetailsModal
+          user={user}
+          loading={editLoading}
+          onClose={() => setShowEditModal(false)}
+          onSave={handleEditDetails}
         />
       )}
     </div>
@@ -488,3 +570,56 @@ function BanModal({ isBanned, loading, onClose, onConfirm }) {
     </div>
   );
 }
+
+function EditDetailsModal({ user, onClose, onSave, loading }) {
+  const [name, setName] = useState(user.name);
+  const [phone, setPhone] = useState(user.phone || "");
+  const [address, setAddress] = useState(user.address || "");
+
+  return (
+    <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+      <div className="bg-white w-[90%] max-w-md rounded-xl p-6 shadow-lg">
+        <h2 className="text-lg font-bold mb-4">Edit User Details</h2>
+
+        <div className="flex flex-col gap-3 mb-4">
+          <input
+            value={name}
+            onChange={e => setName(e.target.value)}
+            placeholder="Full Name"
+            className="h-10 px-3 border border-[#e7e1cf] rounded-lg"
+          />
+          <input
+            value={phone}
+            onChange={e => setPhone(e.target.value.replace(/\D/g, ""))}
+            placeholder="Phone"
+            maxLength="10"
+            className="h-10 px-3 border border-[#e7e1cf] rounded-lg"
+          />
+          <textarea
+            value={address}
+            onChange={e => setAddress(e.target.value)}
+            placeholder="Address"
+            className="h-20 px-3 border border-[#e7e1cf] rounded-lg"
+          />
+        </div>
+
+        <div className="flex justify-end gap-3">
+          <button
+            className="px-4 py-2 border border-[#e7e1cf] rounded-lg"
+            onClick={onClose}
+          >
+            Cancel
+          </button>
+          <button
+            onClick={() => onSave({ name, phone, address })}
+            disabled={loading}
+            className="px-4 py-2 bg-[#b28c34] text-white rounded-lg disabled:opacity-50"
+          >
+            {loading ? "Saving…" : "Save"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+

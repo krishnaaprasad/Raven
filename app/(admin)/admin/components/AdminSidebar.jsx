@@ -25,7 +25,7 @@ export default function AdminSidebar({ closeMobile }) {
     { name: "Products", icon: <Boxes size={20} />, href: "/admin/products" },
     { name: "Customers", icon: <Users size={20} />, href: "/admin/customers" },
     { name: "Discounts", icon: <BadgePercent size={20} />, href: "/admin/discounts" },
-    { name: "Reports", icon: <BarChart3 size={20} />, href: "/admin/reports" },
+    { name: "Carts", icon: <BarChart3 size={20} />, href: "/admin/carts" },
   ];
 
   const isActive = (href) =>
