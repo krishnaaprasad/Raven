@@ -110,6 +110,16 @@ export function CartProvider({ children }) {
   //   localStorage.setItem('cart', JSON.stringify(cartData))
   // }, [cartItems])
   
+
+  useEffect(() => {
+  function handleClearCart() {
+    setCartItems([]);
+  }
+
+  window.addEventListener("clear-cart", handleClearCart);
+  return () => window.removeEventListener("clear-cart", handleClearCart);
+}, []);
+
   const lastSentRef = React.useRef(null);
 
 // 🛑 Prevent re-syncing on first page load

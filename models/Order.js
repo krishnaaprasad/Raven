@@ -113,7 +113,11 @@ const orderSchema = new mongoose.Schema(
 
 orderSchema.index({ email: 1, payment_status: 1, createdAt: -1 });
 
-export const Order = mongoose.models.Order || mongoose.model("Order", orderSchema);
+const Order =
+  mongoose.models.Order || mongoose.model("Order", orderSchema);
+
+export default Order;         // default export
+export { Order };   
 
 // Counter for generating incremental Raven Order IDs (e.g., RVN-20250124-0001)
 const orderCounterSchema = new mongoose.Schema({

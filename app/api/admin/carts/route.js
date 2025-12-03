@@ -35,29 +35,28 @@ export async function GET(req) {
       ];
     }
 
-    // === GET CARTS + POPULATE USER DATA ===
-    const carts = await Cart.find(query)
-      .populate("userId", "name email")
-      .sort({ updatedAt: -1 })
-      .skip((page - 1) * limit)
-      .limit(limit);
+    // Fetch abandoned carts
+const skip = (page - 1) * limit;
+const carts = await Cart.find(query)
+  .populate("userId", "name email")
+  .sort({ updatedAt: -1 })
+  .skip(skip)
+  .limit(limit);
 
-    const total = await Cart.countDocuments(query);
-    const pages = Math.ceil(total / limit);
+const total = await Cart.countDocuments(query);
 
-    return Response.json({
-      success: true,
-      carts,
-      total,
-      pages,
-      stats: {
-        totalCarts: await Cart.countDocuments(),
-        guestCarts: await Cart.countDocuments({ userId: null }),
-        registeredCarts: await Cart.countDocuments({ userId: { $ne: null } }),
-      },
-    });
-  } catch (err) {
-    console.error("Cart fetch error:", err);
-    return Response.json({ success: false, error: err.message });
+// Stats
+const guestCarts = await Cart.countDocuments({ userId: null });
+const registeredCarts = await Cart.countDocuments({ userId: { $ne: null } });
+const totalCarts = guestCarts + registeredCarts;
+return Response.json({
+  success: true,
+  carts,
+  total,
+  pages: Math.ceil(total / limit),
+  stats: { totalCarts, guestCarts, registeredCarts },
+});
+  } catch (error) {
+    return Response.json({ success: false, error: error.message }, { status: 500 });
   }
 }
