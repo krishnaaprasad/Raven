@@ -13,14 +13,16 @@ export const metadata = {
 
 async function getOrder(id) {
   await connectToDatabase();
-  const doc = await Order.findById(id).lean();
-  if (!doc) return null;
+  const doc = await Order.findById(id)
+    .populate("userId", "name email phone isGuest role")
+    .lean();
 
-  return JSON.parse(JSON.stringify(doc)); // Serialize for client
+  if (!doc) return null;
+  return JSON.parse(JSON.stringify(doc));
 }
 
 export default async function AdminOrderDetailsPage({ params }) {
-  const { id } = await params;   // 🟢 FIXED
+  const { id } = await params;
   const order = await getOrder(id);
 
   if (!order) return notFound();

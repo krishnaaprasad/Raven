@@ -351,8 +351,8 @@ function ConvertToOrderModal({ cart, onClose }) {
         />
 
         <div className="flex gap-2">
-          <button className="w-1/2 py-3 rounded-lg border" onClick={onClose}>Cancel</button>
-          <button className="w-1/2 py-3 rounded-lg bg-[#b28c34] text-white font-semibold" onClick={handleSubmit}>
+          <button className="w-1/2 py-1 rounded-lg border" onClick={onClose}>Cancel</button>
+          <button className="w-1/2 py-1 rounded-lg bg-[#b28c34] text-white font-semibold" onClick={handleSubmit}>
             Create Order
           </button>
         </div>

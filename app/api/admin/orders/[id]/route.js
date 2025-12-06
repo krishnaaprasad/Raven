@@ -36,7 +36,7 @@ export async function PATCH(req, context) {
     const next = normalize(requested);
 
     await connectToDatabase();
-    const order = await Order.findById(id);
+    const order = await Order.findById(id).populate("userId", "isGuest name email phone");
 
     if (!order) {
       return NextResponse.json({ success: false, error: "Order not found" }, { status: 404 });

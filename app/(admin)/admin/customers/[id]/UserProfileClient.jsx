@@ -223,14 +223,11 @@ export default function UserProfileClient({ userId }) {
               />
               <DetailRow label="Last Login" value={lastLogin} />
               <DetailRow
-  label="User ID"
-  value={<span className="font-mono text-xs bg-[#f5f1e6] px-2 py-1 rounded break-all">{userId}</span>}
-/>
-              <DetailRow
-                label="Shipping Address"
-                full
-                value={user.address || "—"}
+                label="User ID"
+                value={<span className="font-mono text-xs bg-[#f5f1e6] px-2 py-1 rounded break-all">{userId}</span>}
               />
+              <DetailRow label="Shipping Address" full value={user.fullAddress || "—"} />
+
             </div>
           </div>
 
@@ -375,11 +372,11 @@ export default function UserProfileClient({ userId }) {
           <h3 className="text-lg font-bold">Shopping Cart</h3>
 
           <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-            cartMeta?.mode === "guest"
+            user?.isGuest
               ? "bg-orange-100 text-orange-800"
               : "bg-emerald-100 text-emerald-800"
           }`}>
-            {cartMeta?.mode === "guest" ? "Guest" : "Registered"}
+            {user?.isGuest ? "Guest User" : "Registered User"}
           </span>
         </div>
 

@@ -43,7 +43,7 @@ export const authOptions = {
   ],
 
   callbacks: {
-    // 🔥 JWT CALLBACK (App Router correct signature)
+    // JWT CALLBACK (Token building)
     async jwt({ token, user, account, trigger, profile }) {
       await connectToDatabase();
 
@@ -55,33 +55,40 @@ export const authOptions = {
 
         let existingUser = await User.findOne({ email });
 
-        if (!existingUser) {
-          existingUser = await User.create({
-            name: profile.name,
-            email,
-            password: null,
-            role: "USER",
-          });
+        if (existingUser) {
+          // If existing guest → upgrade to registered
+          if (existingUser.isGuest === true) {
+            existingUser.isGuest = false;
+            existingUser.name = profile.name || existingUser.name;
+            existingUser.lastLogin = new Date();
+            await existingUser.save();
+          }
+
+          token.id = existingUser._id.toString();
+          token.email = existingUser.email;
+          token.name = existingUser.name;
+          token.role = existingUser.role;
+          return token;
         }
 
-        token.id = existingUser._id.toString();
-        token.email = existingUser.email;
-        token.name = existingUser.name;
-        token.role = existingUser.role;
+        // If no user exists → create full Google user
+        const newUser = await User.create({
+          name: profile.name,
+          email,
+          password: null,
+          isGuest: false,
+          role: "USER",
+          lastLogin: new Date(),
+        });
 
-        console.log("GOOGLE LOGIN ROLE:", token.role);
+        token.id = newUser._id.toString();
+        token.email = newUser.email;
+        token.name = newUser.name;
+        token.role = newUser.role;
         return token;
       }
 
-      // Track login timestamp
-      if (trigger === "signIn") {
-        await User.findByIdAndUpdate(token.id, { lastLogin: new Date() });
-      }
-
-
-      /* ------------------------------
-         🔵 CREDENTIALS LOGIN (normal)
-      ------------------------------ */
+      // NORMAL CREDENTIALS LOGIN
       if (user) {
         const dbUser = await User.findById(user.id);
 
@@ -90,13 +97,16 @@ export const authOptions = {
         token.name = dbUser.name;
         token.role = dbUser.role;
 
+        // Track login timestamp
+        await User.findByIdAndUpdate(dbUser._id, { lastLogin: new Date() });
+
         return token;
       }
 
       return token;
     },
 
-    // SESSION CALLBACK
+    // SESSION CALLBACK (set session variables)
     async session({ session, token }) {
       session.user.id = token.id;
       session.user.email = token.email;

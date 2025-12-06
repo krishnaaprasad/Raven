@@ -4,6 +4,7 @@ import { Order, OrderCounter } from "@/models/Order";
 import axios from "axios";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import User from "@/models/User";
 
 // =============================
 // Helper → Generate Sequential Custom Order ID
@@ -42,6 +43,33 @@ async function generateSequentialOrderId(cartItems) {
   return `${prefix}${datePart}${sequence}`;
 }
 
+// 🔹 Guest / Registered user resolution
+async function findOrCreateUser({ name, email, phone, address }) {
+  // 1) Try to find existing user by email OR phone
+  let user = await User.findOne({ $or: [{ email }, { phone }] });
+
+  if (user) {
+    // 👉 Existing user (could be guest or registered)
+    // We DO NOT auto-set isGuest here to avoid mis-tagging real accounts
+    return user._id;
+  }
+
+  // 2) Create a new GUEST user
+  const newUser = await User.create({
+    name,
+    email,
+    phone,
+    address,
+    password: null,  // no password for guest
+    isGuest: true,   // 👈 THIS is what writes isGuest in Mongo
+  });
+
+  // Optional: console log once to verify
+  console.log("🆕 Guest user created:", newUser._id, newUser.email, newUser.isGuest);
+
+  return newUser._id;
+}
+
 // =============================
 // POST Handler
 // =============================
@@ -68,6 +96,7 @@ export async function POST(req) {
       cartItems,
     } = body;
 
+    // Basic required field validation
     if (
       !firstName ||
       !lastName ||
@@ -90,9 +119,27 @@ export async function POST(req) {
     const customOrderId = await generateSequentialOrderId(cartItems);
 
     const fullAddress = `${address1}, ${address2 || ""}, ${city}, ${state}, ${pincode}`;
+
+    // 👇 Decide which user to attach to this order
+    let finalUserId = null;
+
+    if (session?.user && session.user.email) {
+      // Logged-in user (credentials/Google) — attach real account
+      finalUserId = session.user.id;
+    } else {
+      // Guest checkout — create/find guest user record
+      finalUserId = await findOrCreateUser({
+        name: `${firstName} ${lastName}`,
+        email,
+        phone,
+        address: address1,
+      });
+    }
+
+    // Create Order
     const newOrder = await Order.create({
       customOrderId,
-      userId: session?.user?.id || null,
+      userId: finalUserId, // 🔗 always set (guest or logged)
       userName: `${firstName} ${lastName}`,
       email,
       phone,

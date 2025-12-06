@@ -200,7 +200,7 @@ const exportCSV = async () => {
         Number(o.totalAmount || 0).toLocaleString("en-IN"),
         o.status || "",
         o.order_status || "",
-        o.userId ? "Logged-in" : "Guest",
+        (o.userId?.isGuest === true ? "Guest" : "Logged-In"),
       ]),
     ];
 

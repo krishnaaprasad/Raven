@@ -105,7 +105,14 @@ export default function OrderRow({ order, onStatusUpdated }) {
   });
 
   const amount = Number(order.totalAmount || 0).toLocaleString("en-IN");
-  const customerType = order.userId ? "Logged User" : "Guest User";
+const customerType =
+  order.userId
+    ? order.userId.isGuest
+      ? "Guest User"
+      : "Logged User"
+    : "Guest User";
+
+
 
   return (
     <>

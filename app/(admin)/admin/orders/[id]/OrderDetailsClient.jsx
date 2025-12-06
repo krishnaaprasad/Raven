@@ -66,7 +66,12 @@ export default function OrderDetailsClient({ orderFromServer }) {
   const shipping = order.shippingCharge || 0;
   const grandTotal = order.totalAmount || subtotal + shipping;
 
-  const customerType = order.userId ? "Registered" : "Guest User";
+  const customerType =
+    order.userId?.isGuest === true
+      ? "Guest User"
+      : order.userId
+      ? "Registered User"
+      : "Guest User";
 
   const paymentStatus = (order.payment_status || order.status || "PENDING").toUpperCase();
   const paymentBadgeClass =

@@ -12,7 +12,7 @@ export async function GET(request) {
     const limit = Math.min(100, parseInt(searchParams.get("limit") || "10"));
 
     const q = (searchParams.get("q") || "").trim();
-    const paymentStatus = searchParams.get("paymentStatus") || null; // PAID/PENDING/FAILED/CANCELLED
+    const paymentStatus = searchParams.get("paymentStatus") || null;
     const orderStatus = searchParams.get("orderStatus") || null;
     const from = searchParams.get("from") || null;
     const to = searchParams.get("to") || null;
@@ -21,10 +21,7 @@ export async function GET(request) {
 
     // SEARCH
     if (q) {
-      const re = new RegExp(
-        q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"),
-        "i"
-      );
+      const re = new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i");
       filter.$or = [
         { customOrderId: re },
         { userName: re },
@@ -34,20 +31,18 @@ export async function GET(request) {
       ];
     }
 
-    // NEW PAYMENT STATUS FILTER (updated)
+    // PAYMENT STATUS
     if (paymentStatus) {
       filter.$or = [
-        { payment_status: paymentStatus }, // new field
-        { status: paymentStatus }, // legacy fallback (your old field)
+        { payment_status: paymentStatus },
+        { status: paymentStatus },
       ];
     }
 
-    // ORDER STATUS FILTER
-    if (orderStatus) {
-      filter.order_status = orderStatus;
-    }
+    // ORDER STATUS
+    if (orderStatus) filter.order_status = orderStatus;
 
-    // DATE RANGE
+    // DATE RANGE FILTER
     if (from || to) {
       filter.createdAt = {};
       if (from) filter.createdAt.$gte = new Date(from);
@@ -57,10 +52,11 @@ export async function GET(request) {
     const total = await Order.countDocuments(filter);
 
     const orders = await Order.find(filter)
+      .populate("userId", "isGuest")   // <-- ADDED
       .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
       .limit(limit)
-      .lean();
+      .lean();                                          // <-- safe
 
     return NextResponse.json({
       data: orders,
@@ -71,11 +67,9 @@ export async function GET(request) {
         pages: Math.ceil(total / limit),
       },
     });
+
   } catch (err) {
     console.error("❌ GET /api/admin/orders error:", err);
-    return NextResponse.json(
-      { error: "Server error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Server error" }, { status: 500 });
   }
 }

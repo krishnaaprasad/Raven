@@ -14,7 +14,7 @@ export async function GET(req, context) {
     const orderLimit = Number(searchParams.get("orderLimit") || "10");
     const orderSearch = searchParams.get("orderSearch") || "";
 
-    const user = await User.findById(id);
+    const user = await User.findById(id).lean();
     if (!user) {
       return NextResponse.json(
         { success: false, message: "User not found" },
@@ -22,20 +22,15 @@ export async function GET(req, context) {
       );
     }
 
-    // 🔍 Build orders query: try by userId OR userEmail
+    // 🟡 Try User orders
     const ordersQuery = {
-      $or: [
-        { userId: id }, // if you stored userId
-        { userEmail: user.email }, // if you stored userEmail
-      ],
+      $or: [{ userId: id }, { email: user.email }],
     };
 
     if (orderSearch) {
       ordersQuery.$and = [
         {
-          $or: [
-            { customOrderId: { $regex: orderSearch, $options: "i" } },
-          ],
+          $or: [{ customOrderId: { $regex: orderSearch, $options: "i" } }],
         },
       ];
     }
@@ -46,13 +41,33 @@ export async function GET(req, context) {
       Order.find(ordersQuery)
         .sort({ createdAt: -1 })
         .skip(skip)
-        .limit(orderLimit),
+        .limit(orderLimit)
+        .lean(),
       Order.countDocuments(ordersQuery),
     ]);
 
+    // 🔥 Get latest order address if exists
+    const latestOrder = await Order.findOne({ userId: id })
+      .sort({ createdAt: -1 })
+      .lean();
+
+    const fullAddress = latestOrder?.addressDetails
+      ? `${latestOrder.addressDetails.address1}${
+          latestOrder.addressDetails.address2
+            ? ", " + latestOrder.addressDetails.address2
+            : ""
+        }, ${latestOrder.addressDetails.city}, ${
+          latestOrder.addressDetails.state
+        } ${latestOrder.addressDetails.pincode}`
+      : user.address || "";
+
     return NextResponse.json({
       success: true,
-      user,
+      user: {
+        ...user,
+        fullAddress,
+        isGuest: user.isGuest || false, // 🟢 Important
+      },
       orders,
       ordersMeta: {
         total: totalOrders,
