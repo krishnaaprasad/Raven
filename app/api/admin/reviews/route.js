@@ -1,5 +1,6 @@
 import connectToDatabase from "@/lib/mongodb";
 import Review from "@/models/Review";
+import Product from "@/models/Product";
 
 export async function GET() {
   try {
