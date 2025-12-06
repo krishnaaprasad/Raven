@@ -73,8 +73,6 @@ export default function AbandonedCartsPage() {
   return (
     <main className="font-[Manrope,sans-serif] text-[#1b180d] space-y-6 min-h-screen">
 
-      <h1 className="text-2xl font-bold">Abandoned Carts</h1>
-
       {/* STATS */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <StatCard icon={<ShoppingCart size={22} />} label="Total Carts" value={stats.totalCarts} />
