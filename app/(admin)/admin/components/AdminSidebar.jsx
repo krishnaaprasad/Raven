@@ -10,7 +10,9 @@ import {
   Boxes,
   Users,
   BadgePercent,
+  ShoppingBag,
   BarChart3,
+  Star,
   X,
   Flower,
 } from "lucide-react";
@@ -24,8 +26,8 @@ export default function AdminSidebar({ closeMobile }) {
     { name: "Orders", icon: <ShoppingCart size={20} />, href: "/admin/orders" },
     { name: "Products", icon: <Boxes size={20} />, href: "/admin/products" },
     { name: "Customers", icon: <Users size={20} />, href: "/admin/customers" },
-    { name: "Discounts", icon: <BadgePercent size={20} />, href: "/admin/discounts" },
-    { name: "Carts", icon: <BarChart3 size={20} />, href: "/admin/carts" },
+    { name: "Reviews", icon: <Star size={20} />, href: "/admin/reviews" },
+    { name: "Carts", icon: <ShoppingBag size={20} />, href: "/admin/carts" },
   ];
 
   const isActive = (href) =>

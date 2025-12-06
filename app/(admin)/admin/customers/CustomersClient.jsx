@@ -293,7 +293,7 @@ export default function CustomersClient() {
                   colSpan={5}
                   className="py-6 text-center text-sm text-gray-500"
                 >
-                  No users found with current filters.
+                  Loading...
                 </td>
               </tr>
             )}

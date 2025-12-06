@@ -259,10 +259,18 @@ export default function ProductReviews({ productId }) {
                 </div>
                 <div className="text-xs text-[#b3a575] mb-1">{timeAgo(r.createdAt)}</div>
                 <div className="text-[#4b423c] mb-2">{r.comment}</div>
+                {r.reply && (
+                  <div className="mt-3 ml-10 border-l-2 border-[#b28c34] pl-3 bg-[#fbf5e9] rounded-md py-2">
+                    <p className="text-[13px] text-[#b28c34] font-semibold">Raven Support</p>
+                    <p className="text-sm text-[#4b423c] mt-1">{r.reply}</p>
+                    <span className="text-[11px] text-gray-500">{timeAgo(r.replyAt)}</span>
+                  </div>
+                )}
               </div>
             </div>
           ))
         )}
+
 
         {/* Pagination */}
         {total > reviewsPerPage && (

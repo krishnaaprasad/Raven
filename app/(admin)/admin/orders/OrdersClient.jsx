@@ -43,7 +43,7 @@ export default function OrdersClient() {
   // date range picker state
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [range, setRange] = useState({
-    startDate: addDays(new Date(), -7),
+    startDate: addDays(new Date(), 0),
     endDate: new Date(),
     key: "selection",
   });

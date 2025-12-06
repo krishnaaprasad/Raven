@@ -12,7 +12,11 @@ export async function GET(req) {
       return Response.json({ message: "Product ID required" }, { status: 400 });
     }
 
-    const reviews = await Review.find({ productId }).sort({ createdAt: -1 });
+    const reviews = await Review.find({
+      productId,
+      deleted: false
+    }).sort({ createdAt: -1 });
+
     return Response.json(reviews, { status: 200 });
   } catch (error) {
     console.error("GET /reviews error:", error);
