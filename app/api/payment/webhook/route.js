@@ -7,15 +7,18 @@ export async function POST(req) {
     const body = await req.json();
     console.log("📩 Webhook Received:", JSON.stringify(body, null, 2));
 
-    // If missing required fields (Cashfree test payload case) → return OK
+    // Handle Cashfree TEST webhook
     if (!body?.data?.order) {
-      return NextResponse.json({ received: true, info: "Test webhook response" }, { status: 200 });
+      return NextResponse.json(
+        { received: true, test: true, message: "Webhook test received" },
+        { status: 200 }
+      );
     }
 
     await connectToDatabase();
 
     const orderIdFromGateway = body.data.order.cf_order_id;
-    const paymentStatus = body.data.order.order_status.toUpperCase();
+    const paymentStatus = body.data.order.order_status?.toUpperCase();
 
     let payment_status = "PENDING";
     let order_status = "Payment Awaiting";
