@@ -320,10 +320,10 @@ function ConvertToOrderModal({ cart, onClose }) {
 
   return (
     <>
-      <div className="fixed inset-0 bg-black/40 z-[9999]" onClick={onClose}></div>
+      <div className="fixed inset-0 bg-black/40 z-9999" onClick={onClose}></div>
 
       <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 
-        bg-white p-6 rounded-xl w-[92vw] sm:w-[450px] z-[10000] space-y-4">
+        bg-white p-6 rounded-xl w-[92vw] sm:w-[450px] z-10000 space-y-4">
 
         <h2 className="text-lg font-semibold">Convert to Order</h2>
 
@@ -365,9 +365,9 @@ function CartDrawer({ cart, onClose, onConvert }) {
 
   return (
     <>
-      <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[999]" onClick={onClose} />
+      <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-999" onClick={onClose} />
 
-      <div className="fixed top-0 right-0 w-[92vw] sm:w-[420px] h-screen bg-white z-[1000] shadow-2xl border-l border-[#e7e1cf] flex flex-col">
+      <div className="fixed top-0 right-0 w-[92vw] sm:w-[420px] h-screen bg-white z-1000 shadow-2xl border-l border-[#e7e1cf] flex flex-col">
 
         <div className="p-4 border-b bg-[#fcfbf8] flex justify-between items-center">
           <h3 className="text-lg font-semibold">Shopping Cart Details</h3>
