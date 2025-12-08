@@ -1,10 +1,14 @@
 import ProductClient from "./ProductClient";
 
 export async function generateMetadata({ params }) {
-  const { slug } = await params; // ✅ await here
+  const { slug } = params;
+
+  const baseUrl =
+    process.env.BASE_URL ||
+    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000");
 
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/products/${slug}`, {
+    const res = await fetch(`${baseUrl}/api/products/${slug}`, {
       next: { revalidate: 60 },
     });
 
@@ -43,6 +47,6 @@ export async function generateMetadata({ params }) {
 }
 
 export default async function Page({ params }) {
-  const { slug } = await params; // ✅ also await here
+  const { slug } = params;
   return <ProductClient slug={slug} />;
 }
