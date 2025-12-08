@@ -330,7 +330,7 @@ const exportCSV = async () => {
             className="
             h-10 px-4 rounded-lg border border-[#e7e1cf]
             bg-[#fcfbf8] text-[14px] text-[#1b180d]
-            flex items-center justify-between gap-2 min-w-[160px]
+            flex items-center justify-between gap-2 min-w-40
             hover:border-[#b28c34] transition
             "
         >
@@ -462,7 +462,7 @@ const exportCSV = async () => {
               <th className="px-6 py-4 text-left min-w-[170px]">Date</th>
               <th className="px-6 py-4 text-left min-w-[120px]">Amount</th>
               <th className="px-6 py-4 text-left min-w-[120px]">Payment</th>
-              <th className="px-6 py-4 text-left min-w-[160px]">Status</th>
+              <th className="px-6 py-4 text-left min-w-40">Status</th>
               <th className="px-6 py-4 text-left min-w-[120px]">Action</th>
             </tr>
           </thead>
