@@ -449,8 +449,8 @@ export default function OrderDetailsClient({ orderFromServer }) {
                                   minute: "2-digit",
                                 })
                               : ""}
-                            {h.by && (
-                              <span> · by {session?.user?.name ?? "Admin"}</span>
+                            {session?.user?.name && (
+                              <span> · by {session.user.name}</span>
                             )}
                           </p>
                           {h.note && (
