@@ -1,7 +1,7 @@
 // app/(admin)/admin/orders/[id]/OrderDetailsClient.jsx
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo,useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import {
@@ -66,6 +66,40 @@ export default function OrderDetailsClient({ orderFromServer }) {
   );
   const shipping = order.shippingCharge || 0;
   const grandTotal = order.totalAmount || subtotal + shipping;
+
+  // 👉 DATE FIX HOOKS MUST BE HERE
+  const [formattedDate, setFormattedDate] = useState("");
+  const [formattedHistoryDate, setFormattedHistoryDate] = useState({});
+
+  useEffect(() => {
+    if (order?.createdAt) {
+      const dt = new Date(order.createdAt);
+      setFormattedDate(
+        dt.toLocaleString("en-IN", {
+          day: "2-digit",
+          month: "long",
+          year: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+        })
+      );
+    }
+
+    const mapped = {};
+    order.orderHistory?.forEach((h, i) => {
+      if (h.at) {
+        const date = new Date(h.at);
+        mapped[i] = date.toLocaleString("en-IN", {
+          day: "2-digit",
+          month: "short",
+          year: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+      }
+    });
+    setFormattedHistoryDate(mapped);
+  }, [order]);
 
   const customerType =
     order.userId?.isGuest === true
@@ -158,14 +192,7 @@ export default function OrderDetailsClient({ orderFromServer }) {
               Order #{order.customOrderId || order._id}
             </h1>
             <p className="text-xs lg:text-sm text-[#6b6654] ">
-              Placed on:{" "}
-              {createdAt.toLocaleString("en-IN", {
-                day: "2-digit",
-                month: "long",
-                year: "numeric",
-                hour: "2-digit",
-                minute: "2-digit",
-              })}
+              Placed on: {formattedDate || "Loading..."}
             </p>
           </div>
         </div>
@@ -440,15 +467,7 @@ export default function OrderDetailsClient({ orderFromServer }) {
                             {h.from} → {h.to}
                           </p>
                           <p className="text-[11px] text-[#6b6654]">
-                            {h.at
-                              ? new Date(h.at).toLocaleString("en-IN", {
-                                  day: "2-digit",
-                                  month: "short",
-                                  year: "numeric",
-                                  hour: "2-digit",
-                                  minute: "2-digit",
-                                })
-                              : ""}
+                            {formattedHistoryDate[idx] || ""}
                             {session?.user?.name && (
                               <span> · by {session.user.name}</span>
                             )}
