@@ -1,5 +1,6 @@
 // app/(admin)/admin/orders/[id]/page.jsx
-
+import "@/models/User";         // register User model on server
+import "@/models/Product";      // register Product model on server
 import connectToDatabase from "@/lib/mongodb";
 import { Order } from "@/models/Order";
 import OrderDetailsClient from "./OrderDetailsClient";
