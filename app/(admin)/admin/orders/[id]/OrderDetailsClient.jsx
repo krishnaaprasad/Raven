@@ -14,6 +14,7 @@ import {
   Clock3,
 } from "lucide-react";
 import { toast } from "react-hot-toast";
+import "@/models/User";
 
 const ORDER_FLOW = [
   "Payment Awaiting",
