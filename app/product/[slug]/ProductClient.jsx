@@ -276,7 +276,7 @@ export default function ProductClient({ slug }) {
           </h1>
 
           {/* Tagline */}
-          <p className="text-[#755B00] text-base md:text-lg font-medium">
+          <p className="text-[#755B00] text-base md:text-base font-medium">
             Long lasting | Premium scent | Fragrance
           </p>
 
@@ -313,7 +313,7 @@ export default function ProductClient({ slug }) {
 
           {/* Price block */}
           <div>
-            <p className="text-gray-700 text-sm font-semibold mb-1">
+            <p className="text-gray-700 text-xs font-semibold mb-1">
               MRP ₹{formatAmount(selected.mrp)} (Incl. of all taxes)
             </p>
             <div className="flex items-center gap-3">
@@ -351,10 +351,10 @@ export default function ProductClient({ slug }) {
           {/* Benefits */}
           {product.benefits?.length > 0 && (
             <div>
-              <p className="font-bold mb-2 text-[#231F20] text-lg">
+              <p className="font-bold mb-2 text-[#231F20] text-sm md:text-base">
                 What makes it great:
               </p>
-              <ul className="space-y-2 text-[#5F544E] text-base">
+              <ul className="space-y-2 text-[#5F544E] text-sm md:text-base">
                 {product.benefits.map((b, i) => (
                   <li key={i} className="flex items-center gap-2">
                     <FaCheck className="text-[#b28c34]" />
@@ -449,7 +449,7 @@ export default function ProductClient({ slug }) {
               Description / Ingredients / How To Use
              ───────────────────────── */}
           {/* Accordion Section */}
-          <div className="w-full max-w-xl mx-auto mt-10 border border-[#e7e1cf] rounded-lg overflow-hidden">
+          <div className="w-full max-w-xl mx-auto mt-5 border border-[#e7e1cf] rounded-lg overflow-hidden">
             {[
               { id: "Description", label: "DESCRIPTION" },
               { id: "ProductDetails", label: "PRODUCT DETAILS" },
@@ -461,7 +461,7 @@ export default function ProductClient({ slug }) {
                   onClick={() =>
                     setOpenSections((prev) => ({ ...prev, [tab.id]: !prev[tab.id] }))
                   }
-                  className="w-full flex items-center justify-between py-4 px-4 font-medium tracking-wider text-base text-[#1b180d] uppercase"
+                  className="w-full flex items-center justify-between py-4 px-4 font-medium tracking-wider text-sm md:text-base text-[#1b180d] uppercase"
                 >
                   <span className="flex-1 text-center">{tab.label}</span>
 
@@ -483,7 +483,7 @@ export default function ProductClient({ slug }) {
                   animate={{ height: "auto", opacity: 1 }}
                   exit={{ height: 0, opacity: 0 }}
                   transition={{ duration: 0.35, ease: "easeInOut" }}
-                  className="px-4 pb-4 text-[#4b423c] leading-relaxed text-base md:text-lg overflow-hidden"
+                  className="px-4 pb-4 text-[#4b423c] leading-relaxed text-sm md:text-base overflow-hidden"
                 >
                   {/* TAB CONTENT */}
                   {tab.id === "Description" && (
@@ -491,7 +491,7 @@ export default function ProductClient({ slug }) {
                   )}
 
                   {tab.id === "ProductDetails" && (
-                    <ul className="list-disc pl-5 space-y-2 text-base md:text-lg">
+                    <ul className="list-disc pl-5 space-y-2 text-sm md:text-base">
                       {product.fragranceType && (
                         <li><strong>Fragrance Type:</strong> {product.fragranceType}</li>
                       )}
@@ -540,7 +540,7 @@ export default function ProductClient({ slug }) {
         id="reviews-section"
         className="bg-white border border-[#e7e1cf] rounded-2xl shadow-sm px-0 sm:px-0 py-0"
       >
-        <h2 className="text-2xl text-center font-semibold text-[#1b180d] px-2 sm:px-4 py-2 sm:py-4 border-b border-[#e7e1cf]">
+        <h2 className="text-lg md:text-2xl text-center font-semibold text-[#1b180d] px-2 sm:px-4 py-2 sm:py-4 border-b border-[#e7e1cf]">
         Customer Reviews
       </h2>
         <ProductReviews
