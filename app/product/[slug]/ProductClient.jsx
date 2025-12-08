@@ -585,7 +585,7 @@ export default function ProductClient({ slug }) {
       </div>
 
       {/* FULL-WIDTH REVIEWS SECTION */}
-      <div className="max-w-7xl mx-auto mt-20 px-4">
+      <div className="max-w-7xl md:max-w-9x1 mx-auto mt-20 px-2">
       {/* Title */}
       
 

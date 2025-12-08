@@ -1,7 +1,7 @@
 import ProductClient from "./ProductClient";
 
 export async function generateMetadata({ params }) {
-  const { slug } = params;
+  const { slug } = await params;
 
   const baseUrl =
     process.env.BASE_URL ||
@@ -47,6 +47,6 @@ export async function generateMetadata({ params }) {
 }
 
 export default async function Page({ params }) {
-  const { slug } = params;
+  const { slug } = await params;
   return <ProductClient slug={slug} />;
 }
