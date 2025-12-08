@@ -87,62 +87,7 @@ export default function ProductClient({ slug }) {
     return (
       <section className="min-h-screen bg-[#FCF8F3] py-12 flex justify-center">
         <div className="w-full max-w-6xl grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-16 animate-pulse">
-          {/* Image Skeleton */}
-          {/* <div className="w-full flex flex-col gap-4">
-            <div className="relative h-[500px] w-full rounded-xl overflow-hidden bg-[#eae2cf] shimmer"></div>
-            <div className="flex gap-2">
-              {[1, 2, 3, 4].map((i) => (
-                <div key={i} className="bg-[#eae2cf] h-24 w-24 rounded-lg shimmer"></div>
-              ))}
-            </div>
-          </div> */}
-
-          {/* Text Skeleton */}
-          {/* <div className="flex flex-col gap-5">
-            <div className="bg-[#eae2cf] h-8 w-2/3 rounded shimmer"></div>
-            <div className="bg-[#eae2cf] h-4 w-1/3 rounded shimmer"></div>
-            <div className="bg-[#eae2cf] h-6 w-1/2 rounded shimmer"></div>
-            <div className="space-y-3 mt-6">
-              {[1, 2, 3, 4].map((i) => (
-                <div key={i} className="bg-[#eae2cf] h-3 rounded w-full shimmer"></div>
-              ))}
-            </div>
-            <div className="mt-6 flex gap-3">
-              <div className="bg-[#eae2cf] h-12 w-1/2 rounded-full shimmer"></div>
-              <div className="bg-[#eae2cf] h-12 w-1/2 rounded-full shimmer"></div>
-            </div>
-          </div> */}
         </div>
-
-        <style jsx>{`
-          .shimmer {
-            position: relative;
-            overflow: hidden;
-          }
-          .shimmer::before {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: -150px;
-            width: 100px;
-            height: 100%;
-            background: linear-gradient(
-              90deg,
-              transparent,
-              rgba(255, 215, 140, 0.4),
-              transparent
-            );
-            animation: shimmer 1.5s infinite;
-          }
-          @keyframes shimmer {
-            0% {
-              left: -150px;
-            }
-            100% {
-              left: 100%;
-            }
-          }
-        `}</style>
       </section>
     );
   }
