@@ -29,7 +29,7 @@ function timeAgo(dateString) {
   return new Date(dateString).toLocaleDateString();
 }
 
-export default function ProductReviews({ productId }) {
+export default function ProductReviews({ productId, onSummary }) {
   const { data: session } = useSession();
 
   const [reviews, setReviews] = useState([]);
@@ -69,6 +69,13 @@ export default function ProductReviews({ productId }) {
         setReviews(sorted);
       });
   }, [productId]);
+
+  useEffect(() => {
+  if (onSummary) {
+    onSummary({ avg, total });
+  }
+}, [avg, total]);
+
 
   function sortReviews(list, option) {
     const sorted = [...list];
@@ -115,7 +122,7 @@ export default function ProductReviews({ productId }) {
   return (
     <div className="flex flex-col md:flex-row bg-[#FCF8F3] rounded-xl px-0 md:px-6 py-6 border border-[#ede7d7]">
       {/* LEFT: Summary Sidebar */}
-      <div className="md:w-[290px] w-full flex-shrink-0 px-4 mb-10 md:mb-0">
+      <div className="md:w-[290px] w-full shrink-0 px-4 mb-10 md:mb-0">
         <div className="text-[2.5rem] leading-none font-extrabold text-[#b28c34] flex items-center mb-2">
           {avg}
           <span className="ml-2">
@@ -251,7 +258,7 @@ export default function ProductReviews({ productId }) {
                     <span className="font-semibold text-[#33270a]">{r.name}</span>
                     <CheckCircle2
                       size={14}
-                      className="text-[#b28c34] mt-[1px]"
+                      className="text-[#b28c34] mt-px"
                       title="Verified user"
                     />
                   </div>
