@@ -1,56 +1,71 @@
 'use client'
 
 import { ChevronDown, ChevronUp } from "lucide-react";
-import Zoom from "react-medium-image-zoom";
-import ZoomPlugin from "yet-another-react-lightbox/plugins/zoom";
-
-import { useEffect, useState } from 'react'
-import Image from 'next/image'
-import { FaCheck, FaShoppingCart } from 'react-icons/fa'
+import { useEffect, useState } from 'react';
+import Image from 'next/image';
+import { FaCheck, FaShoppingCart } from 'react-icons/fa';
 import ProductReviews from "@/components/ProductReviews";
 
-// ✅ Swiper setup
-import SwiperCore from 'swiper'
-import { Swiper, SwiperSlide } from 'swiper/react'
-import { Thumbs, Pagination } from 'swiper/modules'
-SwiperCore.use([Thumbs, Pagination])
+// Swiper (mobile gallery)
+import SwiperCore from 'swiper';
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { Thumbs, Pagination } from 'swiper/modules';
+SwiperCore.use([Thumbs, Pagination]);
 
-import 'swiper/css'
-import 'swiper/css/thumbs'
-import 'swiper/css/pagination'
+import 'swiper/css';
+import 'swiper/css/thumbs';
+import 'swiper/css/pagination';
 
-import Lightbox from 'yet-another-react-lightbox'
-import 'yet-another-react-lightbox/styles.css'
-import { motion, AnimatePresence } from "framer-motion"
-import { useCart } from '@/app/context/cartcontext'
-import { toast } from 'react-hot-toast'
-import { useRouter } from 'next/navigation'
+import Lightbox from 'yet-another-react-lightbox';
+import 'yet-another-react-lightbox/styles.css';
+
+import { motion, AnimatePresence } from "framer-motion";
+import { useCart } from '@/app/context/cartcontext';
+import { toast } from 'react-hot-toast';
+import { useRouter } from 'next/navigation';
+
+// ---------- Cloudinary Helper ----------
+function buildCloudinaryUrl(url, { w, h, crop = 'fill', quality = 'auto' } = {}) {
+  if (!url || typeof url !== 'string') return url;
+
+  // Only touch Cloudinary image URLs
+  if (!url.includes("res.cloudinary.com") || !url.includes("/image/upload/")) {
+    return url;
+  }
+
+  const [prefix, rest] = url.split("/image/upload/");
+  const transforms = [`f_auto`, `q_${quality}`];
+
+  if (w) transforms.push(`w_${w}`);
+  if (h) transforms.push(`h_${h}`);
+  if (crop) transforms.push(`c_${crop}`);
+
+  return `${prefix}/image/upload/${transforms.join(",")}/${rest}`;
+}
 
 export default function ProductClient({ slug }) {
-  const [product, setProduct] = useState(null)
-  const [loading, setLoading] = useState(true)
-  const [selected, setSelected] = useState(null)
-  const [quantity, setQuantity] = useState(1)
-  const [thumbsSwiper, setThumbsSwiper] = useState(null)
-  const [lightboxOpen, setLightboxOpen] = useState(false)
-  const [lightboxIndex, setLightboxIndex] = useState(0)
-  const [isAdding, setIsAdding] = useState(false)
+  const [product, setProduct] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [selected, setSelected] = useState(null);
+  const [quantity, setQuantity] = useState(1);
+  const [thumbsSwiper, setThumbsSwiper] = useState(null);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
+  const [isAdding, setIsAdding] = useState(false);
   const [reviewSummary, setReviewSummary] = useState({ avg: 0, total: 0 });
   const [activeTab, setActiveTab] = useState("");
 
-
-  // Accordion: Description / Ingredients / How To Use
   const [openSections, setOpenSections] = useState({
     Description: true,
     ProductDetails: false,
     HowToUse: false,
   });
 
-  const { addToCart } = useCart()
-  const router = useRouter()
+  const { addToCart } = useCart();
+  const router = useRouter();
 
-  const toggleSection = (tab) =>
-    setOpenSections((prev) => ({ ...prev, [tab]: !prev[tab] }))
+  const toggleSection = (tabId) =>
+    setOpenSections((prev) => ({ ...prev, [tabId]: !prev[tabId] }));
 
   // ─────────────────────────
   // Fetch product
@@ -58,27 +73,27 @@ export default function ProductClient({ slug }) {
   useEffect(() => {
     async function fetchProduct() {
       try {
-        const res = await fetch(`/api/products/${slug}`)
-        const data = await res.json()
+        const res = await fetch(`/api/products/${slug}`);
+        const data = await res.json();
 
         if (res.ok && data) {
-          setProduct(data)
-          setSelected(data.variants?.[0])
+          setProduct(data);
+          setSelected(data.variants?.[0]);
         } else {
-          router.replace("/")
-          toast.error("This product is no longer available")
+          router.replace("/");
+          toast.error("This product is no longer available");
         }
       } catch (error) {
-        router.replace("/")
-        toast.error("This product is unavailable")
-        console.error("Error fetching product:", error)
+        router.replace("/");
+        toast.error("This product is unavailable");
+        console.error("Error fetching product:", error);
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
     }
 
-    if (slug) fetchProduct()
-  }, [slug, router])
+    if (slug) fetchProduct();
+  }, [slug, router]);
 
   // ─────────────────────────
   // Skeleton while loading / missing
@@ -86,8 +101,7 @@ export default function ProductClient({ slug }) {
   if (!product || !selected) {
     return (
       <section className="min-h-screen bg-[#FCF8F3] py-12 flex justify-center">
-        <div className="w-full max-w-6xl grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-16 animate-pulse">
-        </div>
+        <div className="w-full max-w-6xl grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-16 animate-pulse" />
       </section>
     );
   }
@@ -95,15 +109,15 @@ export default function ProductClient({ slug }) {
   // ─────────────────────────
   // Helpers
   // ─────────────────────────
-  const increase = () => setQuantity((q) => q + 1)
-  const decrease = () => setQuantity((q) => (q > 1 ? q - 1 : 1))
+  const increase = () => setQuantity((q) => q + 1);
+  const decrease = () => setQuantity((q) => (q > 1 ? q - 1 : 1));
 
   const handleAddToCart = () => {
-    setIsAdding(true)
+    setIsAdding(true);
 
     const imageUrl = Array.isArray(product.images)
-      ? product.images[0]?.original || product.images[0]
-      : product.image || ''
+      ? (product.images[0]?.original || product.images[0])
+      : product.image || '';
 
     addToCart(
       {
@@ -115,11 +129,11 @@ export default function ProductClient({ slug }) {
         size: selected.size,
       },
       quantity
-    )
+    );
 
-    toast.success(`${product.name} (${selected.size}) added to cart!`)
-    setTimeout(() => setIsAdding(false), 800)
-  }
+    toast.success(`${product.name} (${selected.size}) added to cart!`);
+    setTimeout(() => setIsAdding(false), 800);
+  };
 
   const handleBuyNow = () => {
     const buyNowItem = {
@@ -129,39 +143,37 @@ export default function ProductClient({ slug }) {
       price: selected.price,
       mrp: selected.mrp,
       image: Array.isArray(product.images)
-        ? product.images[0]?.original || product.images[0]
+        ? (product.images[0]?.original || product.images[0])
         : product.image || '',
       size: selected.size,
       quantity,
-    }
+    };
 
-    sessionStorage.setItem("buyNowItem", JSON.stringify(buyNowItem))
-    router.push('/checkout?mode=buynow')
-  }
+    sessionStorage.setItem("buyNowItem", JSON.stringify(buyNowItem));
+    router.push('/checkout?mode=buynow');
+  };
 
   // Scroll to Reviews & open Review section
   const scrollToReviews = () => {
     const section = document.getElementById("reviews-section");
     if (section) {
       section.scrollIntoView({ behavior: "smooth", block: "start" });
-
-      // Auto-open/activate Review area
       setActiveTab("Review");
       setOpenSections((prev) => ({ ...prev, Review: true }));
     }
   };
 
   const formatAmount = (value) => {
-    if (!value || isNaN(value)) return "0.00"
-    return Number(value).toFixed(2)
-  }
+    if (!value || isNaN(value)) return "0.00";
+    return Number(value).toFixed(2);
+  };
 
-  const subtotal = selected.price * quantity
-
-  // Rating summary (Style A)
   const hasRatingSummary =
     typeof product.averageRating === "number" &&
-    typeof product.reviewCount === "number"
+    typeof product.reviewCount === "number";
+
+  const mainDesktopImage =
+    product.images[lightboxIndex]?.original || product.images[lightboxIndex];
 
   // ─────────────────────────
   // UI
@@ -170,98 +182,125 @@ export default function ProductClient({ slug }) {
     <section className="min-h-screen bg-[#FCF8F3] py-8 px-4 sm:px-8">
       {/* Top 2-column layout */}
       <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-[minmax(0,1.1fr)_minmax(0,1.2fr)] gap-10 md:gap-16 items-start">
-      {/* DESKTOP GALLERY STICKY WRAPPER */}
-      <div className="hidden md:block sticky top-18 h-fit self-start">
-        <div className="flex gap-4">
-          {/* Left Thumbnails */}
-          <div className="flex flex-col gap-3 w-24 max-h-[80vh] overflow-y-auto custom-scroll">
-            {product.images.map((src, index) => {
-              const thumb = src?.thumbnail || src;
-              return (
-                <div
-                  key={index}
-                  onClick={() => setLightboxIndex(index)}
-                  className={`border rounded-lg overflow-hidden cursor-pointer transition ${
-                    lightboxIndex === index ? "border-[#b28c34]" : "border-gray-300"
-                  }`}
-                >
-                  <Image
-                    src={thumb}
-                    alt={`${product.name} thumbnail`}
-                    width={95}
-                    height={95}
-                    className="object-cover w-full h-[95px]"
-                  />
-                </div>
-              );
-            })}
-          </div>
+        {/* DESKTOP STICKY GALLERY */}
+        <div className="hidden md:block md:sticky md:top-24 self-start">
+          <div className="flex gap-4 items-start">
+            {/* Left Thumbnails */}
+            <div className="flex flex-col gap-3 w-24 max-h-[80vh] overflow-y-auto">
+              {product.images.map((src, index) => {
+                const raw = src?.thumbnail || src;
+                const thumb = buildCloudinaryUrl(raw, {
+                  w: 110,
+                  h: 110,
+                  crop: 'fill',
+                });
 
-          {/* Main Image */}
-          <div className="flex-1 items-center justify-center">
-            <Image
-              src={product.images[lightboxIndex]?.original || product.images[lightboxIndex]}
-              alt={product.name}
-              width={600}
-              height={600}
-              className="object-contain rounded-xl cursor-pointer"
-              onClick={() => setLightboxOpen(true)}
-            />
+                return (
+                  <div
+                    key={index}
+                    onClick={() => setLightboxIndex(index)}
+                    className={`border rounded-lg overflow-hidden cursor-pointer transition ${
+                      lightboxIndex === index ? "border-[#b28c34]" : "border-gray-300"
+                    }`}
+                  >
+                    <Image
+                      src={thumb}
+                      alt={`${product.name} thumbnail ${index + 1}`}
+                      width={110}
+                      height={110}
+                      className="object-cover w-full h-[110px]"
+                    />
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Main Image */}
+            <div className="flex-1 flex items-center justify-center rounted-lg max-h-[80vh]">
+              <Image
+                src={buildCloudinaryUrl(mainDesktopImage, {
+                  w: 650,
+                  h: 750,
+                  crop: 'fit',
+                })}
+                alt={product.name}
+                width={650}
+                height={750}
+                className="object-contain rounded-lg cursor-pointer max-h-[80vh] w-full"
+                onClick={() => setLightboxOpen(true)}
+              />
+            </div>
           </div>
         </div>
-      </div>
 
+        {/* MOBILE GALLERY WITH THUMBNAILS */}
+        <div className="md:hidden">
+          {/* Main Swiper */}
+          <Swiper
+            spaceBetween={10}
+            pagination={{ clickable: true }}
+            thumbs={{ swiper: thumbsSwiper }}
+            modules={[Thumbs, Pagination]}
+            className="rounded-xl mb-3"
+          >
+            {product.images?.map((src, i) => {
+              const raw = src?.original || src;
+              const mobileUrl = buildCloudinaryUrl(raw, {
+                w: 650,
+                h: 650,
+                crop: 'fill',
+              });
 
-      {/* MOBILE GALLERY WITH THUMBNAILS */}
-      <div className="md:hidden">
-        {/* Main Swiper */}
-        <Swiper
-          spaceBetween={10}
-          pagination={{ clickable: true }}
-          thumbs={{ swiper: thumbsSwiper }}
-          modules={[Thumbs, Pagination]}
-          className="rounded-xl mb-3"
-        >
-          {product.images?.map((src, i) => (
-            <SwiperSlide key={i}>
-              <Image
-                src={src?.original || src}
-                alt={product.name}
-                width={400}
-                height={400}
-                className="w-full h-auto object-contain rounded-xl cursor-pointer"
-                onClick={() => {
-                  setLightboxIndex(i);
-                  setLightboxOpen(true);
-                }}
-              />
-            </SwiperSlide>
-          ))}
-        </Swiper>
+              return (
+                <SwiperSlide key={i}>
+                  <Image
+                    src={mobileUrl}
+                    alt={product.name}
+                    width={650}
+                    height={650}
+                    className="w-full h-auto object-contain rounded-xl cursor-pointer"
+                    onClick={() => {
+                      setLightboxIndex(i);
+                      setLightboxOpen(true);
+                    }}
+                  />
+                </SwiperSlide>
+              );
+            })}
+          </Swiper>
 
-        {/* Mobile Thumbnails */}
-        <Swiper
-          onSwiper={setThumbsSwiper}
-          spaceBetween={12}
-          slidesPerView={4}
-          freeMode
-          watchSlidesProgress
-          className="mt-4"
-        >
-          {product.images?.map((src, i) => (
-            <SwiperSlide key={i}>
-              <Image
-                src={src?.thumbnail || src}
-                alt={`thumb-${i}`}
-                width={80}
-                height={80}
-                className="rounded-lg border border-gray-300 object-cover h-[85px] w-[85px] cursor-pointer "
-                onClick={() => setLightboxIndex(i)}
-              />
-            </SwiperSlide>
-          ))}
-        </Swiper>
-      </div>
+          {/* Mobile Thumbnails */}
+          <Swiper
+            onSwiper={setThumbsSwiper}
+            spaceBetween={12}
+            slidesPerView={4}
+            freeMode
+            watchSlidesProgress
+            className="mt-4"
+          >
+            {product.images?.map((src, i) => {
+              const raw = src?.thumbnail || src;
+              const thumb = buildCloudinaryUrl(raw, {
+                w: 100,
+                h: 100,
+                crop: 'fill',
+              });
+
+              return (
+                <SwiperSlide key={i}>
+                  <Image
+                    src={thumb}
+                    alt={`thumb-${i}`}
+                    width={100}
+                    height={100}
+                    className="rounded-lg border border-gray-300 object-cover h-[90px] w-[90px] cursor-pointer"
+                    onClick={() => setLightboxIndex(i)}
+                  />
+                </SwiperSlide>
+              );
+            })}
+          </Swiper>
+        </div>
 
         {/* RIGHT: Product Details + Accordion */}
         <motion.div
@@ -283,16 +322,19 @@ export default function ProductClient({ slug }) {
           {/* Rating summary - Style A */}
           {hasRatingSummary && (
             <div className="flex items-center gap-2 text-sm text-[#4B423C]">
-              <span className="text-base">★ {product.averageRating.toFixed(1)}</span>
+              <span className="text-base">
+                ★ {product.averageRating.toFixed(1)}
+              </span>
               <span className="text-xs text-[#6b6654]">
-                | {product.reviewCount} {product.reviewCount === 1 ? "review" : "reviews"}
+                | {product.reviewCount}{" "}
+                {product.reviewCount === 1 ? "review" : "reviews"}
               </span>
             </div>
           )}
-          
-          {reviewSummary.total > 0 && (
-            <div onClick={scrollToReviews}
 
+          {reviewSummary.total > 0 && (
+            <div
+              onClick={scrollToReviews}
               className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-[#e7e1cf] bg-white hover:bg-[#faf6ed] transition cursor-pointer w-auto max-w-fit"
             >
               <span className="text-[#b28c34] text-[15px]">★</span>
@@ -338,8 +380,8 @@ export default function ProductClient({ slug }) {
                   onClick={() => setSelected(v)}
                   className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
                     selected.size === v.size
-                      ? 'bg-black text-white shadow'
-                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                      ? "bg-black text-white shadow"
+                      : "bg-gray-200 text-gray-700 hover:bg-gray-300"
                   }`}
                 >
                   {v.size.toUpperCase()}
@@ -388,11 +430,12 @@ export default function ProductClient({ slug }) {
               disabled={isAdding}
               className="relative group flex-1 h-12 rounded-full overflow-hidden text-sm font-semibold tracking-wide uppercase text-[#1b180d] transition-all shadow-[0_4px_10px_rgba(0,0,0,0.1)] hover:shadow-[0_6px_15px_rgba(0,0,0,0.15)] font-[Manrope,sans-serif] cursor-pointer"
               style={{
-                background: 'linear-gradient(45deg, #a66d30, #ffe58e 50%, #e0b057)',
+                background:
+                  "linear-gradient(45deg, #a66d30, #ffe58e 50%, #e0b057)",
               }}
             >
               <span className="relative z-10 flex items-center justify-center gap-2">
-                {isAdding ? 'Added!' : 'Add to Cart'}
+                {isAdding ? "Added!" : "Add to Cart"}
                 <FaShoppingCart size={16} />
               </span>
 
@@ -444,10 +487,6 @@ export default function ProductClient({ slug }) {
             }
           `}</style>
 
-          {/* ─────────────────────────
-              VERTICAL ACCORDION (RIGHT COLUMN)
-              Description / Ingredients / How To Use
-             ───────────────────────── */}
           {/* Accordion Section */}
           <div className="w-full max-w-xl mx-auto mt-5 border border-[#e7e1cf] rounded-lg overflow-hidden">
             {[
@@ -458,9 +497,7 @@ export default function ProductClient({ slug }) {
               <div key={tab.id} className="border-b last:border-b-0 border-[#e7e1cf]">
                 <button
                   type="button"
-                  onClick={() =>
-                    setOpenSections((prev) => ({ ...prev, [tab.id]: !prev[tab.id] }))
-                  }
+                  onClick={() => toggleSection(tab.id)}
                   className="w-full flex items-center justify-between py-4 px-4 font-medium tracking-wider text-sm md:text-base text-[#1b180d] uppercase"
                 >
                   <span className="flex-1 text-center">{tab.label}</span>
@@ -474,56 +511,83 @@ export default function ProductClient({ slug }) {
                   </span>
                 </button>
 
-            {/* Smooth open animation */}
-            <AnimatePresence initial={false}>
-              {openSections[tab.id] && (
-                <motion.div
-                  key={tab.id}
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: "auto", opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
-                  transition={{ duration: 0.35, ease: "easeInOut" }}
-                  className="px-4 pb-4 text-[#4b423c] leading-relaxed text-sm md:text-base overflow-hidden"
-                >
-                  {/* TAB CONTENT */}
-                  {tab.id === "Description" && (
-                    <div dangerouslySetInnerHTML={{ __html: product.description }} />
-                  )}
+                <AnimatePresence initial={false}>
+                  {openSections[tab.id] && (
+                    <motion.div
+                      key={tab.id}
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.35, ease: "easeInOut" }}
+                      className="px-4 pb-4 text-[#4b423c] leading-relaxed text-sm md:text-base overflow-hidden"
+                    >
+                      {tab.id === "Description" && (
+                        <div
+                          dangerouslySetInnerHTML={{
+                            __html: product.description,
+                          }}
+                        />
+                      )}
 
-                  {tab.id === "ProductDetails" && (
-                    <ul className="list-disc pl-5 space-y-2 text-sm md:text-base">
-                      {product.fragranceType && (
-                        <li><strong>Fragrance Type:</strong> {product.fragranceType}</li>
+                      {tab.id === "ProductDetails" && (
+                        <ul className="list-disc pl-5 space-y-2 text-sm md:text-base">
+                          {product.fragranceType && (
+                            <li>
+                              <strong>Fragrance Type:</strong>{" "}
+                              {product.fragranceType}
+                            </li>
+                          )}
+                          {selected?.size && (
+                            <li>
+                              <strong>Volume:</strong> {selected.size}
+                            </li>
+                          )}
+                          {product.longevity && (
+                            <li>
+                              <strong>Longevity:</strong>{" "}
+                              {product.longevity}
+                            </li>
+                          )}
+                          {product.sillage && (
+                            <li>
+                              <strong>Sillage:</strong> {product.sillage}
+                            </li>
+                          )}
+                          {product.topNotes?.length > 0 && (
+                            <li>
+                              <strong>Top Notes:</strong>{" "}
+                              {product.topNotes.join(", ")}
+                            </li>
+                          )}
+                          {product.heartNotes?.length > 0 && (
+                            <li>
+                              <strong>Heart Notes:</strong>{" "}
+                              {product.heartNotes.join(", ")}
+                            </li>
+                          )}
+                          {product.baseNotes?.length > 0 && (
+                            <li>
+                              <strong>Base Notes:</strong>{" "}
+                              {product.baseNotes.join(", ")}
+                            </li>
+                          )}
+                          <li>
+                            <strong>Designed In:</strong> United Arab
+                            Emirates (UAE)
+                          </li>
+                        </ul>
                       )}
-                      {selected?.size && (
-                        <li><strong>Volume:</strong> {selected.size}</li>
-                      )}
-                      {product.longevity && (
-                        <li><strong>Longevity:</strong> {product.longevity}</li>
-                      )}
-                      {product.sillage && (
-                        <li><strong>Sillage:</strong> {product.sillage}</li>
-                      )}
-                      {product.topNotes?.length > 0 && (
-                        <li><strong>Top Notes:</strong> {product.topNotes.join(", ")}</li>
-                      )}
-                      {product.heartNotes?.length > 0 && (
-                        <li><strong>Heart Notes:</strong> {product.heartNotes.join(", ")}</li>
-                      )}
-                      {product.baseNotes?.length > 0 && (
-                        <li><strong>Base Notes:</strong> {product.baseNotes.join(", ")}</li>
-                      )}
-                      <li><strong>Designed In:</strong> United Arab Emirates (UAE)</li>
-                    </ul>
-                  )}
 
-                  {tab.id === "HowToUse" && (
-                    <p>Spray on pulse points like neck & wrists. Avoid contact with eyes.</p>
+                      {tab.id === "HowToUse" && (
+                        <p>
+                          Spray on pulse points like neck & wrists. Avoid
+                          contact with eyes.
+                        </p>
+                      )}
+                    </motion.div>
                   )}
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
+                </AnimatePresence>
+              </div>
             ))}
           </div>
         </motion.div>
@@ -531,75 +595,53 @@ export default function ProductClient({ slug }) {
 
       {/* FULL-WIDTH REVIEWS SECTION */}
       <div className="max-w-7xl md:max-w-9x1 mx-auto mt-20 px-2">
-      {/* Title */}
-      
-
-      {/* Card container */}
-      <div
-      
-        id="reviews-section"
-        className="bg-white border border-[#e7e1cf] rounded-2xl shadow-sm px-0 sm:px-0 py-0"
-      >
-        <h2 className="text-lg md:text-2xl text-center font-semibold text-[#1b180d] px-2 sm:px-4 py-2 sm:py-4 border-b border-[#e7e1cf]">
-        Customer Reviews
-      </h2>
-        <ProductReviews
-          productId={product._id}
-          onSummary={(data) => setReviewSummary(data)}
-        />
-      </div>
-    </div>
-
-
-      {/* FULL-WIDTH RELATED PRODUCTS (placeholder, if you want later) */}
-      {/* <div className="max-w-7xl mx-auto mt-16">
-        <RelatedProducts currentProductId={product._id} />
-      </div> */}
-
-      {lightboxOpen && (
-  <Lightbox
-    open={lightboxOpen}
-    close={() => setLightboxOpen(false)}
-    index={lightboxIndex}
-    slides={product.images.map((src) => ({
-      src: src?.original || src,
-    }))}
-    carousel={{ finite: false }}
-    render={{
-      slide: ({ slide }) => (
-        <div className="flex items-center justify-center w-full h-full bg-black">
-          <img
-            src={slide.src}
-            alt="fullscreen preview"
-            className="max-w-[98vw] max-h-[92vh] object-contain"
+        <div
+          id="reviews-section"
+          className="bg-white border border-[#e7e1cf] rounded-2xl shadow-sm px-0 sm:px-0 py-0"
+        >
+          <h2 className="text-lg md:text-2xl text-center font-semibold text-[#1b180d] px-2 sm:px-4 py-2 sm:py-4 border-b border-[#e7e1cf]">
+            Customer Reviews
+          </h2>
+          <ProductReviews
+            productId={product._id}
+            onSummary={(data) => setReviewSummary(data)}
           />
         </div>
-      ),
+      </div>
 
-      iconClose: () => (
-        <div
-          className="absolute top-5 right-5 text-white text-4xl font-bold z-999 cursor-pointer"
-          onClick={() => setLightboxOpen(false)}
-        >
-          ×
-        </div>
-      ),
-
-      iconPrev: () => (
-        <div className="absolute left-5 top-1/2 -translate-y-1/2 text-white text-5xl z-999 cursor-pointer select-none">
-          ❮
-        </div>
-      ),
-
-      iconNext: () => (
-        <div className="absolute right-5 top-1/2 -translate-y-1/2 text-white text-5xl z-999 cursor-pointer select-none">
-          ❯
-        </div>
-      ),
-    }}
-  />
-)}
-
+      {/* FULLSCREEN LIGHTBOX (DESKTOP + MOBILE) */}
+      {lightboxOpen && (
+        <Lightbox
+          open={lightboxOpen}
+          close={() => setLightboxOpen(false)}
+          index={lightboxIndex}
+          slides={product.images.map((src) => {
+            const raw = src?.original || src;
+            return {
+              src: buildCloudinaryUrl(raw, {
+                w: 1400,
+                h: 1400,
+                crop: 'fit',
+              }),
+            };
+          })}
+          carousel={{ finite: false }}
+          render={{
+            slide: ({ slide }) => (
+              <div className="flex items-center justify-center w-full h-full bg-black">
+                <img
+                  src={slide.src}
+                  alt="fullscreen preview"
+                  className="max-w-[98vw] max-h-[92vh] object-contain"
+                />
+              </div>
+            ),
+            iconClose: () => (
+              <div className="text-white text-2xl leading-none">×</div>
+            ),
+          }}
+        />
+      )}
     </section>
-  )
+  );
 }
