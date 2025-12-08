@@ -305,8 +305,8 @@ export default function OrderDetailsClient({ orderFromServer }) {
                   </span>
                 </div>
                 <div className="text-sm lg:text-sm text-[#6b6654] space-y-1">
-                  <p>{order.email}</p>
-                  <p>{order.phone}</p>
+                  <p>{order.email ?? "--"}</p>
+                  <p>{order.phone ?? "--"}</p>
                 </div>
 
                 <button
@@ -331,10 +331,8 @@ export default function OrderDetailsClient({ orderFromServer }) {
                     Shipping Address
                   </p>
                   <p>
-                    {order.addressDetails.address1}
-                    {order.addressDetails.address2
-                      ? `, ${order.addressDetails.address2}`
-                      : ""}
+                    {order.addressDetails?.address1 || "--"}
+                    {order.addressDetails?.address2 ? `, ${order.addressDetails.address2}` : ""}
                   </p>
                   <p>
                     {order.addressDetails.city}, {order.addressDetails.state}{" "}
@@ -370,7 +368,7 @@ export default function OrderDetailsClient({ orderFromServer }) {
                 <span
                   className={`px-2.5 py-1 text-sm font-semibold rounded-full ${currentOrderColor}`}
                 >
-                  {order.order_status}
+                  {order.order_status ?? "Unknown"}
                 </span>
               </div>
 
