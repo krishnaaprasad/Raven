@@ -4,6 +4,7 @@ import { Order } from "@/models/Order";
 import OrderDetailsClient from "./OrderDetailsClient";
 import { notFound } from "next/navigation";
 
+
 export const dynamic = "force-dynamic";
 
 export const metadata = {

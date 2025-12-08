@@ -1,6 +1,7 @@
 // app/(admin)/admin/orders/[id]/OrderDetailsClient.jsx
 "use client";
 
+import "@/models/User";
 import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
@@ -14,7 +15,7 @@ import {
   Clock3,
 } from "lucide-react";
 import { toast } from "react-hot-toast";
-import "@/models/User";
+
 
 const ORDER_FLOW = [
   "Payment Awaiting",

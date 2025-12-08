@@ -17,7 +17,6 @@ import { addDays, format } from "date-fns";
 // react-date-range CSS (required)
 import "react-date-range/dist/styles.css";
 import "react-date-range/dist/theme/default.css";
-import "@/models/User";
 
 /**
  * OrdersClient.jsx
