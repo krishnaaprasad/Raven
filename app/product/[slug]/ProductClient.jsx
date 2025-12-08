@@ -247,7 +247,7 @@ export default function ProductClient({ slug }) {
               const raw = src?.original || src;
               const mobileUrl = buildCloudinaryUrl(raw, {
                 w: 650,
-                h: 650,
+                h: 750,
                 crop: 'fill',
               });
 
@@ -257,7 +257,7 @@ export default function ProductClient({ slug }) {
                     src={mobileUrl}
                     alt={product.name}
                     width={650}
-                    height={650}
+                    height={750}
                     className="w-full h-auto object-contain rounded-xl cursor-pointer"
                     onClick={() => {
                       setLightboxIndex(i);
