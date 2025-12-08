@@ -451,7 +451,9 @@ export default function OrderDetailsClient({ orderFromServer }) {
                                   minute: "2-digit",
                                 })
                               : ""}
-                            {h.by && ` · by ${session?.user?.name || "Loading..."}`}
+                            {h.by && (
+                              <span> · by {session?.user?.name ?? "Admin"}</span>
+                            )}
                           </p>
                           {h.note && (
                             <p className="text-[11px] text-[#9a864c] mt-1">
