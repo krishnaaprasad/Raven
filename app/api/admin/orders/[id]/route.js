@@ -2,7 +2,7 @@
 import { NextResponse } from "next/server";
 import connectToDatabase from "@/lib/mongodb";
 import { Order } from "@/models/Order";
-import { User } from "@/models/User";
+import "@/models/User";
 const FLOW = ["Payment Awaiting", "Processing", "Shipped", "Out for Delivery", "Delivered"];
 
 function normalize(s) {
