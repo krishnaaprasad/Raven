@@ -1,5 +1,5 @@
 // app/(admin)/admin/orders/[id]/page.jsx
-import "@/models/User";
+
 import connectToDatabase from "@/lib/mongodb";
 import { Order } from "@/models/Order";
 import OrderDetailsClient from "./OrderDetailsClient";

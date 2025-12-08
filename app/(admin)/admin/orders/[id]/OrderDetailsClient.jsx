@@ -1,7 +1,6 @@
 // app/(admin)/admin/orders/[id]/OrderDetailsClient.jsx
 "use client";
 
-import "@/models/User";
 import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
@@ -9,7 +8,7 @@ import {
   ArrowLeft,
   Printer,
   Mail,
-  User,
+  User as UserIcon,
   Truck,
   CheckCircle2,
   Clock3,
@@ -301,7 +300,7 @@ export default function OrderDetailsClient({ orderFromServer }) {
                     {order.userName}
                   </p>
                   <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-[#f3e7c9] text-[#1b180d]">
-                    <User className="w-3 h-3" />
+                    <UserIcon className="w-3 h-3" />
                     {customerType}
                   </span>
                 </div>

@@ -1,5 +1,5 @@
 // /app/api/admin/orders/[id]/route.js
-import "@/models/User";
+
 import { NextResponse } from "next/server";
 import connectToDatabase from "@/lib/mongodb";
 import { Order } from "@/models/Order";
