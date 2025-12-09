@@ -175,11 +175,45 @@ export default function ProductClient({ slug }) {
   const mainDesktopImage =
     product.images[lightboxIndex]?.original || product.images[lightboxIndex];
 
+    // ----------- JSON-LD SEO Structured Data -----------
+    const productJsonLd = {
+      "@context": "https://schema.org",
+      "@type": "Product",
+      name: product.name,
+      description: product.shortDescription || product.metaDescription,
+      image: product.images?.map((i) => i.original || i),
+      sku: product._id,
+      brand: {
+        "@type": "Brand",
+        name: "Raven Fragrance",
+      },
+      offers: {
+        "@type": "Offer",
+        priceCurrency: "INR",
+        price: selected.price,
+        url: `https://www.ravenfragrance.in/product/${product.slug}`,
+        availability: "https://schema.org/InStock",
+      },
+      aggregateRating:
+        product.averageRating && product.reviewCount > 0
+          ? {
+              "@type": "AggregateRating",
+              ratingValue: product.averageRating,
+              reviewCount: product.reviewCount,
+            }
+          : undefined,
+    };
+
   // ─────────────────────────
   // UI
   // ─────────────────────────
   return (
     <section className="min-h-screen bg-[#FCF8F3] py-8 px-4 sm:px-8">
+      {/* SEO Structured Data */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd) }}
+        />
       {/* Top 2-column layout */}
       <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-[minmax(0,1.1fr)_minmax(0,1.2fr)] gap-10 md:gap-16 items-start">
         {/* DESKTOP STICKY GALLERY */}
@@ -579,21 +613,25 @@ export default function ProductClient({ slug }) {
                       )}
 
                       {tab.id === "HowToUse" && (
-                        <div className="space-y-3 leading-relaxed text-sm md:text-base">
-                          <p>For the best scent projection and longevity, follow these steps:</p>
+                        <div className=" space-y-3 text-[#4b423c] font-[Manrope,sans-serif] leading-relaxed text-sm md:text-base">
+                          <p>
+                            For the best scent projection and longevity, follow these steps:
+                          </p>
 
-                          <ul className="list-disc pl-5 space-y-2">
+                          <ul className="space-y-2 list-disc pl-5">
                             <li>
-                              <strong>The Perfect Distance:</strong> Hold the bottle 3–6 inches away from your body to create a fine, even mist.
+                              <strong>The Perfect Distance:</strong> Hold the bottle
+                              <strong> 3–6 inches</strong> away from your body to create a fine, even mist.
                             </li>
 
                             <li>
-                              <strong>Focus on Pulse Points:</strong> Apply to areas where heat naturally diffuses fragrance, such as the neck, wrists, and chest.
+                              <strong>Focus on Pulse Points:</strong> Spray where warmth naturally
+                              enhances diffusion — <strong>neck, wrists, chest, and behind the ears</strong>.
                             </li>
 
                             <li>
-                              <strong>Skin Only:</strong> Because of our high concentration of precious oils,
-                              apply directly to the skin. Avoid spraying closely on fabrics to prevent potential staining.
+                              <strong>Skin Only:</strong> Because of our high concentration of oils,
+                              apply directly on skin. Avoid close spray on clothes to prevent staining.
                             </li>
                           </ul>
                         </div>
@@ -614,7 +652,7 @@ export default function ProductClient({ slug }) {
           className="bg-white border border-[#e7e1cf] rounded-2xl shadow-sm px-0 sm:px-0 py-0"
         >
           <h2 className="text-lg md:text-2xl text-center font-semibold text-[#1b180d] px-2 sm:px-4 py-2 sm:py-4 border-b border-[#e7e1cf]">
-            Customer Reviews
+            Customer Reviews for {product.name}
           </h2>
           <ProductReviews
             productId={product._id}
@@ -659,3 +697,13 @@ export default function ProductClient({ slug }) {
     </section>
   );
 }
+
+<style jsx global>{`
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .animate-fadeIn {
+    animation: fadeIn .45s ease-in-out;
+  }
+`}</style>
