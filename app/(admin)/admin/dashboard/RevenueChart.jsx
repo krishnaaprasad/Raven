@@ -1,126 +1,176 @@
-// app/admin/dashboard/RevenueChart.jsx
 "use client";
 
 import { useEffect, useState } from "react";
 
 export default function RevenueChart() {
-  const [range, setRange] = useState("30 Days");
-  const [data, setData] = useState([]);
+  const [monthlyData, setMonthlyData] = useState([]);
+  const [dailyData, setDailyData] = useState([]);
+  const [selectedMonth, setSelectedMonth] = useState(null);
+  const [hover, setHover] = useState(null);
 
   useEffect(() => {
-    async function load() {
-      try {
-        const res = await fetch("/api/admin/revenue-stats");
-        const d = await res.json();
-        setData(d);
-      } catch (e) {
-        console.error("Revenue stats error:", e);
-      }
-    }
-    load();
+    loadMonthly();
   }, []);
 
-  // Total revenue (header)
-  const total = data.reduce((s, d) => s + d.revenue, 0);
+  async function loadMonthly() {
+    try {
+      const res = await fetch("/api/admin/revenue-monthly");
+      const json = await res.json();
+      setMonthlyData(json);
+    } catch (err) {
+      console.error("Monthly revenue API error:", err);
+    }
+  }
+
+  async function loadDaily(monthIndex, year) {
+    try {
+      const res = await fetch(`/api/admin/revenue-stats?month=${monthIndex}&year=${year}`);
+      const json = await res.json();
+      setDailyData(json.data);
+      setSelectedMonth({ monthIndex, year });
+    } catch (err) {
+      console.error("Daily stats error:", err);
+    }
+  }
+
+  const maxMonthly = Math.max(...monthlyData.map((m) => m.revenue), 1);
+  const maxDaily = Math.max(...dailyData.map((d) => d.revenue), 1);
+  const barWidth = 600 / Math.max(monthlyData.length, 1);
 
   return (
     <div className="rounded-xl border border-[#e7e1cf] p-6 bg-[#fcfbf8] w-full">
-      
-      {/* Header */}
-      <div className="flex items-start justify-between">
-        <div>
-          <p className="text-lg font-serif text-[#1b180d]">Daily Revenue</p>
+      <div className="flex justify-between items-center mb-4">
+        <p className="text-lg font-serif text-[#1b180d]">
+          {selectedMonth
+            ? `Revenue for ${monthName(selectedMonth.monthIndex)}`
+            : "Revenue by Month"}
+        </p>
 
-          <div className="flex items-baseline gap-3">
-            <div className="text-3xl font-serif font-semibold text-[#1b180d]">
-              ₹{total.toLocaleString()}
-            </div>
-            <div className="text-sm text-green-600">+12.5%</div>
-          </div>
-
-          <p className="text-sm text-[#9a864c]">Last 30 Days</p>
-        </div>
-
-        {/* Filter (only 30 days for now) */}
-        <div className="flex items-center gap-2 rounded-md p-1 bg-white border border-[#e7e1cf]">
+        {selectedMonth && (
           <button
-            className="px-3 py-1 text-sm rounded-md bg-[#f3efe6] font-semibold"
+            onClick={() => setSelectedMonth(null)}
+            className="px-3 py-1 text-sm rounded-md bg-[#b28c34] text-white hover:bg-[#9a864c] transition"
           >
-            30 Days
+            Back to Months
           </button>
-        </div>
+        )}
       </div>
 
-      {/* Chart */}
-      <div className="mt-4">
-        <div className="h-48 rounded-md bg-white border border-[#e7e1cf] p-4 overflow-hidden">
-          <svg viewBox="0 0 600 140" className="w-full h-full">
+      {/* ===================== CHART ===================== */}
+      <div className="h-72 rounded-lg border border-[#e7e1cf] bg-white p-4 relative overflow-visible">
 
-            {/* Gold gradient fill */}
-            <defs>
-              <linearGradient id="goldFill" x1="0" x2="0" y1="0" y2="1">
-                <stop offset="0%" stopColor="#9a864c" stopOpacity="0.18" />
-                <stop offset="100%" stopColor="#9a864c" stopOpacity="0" />
-              </linearGradient>
-            </defs>
+        {/* -------------------- MONTHLY BAR CHART -------------------- */}
+        {!selectedMonth && (
+          <svg viewBox="0 0 600 260" className="w-full h-full overflow-visible">
+            {monthlyData.map((m, i) => {
+              const height = (m.revenue / maxMonthly) * 170;
+              return (
+                <g
+                  key={i}
+                  onClick={() => loadDaily(m.monthIndex, m.year)}
+                  onMouseEnter={() => setHover({ index: i, type: "month" })}
+                  onMouseLeave={() => setHover(null)}
+                  style={{ cursor: "pointer" }}
+                >
+                  <rect
+                    x={i * barWidth + 25}
+                    y={200 - height}
+                    width={barWidth - 25}
+                    height={height}
+                    fill="#b28c34"
+                    rx="6"
+                  />
 
-            {/* Smooth gold line */}
+                  <text
+                    x={i * barWidth + barWidth / 2}
+                    y={225}
+                    textAnchor="middle"
+                    fontSize="12"
+                    fill="#6b6654"
+                  >
+                    {(m.month || "").substring(0, 3)}
+                  </text>
+
+                  {/* Tooltip */}
+                  {hover?.index === i && (
+                    <foreignObject
+                      x={i * barWidth + barWidth / 2 - 70}
+                      y={200 - height - 70}
+                      width="140"
+                      height="60"
+                    >
+                      <div className="bg-[#1b180d] text-white text-center p-2 rounded-md shadow-xl text-[11px]">
+                        <div>₹{m.revenue.toLocaleString()}</div>
+                        <div>{m.orders} orders</div>
+                      </div>
+                    </foreignObject>
+                  )}
+                </g>
+              );
+            })}
+          </svg>
+        )}
+
+        {/* -------------------- DAILY LINE CHART -------------------- */}
+        {selectedMonth && (
+          <svg viewBox="0 0 600 260" className="w-full h-full overflow-visible">
             <path
-              d={generateSmoothPath(data)}
-              stroke="#9a864c"
-              strokeWidth="4"
+              d={generateLine(dailyData, maxDaily)}
+              stroke="#b28c34"
+              strokeWidth="3"
               fill="none"
               strokeLinecap="round"
             />
 
-            {/* Fill under the curve */}
-            <path
-              d={generateArea(data)}
-              fill="url(#goldFill)"
-              opacity="0.6"
-            />
+            {dailyData.map((d, i) => {
+              const x = (560 / dailyData.length) * i + 20;
+              const y = 200 - (d.revenue / maxDaily) * 170;
+              const tooltipY = Math.max(10, y - 55); // prevents clipping top
 
+              return (
+                <g
+                  key={i}
+                  onMouseEnter={() => setHover({ index: i, type: "day" })}
+                  onMouseLeave={() => setHover(null)}
+                >
+                  <circle cx={x} cy={y} r="5" fill="#1b180d" />
+
+                  {hover?.index === i && (
+                    <foreignObject x={x - 60} y={tooltipY} width="140" height="50">
+                      <div className="bg-[#1b180d] text-white p-2 rounded text-center shadow-2xl text-[11px]">
+                        ₹{d.revenue.toLocaleString()} <br />
+                        {formatDate(d.date)}
+                      </div>
+                    </foreignObject>
+                  )}
+                </g>
+              );
+            })}
           </svg>
-        </div>
+        )}
       </div>
-
     </div>
   );
 }
 
-/** Convert data points → smooth SVG curve */
-function generateSmoothPath(data) {
-  if (!data.length) return "";
-
-  const max = Math.max(...data.map((d) => d.revenue), 1);
-  const stepX = 600 / Math.max(data.length - 1, 1);
-
+function generateLine(data, max) {
   return data
     .map((d, i) => {
-      const x = i * stepX;
-      const y = 120 - (d.revenue / max) * 110;
+      const x = (560 / data.length) * i + 20;
+      const y = 200 - (d.revenue / max) * 170;
       return `${i === 0 ? "M" : "L"}${x},${y}`;
     })
     .join(" ");
 }
 
-/** Fill area below the curve */
-function generateArea(data) {
-  if (!data.length) return "";
+function formatDate(str) {
+  return new Date(str).toLocaleDateString("en-IN", { day: "2-digit", month: "short" });
+}
 
-  const max = Math.max(...data.map((d) => d.revenue), 1);
-  const stepX = 600 / Math.max(data.length - 1, 1);
-
-  let path = data
-    .map((d, i) => {
-      const x = i * stepX;
-      const y = 120 - (d.revenue / max) * 110;
-      return `${i === 0 ? "M" : "L"}${x},${y}`;
-    })
-    .join(" ");
-
-  // Close bottom area
-  path += ` L600,140 L0,140 Z`;
-
-  return path;
+function monthName(num) {
+  return [
+    "",
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December",
+  ][num];
 }

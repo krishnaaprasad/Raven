@@ -2,56 +2,49 @@ import { NextResponse } from "next/server";
 import connectToDatabase from "@/lib/mongodb";
 import { Order } from "@/models/Order";
 
-export async function GET() {
+export async function GET(req) {
   try {
     await connectToDatabase();
 
-    // Create a date 30 days ago
-    const today = new Date();
-    const startDate = new Date();
-    startDate.setDate(today.getDate() - 29); // last 30 days
+    const { searchParams } = new URL(req.url);
+    const month = Number(searchParams.get("month"));
+    const year = Number(searchParams.get("year")) || new Date().getFullYear();
 
-    // Fetch PAID orders from last 30 days
+    let start = new Date(year, month - 1, 1);
+    let end = new Date(year, month, 1);
+
     const orders = await Order.aggregate([
       {
         $match: {
           status: "PAID",
-          createdAt: { $gte: startDate },
-        },
+          createdAt: { $gte: start, $lt: end }
+        }
       },
       {
         $group: {
-          _id: {
-            $dateToString: { format: "%Y-%m-%d", date: "$createdAt" },
-          },
-          revenue: { $sum: "$totalAmount" },
-        },
+          _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+          revenue: { $sum: "$totalAmount" }
+        }
       },
-      { $sort: { _id: 1 } },
+      { $sort: { _id: 1 } }
     ]);
 
-    // Convert aggregation to a dictionary
     const map = {};
-    orders.forEach((o) => {
-      map[o._id] = o.revenue;
-    });
+    orders.forEach((o) => (map[o._id] = o.revenue));
 
-    // Construct last 30-day range (even if no orders)
     const result = [];
-    for (let i = 0; i < 30; i++) {
-      const d = new Date(startDate);
-      d.setDate(startDate.getDate() + i);
-
+    for (let d = start; d < end; d.setDate(d.getDate() + 1)) {
       const key = d.toISOString().split("T")[0];
       result.push({
         date: key,
-        revenue: map[key] || 0,
+        revenue: map[key] || 0
       });
     }
 
-    return NextResponse.json(result);
+    return NextResponse.json({ data: result }); // ⬅ FIXED
+
   } catch (err) {
-    console.error("Revenue Stats Error:", err);
-    return NextResponse.json({ error: "Failed to load revenue stats" }, { status: 500 });
+    console.error("Daily Stats Error:", err);
+    return NextResponse.json({ error: "Failed to load daily stats" }, { status: 500 });
   }
 }

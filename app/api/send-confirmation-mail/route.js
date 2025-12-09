@@ -57,6 +57,7 @@ export async function POST(req) {
     await transporter.sendMail({
       from: `Raven Fragrance <${process.env.EMAIL_USER}>`,
       to: email,
+      bcc: "ravenfragrances@gmail.com",
       subject: `Your Order ${orderId} is Confirmed – Raven Fragrance`,
       html: orderConfirmationTemplate({
         name,
