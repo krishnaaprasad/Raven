@@ -5,6 +5,9 @@ import { usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import Marquee from "react-fast-marquee";
 
+// Lucide Icons
+import { Truck, Gift, Sparkles, Info } from "lucide-react";
+
 export default function HomeMarquee() {
   const pathname = usePathname();
   const isHomePage = pathname === "/";
@@ -19,18 +22,37 @@ export default function HomeMarquee() {
       try {
         const res = await fetch("/api/admin/marquee", { cache: "no-store" });
         const data = await res.json();
-        setMarquee({
-          active: data.active,
-          lines: data.lines || [],
-        });
+
+        const formatted =
+          data.lines?.map((item) =>
+            typeof item === "string"
+              ? { text: item, icon: "Sparkles", link: "" }
+              : item
+          ) || [];
+
+        setMarquee({ active: data.active, lines: formatted });
       } catch (err) {
         console.error("Failed to load marquee:", err);
       }
     }
+
     load();
   }, []);
 
-  if (!isHomePage || !marquee.active) return null;
+  if (!isHomePage || !marquee.active || marquee.lines.length === 0) return null;
+
+  const renderIcon = (name) => {
+    switch (name) {
+      case "Truck":
+        return <Truck className="w-4 h-4" />;
+      case "Gift":
+        return <Gift className="w-4 h-4" />;
+      case "Sparkles":
+        return <Sparkles className="w-4 h-4" />;
+      default:
+        return <Info className="w-4 h-4" />;
+    }
+  };
 
   return (
     <AnimatePresence mode="wait">
@@ -40,20 +62,25 @@ export default function HomeMarquee() {
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         transition={{ duration: 0.6, ease: "easeInOut" }}
-        className="relative bg-black text-white text-sm py-2 top-0 z-50 overflow-hidden"
+        className="relative bg-[#1b180d] text-[#fcfbf8] text-xs font-semibold uppercase tracking-wider py-2 z-50 overflow-hidden"
       >
-        <div className="absolute left-0 top-0 h-full w-17 bg-gradient-to-r from-black via-black/80 to-transparent z-10 pointer-events-none" />
-        <div className="absolute right-0 top-0 h-full w-17 bg-gradient-to-l from-black via-black/80 to-transparent z-10 pointer-events-none" />
+        <Marquee pauseOnHover pauseOnClick gradient={false} speed={55} className="px-4">
+          {marquee.lines.map((item, i) => {
+            const content = (
+              <span className="flex items-center gap-2 mx-8">
+                {renderIcon(item.icon)}
+                {item.text}
+              </span>
+            );
 
-        <Marquee pauseOnHover pauseOnClick gradient={false} speed={60} className="px-8">
-          {marquee.lines.map((line, i) => (
-            <span key={i} className="flex items-center">
-              {line}
-              {i !== marquee.lines.length - 1 && (
-                <span className="mx-3"></span>
-              )}
-            </span>
-          ))}
+            return item.link ? (
+              <a key={i} href={item.link} className="hover:text-[#b28c34] transition">
+                {content}
+              </a>
+            ) : (
+              <span key={i}>{content}</span>
+            );
+          })}
         </Marquee>
       </motion.div>
     </AnimatePresence>

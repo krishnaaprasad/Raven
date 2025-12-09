@@ -16,18 +16,19 @@ export default function RevenueChart() {
     try {
       const res = await fetch("/api/admin/revenue-monthly");
       const json = await res.json();
-      setMonthlyData(json);
+      setMonthlyData(json.data || []);
     } catch (err) {
       console.error("Monthly revenue API error:", err);
     }
   }
 
-  async function loadDaily(monthIndex, year) {
+  async function loadDaily(monthIndex) {
     try {
-      const res = await fetch(`/api/admin/revenue-stats?month=${monthIndex}&year=${year}`);
+      const res = await fetch(`/api/admin/revenue-stats?month=${monthIndex}`);
       const json = await res.json();
-      setDailyData(json.data);
-      setSelectedMonth({ monthIndex, year });
+      setDailyData(json.data || []);
+      setSelectedMonth(monthIndex);
+      setHover(null);
     } catch (err) {
       console.error("Daily stats error:", err);
     }
@@ -42,7 +43,7 @@ export default function RevenueChart() {
       <div className="flex justify-between items-center mb-4">
         <p className="text-lg font-serif text-[#1b180d]">
           {selectedMonth
-            ? `Revenue for ${monthName(selectedMonth.monthIndex)}`
+            ? `Revenue for ${monthName(selectedMonth)}`
             : "Revenue by Month"}
         </p>
 
@@ -56,25 +57,26 @@ export default function RevenueChart() {
         )}
       </div>
 
-      {/* ===================== CHART ===================== */}
       <div className="h-72 rounded-lg border border-[#e7e1cf] bg-white p-4 relative overflow-visible">
-
-        {/* -------------------- MONTHLY BAR CHART -------------------- */}
+        {/* ===================== MONTHLY BAR CHART ===================== */}
         {!selectedMonth && (
           <svg viewBox="0 0 600 260" className="w-full h-full overflow-visible">
             {monthlyData.map((m, i) => {
               const height = (m.revenue / maxMonthly) * 170;
+              const barX = i * barWidth + 25;
+              const barY = 200 - height;
+
               return (
                 <g
                   key={i}
-                  onClick={() => loadDaily(m.monthIndex, m.year)}
-                  onMouseEnter={() => setHover({ index: i, type: "month" })}
+                  onClick={() => loadDaily(m.monthIndex)}
+                  onMouseEnter={() => setHover({ index: i })}
                   onMouseLeave={() => setHover(null)}
                   style={{ cursor: "pointer" }}
                 >
                   <rect
-                    x={i * barWidth + 25}
-                    y={200 - height}
+                    x={barX}
+                    y={barY}
                     width={barWidth - 25}
                     height={height}
                     fill="#b28c34"
@@ -82,8 +84,8 @@ export default function RevenueChart() {
                   />
 
                   <text
-                    x={i * barWidth + barWidth / 2}
-                    y={225}
+                    x={barX + (barWidth - 25) / 2}
+                    y={230}
                     textAnchor="middle"
                     fontSize="12"
                     fill="#6b6654"
@@ -91,17 +93,17 @@ export default function RevenueChart() {
                     {(m.month || "").substring(0, 3)}
                   </text>
 
-                  {/* Tooltip */}
                   {hover?.index === i && (
                     <foreignObject
-                      x={i * barWidth + barWidth / 2 - 70}
-                      y={200 - height - 70}
-                      width="140"
-                      height="60"
+                      x={barX - 30}
+                      y={barY - 60}
+                      width="120"
+                      height="55"
+                      style={{ overflow: "visible" }}
                     >
-                      <div className="bg-[#1b180d] text-white text-center p-2 rounded-md shadow-xl text-[11px]">
+                      <div className="bg-[#1b180d] text-white text-xs p-2 rounded shadow-xl text-center leading-tight">
                         <div>₹{m.revenue.toLocaleString()}</div>
-                        <div>{m.orders} orders</div>
+                        <div className="opacity-80">{m.orders} orders</div>
                       </div>
                     </foreignObject>
                   )}
@@ -111,9 +113,9 @@ export default function RevenueChart() {
           </svg>
         )}
 
-        {/* -------------------- DAILY LINE CHART -------------------- */}
+        {/* ===================== DAILY LINE CHART ===================== */}
         {selectedMonth && (
-          <svg viewBox="0 0 600 260" className="w-full h-full overflow-visible">
+          <svg viewBox="0 0 600 220" className="w-full h-full overflow-visible">
             <path
               d={generateLine(dailyData, maxDaily)}
               stroke="#b28c34"
@@ -123,23 +125,28 @@ export default function RevenueChart() {
             />
 
             {dailyData.map((d, i) => {
-              const x = (560 / dailyData.length) * i + 20;
-              const y = 200 - (d.revenue / maxDaily) * 170;
-              const tooltipY = Math.max(10, y - 55); // prevents clipping top
+              const x = (600 / dailyData.length) * i + 20;
+              const y = 180 - (d.revenue / maxDaily) * 160;
 
               return (
                 <g
                   key={i}
-                  onMouseEnter={() => setHover({ index: i, type: "day" })}
+                  onMouseEnter={() => setHover({ index: i })}
                   onMouseLeave={() => setHover(null)}
                 >
                   <circle cx={x} cy={y} r="5" fill="#1b180d" />
 
                   {hover?.index === i && (
-                    <foreignObject x={x - 60} y={tooltipY} width="140" height="50">
-                      <div className="bg-[#1b180d] text-white p-2 rounded text-center shadow-2xl text-[11px]">
-                        ₹{d.revenue.toLocaleString()} <br />
-                        {formatDate(d.date)}
+                    <foreignObject
+                      x={Math.max(10, x - 65)}
+                      y={Math.max(10, y - 65)}
+                      width="140"
+                      height="60"
+                    >
+                      <div className="bg-[#1b180d] text-white text-xs p-2 rounded shadow-lg text-center leading-tight">
+                        <div>₹{d.revenue.toLocaleString()}</div>
+                        <div>{formatDate(d.date)}</div>
+                        <div>{d.orders} orders</div>
                       </div>
                     </foreignObject>
                   )}
@@ -156,21 +163,24 @@ export default function RevenueChart() {
 function generateLine(data, max) {
   return data
     .map((d, i) => {
-      const x = (560 / data.length) * i + 20;
-      const y = 200 - (d.revenue / max) * 170;
+      const x = (600 / data.length) * i + 20;
+      const y = 180 - (d.revenue / max) * 160;
       return `${i === 0 ? "M" : "L"}${x},${y}`;
     })
     .join(" ");
 }
 
 function formatDate(str) {
-  return new Date(str).toLocaleDateString("en-IN", { day: "2-digit", month: "short" });
+  return new Date(str).toLocaleDateString("en-IN", {
+    day: "2-digit",
+    month: "short",
+  });
 }
 
 function monthName(num) {
   return [
     "",
-    "January", "February", "March", "April", "May", "June",
-    "July", "August", "September", "October", "November", "December",
+    "January","February","March","April","May","June",
+    "July","August","September","October","November","December",
   ][num];
 }

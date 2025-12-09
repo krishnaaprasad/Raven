@@ -4,13 +4,14 @@ import Marquee from "@/models/Marquee";
 
 export async function GET() {
   await connectToDatabase();
-
   let record = await Marquee.findOne();
 
   if (!record) {
     record = await Marquee.create({
       active: true,
-      lines: ["FREE SHIPPING ON ORDERS ABOVE ₹1499!"],
+      lines: [
+        { text: "FREE SHIPPING ON ORDERS ABOVE ₹1499", icon: "Truck", link: "" },
+      ],
     });
   }
 
@@ -23,10 +24,7 @@ export async function PATCH(req) {
 
   const updated = await Marquee.findOneAndUpdate(
     {},
-    {
-      active: body.active,
-      lines: body.lines,
-    },
+    { active: body.active, lines: body.lines },
     { new: true, upsert: true }
   );
 

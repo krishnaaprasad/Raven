@@ -9,7 +9,7 @@ export async function GET() {
     const result = await Order.aggregate([
       {
         $match: {
-          status: "PAID",
+          payment_status: "PAID",   // FIXED
         },
       },
       {
@@ -45,7 +45,7 @@ export async function GET() {
       monthIndex: r._id,
     }));
 
-    return NextResponse.json(formatted);
+    return NextResponse.json({ data: formatted });
   } catch (err) {
     console.error("Revenue Monthly API Error:", err);
     return NextResponse.json({ error: "Failed to load monthly revenue" }, { status: 500 });
