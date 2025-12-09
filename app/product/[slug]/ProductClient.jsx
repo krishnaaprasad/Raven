@@ -579,10 +579,24 @@ export default function ProductClient({ slug }) {
                       )}
 
                       {tab.id === "HowToUse" && (
-                        <p>
-                          Spray on pulse points like neck & wrists. Avoid
-                          contact with eyes.
-                        </p>
+                        <div className="space-y-3 leading-relaxed text-sm md:text-base">
+                          <p>For the best scent projection and longevity, follow these steps:</p>
+
+                          <ul className="list-disc pl-5 space-y-2">
+                            <li>
+                              <strong>The Perfect Distance:</strong> Hold the bottle 3–6 inches away from your body to create a fine, even mist.
+                            </li>
+
+                            <li>
+                              <strong>Focus on Pulse Points:</strong> Apply to areas where heat naturally diffuses fragrance, such as the neck, wrists, and chest.
+                            </li>
+
+                            <li>
+                              <strong>Skin Only:</strong> Because of our high concentration of precious oils,
+                              apply directly to the skin. Avoid spraying closely on fabrics to prevent potential staining.
+                            </li>
+                          </ul>
+                        </div>
                       )}
                     </motion.div>
                   )}
