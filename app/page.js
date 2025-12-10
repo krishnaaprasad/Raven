@@ -13,8 +13,8 @@ import FindYourScentSection from "@/components/FindYourScentSection";
 
 export default function Home() {
   return (
-    <>
- <section className="relative w-full min-h-[320px] sm:min-h-[340px] md:min-h-[550px] flex items-center justify-center overflow-hidden">
+    <div className="homepage-theme">
+ <section className="relative w-full min-h-80 sm:min-h-[340px] md:min-h-[550px] flex items-center justify-center overflow-hidden">
   <video
     autoPlay
     loop
@@ -28,14 +28,14 @@ export default function Home() {
   
 </section>
 
-<div className="w-full h-[2px] bg-gradient-to-r from-[#af9b64] via-[#B4933A] to-[#af9b64] shadow-md" />
+<div className="w-full h-0.5 bg-linear-to-r from-[#af9b64] via-[#B4933A] to-[#af9b64] shadow-md" />
   <RavenBadge />
   <WhyChooseRaven />
   {/* <AboutRaven /> */}
-  <RebelSpirit />
-  <RebelFinale />
-  <ScentStorySection />
-  </>
+  {/* <RebelSpirit />
+  <RebelFinale /> */}
+  {/* <ScentStorySection /> */}
+  </div>
 
   );
 }

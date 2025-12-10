@@ -1,8 +1,5 @@
 @import "tailwindcss";
 
-@import "froala-editor/css/froala_editor.pkgd.min.css";
-@import "froala-editor/css/froala_style.min.css";
-
 
 :root {
   --background: #ffffff;
@@ -296,3 +293,66 @@ body {
   }
 }
 
+/* ============================================
+   ❤️ LOVABLE HOMEPAGE THEME (Safe Scoped Mode)
+   ============================================ */
+
+.homepage-theme {
+  --background: 40 30% 97%;
+  --foreground: 30 15% 15%;
+  --card: 40 25% 95%;
+  --card-foreground: 30 15% 15%;
+  --primary: 32 65% 45%;
+  --primary-foreground: 40 30% 97%;
+  --secondary: 35 20% 90%;
+  --secondary-foreground: 30 15% 20%;
+  --muted: 35 15% 88%;
+  --muted-foreground: 30 10% 45%;
+  --border: 35 20% 82%;
+  --input: 35 15% 88%;
+  --ring: 32 65% 45%;
+  --radius: 0.5rem;
+
+  --gold: 32 65% 45%;
+  --gold-light: 38 70% 55%;
+  --gold-dark: 28 60% 35%;
+  --cream: 40 30% 97%;
+  --cream-muted: 40 20% 92%;
+
+  font-family: "Outfit", sans-serif !important;
+}
+
+.homepage-theme h1,
+.homepage-theme h2,
+.homepage-theme h3,
+.homepage-theme h4 {
+  font-family: "Cormorant Garamond", serif !important;
+}
+
+/* Lovable animations */
+@keyframes homepage_float {
+  0%,100% { transform: translateY(0); }
+  50% { transform: translateY(-20px); }
+}
+.homepage-theme .animate-float {
+  animation: homepage_float 6s ease-in-out infinite;
+}
+
+@keyframes homepage_fadeInUp {
+  from { opacity:0; transform: translateY(30px); }
+  to   { opacity:1; transform: translateY(0); }
+}
+.homepage-theme .animate-fade-in-up {
+  animation: homepage_fadeInUp 0.8s ease-out forwards;
+}
+
+.homepage-theme .text-gold-gradient {
+  background: linear-gradient(135deg, hsl(var(--gold)), hsl(var(--gold-light)));
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+.homepage-theme .glow-gold {
+  box-shadow: 0 0 60px hsl(var(--gold) / 0.15);
+}

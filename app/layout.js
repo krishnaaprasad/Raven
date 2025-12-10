@@ -8,14 +8,23 @@ import Providers from "./Providers";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import HomeMarquee from "@/components/HomeMarquee"; // ✅ new client component
 
-import "froala-editor/css/froala_style.min.css";
-import "froala-editor/css/froala_editor.pkgd.min.css";
-import "froala-editor/css/themes/gray.min.css"; // premium theme
+import { Outfit } from 'next/font/google';
+import { Cormorant_Garamond } from 'next/font/google';
 
+const cormorantGaramond = Cormorant_Garamond({
+  subsets: ['latin'],
+  weight: ['400', '700'],
+  display: 'swap',
+})
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
+});
+
+const outfit = Outfit({
+  subsets: ['latin'],
+  display: 'swap', // Optional: controls font display behavior
 });
 
 const geistMono = Geist_Mono({
@@ -67,7 +76,7 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
+    <html lang="en" className={`${outfit.className} ${cormorantGaramond.className}`}>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
