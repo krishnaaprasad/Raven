@@ -62,7 +62,7 @@ export default function HomeMarquee() {
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         transition={{ duration: 0.6, ease: "easeInOut" }}
-        className="relative bg-[#1b180d] text-[#fcfbf8] text-xs font-semibold uppercase tracking-wider py-2 z-50 overflow-hidden"
+        className="relative bg-[#1b180d] text-[#fcfbf8] text-sm font-semibold uppercase tracking-wider py-2 z-50 overflow-hidden"
       >
         <Marquee pauseOnHover pauseOnClick gradient={false} speed={55} className="px-4">
           {marquee.lines.map((item, i) => {
