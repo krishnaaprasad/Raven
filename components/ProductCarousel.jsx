@@ -1,0 +1,93 @@
+"use client";
+
+import { useRef } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import ProductCard from "./ProductCard";
+import { Outfit, Cormorant_Garamond } from "next/font/google";
+
+const outfit = Outfit({ subsets: ["latin"], display: "swap" });
+const cormorant = Cormorant_Garamond({
+  subsets: ["latin"],
+  weight: ["400", "700"],
+  display: "swap",
+});
+
+export default function ProductCarousel({ products = [] }) {
+  const scrollRef = useRef(null);
+
+  const scroll = (dir) => {
+    if (scrollRef.current) {
+      const width = scrollRef.current.offsetWidth;
+      scrollRef.current.scrollBy({
+        left: dir === "left" ? -width * 0.7 : width * 0.7,
+        behavior: "smooth",
+      });
+    }
+  };
+
+  return (
+    <section className="py-14 sm:py-18 md:py-20 lg:py-16 bg-[#F7F2E8]">
+      <div className="mx-auto px-4 sm:px-9">
+
+        {/* HEADER */}
+        <div className="flex flex-col sm:flex-row justify-between items-end mb-10 px-4 gap-4">
+
+          <div className="text-center sm:text-left">
+            <span className={`text-[#B68A3A] uppercase tracking-[0.25em] text-xs block mb-2 ${outfit.className}`}>
+              Our Collection
+            </span>
+
+            <h2 className={`text-3xl sm:text-4xl lg:text-5xl font-semibold text-[#3B3024] ${cormorant.className}`}>
+              Featured Fragrances
+            </h2>
+
+            <p className={`text-[#7C6E5A] text-sm mt-2 max-w-md mx-auto sm:mx-0 ${outfit.className}`}>
+              Discover our carefully curated selection of premium scents
+            </p>
+          </div>
+
+          {/* ARROWS (hidden on mobile) */}
+          <div className="hidden sm:flex gap-2 sm:gap-3">
+            <button
+              onClick={() => scroll("left")}
+              className="w-11 h-11 sm:w-12 sm:h-12 rounded-full border-2 border-[#E6DDCF] hover:border-[#B68A3A] flex items-center justify-center transition"
+            >
+              <ChevronLeft className="w-6 h-6 text-[#7C6E5A]" />
+            </button>
+
+            <button
+              onClick={() => scroll("right")}
+              className="w-11 h-11 sm:w-12 sm:h-12 rounded-full border-2 border-[#E6DDCF] hover:border-[#B68A3A] flex items-center justify-center transition"
+            >
+              <ChevronRight className="w-6 h-6 text-[#7C6E5A]" />
+            </button>
+          </div>
+        </div>
+
+        {/* ----------------------------- */}
+        {/* MOBILE GRID VERSION (2 columns) */}
+        {/* ----------------------------- */}
+        <div className="grid grid-cols-2 gap-4 px-2 sm:hidden">
+          {products.map((p) => (
+            <ProductCard key={p._id} product={p} />
+          ))}
+        </div>
+
+        {/* ----------------------------- */}
+        {/* DESKTOP SLIDER VERSION        */}
+        {/* ----------------------------- */}
+        <div
+          ref={scrollRef}
+          className="hidden sm:flex gap-4 sm:gap-5 lg:gap-6 overflow-x-auto scrollbar-hide px-4 pb-4 snap-x snap-mandatory"
+        >
+          {products.map((p) => (
+            <div key={p._id} className="snap-start">
+              <ProductCard product={p} />
+            </div>
+          ))}
+        </div>
+
+      </div>
+    </section>
+  );
+}
