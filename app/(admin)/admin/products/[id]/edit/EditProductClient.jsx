@@ -16,6 +16,7 @@ import {
   GripVertical,
 } from "lucide-react";
 import { toast } from "react-hot-toast";
+import { TouchSensor } from "@dnd-kit/core";
 
 import {
   DndContext,
@@ -87,6 +88,7 @@ function SortableImageCard({ image, onRemove }) {
         type="button"
         {...attributes}
         {...listeners}
+        style={{ touchAction: "none" }}
         className="absolute top-1 left-1 w-6 h-6 rounded-full bg-white/90 text-[#6b6654] flex items-center justify-center shadow-sm cursor-grab hover:bg-white"
       >
         <GripVertical className="w-3 h-3" />
@@ -104,7 +106,8 @@ function SortableImageCard({ image, onRemove }) {
           e.stopPropagation();
           onRemove();
         }}
-        className="absolute top-1 right-1 w-6 h-6 rounded-full bg-black/60 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition"
+        className="absolute top-1 right-1 w-6 h-6 rounded-full bg-black/60 text-white flex items-center justify-center transition 
+           opacity-100 md:opacity-0 md:group-hover:opacity-100"
       >
         <Trash2 className="w-3 h-3" />
       </button>
@@ -166,7 +169,8 @@ export default function EditProductClient({ productId }) {
 
   // DnD sensors
   const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 120, tolerance: 5 } })
   );
 
   // Tiptap editor (we don't store description in state while typing)
