@@ -2,10 +2,10 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { v4 as uuidv4 } from "uuid";
 
-
 const CartContext = createContext()
 const CART_EXPIRY_MS = 30 * 24 * 60 * 60 * 1000 // 30 days
 
+// Guest Session ID
 if (typeof window !== "undefined" && !localStorage.getItem("guestSessionId")) {
   localStorage.setItem("guestSessionId", uuidv4());
 }
@@ -14,35 +14,24 @@ const sessionId = typeof window !== "undefined"
   ? localStorage.getItem("guestSessionId")
   : null;
 
-
-// ✅ Load cart or failed order data from storage
+// Load Cart
 function loadCartFromStorage() {
   try {
-    // 🧾 If failed order exists, restore its cart items first
     const failedOrder = localStorage.getItem('failedOrder')
     if (failedOrder) {
       const parsed = JSON.parse(failedOrder)
       if (parsed.cartItems && Array.isArray(parsed.cartItems)) {
-        console.log('🛒 Restored cart from failed order:', parsed.cartItems)
         return parsed.cartItems
       }
     }
 
-    // 🛒 Otherwise, load normal cart
     const data = JSON.parse(localStorage.getItem('cart'))
     if (data && data.expiry > Date.now() && Array.isArray(data.items)) {
-      return data.items.map(item => ({
-        ...item,
-        slug: item.slug || '',
-        image: item.image || '',
-      }))
+      return data.items
     }
 
     localStorage.removeItem('cart')
-  } catch (e) {
-    console.error('Error loading cart:', e)
-  }
-
+  } catch (e) {}
   return []
 }
 
@@ -53,90 +42,67 @@ function saveToLocal(items) {
   );
 }
 
-// 🧩 Save full failed order (cart + address)
+// Failed Order
 export function saveFailedOrder(cartItems, userData) {
   try {
-    if (!cartItems?.length) return
-    localStorage.setItem(
-      'failedOrder',
-      JSON.stringify({
-        cartItems: Array.isArray(cartItems) ? cartItems : [],
-        userData: userData || {},
-      })
-    )
-    console.log('💾 Saved failed order for retry')
-  } catch (e) {
-    console.error('Error saving failed order:', e)
-  }
+    localStorage.setItem('failedOrder', JSON.stringify({
+      cartItems: Array.isArray(cartItems) ? cartItems : [],
+      userData: userData || {},
+    }))
+  } catch {}
 }
 
-// 🧩 Load failed order address data
 export function loadFailedOrderData() {
   try {
     const data = JSON.parse(localStorage.getItem('failedOrder'))
     return data?.userData || null
-  } catch {
-    return null
-  }
+  } catch { return null }
 }
 
-// ✅ Clear failed order explicitly
 export function clearFailedOrder() {
   localStorage.removeItem('failedOrder')
 }
 
 export function CartProvider({ children }) {
+
+  // 🛍 CART ITEMS
   const [cartItems, setCartItems] = useState([])
 
-  // ✅ Always attempt to load on mount
-    useEffect(() => {
-    const loadCart = () => {
-      const storedCart = loadCartFromStorage();
-      setCartItems(storedCart);
-    };
+  // ⭐ MINI CART OPEN/CLOSE STATE
+  const [isCartOpen, setIsCartOpen] = useState(false)
 
-    // ✅ Load immediately
-    loadCart();
+  const openCart = () => setIsCartOpen(true)
+  const closeCart = () => setIsCartOpen(false)
 
-  }, []);
+  // Load Cart on mount
+  useEffect(() => {
+    setCartItems(loadCartFromStorage())
+  }, [])
 
+  // Clear Cart Event
+  useEffect(() => {
+    const handleClearCart = () => setCartItems([])
 
-  // // ✅ Persist cart in localStorage on change
-  // useEffect(() => {
-  //   const cartData = {
-  //     items: cartItems,
-  //     expiry: Date.now() + CART_EXPIRY_MS,
-  //   }
-  //   localStorage.setItem('cart', JSON.stringify(cartData))
-  // }, [cartItems])
-  
+    window.addEventListener("clear-cart", handleClearCart)
+    return () => window.removeEventListener("clear-cart", handleClearCart)
+  }, [])
+
+  // Sync Cart to backend
+  const lastSentRef = React.useRef(null)
+  const firstLoadRef = React.useRef(true)
 
   useEffect(() => {
-  function handleClearCart() {
-    setCartItems([]);
-  }
+    if (firstLoadRef.current) {
+      firstLoadRef.current = false
+      return;
+    }
 
-  window.addEventListener("clear-cart", handleClearCart);
-  return () => window.removeEventListener("clear-cart", handleClearCart);
-}, []);
+    if (!cartItems.length) return;
 
-  const lastSentRef = React.useRef(null);
+    const json = JSON.stringify(cartItems)
+    if (json === lastSentRef.current) return;
 
-// 🛑 Prevent re-syncing on first page load
-  const firstLoadRef = React.useRef(true);
-
-  useEffect(() => {
-   if (firstLoadRef.current) {
-    firstLoadRef.current = false;
-    return;
-  }
-
-  if (!cartItems || cartItems.length === 0) return;
-
-  const json = JSON.stringify(cartItems);
-  if (json === lastSentRef.current) return; // prevent identical resync loop
-
-  lastSentRef.current = json;
+    lastSentRef.current = json;
 
     const timeout = setTimeout(async () => {
       try {
@@ -144,84 +110,85 @@ export function CartProvider({ children }) {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ items: cartItems, sessionId }),
-        });
-      } catch (err) {
-        console.log("Cart sync error:", err);
-      }
-    }, 800); // ⏳ Calls after 800ms pause
+        })
+      } catch (err) {}
+    }, 800)
 
-    return () => clearTimeout(timeout);
-   }, [cartItems, sessionId]);
+    return () => clearTimeout(timeout)
+  }, [cartItems, sessionId])
 
-
-  // ✅ Add product
+  // Add
   const addToCart = (product, quantity) => {
     setCartItems(prev => {
-      const idx = prev.findIndex(item => item.id === product.id && item.size === product.size);
-      let updated;
+      const idx = prev.findIndex(item => item.id === product.id && item.size === product.size)
+      let updated
+
       if (idx >= 0) {
-        updated = [...prev];
-        updated[idx].quantity += quantity;
+        updated = [...prev]
+        updated[idx].quantity += quantity
       } else {
-        updated = [...prev, { ...product, slug: product.slug || '', image: product.image || '', quantity }];
+        updated = [...prev, { ...product, quantity }]
       }
-      saveToLocal(updated);
-      return updated;
-    });
-  };
 
+      saveToLocal(updated)
+      return updated
+    })
+  }
 
-  // ✅ Remove product
+  // Remove
   const removeFromCart = (productId, size) => {
     setCartItems(prev => {
-      const updated = prev.filter(item => !(item.id === productId && item.size === size));
-      saveToLocal(updated);
-      return updated;
-    });
-  };
+      const updated = prev.filter(item => !(item.id === productId && item.size === size))
+      saveToLocal(updated)
+      return updated
+    })
+  }
 
-  // ✅ Update quantity
+  // Update Qty
   const updateQuantity = (productId, size, newQty) => {
-    if (newQty < 1) return;
+    if (newQty < 1) return
     setCartItems(prev => {
       const updated = prev.map(item =>
-        item.id === productId && item.size === size ? { ...item, quantity: newQty } : item
-      );
-      saveToLocal(updated);
-      return updated;
-    });
-  };
+        item.id === productId && item.size === size
+          ? { ...item, quantity: newQty }
+          : item
+      )
+      saveToLocal(updated)
+      return updated
+    })
+  }
 
-
-  // ✅ Clear cart (but not failed order)
   const clearCart = () => {
     setCartItems([])
     localStorage.removeItem('cart')
   }
 
-  // ✅ Save specific cart
   const saveCart = (items) => {
     setCartItems(items)
-    localStorage.setItem(
-      'cart',
-      JSON.stringify({ items, expiry: Date.now() + CART_EXPIRY_MS })
-    )
+    saveToLocal(items)
   }
 
-  const cartCount = Array.isArray(cartItems)
-    ? cartItems.reduce((acc, item) => acc + item.quantity, 0)
-    : 0
+  const subtotal = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0)
+  const cartCount = cartItems.reduce((acc, item) => acc + item.quantity, 0)
 
   return (
     <CartContext.Provider
       value={{
         cartItems,
+        cartCount,
+        subtotal,
+
         addToCart,
         removeFromCart,
         updateQuantity,
+
         clearCart,
         saveCart,
-        cartCount,
+
+        // ⭐ MINI CART CONTROL
+        isCartOpen,
+        openCart,
+        closeCart
       }}
     >
       {children}

@@ -22,6 +22,15 @@ export default async function Home() {
   // Convert ObjectId + dates → strings (Next.js requirement)
   const products = JSON.parse(JSON.stringify(rawProducts));
 
+  // ⭐⭐⭐ ADD BESTSELLER & TOP-RATING LOGIC ⭐⭐⭐
+  const bestsellerIds = products
+    .filter((p) => p.rating && p.reviewCount) // only rated products
+    .sort(
+      (a, b) => b.rating - a.rating || b.reviewCount - a.reviewCount
+    )
+    .slice(0, 3) // top 3
+    .map((p) => p._id);
+
   return (
     <div className="homepage-theme">
 
@@ -43,7 +52,8 @@ export default async function Home() {
 
       {/* SECTIONS */}
       <RavenBadge />
-      <ProductCarousel products={products} />
+      {/* ⭐ PASS bestsellerIds ALSO ⭐ */}
+      <ProductCarousel products={products} bestsellerIds={bestsellerIds} />
       <WhyChooseRaven />
 
       {/*

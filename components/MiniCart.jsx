@@ -1,203 +1,303 @@
-'use client'
+"use client";
 
-import { useCart } from '../app/context/cartcontext'
-import Image from 'next/image'
-import Link from 'next/link'
-import { AnimatePresence, motion } from 'framer-motion'
-import { createPortal } from 'react-dom'
-import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { TrashIcon } from '@heroicons/react/24/outline'
+import React, { useEffect } from "react";
+import { createPortal } from "react-dom";
+import { Outfit, Cormorant_Garamond } from "next/font/google";
+import {
+  X,
+  Trash2,
+  Plus,
+  Minus,
+  ShoppingBag,
+  Sparkles,
+  ArrowRight,
+} from "lucide-react";
+import { useCart } from "@/app/context/cartcontext";
+import { useRouter } from "next/navigation";
 
-// ✅ Utility to ensure .00 formatting
 const formatAmount = (amount) => {
-  if (!amount || isNaN(amount)) return "0.00"
-  return parseFloat(amount).toFixed(2)
-}
+  if (!amount || isNaN(amount)) return "0.00";
+  return parseFloat(amount).toFixed(2);
+};
 
-function MiniCartDrawer({ isOpen, onClose }) {
-  const { cartItems, removeFromCart, updateQuantity, cartCount } = useCart()
-  const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
-  const router = useRouter()
+const outfit = Outfit({ subsets: ["latin"], display: "swap" });
+const cormorant = Cormorant_Garamond({
+  subsets: ["latin"],
+  weight: ["400", "700"],
+  display: "swap",
+});
+
+export default function MiniCart() {
+  const {
+    cartItems,
+    cartCount,
+    subtotal,
+    removeFromCart,
+    updateQuantity,
+    isCartOpen,
+    closeCart,
+  } = useCart();
+
+  const router = useRouter();
+
+  // ESC KEY CLOSE
+  useEffect(() => {
+    const handleEsc = (e) => e.key === "Escape" && closeCart();
+
+    if (isCartOpen) {
+      document.addEventListener("keydown", handleEsc);
+      document.body.style.overflow = "hidden";
+    }
+
+    return () => {
+      document.removeEventListener("keydown", handleEsc);
+      document.body.style.overflow = "";
+    };
+  }, [isCartOpen, closeCart]);
 
   const handleCheckout = () => {
-    onClose?.()
-    router.push('/checkout')
-  }
+    closeCart();
+    router.push("/checkout");
+  };
 
-  // shimmer placeholder for images
-  const shimmer =
-    'data:image/svg+xml;base64,' +
-    btoa(`
-      <svg width="200" height="200" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
-        <defs>
-          <linearGradient id="g">
-            <stop stop-color="#f6f6f6" offset="20%" />
-            <stop stop-color="#eaeaea" offset="50%" />
-            <stop stop-color="#f6f6f6" offset="70%" />
-          </linearGradient>
-        </defs>
-        <rect width="200" height="200" fill="#f6f6f6" />
-        <rect id="r" width="200" height="200" fill="url(#g)" />
-        <animate xlink:href="#r" attributeName="x" from="-200" to="200" dur="1s" repeatCount="indefinite" />
-      </svg>
-    `)
+  const handleViewCart = () => {
+    closeCart();
+    router.push("/Cart");
+  };
 
-  return (
-    <AnimatePresence>
-      {isOpen && (
-        <>
-          {/* Dim background */}
-          <motion.div
-            className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[9998]"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={onClose}
-          />
+  const handleProductClick = (slug) => {
+    closeCart();
+    router.push(`/product/${slug}`);
+  };
 
-          {/* Drawer */}
-          <motion.div
-            key="cart-drawer"
-            initial={{ x: '100%' }}
-            animate={{ x: 0 }}
-            exit={{ x: '100%' }}
-            transition={{ type: 'spring', stiffness: 260, damping: 25 }}
-            className="fixed top-0 right-0 h-[100dvh] w-[92vw] sm:w-[380px] bg-white z-[9999] shadow-2xl flex flex-col border-l border-[#e4d5b5]"
-          >
-            {/* Header */}
-            <div className="px-6 py-5 border-b flex justify-between items-center bg-[#FCF8F3] shrink-0">
-              <h3 className="text-xl font-bold text-[#B28C34] tracking-wide">Perfume Cart</h3>
+  if (!isCartOpen) return null;
+
+  return createPortal(
+    <div className="fixed inset-0 z-9999">
+      {/* BACKDROP */}
+      <div
+        className="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity duration-300"
+        onClick={closeCart}
+        style={{ animation: "fadeIn 0.3s ease-out" }}
+      />
+
+      {/* DRAWER */}
+      <div
+        className="absolute top-0 right-0 h-full w-full max-w-[420px] bg-[#fcfbf8] shadow-2xl flex flex-col border-l border-[#e7e1cf]"
+        style={{
+          animation: "slideInRight 0.4s cubic-bezier(0.16, 1, 0.3, 1)",
+        }}
+      >
+        {/* HEADER */}
+        <div className="relative px-6 py-5 border-b border-[#e7e1cf] bg-linear-to-r from-[#faf5eb] via-[#fffdf8] to-[#faf5eb]">
+          <div className="relative flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="relative">
+                <ShoppingBag className="w-6 h-6 text-[#b28c34]" />
+                {cartCount > 0 && (
+                  <span className="absolute -top-2 -right-2 w-5 h-5 bg-[#b28c34] text-white text-xs font-semibold rounded-full flex items-center justify-center">
+                    {cartCount}
+                  </span>
+                )}
+              </div>
+              <div>
+                <h3 className={`${cormorant.className} text-xl font-semibold text-[#1b180d]`}>
+                  Your Cart
+                </h3>
+                <p className="text-xs text-[#7c6e5a]">
+                  {cartCount === 0
+                    ? "No items yet"
+                    : `${cartCount} item${cartCount > 1 ? "s" : ""}`}
+                </p>
+              </div>
+            </div>
+
+            <button
+              onClick={closeCart}
+              className="w-10 h-10 rounded-full bg-white border border-[#e7e1cf] hover:bg-[#b28c34] hover:text-white flex items-center justify-center transition-all duration-300"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+        </div>
+
+        {/* CART ITEMS */}
+        <div className="flex-1 overflow-y-auto px-6 py-4">
+          {cartCount === 0 ? (
+            <div
+              className="flex flex-col items-center justify-center h-full text-center py-12"
+              style={{ animation: "fadeInUp 0.5s ease-out" }}
+            >
+              <div className="w-24 h-24 rounded-full bg-[#f1e9d6] flex items-center justify-center mb-6">
+                <ShoppingBag className="w-10 h-10 text-[#9e8c6b]" />
+              </div>
+
+              <h4 className={`${cormorant.className} text-xl text-[#1b180d] font-semibold mb-2`}>
+                Your cart is empty
+              </h4>
+
+              <p className="text-[#7c6e5a] text-sm mb-6 max-w-[200px]">
+                Discover our exquisite collection of premium fragrances
+              </p>
+
               <button
-                onClick={onClose}
-                className="text-3xl leading-none font-light text-[#4a3b25] hover:text-[#B28C34] transition"
-                aria-label="Close cart"
+                onClick={() => {
+                  closeCart();
+                  router.push("/shop");
+                }}
+                className="bg-[#b28c34] hover:bg-[#a27c2e] text-white px-5 py-2 rounded-full flex items-center gap-2 shadow-md"
               >
-                &times;
+                <Sparkles className="w-4 h-4" />
+                Explore Collection
               </button>
             </div>
-
-            {/* Cart items (scrollable section) */}
-            <div className="px-6 py-4 flex-1 overflow-y-auto overscroll-contain">
-              {cartCount === 0 ? (
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="text-center py-12 text-[#B28C34] text-lg font-medium"
+          ) : (
+            <div className="space-y-4">
+              {cartItems.map((item, index) => (
+                <div
+                  key={`${item.id}-${item.size}-${index}`}
+                  className="group relative rounded-xl p-4 border border-[#e7e1cf] bg-white hover:border-[#b28c34] hover:shadow-lg transition-all duration-300"
+                  style={{
+                    animation: `fadeInUp 0.4s ease-out ${index * 0.1}s both`,
+                  }}
                 >
-                  Your cart is empty!
-                </motion.div>
-              ) : (
-                cartItems.map((item, i) => {
-                  const imageSrc = item.image?.original || item.image
+                  {/* DELETE BUTTON */}
+                  <button
+                    onClick={() => removeFromCart(item.id, item.size)}
+                    className="absolute top-3 right-3 w-8 h-8 rounded-full bg-[#f8d7d7] hover:bg-[#f3bcbc] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 cursor-pointer"
+                  >
+                    <Trash2 className="w-4 h-4 text-red-600" />
+                  </button>
 
-                  return (
-                    <motion.div
-                      key={`${item.id}-${item.size}-${i}`}
-                      initial={{ opacity: 0, x: 40 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: -40 }}
-                      className="flex gap-4 mb-6 border-b pb-4"
+                  <div className="flex gap-4">
+                    {/* IMAGE */}
+                    <div
+                      onClick={() => handleProductClick(item.slug)}
+                      className="w-20 h-20 rounded-lg bg-[#f7f2e8] overflow-hidden cursor-pointer"
                     >
-                      {/* Product image */}
-                      <div className="w-16 h-16 flex-shrink-0 rounded-md bg-[#FCF8F3] flex items-center justify-center border shadow-sm overflow-hidden">
-                        <Image
-                          src={imageSrc}
-                          alt={item.name}
-                          width={70}
-                          height={70}
-                          className="rounded-md object-cover"
-                          placeholder="blur"
-                          blurDataURL={shimmer}
-                        />
-                      </div>
+                      <img
+                        src={item.image}
+                        alt={item.name}
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                      />
+                    </div>
 
-                      {/* Product Info */}
-                      <div className="flex-1 flex flex-col">
-                        <div className="flex justify-between items-center">
-                          <Link
-                            href={`/product/${item.slug}`}
-                            onClick={onClose}
-                            className="block font-serif font-semibold text-[#33270a] hover:text-[#B28C34] transition-colors leading-snug"
-                          >
-                            {item.name}
-                          </Link>
-                          <button
-                            onClick={() => removeFromCart(item.id, item.size)}
-                            className="ml-2 p-1 text-gray-600 hover:text-red-600 transition"
-                            aria-label="Remove item"
-                          >
-                            <TrashIcon className="h-5 w-5" />
-                          </button>
-                        </div>
-                        <p className="text-xs text-[#665933]">Size: {item.size}</p>
-                        <p className="font-semibold text-[#B28C34] mt-1">
-                          ₹{formatAmount(item.price * item.quantity).toLocaleString()}
-                        </p>
+                    {/* INFO */}
+                    <div className="flex-1 min-w-0">
+                      <h4
+                        onClick={() => handleProductClick(item.slug)}
+                        className={`${cormorant.className} text-lg font-semibold text-[#1b180d] cursor-pointer hover:text-[#b28c34] transition-colors pr-8 truncate`}
+                      >
+                        {item.name}
+                      </h4>
 
-                        {/* Quantity Controls */}
-                        <div className="flex items-center gap-2 mt-2">
+                      <p className="text-xs text-[#7c6e5a] mt-0.5">
+                        Size:
+                        <span className="text-[#1b180d] font-medium ml-1">
+                          {item.size}
+                        </span>
+                      </p>
+
+                      {/* PRICE + QUANTITY */}
+                      <div className="flex items-center justify-between mt-3">
+                        <span className={`${cormorant.className} text-lg font-bold text-[#b28c34]`}>
+                          ₹{formatAmount(item.price * item.quantity)}
+                        </span>
+
+                        <div className="flex items-center gap-1 bg-[#f1e9d7] rounded-full p-1">
                           <button
                             onClick={() =>
-                              updateQuantity(item.id, item.size, Math.max(1, item.quantity - 1))
+                              updateQuantity(
+                                item.id,
+                                item.size,
+                                Math.max(1, item.quantity - 1)
+                              )
                             }
-                            className="w-6 h-6 rounded-full border border-[#B28C34] text-[#B28C34] flex items-center justify-center hover:bg-[#B28C34] hover:text-white transition"
+                            className="w-7 h-7 bg-white hover:bg-[#b28c34] hover:text-white rounded-full flex items-center justify-center transition-all shadow-sm"
                           >
-                            –
+                            <Minus className="w-3.5 h-3.5 cursor-pointer" />
                           </button>
-                          <span className="px-3 py-1 rounded bg-[#FDF7E2] text-[#33270a] text-sm font-medium">
+
+                          <span className="w-8 text-center font-semibold text-sm">
                             {item.quantity}
                           </span>
+
                           <button
-                            onClick={() => updateQuantity(item.id, item.size, item.quantity + 1)}
-                            className="w-6 h-6 rounded-full border border-[#B28C34] text-[#B28C34] flex items-center justify-center hover:bg-[#B28C34] hover:text-white transition"
+                            onClick={() =>
+                              updateQuantity(
+                                item.id,
+                                item.size,
+                                item.quantity + 1
+                              )
+                            }
+                            className="w-7 h-7 bg-white hover:bg-[#b28c34] hover:text-white rounded-full flex items-center justify-center transition-all shadow-sm"
                           >
-                            +
+                            <Plus className="w-3.5 h-3.5 cursor-pointer" />
                           </button>
                         </div>
                       </div>
-                    </motion.div>
-                  )
-                })
-              )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* FOOTER */}
+        {cartCount > 0 && (
+          <div
+            className="border-t border-[#e7e1cf] p-3 bg-linear-to-t from-[#faf5eb] to-[#fcfbf8]"
+            style={{ animation: "fadeInUp 0.5s ease-out 0.2s both" }}
+          >
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-[#7c6e5a]">Subtotal</span>
+              <span className={`${cormorant.className} text-2xl font-bold text-[#1b180d]`}>
+                ₹{formatAmount(subtotal)}
+              </span>
             </div>
 
-            {/* Footer (always visible) */}
-            {cartCount > 0 && (
-              <div className="border-t px-6 py-5 bg-[#FCF8F3] sticky bottom-0">
-                <div className="flex justify-between items-center mb-3">
-                  <span className="text-[#665933] font-medium">Subtotal</span>
-                  <span className="font-bold text-lg text-[#B28C34]">
-                    ₹{formatAmount(subtotal).toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                  </span>
-                </div>
+            <p className="text-xs text-[#7c6e5a] mb-4">
+              Shipping & taxes calculated at checkout
+            </p>
 
-                <button
-                  className="w-full py-3 rounded-lg bg-[#1f1c1a] text-white font-semibold shadow-sm hover:shadow-md transition text-sm"
-                  onClick={handleCheckout}
-                >
-                  PROCEED TO CHECKOUT
-                </button>
+            {/* CHECKOUT */}
+            <button
+              onClick={handleCheckout}
+              className={`${outfit.className} w-full h-12 bg-[#1b180d] hover:bg-[#b28c34] text-white font-semibold text-base rounded-xl shadow-lg transition-all duration-300 flex items-center justify-center gap-2`}
+              >
+              Proceed to Checkout
+              <ArrowRight className="w-4 h-4" />
+            </button>
 
-                <Link
-                  href="/Cart"
-                  onClick={onClose}
-                  className="mt-3 block text-center underline text-[#7e4343] hover:text-[#9c5516] text-sm"
-                >
-                  View Full Cart
-                </Link>
+            {/* VIEW CART */}
+            <button
+              onClick={handleViewCart}
+              className="w-full text-center text-sm text-[#7c6e5a] hover:text-[#b28c34] underline underline-offset-4 mt-3 cursor-pointer"
+            >
+              View Full Cart
+            </button>
+
+            {/* TRUST BADGES */}
+            <div className="flex items-center justify-center gap-4 mt-2 pt-2 border-t border-[#ece4d4]">
+              <div className="flex items-center gap-1.5 text-xs text-[#7c6e5a]">
+                🔒 Secure Checkout
               </div>
-            )}
-          </motion.div>
-        </>
-      )}
-    </AnimatePresence>
-  )
-}
+              <div className="flex items-center gap-1.5 text-xs text-[#7c6e5a]">
+                🚚 Free Shipping
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
 
-export default function MiniCart({ isOpen, onClose }) {
-  const [mounted, setMounted] = useState(false)
-  useEffect(() => setMounted(true), [])
-  if (!mounted) return null
-  return createPortal(<MiniCartDrawer isOpen={isOpen} onClose={onClose} />, document.body)
+      {/* Animations */}
+      <style>{`
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideInRight { from { transform: translateX(100%); } to { transform: translateX(0); } }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+      `}</style>
+    </div>,
+    document.body
+  );
 }

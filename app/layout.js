@@ -7,6 +7,8 @@ import { Analytics } from "@vercel/analytics/next"
 import Providers from "./Providers";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import HomeMarquee from "@/components/HomeMarquee"; // ✅ new client component
+import QuickViewModal from "@/components/QuickViewModal";
+import { QuickViewProvider } from "@/app/context/QuickViewContext";
 
 import { Outfit } from 'next/font/google';
 import { Cormorant_Garamond } from 'next/font/google';
@@ -83,7 +85,12 @@ export default function RootLayout({ children }) {
         <Providers>
           <HomeMarquee /> {/* ✅ Client component handles fade + homepage check */}
           <NavBar />
+          
+          <QuickViewProvider>
           {children}
+          <QuickViewModal />
+        </QuickViewProvider>
+          
           <SpeedInsights />
           <Analytics/>
           <Footer />

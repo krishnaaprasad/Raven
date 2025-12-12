@@ -25,8 +25,9 @@ export default function NavBar() {
   const [animateCart, setAnimateCart] = useState(false);
   const [showAccountMenu, setShowAccountMenu] = useState(false);
   const dropdownRef = useRef(null);
-  const { cartCount } = useCart();
+  const { cartCount, openCart } = useCart();
   const { data: session } = useSession();
+  
 
   useEffect(() => {
     if (cartCount > 0) {
@@ -48,7 +49,7 @@ export default function NavBar() {
 
   return (
     <>
-      <nav className="relative bg-[#FAF5E8]/95 backdrop-blur-md border-b border-[#e4d5b5] top-0 z-[999] shadow-[0_1px_8px_rgba(0,0,0,0.04)]">
+      <nav className="relative bg-[#FAF5E8]/95 backdrop-blur-md border-b border-[#e4d5b5] top-0 z-999 shadow-[0_1px_8px_rgba(0,0,0,0.04)]">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="relative flex h-14 items-center justify-between">
 
@@ -68,7 +69,7 @@ export default function NavBar() {
                 >
                   <span className="relative z-10">SHOP</span>
                   {/* Shine Effect */}
-                  <span className="absolute top-0 left-[-80%] w-[60%] h-full bg-gradient-to-tr from-transparent via-white/50 to-transparent rotate-[25deg] opacity-0 group-hover:opacity-100 animate-shine-slow"></span>
+                  <span className="absolute top-0 left-[-80%] w-[60%] h-full bg-linear-to-tr from-transparent via-white/50 to-transparent rotate-25 opacity-0 group-hover:opacity-100 animate-shine-slow"></span>
                 </button>
               </Link>
             </motion.div>
@@ -112,7 +113,7 @@ export default function NavBar() {
                   >
                     <span className="relative z-10">SHOP NOW</span>
                     {/* Shine Effect */}
-                    <span className="absolute top-0 left-[-80%] w-[60%] h-full bg-gradient-to-tr from-transparent via-white/50 to-transparent rotate-[25deg] opacity-0 group-hover:opacity-100 animate-shine-slow"></span>
+                    <span className="absolute top-0 left-[-80%] w-[60%] h-full bg-linear-to-tr from-transparent via-white/50 to-transparent rotate-25 opacity-0 group-hover:opacity-100 animate-shine-slow"></span>
                   </button>
                 </Link>
               </motion.div>
@@ -134,12 +135,12 @@ export default function NavBar() {
                     aria-label="My Account Menu"
                   >
                     <UserIcon className="h-5 w-5 sm:h-6 sm:w-6" />
-                    <ChevronDownIcon className="h-4 w-4 mt-[1px]" />
+                    <ChevronDownIcon className="h-4 w-4 mt-px" />
                   </button>
 
                   {showAccountMenu && (
                     <div
-                      className="absolute right-0 top-8 w-44 bg-white/95 backdrop-blur-md border border-[#e7dabf] rounded-xl shadow-[0_8px_18px_rgba(0,0,0,0.15)] py-2 z-[9999] animate-fadeIn"
+                      className="absolute right-0 top-8 w-44 bg-white/95 backdrop-blur-md border border-[#e7dabf] rounded-xl shadow-[0_8px_18px_rgba(0,0,0,0.15)] py-2 z-9999 animate-fadeIn"
                       onMouseEnter={() => setShowAccountMenu(true)}
                       onMouseLeave={() => setShowAccountMenu(false)}
                     >
@@ -165,28 +166,28 @@ export default function NavBar() {
               )}
 
               {/* Cart */}
-              <button
-                aria-label="View Cart"
-                id="cart-icon"
-                className="relative cursor-pointer bg-transparent border-none outline-none"
-                onClick={() => setShowMiniCart(true)}
-                type="button"
-              >
-                <ShoppingBagIcon
-                  className={`h-5 w-5 sm:h-6 sm:w-6 text-[#191919] hover:text-[#B4933A] transition-transform duration-500 ${
-                    animateCart ? 'animate-bounce' : ''
-                  }`}
-                />
-                {cartCount > 0 && (
-                  <span className="absolute -top-2 -right-2 rounded-full bg-red-600 text-white text-xs w-5 h-5 flex items-center justify-center font-bold">
-                    {cartCount}
-                  </span>
-                )}
-              </button>
+<button
+  aria-label="View Cart"
+  id="cart-icon"
+  className="relative cursor-pointer bg-transparent border-none outline-none"
+  onClick={openCart}
+  type="button"
+>
+  <ShoppingBagIcon
+    className={`h-5 w-5 sm:h-6 sm:w-6 text-[#191919] hover:text-[#B4933A] transition-transform duration-500 ${
+      animateCart ? "animate-bounce" : ""
+    }`}
+  />
+
+  {cartCount > 0 && (
+    <span className="absolute -top-2 -right-2 rounded-full bg-red-600 text-white text-xs w-5 h-5 flex items-center justify-center font-bold">
+      {cartCount}
+    </span>
+  )}
+</button>
 
               <MiniCart
-                isOpen={showMiniCart}
-                onClose={() => setShowMiniCart(false)}
+
               />
             </div>
           </div>
