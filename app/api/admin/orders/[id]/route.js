@@ -1,56 +1,91 @@
 import { NextResponse } from "next/server";
 import connectToDatabase from "@/lib/mongodb";
 import { Order } from "@/models/Order";
-import User from "@/models/User";
 
-export async function GET(req) {
+export async function GET(req, { params }) {
   try {
     await connectToDatabase();
-    const { searchParams } = new URL(req.url);
 
-    const page = parseInt(searchParams.get("page")) || 1;
-    const limit = parseInt(searchParams.get("limit")) || 10;
+    const { id } = await params; // ✅ FIX
 
-    const q = searchParams.get("q") || "";
-    const paymentStatus = searchParams.get("paymentStatus") || "";
-    const orderStatus = searchParams.get("orderStatus") || "";
-    const from = searchParams.get("from");
-    const to = searchParams.get("to");
-
-    const query = {};
-
-    if (q) {
-      query.$or = [
-        { customOrderId: { $regex: q, $options: "i" } },
-        { userName: { $regex: q, $options: "i" } },
-        { email: { $regex: q, $options: "i" } },
-      ];
+    if (!id) {
+      return NextResponse.json(
+        { success: false, error: "Order ID missing" },
+        { status: 400 }
+      );
     }
 
-    if (paymentStatus) query.status = paymentStatus;
-    if (orderStatus) query.order_status = orderStatus;
-    if (from && to) query.createdAt = { $gte: new Date(from), $lte: new Date(to) };
+    const order = await Order.findById(id)
+      .populate("userId", "name email phone isGuest");
 
-    const orders = await Order.find(query)
-      .populate("userId", "name email phone isGuest")
-      .sort({ createdAt: -1 })
-      .skip((page - 1) * limit)
-      .limit(limit);
+    if (!order) {
+      return NextResponse.json(
+        { success: false, error: "Order not found" },
+        { status: 404 }
+      );
+    }
 
-    const total = await Order.countDocuments(query);
+    return NextResponse.json({ success: true, order });
+  } catch (err) {
+    console.error("❌ GET /api/admin/orders/[id]:", err);
+    return NextResponse.json(
+      { success: false, error: "Server error" },
+      { status: 500 }
+    );
+  }
+}
 
-    return NextResponse.json({
-      data: orders,
-      meta: {
-        page,
-        limit,
-        total,
-        pages: Math.ceil(total / limit),
-      },
+export async function PATCH(req, { params }) {
+  try {
+    await connectToDatabase();
+
+    const { id } = await params; // ✅ FIX
+
+    if (!id) {
+      return NextResponse.json(
+        { success: false, error: "Order ID missing" },
+        { status: 400 }
+      );
+    }
+
+    const { order_status } = await req.json();
+
+    if (!order_status) {
+      return NextResponse.json(
+        { success: false, error: "order_status required" },
+        { status: 400 }
+      );
+    }
+
+    const order = await Order.findById(id);
+
+    if (!order) {
+      return NextResponse.json(
+        { success: false, error: "Order not found" },
+        { status: 404 }
+      );
+    }
+
+    // ✅ Save history
+    order.orderHistory.push({
+      from: order.order_status,
+      to: order_status,
+      by: "admin",
+      at: new Date(),
     });
 
-  } catch (error) {
-    console.error("❌ GET /api/admin/orders:", error);
-    return NextResponse.json({ error: "Server error" }, { status: 500 });
+    order.order_status = order_status;
+    await order.save();
+
+    return NextResponse.json({
+      success: true,
+      order,
+    });
+  } catch (err) {
+    console.error("❌ PATCH /api/admin/orders/[id]:", err);
+    return NextResponse.json(
+      { success: false, error: "Server error" },
+      { status: 500 }
+    );
   }
 }

@@ -35,10 +35,13 @@ export async function GET(request) {
 
     // PAYMENT STATUS
     if (paymentStatus) {
-      filter.$or = [
-        { payment_status: paymentStatus },
-        { status: paymentStatus },
-      ];
+      filter.$and = filter.$and || [];
+      filter.$and.push({
+        $or: [
+          { payment_status: paymentStatus },
+          { status: paymentStatus },
+        ],
+      });
     }
 
     // ORDER STATUS

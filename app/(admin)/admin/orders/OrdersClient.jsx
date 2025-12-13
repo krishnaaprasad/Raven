@@ -43,7 +43,7 @@ export default function OrdersClient() {
   // date range picker state
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [range, setRange] = useState({
-    startDate: addDays(new Date(), 0),
+    startDate: addDays(new Date(), -30),
     endDate: new Date(),
     key: "selection",
   });
@@ -236,6 +236,13 @@ const exportCSV = async () => {
     return `${s} — ${e}`;
   };
 
+  const resetAfterStatusUpdate = () => {
+  setOrderStatus("");
+  fetchOrders(1);
+};
+
+
+
   return (
     <div className="space-y-6">
 
@@ -361,7 +368,7 @@ const exportCSV = async () => {
                 "Out for Delivery",
                 "Shipped",
                 "Delivered",
-                "Canceled",
+                "Cancelled",
             ].map((s) => (
                 <div
                 key={s}
@@ -479,7 +486,7 @@ const exportCSV = async () => {
                 <OrderRow
                   key={o._id}
                   order={o}
-                  onStatusUpdated={() => fetchOrders(meta.page)}
+                  onStatusUpdated={resetAfterStatusUpdate}
                 />
               ))
             ) : (

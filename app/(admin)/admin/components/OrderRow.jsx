@@ -142,13 +142,13 @@ const customerType =
             onClick={() => setOpen((v) => !v)}
             className="flex items-center justify-between w-[140px] px-3 py-1.5 text-[12px] border border-[#b28c34] text-[#1b180d] rounded-lg hover:bg-[#fff4dd] cursor-pointer"
           >
-            <span className={`px-2 py-[2px] rounded-full font-medium ${ORDER_COLORS[currentStatus]}`}>{currentStatus}</span>
+            <span className={`px-2 py-0.5 rounded-full font-medium ${ORDER_COLORS[currentStatus]}`}>{currentStatus}</span>
             <ChevronDown size={14} className="text-[#b28c34]" />
           </button>
 
           {open && (
             <div
-              className={`absolute w-[160px] bg-white border border-[#e7e1cf] rounded-lg shadow-lg z-40 cursor-pointer
+              className={`absolute w-40 bg-white border border-[#e7e1cf] rounded-lg shadow-lg z-40 cursor-pointer
                 ${dropdownRef.current?.getBoundingClientRect().bottom + 180 > window.innerHeight
                   ? "bottom-full mb-2"
                   : "mt-2"
