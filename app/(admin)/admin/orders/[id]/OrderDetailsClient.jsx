@@ -189,7 +189,7 @@ export default function OrderDetailsClient({ orderFromServer }) {
           </button>
           <div>
             <h1 className="text-xl lg:text-xl font-semibold text-[#1b180d]">
-              Order #{order.customOrderId || order._id}
+              Order {order.manualOrderId || order.customOrderId || `#${order._id.slice(-6)}`}
             </h1>
             <p className="text-xs lg:text-sm text-[#6b6654] ">
               Placed on: {formattedDate || "Loading..."}

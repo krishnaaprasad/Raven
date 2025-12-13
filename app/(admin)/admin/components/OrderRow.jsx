@@ -95,7 +95,11 @@ export default function OrderRow({ order, onStatusUpdated }) {
     setConfirmModal(false);
   };
 
-  const displayId = `#${order.customOrderId || order._id}`;
+const displayId =
+  order.manualOrderId
+    ? order.manualOrderId
+    : `#${order.customOrderId || order._id.toString().slice(-6)}`;
+
   const createdAt = new Date(order.createdAt).toLocaleString("en-IN", {
     day: "2-digit",
     month: "short",

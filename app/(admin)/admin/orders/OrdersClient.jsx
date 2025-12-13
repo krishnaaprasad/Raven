@@ -13,6 +13,7 @@ import {
 
 import { DateRange } from "react-date-range";
 import { addDays, format } from "date-fns";
+import CreateOrderModal from "./components/CreateOrderModal";
 
 // react-date-range CSS (required)
 import "react-date-range/dist/styles.css";
@@ -39,6 +40,8 @@ export default function OrdersClient() {
   const [orderStatus, setOrderStatus] = useState("");
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
+  const [showCreateOrder, setShowCreateOrder] = useState(false);
+
 
   // date range picker state
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -241,7 +244,12 @@ const exportCSV = async () => {
   fetchOrders(1);
 };
 
-
+{showCreateOrder && (
+  <CreateOrderModal
+    onClose={() => setShowCreateOrder(false)}
+    onCreated={() => fetchOrders(1)}
+  />
+)}
 
   return (
     <div className="space-y-6">
@@ -447,13 +455,24 @@ const exportCSV = async () => {
       </button>
     </div>
 
-    {/* CSV Export Button */}
-    <button
-      onClick={exportCSV}
-      className="flex items-center gap-2 h-10 px-4 border border-[#e7e1cf] rounded-lg text-sm text-[#1b180d] hover:bg-[#f5f1e6] transition"
-    >
-      <Download size={16} /> Export
-    </button>
+    <div className="flex items-center gap-3">
+      {/* CREATE ORDER */}
+      <button
+        onClick={() => setShowCreateOrder(true)}
+        className="h-10 px-4 bg-[#1b180d] text-white rounded-lg text-sm font-semibold hover:bg-[#b28c34] transition"
+      >
+        + Create Order
+      </button>
+
+      {/* EXPORT */}
+      <button
+        onClick={exportCSV}
+        className="flex items-center gap-2 h-10 px-4 border border-[#e7e1cf] rounded-lg text-sm text-[#1b180d] hover:bg-[#f5f1e6] transition"
+      >
+        <Download size={16} /> Export
+      </button>
+    </div>
+
   </div>
 </div>
 
@@ -541,6 +560,14 @@ const exportCSV = async () => {
           >
             <ChevronRight size={16} />
           </button>
+
+          {showCreateOrder && (
+  <CreateOrderModal
+    onClose={() => setShowCreateOrder(false)}
+    onCreated={() => fetchOrders(1)}
+  />
+)}
+
         </div>
       </div>
     </div>

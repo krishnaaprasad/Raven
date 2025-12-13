@@ -14,6 +14,7 @@ const orderHistoryItem = new mongoose.Schema(
 
 const orderSchema = new mongoose.Schema(
   {
+    manualOrderId: { type: String, default: null },
     customOrderId: { type: String, unique: true, sparse: true },
     userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", default: null }, // optional link to user
     userName: { type: String, required: [true, "User name is required"] },
