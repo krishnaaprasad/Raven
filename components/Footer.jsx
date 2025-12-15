@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { usePathname } from "next/navigation";
 import { Mail, ShieldCheck, Truck } from "lucide-react";
+import toast from "react-hot-toast";
 
 export default function Footer() {
   const pathname = usePathname();
@@ -13,12 +14,30 @@ export default function Footer() {
 
   const [email, setEmail] = useState("");
 
-  const handleSubscribe = (e) => {
-    e.preventDefault();
-    if (!email.trim()) return;
-    alert(`Subscribed successfully with: ${email}`);
+  const handleSubscribe = async (e) => {
+  e.preventDefault();
+  if (!email.trim()) return;
+
+  try {
+    const res = await fetch("/api/newsletter", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      toast.error(data.message || "Subscription failed");
+      return;
+    }
+
+    toast.success("Welcome to Raven Fragrance 🖤");
     setEmail("");
-  };
+  } catch (err) {
+    toast.error("Network error. Please try again.");
+  }
+};
 
   return (
     <footer className="relative bg-[#1b180d] text-[#fcfbf8] overflow-hidden">
