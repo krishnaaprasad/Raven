@@ -4,12 +4,13 @@ import { FaFacebookF, FaInstagram, FaWhatsapp } from "react-icons/fa6";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
-import { usePathname } from "next/navigation"; 
+import { usePathname } from "next/navigation";
+import { Mail, ShieldCheck, Truck } from "lucide-react";
 
 export default function Footer() {
-  const pathname = usePathname(); // ⭐ ADDED
+  const pathname = usePathname();
   if (pathname.startsWith("/admin")) return null;
-  
+
   const [email, setEmail] = useState("");
 
   const handleSubscribe = (e) => {
@@ -20,139 +21,165 @@ export default function Footer() {
   };
 
   return (
-    <footer className="bg-black text-neutral-300 border-t border-[#2D2D2D]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-10 text-center sm:text-left">
-          {/* Brand & Social */}
+    <footer className="relative bg-[#1b180d] text-[#fcfbf8] overflow-hidden">
+      {/* SUBTLE LUXURY GLOW */}
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,#2a2412,transparent_65%)] opacity-60 pointer-events-none" />
+
+      <div className="relative max-w-7xl mx-auto px-6 pt-20 pb-10">
+        {/* ================= TOP GRID ================= */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-14 mb-20">
+
+          {/* BRAND */}
           <div>
             <Image
               src="/whitelogo.PNG"
               alt="Raven Fragrance Logo"
-              width={120}
-              height={30}
-              className="h-8 w-auto mx-auto sm:mx-0 mb-5"
+              width={150}
+              height={42}
+              className="mb-6"
               priority
-              draggable={false}
             />
-            <p className="text-sm mt-2 text-neutral-400 leading-relaxed">
-              Discover your next favorite scent with our curated collection of
-              timeless fragrances.
+
+            <p className="text-[#fcfbf8]/70 text-sm leading-relaxed mb-6 font-[Manrope,sans-serif] max-w-sm">
+              Artisan fragrances crafted to reveal your most authentic self.
+              Each scent is a story waiting to be told.
             </p>
 
-            {/* Social Icons */}
-            <div className="flex justify-center sm:justify-start space-x-4 mt-5">
-              <a
-                href="https://www.facebook.com/Ravenfragrance"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Facebook"
-              >
-                <FaFacebookF className="h-5 w-5 text-neutral-400 hover:text-[#B4933A] transition" />
-              </a>
-              <a
-                href="https://www.instagram.com/ravenfragrance.in/"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Instagram"
-              >
-                <FaInstagram className="h-5 w-5 text-neutral-400 hover:text-[#B4933A] transition" />
-              </a>
-              <a
-                href="https://chat.whatsapp.com/YourCommunityLinkHere"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Join our WhatsApp Community"
-              >
-                <FaWhatsapp className="h-5 w-5 text-neutral-400 hover:text-[#B4933A] transition" />
-              </a>
+            <div className="flex gap-3">
+              {[
+                { icon: FaFacebookF, href: "https://www.facebook.com/Ravenfragrance" },
+                { icon: FaInstagram, href: "https://www.instagram.com/ravenfragrance.in/" },
+                { icon: FaWhatsapp, href: "https://chat.whatsapp.com/YourCommunityLinkHere" },
+              ].map(({ icon: Icon, href }, i) => (
+                <a
+                  key={i}
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Social link"
+                  className="w-10 h-10 rounded-full bg-[#fcfbf8]/10 flex items-center justify-center text-[#fcfbf8]/70 hover:bg-[#b28c34] hover:text-[#1b180d] transition-all duration-300 hover:-translate-y-0.5"
+                >
+                  <Icon size={16} />
+                </a>
+              ))}
             </div>
           </div>
 
-          {/* Quick Links */}
+          {/* QUICK LINKS */}
           <div>
-            <h3 className="text-sm font-semibold text-white uppercase tracking-wider">
+            <h3 className="font-serif text-lg uppercase tracking-widest mb-6">
               Quick Links
             </h3>
-            <ul className="mt-4 space-y-2 text-sm">
+            <ul className="space-y-3 font-[Manrope,sans-serif]">
               {[
                 { label: "Home", href: "/" },
                 { label: "Shop", href: "/product" },
                 { label: "About Us", href: "/WhyChooseRaven" },
                 { label: "Contact Us", href: "/contact-us" },
-              ].map((item, i) => (
-                <li key={i}>
+              ].map((item) => (
+                <li key={item.label}>
                   <Link
                     href={item.href}
-                    className="relative text-neutral-400 transition-colors hover:text-[#B4933A] after:absolute after:left-0 after:-bottom-1 after:h-[2px] after:w-0 hover:after:w-full after:bg-[#B4933A] after:transition-all after:duration-300"
+                    className="group relative text-[#fcfbf8]/70 text-sm hover:text-[#b28c34] transition"
                   >
                     {item.label}
+                    <span className="absolute left-0 -bottom-1 h-0.5 w-0 bg-[#b28c34] transition-all duration-300 group-hover:w-full" />
                   </Link>
                 </li>
               ))}
             </ul>
           </div>
 
-          {/* Company */}
+          {/* COMPANY */}
           <div>
-            <h3 className="text-sm font-semibold text-white uppercase tracking-wider">
+            <h3 className="font-serif text-lg uppercase tracking-widest mb-6">
               Company
             </h3>
-            <ul className="mt-4 space-y-2 text-sm">
+            <ul className="space-y-3 font-[Manrope,sans-serif]">
               {[
                 { label: "Privacy Policy", href: "/policy/privacy-policy" },
                 { label: "Terms & Conditions", href: "/policy/terms-conditions" },
                 { label: "Refund & Cancellation", href: "/policy/refund-cancellation" },
                 { label: "Shipping & Delivery", href: "/policy/shipping-delivery" },
-              ].map((item, i) => (
-                <li key={i}>
+              ].map((item) => (
+                <li key={item.label}>
                   <Link
                     href={item.href}
-                    className="relative text-neutral-400 transition-colors hover:text-[#B4933A] after:absolute after:left-0 after:-bottom-1 after:h-[2px] after:w-0 hover:after:w-full after:bg-[#B4933A] after:transition-all after:duration-300"
+                    className="group relative text-[#fcfbf8]/70 text-sm hover:text-[#b28c34] transition"
                   >
                     {item.label}
+                    <span className="absolute left-0 -bottom-1 h-0.5 w-0 bg-[#b28c34] transition-all duration-300 group-hover:w-full" />
                   </Link>
                 </li>
               ))}
             </ul>
           </div>
 
-          {/* Newsletter */}
+          {/* NEWSLETTER */}
           <div>
-            <h3 className="text-sm font-semibold text-white uppercase tracking-wider">
-              Newsletter
+            <h3 className="font-serif text-lg uppercase tracking-widest mb-6">
+              Stay Connected
             </h3>
-            <p className="mt-4 text-sm text-neutral-400">
-              Subscribe to receive updates on new fragrances and offers.
+
+            <p className="text-[#fcfbf8]/70 text-sm mb-4 font-[Manrope,sans-serif]">
+              Subscribe for exclusive offers, new launches & fragrance stories.
             </p>
-            <form
-              onSubmit={handleSubscribe}
-              className="mt-4 flex flex-col sm:flex-row items-center sm:items-stretch gap-3"
-            >
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Your email address"
-                className="w-full px-4 py-2 bg-transparent border border-neutral-700 rounded-lg text-sm placeholder-neutral-500 focus:outline-none focus:border-[#B4933A] transition"
-                required
-              />
+
+            <form onSubmit={handleSubscribe} className="flex gap-2">
+              <div className="relative flex-1">
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#fcfbf8]/50" />
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Your email"
+                  aria-label="Email address"
+                  className="w-full bg-[#fcfbf8]/10 border border-[#fcfbf8]/20 rounded-lg pl-10 pr-4 py-3 text-sm text-[#fcfbf8] placeholder:text-[#fcfbf8]/50 focus:outline-none focus:border-[#b28c34]"
+                  required
+                />
+              </div>
+
               <button
                 type="submit"
-                className="px-6 py-2 bg-[#B4933A] text-black font-semibold rounded-lg text-sm hover:bg-[#cfae56] transition"
+                className="px-6 rounded-lg bg-[#b28c34] text-[#1b180d] font-semibold text-sm hover:bg-[#9a864c] transition"
               >
-                Subscribe
+                Join
               </button>
             </form>
           </div>
         </div>
 
-        {/* Divider */}
-        <div className="mt-12 border-t border-[#2D2D2D] pt-6 flex flex-col md:flex-row justify-between items-center text-sm text-neutral-500 gap-4">
-          <p>© 2025 Raven Fragrance. All rights reserved.</p>
-          <div className="flex flex-wrap justify-center gap-1">
+        {/* ================= BOTTOM BAR ================= */}
+        <div className="border-t border-[#fcfbf8]/15 pt-6 mt-10 flex flex-col md:flex-row items-center justify-between gap-4">
+          <p className="text-[#fcfbf8]/60 text-sm font-[Manrope,sans-serif]">
+            © {new Date().getFullYear()} Raven Fragrance. All rights reserved.
+          </p>
+
+          <div className="flex items-center gap-5 ">
+            {[
+              { src: "/upi.svg", alt: "UPI" },
+              { src: "/visa.svg", alt: "Visa" },
+              { src: "/mastercard.svg", alt: "Mastercard" },
+              { src: "/rupay.svg", alt: "RuPay" },
+            ].map((p) => (
+              <img
+                key={p.alt}
+                src={p.src}
+                alt={p.alt}
+                className="h-6 md:h-7 transition duration-300"
+                loading="lazy"
+              />
+            ))}
           </div>
         </div>
       </div>
+
+      {/* LUXURY HOVER GLOW */}
+      <style jsx>{`
+        footer a:hover {
+          text-shadow: 0 0 6px rgba(178, 140, 52, 0.35);
+        }
+      `}</style>
     </footer>
   );
 }
