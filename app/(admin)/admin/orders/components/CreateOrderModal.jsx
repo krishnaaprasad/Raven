@@ -1,11 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { X } from "lucide-react";
 import { toast } from "react-hot-toast";
 
 export default function CreateOrderModal({ onClose, onCreated }) {
+  const [products, setProducts] = useState([]);
   const [form, setForm] = useState({
+    orderDate: new Date().toISOString().slice(0, 10),
     userName: "",
     email: "",
     phone: "",
@@ -13,13 +15,32 @@ export default function CreateOrderModal({ onClose, onCreated }) {
     city: "",
     state: "",
     pincode: "",
-    productName: "",
+    productId: "",
+    variantSize: "",
     quantity: 1,
-    price: "",
     shippingCharge: "",
+    paymentMethod: "Cash",
   });
 
-  const update = (k, v) => setForm((p) => ({ ...p, [k]: v }));
+  const update = (k, v) => setForm(p => ({ ...p, [k]: v }));
+
+  useEffect(() => {
+    (async () => {
+      const res = await fetch("/api/admin/products?limit=1000");
+      const json = await res.json();
+      if (json.success) setProducts(json.data || []);
+    })();
+  }, []);
+
+  const product = products.find(p => p._id === form.productId);
+  const variant = product?.variants?.find(v => v.size === form.variantSize);
+
+  const total = useMemo(() => {
+    const qty = Number(form.quantity || 1);
+    const price = Number(variant?.price || 0);
+    const ship = Number(form.shippingCharge || 0);
+    return qty * price + ship;
+  }, [form, variant]);
 
   const handleSave = async () => {
     try {
@@ -30,10 +51,7 @@ export default function CreateOrderModal({ onClose, onCreated }) {
       });
 
       const data = await res.json();
-      if (!res.ok || !data.success) {
-        throw new Error(data.error || "Failed");
-      }
-
+      if (!data.success) throw new Error(data.error);
       toast.success("Manual order created");
       onCreated?.();
       onClose();
@@ -44,58 +62,92 @@ export default function CreateOrderModal({ onClose, onCreated }) {
 
   return (
     <div className="fixed inset-0 z-50 bg-black/30 flex items-center justify-center px-3">
-      <div className="bg-white w-full max-w-md rounded-xl shadow-xl overflow-hidden">
+      <div className="bg-white w-full max-w-md rounded-xl shadow-xl">
 
         {/* HEADER */}
-        <div className="flex items-center justify-between px-4 py-3 border-b border-[#e7e1cf]">
-          <h2 className="text-base font-semibold text-[#1b180d]">
-            Create Manual Order
-          </h2>
-          <button
-            onClick={onClose}
-            className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-[#f3efe6]"
-          >
-            <X className="w-4 h-4" />
-          </button>
+        <div className="flex justify-between px-4 py-3 border-b">
+          <h2 className="text-sm font-semibold">Create Manual Order</h2>
+          <button onClick={onClose}><X size={16} /></button>
         </div>
 
         {/* BODY */}
-        <div className="px-4 py-3 space-y-4 text-sm">
+        <div className="px-4 py-3 space-y-3 text-sm max-h-[70vh] overflow-y-auto">
 
-          {/* CUSTOMER */}
-          <Section title="Customer">
-            <Input placeholder="Name" onChange={(e) => update("userName", e.target.value)} />
-            <Input placeholder="Email" onChange={(e) => update("email", e.target.value)} />
-            <Input placeholder="Phone" onChange={(e) => update("phone", e.target.value)} />
-          </Section>
+          <Input type="date" label="Order Date" value={form.orderDate}
+            onChange={e => update("orderDate", e.target.value)} />
 
-          {/* ADDRESS */}
-          <Section title="Address">
-            <Input placeholder="Address" onChange={(e) => update("address", e.target.value)} />
-            <div className="grid grid-cols-2 gap-2">
-              <Input placeholder="City" onChange={(e) => update("city", e.target.value)} />
-              <Input placeholder="State" onChange={(e) => update("state", e.target.value)} />
-            </div>
-            <Input placeholder="Pincode" onChange={(e) => update("pincode", e.target.value)} />
-          </Section>
+          <Input label="Customer Name*" onChange={e => update("userName", e.target.value)} />
+          <Input label="Phone*" onChange={e => update("phone", e.target.value)} />
+          <Input label="Email" onChange={e => update("email", e.target.value)} />
+          <Input label="Address" onChange={e => update("address", e.target.value)} />
+
+          <div className="grid grid-cols-2 gap-2">
+            <Input label="City" onChange={e => update("city", e.target.value)} />
+            <Input label="State" onChange={e => update("state", e.target.value)} />
+          </div>
+
+          <Input label="Pincode" onChange={e => update("pincode", e.target.value)} />
 
           {/* PRODUCT */}
-          <Section title="Product">
-            <Input placeholder="Product name" onChange={(e) => update("productName", e.target.value)} />
-            <div className="grid grid-cols-3 gap-2">
-              <Input placeholder="Qty" type="number" value={form.quantity} onChange={(e) => update("quantity", e.target.value)} />
-              <Input placeholder="Price ₹" type="number" onChange={(e) => update("price", e.target.value)} />
-              <Input placeholder="Ship ₹" type="number" onChange={(e) => update("shippingCharge", e.target.value)} />
-            </div>
-          </Section>
+          <Select
+            label="Product*"
+            value={form.productId}
+            onChange={e => {
+              update("productId", e.target.value);
+              update("variantSize", "");
+            }}
+          >
+            <option value="">Select product</option>
+            {products.map(p => (
+              <option key={p._id} value={p._id}>{p.name}</option>
+            ))}
+          </Select>
 
+          {/* VARIANT */}
+          {product && (
+            <Select
+              label="Variant*"
+              value={form.variantSize}
+              onChange={e => update("variantSize", e.target.value)}
+            >
+              <option value="">Select size</option>
+              {product.variants.map(v => (
+                <option key={v.size} value={v.size}>
+                  {v.size} — ₹{v.price}
+                </option>
+              ))}
+            </Select>
+          )}
+
+          <div className="grid grid-cols-3 gap-2">
+            <Input type="number" label="Qty" value={form.quantity}
+              onChange={e => update("quantity", e.target.value)} />
+            <Input type="number" label="Shipping"
+              onChange={e => update("shippingCharge", e.target.value)} />
+            <Input label="Price" disabled value={variant?.price || ""} />
+          </div>
+
+          <Select
+            label="Payment Method"
+            value={form.paymentMethod}
+            onChange={e => update("paymentMethod", e.target.value)}
+          >
+            <option>Cash</option>
+            <option>UPI</option>
+            <option>Bank Transfer</option>
+          </Select>
+
+          <div className="flex justify-between font-semibold pt-2">
+            <span>Total</span>
+            <span>₹{total.toFixed(2)}</span>
+          </div>
         </div>
 
         {/* FOOTER */}
-        <div className="px-4 py-3 border-t border-[#e7e1cf] bg-[#fcfbf8]">
+        <div className="px-4 py-3 border-t">
           <button
             onClick={handleSave}
-            className="w-full h-9 rounded-lg bg-[#b28c34] text-white text-sm font-semibold hover:bg-[#9a864c]"
+            className="w-full h-9 bg-[#b28c34] text-white rounded-lg text-sm font-semibold"
           >
             Save Order
           </button>
@@ -105,24 +157,22 @@ export default function CreateOrderModal({ onClose, onCreated }) {
   );
 }
 
-/* ---------- Helpers ---------- */
-
-function Section({ title, children }) {
+function Input({ label, ...props }) {
   return (
-    <div className="space-y-2">
-      <p className="text-xs font-semibold text-[#6b6654] uppercase">
-        {title}
-      </p>
-      {children}
+    <div>
+      {label && <label className="text-xs text-gray-600">{label}</label>}
+      <input {...props} className="w-full h-9 border rounded-md px-3 text-sm" />
     </div>
   );
 }
 
-function Input(props) {
+function Select({ label, children, ...props }) {
   return (
-    <input
-      {...props}
-      className="w-full h-9 rounded-md border border-[#e7e1cf] px-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#b28c34]/50"
-    />
+    <div>
+      {label && <label className="text-xs text-gray-600">{label}</label>}
+      <select {...props} className="w-full h-9 border rounded-md px-3 text-sm">
+        {children}
+      </select>
+    </div>
   );
 }

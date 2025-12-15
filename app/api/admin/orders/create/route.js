@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import connectToDatabase from "@/lib/mongodb";
-import { Order } from "@/models/Order";
+import { Order, OrderCounter } from "@/models/Order";
+import Product from "@/models/Product"; // ✅ ADD
 
 export async function POST(req) {
   try {
@@ -8,55 +9,81 @@ export async function POST(req) {
     const body = await req.json();
 
     const {
-      userName,
-      email,
-      phone,
-      address,
-      city,
-      state,
-      pincode,
-      productName,
-      quantity,
-      price,
-      shippingCharge,
-    } = body;
+  userName,
+  email,
+  phone,
+  address,
+  city,
+  state,
+  pincode,
+  productId,
+  variantSize,          // ✅ NEW
+  quantity,
+  shippingCharge,
+  paymentMethod,
+  orderDate,
+} = body;
 
-    // 🛑 BASIC VALIDATION (only required fields)
-    if (
-      !userName ||
-      !email ||
-      !phone ||
-      !address ||
-      !city ||
-      !state ||
-      !pincode ||
-      !productName ||
-      !quantity ||
-      !price
-    ) {
-      return NextResponse.json(
-        { success: false, error: "Missing required fields" },
-        { status: 400 }
-      );
-    }
+if (!userName || !phone || !productId || !variantSize) {
+  return NextResponse.json(
+    { success: false, error: "Missing required fields" },
+    { status: 400 }
+  );
+}
 
-    const qty = Number(quantity);
-    const unitPrice = Number(price);
-    const shipping = Number(shippingCharge || 0);
+const product = await Product.findById(productId);
+if (!product) {
+  return NextResponse.json(
+    { success: false, error: "Product not found" },
+    { status: 404 }
+  );
+}
 
-    const totalAmount = qty * unitPrice + shipping;
-    // Generate Manual Order ID
-    const manualId = `RVN-MAN-${Date.now().toString().slice(-6)}`;
+const variant = product.variants.find(
+  (v) => String(v.size) === String(variantSize)
+);
 
+if (!variant || variant.price == null) {
+  return NextResponse.json(
+    { success: false, error: "Invalid product variant selected" },
+    { status: 400 }
+  );
+}
+
+const qty = Math.max(1, Number(quantity || 1));
+const ship = Number(shippingCharge || 0);
+const unitPrice = Number(variant.price);
+
+if (Number.isNaN(unitPrice)) {
+  return NextResponse.json(
+    { success: false, error: "Invalid variant price" },
+    { status: 400 }
+  );
+}
+
+const totalAmount = qty * unitPrice + ship;
+
+
+
+    // ✅ MANUAL ORDER ID
+    const today = new Date().toISOString().slice(0, 10);
+    const counter = await OrderCounter.findOneAndUpdate(
+      { prefix: "MAN", date: today },
+      { $inc: { seq: 1 } },
+      { upsert: true, new: true }
+    );
+
+    const customOrderId = `MAN-${String(counter.seq).padStart(5, "0")}`;
+
+    // ✅ CREATE ORDER
     const order = await Order.create({
-      // 👤 CUSTOMER
-      manualOrderId: manualId,
+      customOrderId,
+
       userId: null,
       userName,
-      email,
+      email: email || "",
       phone,
       address,
-
       addressDetails: {
         address1: address,
         city,
@@ -64,48 +91,47 @@ export async function POST(req) {
         pincode,
       },
 
-      // 🚚 REQUIRED BY MODEL
       deliveryType: "standard",
 
-      // 🛒 SINGLE PRODUCT → CART FORMAT
       cartItems: [
         {
-          name: productName,
-          price: unitPrice,
+          name: product.name,
+          size: variant.size,
+          price: Number(unitPrice),   // ⬅ ENSURE NUMBER
           quantity: qty,
+          image: product.images?.[0] || "",
+          slug: product.slug,
         },
       ],
 
-      shippingCharge: shipping,
+
+      shippingCharge: ship,
       totalAmount,
 
-      // 💰 OFFLINE PAYMENT DEFAULTS
       payment_status: "PAID",
       status: "PAID",
-      payment_state: "SUCCESS",
-
-      // 📦 ORDER STATUS
       order_status: "Processing",
-      verified: true,
 
-      paymentGateway: "OFFLINE",
-      paymentMethod: "OFFLINE",
+      paymentGateway: "Manual",
+      paymentMethod: paymentMethod || "Cash",
+
+      createdAt: orderDate ? new Date(orderDate) : new Date(), // ✅ IMPORTANT
 
       orderHistory: [
         {
-          from: "N/A",
+          from: "Created",
           to: "Processing",
           by: "admin",
-          note: "Manual offline order created from admin panel",
+          note: "Manual order entry",
         },
       ],
     });
 
     return NextResponse.json({ success: true, order });
   } catch (e) {
-    console.error("❌ Manual order create error:", e);
+    console.error("❌ CREATE MANUAL ORDER ERROR:", e);
     return NextResponse.json(
-      { success: false, error: e.message || "Failed to create order" },
+      { success: false, error: "Failed to create order" },
       { status: 500 }
     );
   }
