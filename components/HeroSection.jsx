@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { Cormorant_Garamond, Outfit } from "next/font/google";
+import { motion } from 'framer-motion';
 
 const cormorant = Cormorant_Garamond({
   subsets: ["latin"],
@@ -27,6 +28,7 @@ export default function HeroSection() {
   const [products, setProducts] = useState([]);
   const [activeIndex, setActiveIndex] = useState(0);
   const intervalRef = useRef(null);
+  const [isAnimating, setIsAnimating] = useState(false);
 
   useEffect(() => {
     setIsVisible(true);
@@ -200,17 +202,20 @@ const handleMouseMove = (e) => {
 
             {activeProduct && (
             <div
-              className="relative aspect-3/4 max-w-md mx-auto"
-              style={{
-                transform: `perspective(1000px) rotateY(${mousePosition.x * 0.5}deg) rotateX(${-mousePosition.y * 0.5}deg)`,
-              }}
-            >
+                className={`relative aspect-3/4 max-w-md mx-auto transition-all duration-500 ease-out
+                    ${isAnimating ? "opacity-0 translate-y-4" : "opacity-100 translate-y-0"}
+                `}
+                style={{
+                    transform: `perspective(1000px) rotateY(${mousePosition.x * 0.5}deg) rotateX(${-mousePosition.y * 0.5}deg)`,
+                }}
+                >
               <div className="absolute inset-0 bg-[#b28c34]/20 blur-2xl rounded-2xl scale-110 animate-pulse" />
 
               {/* IMAGE */}
                 <Link href={`/product/${activeProduct.slug}`}>
                   <div className="relative h-full rounded-2xl overflow-hidden border border-[#b28c34]/20 shadow-2xl cursor-pointer">
                     <Image
+                      key={activeProduct.slug}
                       src={activeProduct.images?.[0]?.original || "/placeholder.jpg"}
                       alt={activeProduct.name}
                       fill
