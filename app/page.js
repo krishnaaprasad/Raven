@@ -10,6 +10,7 @@ import ProductCarousel from "@/components/ProductCarousel";
 
 import connectToDatabase from "@/lib/mongodb";
 import Product from "@/models/Product";
+import HeroSection from "@/components/HeroSection";
 
 export default async function Home() {
 
@@ -35,21 +36,7 @@ export default async function Home() {
     <div className="homepage-theme">
 
       {/* HERO VIDEO */}
-      <section className="relative w-full min-h-80 sm:min-h-[340px] md:min-h-[550px] flex items-center justify-center overflow-hidden">
-        <video
-          autoPlay
-          loop
-          muted
-          playsInline
-          className="absolute inset-0 w-full h-full object-cover object-[50%_20%] md:object-center"
-        >
-          <source src="/intro.mp4" type="video/mp4" />
-        </video>
-      </section>
-
-      {/* GOLD DIVIDER */}
-      <div className="w-full h-0.5 bg-linear-to-r from-[#af9b64] via-[#B4933A] to-[#af9b64] shadow-md" />
-
+      <HeroSection />
       {/* SECTIONS */}
       <RavenBadge />
       {/* ⭐ PASS bestsellerIds ALSO ⭐ */}
