@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { Cormorant_Garamond, Outfit } from "next/font/google";
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const cormorant = Cormorant_Garamond({
   subsets: ["latin"],
@@ -20,6 +20,7 @@ const outfit = Outfit({
   display: "swap",
 });
 
+
 export default function HeroSection() {
   const [isVisible, setIsVisible] = useState(false);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
@@ -29,6 +30,38 @@ export default function HeroSection() {
   const [activeIndex, setActiveIndex] = useState(0);
   const intervalRef = useRef(null);
   const [isAnimating, setIsAnimating] = useState(false);
+  const [direction, setDirection] = useState(1); // 1 = next, -1 = prev
+  const touchStartX = useRef(null);
+
+const handleTouchStart = (e) => {
+  touchStartX.current = e.touches[0].clientX;
+};
+
+const handleTouchEnd = (e) => {
+  if (!touchStartX.current) return;
+
+  const diff = touchStartX.current - e.changedTouches[0].clientX;
+
+  if (diff > 60) {
+    nextSlide(); // swipe left
+  } else if (diff < -60) {
+    prevSlide(); // swipe right
+  }
+
+  touchStartX.current = null;
+};
+
+const handleClickZone = (e) => {
+  const rect = e.currentTarget.getBoundingClientRect();
+  const clickX = e.clientX - rect.left;
+
+  if (clickX < rect.width / 2) {
+    prevSlide();
+  } else {
+    nextSlide();
+  }
+};
+  
 
   useEffect(() => {
     setIsVisible(true);
@@ -49,19 +82,32 @@ export default function HeroSection() {
   }, []);
 
   /* ================= AUTO SLIDE ================= */
-  useEffect(() => {
-    if (!products.length) return;
+useEffect(() => {
+  if (!products.length) return;
 
-    intervalRef.current = setInterval(() => {
-      setActiveIndex((prev) => (prev + 1) % products.length);
-    }, 4000);
+  intervalRef.current = setInterval(() => {
+    setDirection(1);
+    setActiveIndex((prev) => (prev + 1) % products.length);
+  }, 4000);
 
-    
-
-    return () => {
-        if (intervalRef.current) clearInterval(intervalRef.current);
-        };
+  return () => clearInterval(intervalRef.current);
 }, [products]);
+
+ const nextSlide = () => {
+  setDirection(1);
+  setActiveIndex((prev) => (prev + 1) % products.length);
+};
+
+const prevSlide = () => {
+  setDirection(-1);
+  setActiveIndex((prev) =>
+    prev === 0 ? products.length - 1 : prev - 1
+  );
+};
+
+const activeProduct = products[activeIndex];
+
+
 
 const handleMouseMove = (e) => {
     const rect = e.currentTarget.getBoundingClientRect();
@@ -70,7 +116,21 @@ const handleMouseMove = (e) => {
     setMousePosition({ x: x * 20, y: y * 20 });
   };
 
-  const activeProduct = products[activeIndex];
+/* ================= ANIMATION VARIANTS ================= */
+  const slideVariants = {
+    enter: (dir) => ({
+      x: dir > 0 ? 120 : -120,
+      opacity: 0,
+    }),
+    center: {
+      x: 0,
+      opacity: 1,
+    },
+    exit: (dir) => ({
+      x: dir > 0 ? -120 : 120,
+      opacity: 0,
+    }),
+  };
 
   return (
     <section
@@ -196,10 +256,20 @@ const handleMouseMove = (e) => {
                 setActiveIndex((prev) => (prev + 1) % products.length);
               }, 4000);
             }}
+            onTouchStart={(e) => (touchStartX.current = e.touches[0].clientX)}
+              onTouchEnd={(e) => {
+                if (!touchStartX.current) return;
+                const diff = touchStartX.current - e.changedTouches[0].clientX;
+                if (diff > 50) nextSlide();
+                if (diff < -50) prevSlide();
+                touchStartX.current = null;
+              }}
             >
+
             <div className="absolute -inset-6 border border-[#b28c34]/20 rounded-3xl -rotate-3" />
             <div className="absolute -inset-4 border border-[#b28c34]/10 rounded-3xl rotate-2" />
 
+            <AnimatePresence custom={direction} mode="wait">
             {activeProduct && (
             <div
                 className={`relative aspect-3/4 max-w-md mx-auto transition-all duration-500 ease-out
@@ -214,20 +284,33 @@ const handleMouseMove = (e) => {
               {/* IMAGE */}
                 <Link href={`/product/${activeProduct.slug}`}>
                   <div className="relative h-full rounded-2xl overflow-hidden border border-[#b28c34]/20 shadow-2xl cursor-pointer">
+                    {/* INTERACTION LAYER */}
+                    <div
+                      className="absolute inset-0 z-20"
+                      onClick={handleClickZone}
+                      onTouchStart={handleTouchStart}
+                      onTouchEnd={handleTouchEnd}
+                    />
                     <Image
                       key={activeProduct.slug}
                       src={activeProduct.images?.[0]?.original || "/placeholder.jpg"}
                       alt={activeProduct.name}
                       fill
                       sizes="(max-width: 768px) 90vw, 500px"
-                      className="object-cover transition-opacity duration-700"
+                      className={`absolute inset-0 transition-all duration-700 ease-in-out
+                        ${direction === 1 ? "animate-slide-left" : "animate-slide-right"}
+                      `}
                       priority={activeIndex === 0}
                     />
+
+                  <div className="absolute inset-y-0 left-0 right-0 flex items-center justify-between px-4 pointer-events-none">
+                  </div>
+                  
 
                 <div className="absolute inset-0 bg-linear-to-t from-black/40 to-transparent" />
 
                 {/* PRODUCT CARD */}
-                    <div className="absolute bottom-5 left-5 right-5 bg-[#fcfbf8]/85 backdrop-blur rounded-xl p-4 border border-[#b28c34]/20">
+                    <div className="absolute bottom-5 left-5 right-5 bg-[#fcfbf8]/85 backdrop-blur rounded-xl p-2 border border-[#b28c34]/20">
                       <p className={`text-lg text-[#1b180d] ${cormorant.className}`}>
                         {activeProduct.name}
                       </p>
@@ -245,12 +328,13 @@ const handleMouseMove = (e) => {
                         <span
                           className={`text-xs uppercase tracking-widest text-[#b28c34] ${outfit.className}`}
                         >
-                          Shop Now →
+                          Shop Now ➜
                         </span>
                       </div>
                     </div>
                   </div>
                 </Link>
+                
 
               {/* FLOATING BADGE */}
               <div className="absolute -top-5 -right-5 w-20 h-20 rounded-full bg-[#c59118] flex items-center justify-center shadow-xl animate-float">
@@ -260,6 +344,8 @@ const handleMouseMove = (e) => {
               </div>
             </div>
             )}
+            </AnimatePresence>
+
           </div>
         </div>
       </div>

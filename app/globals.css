@@ -356,3 +356,21 @@ body {
 .homepage-theme .glow-gold {
   box-shadow: 0 0 60px hsl(var(--gold) / 0.15);
 }
+
+@keyframes slideLeft {
+  from { transform: translateX(100%); opacity: 0 }
+  to { transform: translateX(0); opacity: 1 }
+}
+
+@keyframes slideRight {
+  from { transform: translateX(-100%); opacity: 0 }
+  to { transform: translateX(0); opacity: 1 }
+}
+
+.animate-slide-left {
+  animation: slideLeft 0.7s ease-out;
+}
+
+.animate-slide-right {
+  animation: slideRight 0.7s ease-out;
+}
