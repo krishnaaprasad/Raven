@@ -78,7 +78,7 @@ const handleMouseMove = (e) => {
   return (
     <section
       onMouseMove={handleMouseMove}
-      className="relative w-full min-h-dvh overflow-hidden bg-linear-to-br from-cream via-background to-cream-muted"
+      className="relative w-full min-h-screen overflow-hidden bg-linear-to-br from-[#f7f1e6] via-[#fdfbf8] to-[#e9dfc7]"
     >
       {/* ================= DECORATIVE BACKGROUND ================= */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
