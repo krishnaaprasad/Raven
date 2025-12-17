@@ -101,6 +101,8 @@ export default function ProductCard({ product, bestsellerIds = [] }) {
         lg:w-[23vw] lg:max-w-[280px] 
         xl:max-w-[300px]
       "
+       onMouseEnter={() => setHover(true)}
+       onMouseLeave={() => setHover(false)}
     >
       
       <div className="relative overflow-hidden rounded-xl bg-[#FAF7EF] border border-[#E6DDCF] hover:border-[#B68A3A] transition-all duration-500 shadow-[0_4px_20px_rgba(0,0,0,0.04)] hover:shadow-[0_15px_40px_rgba(0,0,0,0.12)]">
@@ -134,8 +136,6 @@ export default function ProductCard({ product, bestsellerIds = [] }) {
         <Link
           href={`/product/${slug}`}
           className="block relative aspect-3/4 overflow-hidden group"
-          onMouseEnter={() => setHover(true)}
-          onMouseLeave={() => setHover(false)}
         >
           
           {/* Make everything inside NOT block the click */}
