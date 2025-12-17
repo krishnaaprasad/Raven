@@ -5,7 +5,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { Cormorant_Garamond, Outfit } from "next/font/google";
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Autoplay } from "swiper/modules";
 
 const cormorant = Cormorant_Garamond({
   subsets: ["latin"],
@@ -27,41 +29,9 @@ export default function HeroSection() {
 
   /* ⭐ PRODUCT SLIDER STATE */
   const [products, setProducts] = useState([]);
-  const [activeIndex, setActiveIndex] = useState(0);
   const intervalRef = useRef(null);
   const [isAnimating, setIsAnimating] = useState(false);
-  const [direction, setDirection] = useState(1); // 1 = next, -1 = prev
   const touchStartX = useRef(null);
-
-const handleTouchStart = (e) => {
-  touchStartX.current = e.touches[0].clientX;
-};
-
-const handleTouchEnd = (e) => {
-  if (!touchStartX.current) return;
-
-  const diff = touchStartX.current - e.changedTouches[0].clientX;
-
-  if (diff > 60) {
-    nextSlide(); // swipe left
-  } else if (diff < -60) {
-    prevSlide(); // swipe right
-  }
-
-  touchStartX.current = null;
-};
-
-const handleClickZone = (e) => {
-  const rect = e.currentTarget.getBoundingClientRect();
-  const clickX = e.clientX - rect.left;
-
-  if (clickX < rect.width / 2) {
-    prevSlide();
-  } else {
-    nextSlide();
-  }
-};
-  
 
   useEffect(() => {
     setIsVisible(true);
@@ -80,33 +50,6 @@ const handleClickZone = (e) => {
     }
     loadProducts();
   }, []);
-
-  /* ================= AUTO SLIDE ================= */
-useEffect(() => {
-  if (!products.length) return;
-
-  intervalRef.current = setInterval(() => {
-    setDirection(1);
-    setActiveIndex((prev) => (prev + 1) % products.length);
-  }, 4000);
-
-  return () => clearInterval(intervalRef.current);
-}, [products]);
-
- const nextSlide = () => {
-  setDirection(1);
-  setActiveIndex((prev) => (prev + 1) % products.length);
-};
-
-const prevSlide = () => {
-  setDirection(-1);
-  setActiveIndex((prev) =>
-    prev === 0 ? products.length - 1 : prev - 1
-  );
-};
-
-const activeProduct = products[activeIndex];
-
 
 
 const handleMouseMove = (e) => {
@@ -160,7 +103,7 @@ const handleMouseMove = (e) => {
 
       {/* ================= CONTENT ================= */}
       <div className="relative z-10 mx-auto px-4 sm:px-6 lg:px-8 min-h-dvh">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center min-h-screen py-15">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center min-h-screen py-13">
 
           {/* ================= LEFT ================= */}
           <div
@@ -248,107 +191,75 @@ const handleMouseMove = (e) => {
           {/* ================= RIGHT ================= */}
           <div
             className={`order-1 lg:order-2 relative transition-all duration-1000 ${
-                isVisible ? "opacity-100 scale-100" : "opacity-0 scale-95"
+              isVisible ? "opacity-100 scale-100" : "opacity-0 scale-95"
             }`}
-            onMouseEnter={() => clearInterval(intervalRef.current)}
-            onMouseLeave={() => {
-              intervalRef.current = setInterval(() => {
-                setActiveIndex((prev) => (prev + 1) % products.length);
-              }, 4000);
-            }}
-            onTouchStart={(e) => (touchStartX.current = e.touches[0].clientX)}
-              onTouchEnd={(e) => {
-                if (!touchStartX.current) return;
-                const diff = touchStartX.current - e.changedTouches[0].clientX;
-                if (diff > 50) nextSlide();
-                if (diff < -50) prevSlide();
-                touchStartX.current = null;
-              }}
-            >
+>
 
             <div className="absolute -inset-6 border border-[#b28c34]/20 rounded-3xl -rotate-3" />
             <div className="absolute -inset-4 border border-[#b28c34]/10 rounded-3xl rotate-2" />
 
-            <AnimatePresence custom={direction} mode="wait">
-            {activeProduct && (
-            <div
-                className={`relative aspect-3/4 max-w-md mx-auto transition-all duration-500 ease-out
-                    ${isAnimating ? "opacity-0 translate-y-4" : "opacity-100 translate-y-0"}
-                `}
-                style={{
-                    transform: `perspective(1000px) rotateY(${mousePosition.x * 0.5}deg) rotateX(${-mousePosition.y * 0.5}deg)`,
-                }}
-                >
-              <div className="absolute inset-0 bg-[#b28c34]/20 blur-2xl rounded-2xl scale-110 animate-pulse" />
+            <Swiper
+  modules={[Autoplay]}
+  autoplay={{
+    delay: 4000,
+    disableOnInteraction: false,
+  }}
+  loop
+  grabCursor
+  slidesPerView={1}
+  className="relative aspect-3/4 max-w-md mx-auto  rounded-2xl shadow-2xl"
+>
+  {products.map((product) => (
+    <SwiperSlide key={product._id}>
+      <Link href={`/product/${product.slug}`}>
+        <div
+          className="relative h-full rounded-2xl overflow-hidden border border-[#b28c34]/20 shadow-2xl cursor-pointer"
+          style={{
+            transform: `perspective(1000px) rotateY(${mousePosition.x * 0.5}deg) rotateX(${-mousePosition.y * 0.5}deg)`,
+          }}
+        >
+          {/* IMAGE */}
+          <Image
+            src={product.images?.[0]?.original || "/placeholder.jpg"}
+            alt={product.name}
+            fill
+            sizes="(max-width: 768px) 90vw, 500px"
+            className="object-cover transition-transform duration-700"
+            priority={false}
+          />
 
-              {/* IMAGE */}
-                <Link href={`/product/${activeProduct.slug}`}>
-                  <div className="relative h-full rounded-2xl overflow-hidden border border-[#b28c34]/20 shadow-2xl cursor-pointer">
-                    {/* INTERACTION LAYER */}
-                    <div
-                      className="absolute inset-0 z-20"
-                      onClick={handleClickZone}
-                      onTouchStart={handleTouchStart}
-                      onTouchEnd={handleTouchEnd}
-                    />
-                    <Image
-                      key={activeProduct.slug}
-                      src={activeProduct.images?.[0]?.original || "/placeholder.jpg"}
-                      alt={activeProduct.name}
-                      fill
-                      sizes="(max-width: 768px) 90vw, 500px"
-                      className={`absolute inset-0 transition-all duration-700 ease-in-out
-                        ${direction === 1 ? "animate-slide-left" : "animate-slide-right"}
-                      `}
-                      priority={activeIndex === 0}
-                    />
+          {/* OVERLAY */}
+          <div className="absolute inset-0 bg-linear-to-t from-black/40 to-transparent" />
 
-                  <div className="absolute inset-y-0 left-0 right-0 flex items-center justify-between px-4 pointer-events-none">
-                  </div>
-                  
+          {/* PRODUCT CARD */}
+          <div className="absolute bottom-5 left-5 right-5 bg-[#fcfbf8]/85 backdrop-blur rounded-xl p-3 border border-[#b28c34]/20">
+            <p className={`text-lg text-[#1b180d] ${cormorant.className}`}>
+              {product.name}
+            </p>
 
-                <div className="absolute inset-0 bg-linear-to-t from-black/40 to-transparent" />
-
-                {/* PRODUCT CARD */}
-                    <div className="absolute bottom-5 left-5 right-5 bg-[#fcfbf8]/85 backdrop-blur rounded-xl p-2 border border-[#b28c34]/20">
-                      <p className={`text-lg text-[#1b180d] ${cormorant.className}`}>
-                        {activeProduct.name}
-                      </p>
-
-                      <div className="flex justify-between items-end mt-2">
-                        <div>
-                          <p className="text-sm line-through text-[#5f544e]">
-                            ₹{activeProduct.variants?.[0]?.mrp}
-                          </p>
-                          <p className="text-xl font-semibold text-[#b28c34]">
-                            ₹{activeProduct.variants?.[0]?.price}
-                          </p>
-                        </div>
-
-                        <span
-                          className={`text-xs uppercase tracking-widest text-[#b28c34] ${outfit.className}`}
-                        >
-                          Shop Now ➜
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </Link>
-                
-
-              {/* FLOATING BADGE */}
-              <div className="absolute -top-5 -right-5 w-20 h-20 rounded-full bg-[#c59118] flex items-center justify-center shadow-xl animate-float">
-                <span className="text-white text-sm font-semibold text-center">
-                  NEW<br />2025
-                </span>
+            <div className="flex justify-between items-end mt-2">
+              <div>
+                <p className="text-sm line-through text-[#5f544e]">
+                  ₹{product.variants?.[0]?.mrp}
+                </p>
+                <p className="text-xl font-semibold text-[#b28c34]">
+                  ₹{product.variants?.[0]?.price}
+                </p>
               </div>
-            </div>
-            )}
-            </AnimatePresence>
 
+              <span
+                className={`text-xs uppercase tracking-widest text-[#b28c34] ${outfit.className}`}
+              >
+                Shop Now ➜
+              </span>
+            </div>
           </div>
         </div>
-      </div>
+      </Link>
+    </SwiperSlide>
+  ))}
+</Swiper>
+
 
       {/* SCROLL INDICATOR */}
       <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3">
@@ -357,6 +268,10 @@ const handleMouseMove = (e) => {
         </span>
         <div className="w-6 h-10 border-2 border-[#1b180d]/30 rounded-full flex justify-center pt-2">
           <div className="w-1.5 h-3 bg-[#b28c34] rounded-full animate-bounce" />
+        </div>
+      </div>
+
+          </div>
         </div>
       </div>
     </section>
