@@ -123,10 +123,10 @@ const handleMouseMove = (e) => {
             </div>
 
             {/* TITLE */}
-            <h1 className="font-serif text-6xl font-semibold sm:text-8xl xl:text-8xl text-[#1b180d] leading-tight mb-6">
+            <h1 className="font-serif text-7xl font-semibold sm:text-8xl xl:text-8xl text-[#1b180d] leading-tight mb-6">
               Unveil
               <span
-                className={`block italic text-8xl font-bold relative mt-0 text-gold-gradient bg-clip-text ${cormorant.className}`}>
+                className={`block italic sm:text-8xl text-7xl font-bold relative mt-0 text-gold-gradient bg-clip-text ${cormorant.className}`}>
                 Your Essence
                 <svg
                   className="absolute -bottom-2 left-0 w-full max-w-[300px]"
@@ -172,8 +172,8 @@ const handleMouseMove = (e) => {
             <div className="flex flex-wrap justify-center lg:justify-start gap-8 mt-12 pt-10 border-t border-[#1b180d]/10">
               {[
                 { value: "100%", label: "Natural" },
-                { value: "20+", label: "Rare Botanicals" },
-                { value: "500+", label: "Happy Customers" },
+                { value: "20+", label: "Ingredients" },
+                { value: "500+", label: "Customers" },
               ].map((b) => (
                 <div key={b.label}>
                   <div className="text-xl sm:text-3xl font-serif text-[#b28c34]">{b.value}</div>
