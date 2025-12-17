@@ -7,12 +7,14 @@ import { useState } from "react";
 import { usePathname } from "next/navigation";
 import { Mail, ShieldCheck, Truck } from "lucide-react";
 import toast from "react-hot-toast";
+import { useRouter } from "next/navigation";
 
 export default function Footer() {
   const pathname = usePathname();
   if (pathname.startsWith("/admin")) return null;
 
   const [email, setEmail] = useState("");
+  const router = useRouter();
 
   const handleSubscribe = async (e) => {
   e.preventDefault();
@@ -38,6 +40,17 @@ export default function Footer() {
     toast.error("Network error. Please try again.");
   }
 };
+   
+  const handleClick = () => {
+    if (window.location.pathname !== "/") {
+      router.push("/#why-choose-raven");
+    } else {
+      document
+        .getElementById("why-choose-raven")
+        ?.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+  
 
   return (
     <footer className="relative bg-[#1b180d] text-[#fcfbf8] overflow-hidden">
@@ -90,23 +103,35 @@ export default function Footer() {
               Quick Links
             </h3>
             <ul className="space-y-3 font-[Manrope,sans-serif]">
-              {[
-                { label: "Home", href: "/" },
-                { label: "Shop", href: "/product" },
-                { label: "About Us", href: "/WhyChooseRaven" },
-                { label: "Contact Us", href: "/contact-us" },
-              ].map((item) => (
-                <li key={item.label}>
-                  <Link
-                    href={item.href}
-                    className="group relative text-[#fcfbf8]/70 text-sm hover:text-[#b28c34] transition"
-                  >
-                    {item.label}
-                    <span className="absolute left-0 -bottom-1 h-0.5 w-0 bg-[#b28c34] transition-all duration-300 group-hover:w-full" />
-                  </Link>
-                </li>
-              ))}
-            </ul>
+  {[
+    { label: "Home", href: "/" },
+    { label: "Shop", href: "/product" },
+    { label: "About Us", action: "scroll" },
+    { label: "Contact Us", href: "/contact-us" },
+  ].map((item) => (
+    <li key={item.label}>
+      {item.action === "scroll" ? (
+        <button
+          type="button"
+          onClick={handleClick}
+          className="group relative text-left text-[#fcfbf8]/70 text-sm hover:text-[#b28c34] transition cursor-pointer"
+        >
+          {item.label}
+          <span className="absolute left-0 -bottom-1 h-0.5 w-0 bg-[#b28c34] transition-all duration-300 group-hover:w-full" />
+        </button>
+      ) : (
+        <Link
+          href={item.href}
+          className="group relative text-[#fcfbf8]/70 text-sm hover:text-[#b28c34] transition"
+        >
+          {item.label}
+          <span className="absolute left-0 -bottom-1 h-0.5 w-0 bg-[#b28c34] transition-all duration-300 group-hover:w-full" />
+        </Link>
+      )}
+    </li>
+  ))}
+</ul>
+
           </div>
 
           {/* COMPANY */}

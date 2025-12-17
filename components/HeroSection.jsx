@@ -154,22 +154,46 @@ const handleMouseMove = (e) => {
 
             {/* CTA */}
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-              <Link href="/product">
-                <button className="group relative px-10 py-4 rounded-full bg-[#b68615] text-white font-semibold shadow-xl overflow-hidden cursor-pointer">
-                  <span className="relative z-10 flex text-base sm:text-xl items-center gap-2">
-                    Explore Collection
-                    <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition" />
-                  </span>
-                  <span className="absolute inset-0 bg-linear-to-r from-[#9a864c] to-[#b28c34] opacity-0 group-hover:opacity-100 transition" />
-                </button>
-              </Link>
 
-              <Link href="/WhyChooseRaven">
-                <button className="px-8 py-4 rounded-full border border-[#1b180d]/20 text-[#000000] hover:bg-[#1b180d] hover:text-[#fcfbf8] transition cursor-pointer">
-                  Our Story
-                </button>
-              </Link>
-            </div>
+  {/* PRIMARY CTA */}
+  <Link href="/product">
+    <button className="group relative px-10 py-4 rounded-full bg-[#b68615] text-white font-semibold shadow-xl overflow-hidden cursor-pointer">
+      <span className="relative z-10 flex text-base sm:text-xl items-center gap-2">
+        Explore Collection
+        <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition" />
+      </span>
+      <span className="absolute inset-0 bg-linear-to-r from-[#9a864c] to-[#b28c34] opacity-0 group-hover:opacity-100 transition" />
+    </button>
+  </Link>
+
+  {/* SECONDARY CTA — FIXED */}
+  <button
+    onClick={() => {
+      const el = document.getElementById("why-choose-raven");
+      el?.scrollIntoView({ behavior: "smooth" });
+    }}
+    className="
+      inline-flex
+      w-fit
+      self-center sm:self-auto
+      px-8 sm:px-8
+      py-4 sm:py-4
+      rounded-full
+      border border-[#1b180d]/20
+      text-[#1b180d]
+      hover:bg-[#1b180d]
+      hover:text-[#fcfbf8]
+      transition
+      text-sm sm:text-base
+      font-medium
+      max-w-fit
+    "
+  >
+    Our Story
+  </button>
+
+</div>
+
 
             {/* TRUST */}
             <div className="flex flex-wrap justify-center lg:justify-start gap-8 mt-12 pt-10 border-t border-[#1b180d]/10">

@@ -329,6 +329,11 @@ body {
   font-family: "Cormorant Garamond", serif !important;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
+
 /* Lovable animations */
 @keyframes homepage_float {
   0%,100% { transform: translateY(0); }

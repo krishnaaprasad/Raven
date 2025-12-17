@@ -36,7 +36,8 @@ const WhyChooseRaven = () => {
 
   return (
     <section
-      className="
+      id="why-choose-raven"
+      className="scroll-mt-4
       py-10 sm:py-18 md:py-20 lg:py-13 
       relative overflow-hidden 
       bg-[hsl(33,47%,96%)]
