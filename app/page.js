@@ -7,7 +7,7 @@ import RebelSpirit from '@/components/RebelSpirit';
 import RebelFinale from '@/components/RebelFinale';
 import RavenBadge from '@/components/RavenBadge';
 import ProductCarousel from "@/components/ProductCarousel";
-
+import InstagramGallery from "@/components/InstagramGallery";
 import connectToDatabase from "@/lib/mongodb";
 import Product from "@/models/Product";
 import HeroSection from "@/components/HeroSection";
@@ -43,6 +43,7 @@ export default async function Home() {
       <ProductCarousel products={products} bestsellerIds={bestsellerIds} />
       <WhyChooseRaven />
       <Testimonials />
+      <InstagramGallery />
 
       {/*
       <AboutRaven />
