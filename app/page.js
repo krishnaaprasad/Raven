@@ -11,7 +11,7 @@ import ProductCarousel from "@/components/ProductCarousel";
 import connectToDatabase from "@/lib/mongodb";
 import Product from "@/models/Product";
 import HeroSection from "@/components/HeroSection";
-
+import Testimonials from "@/components/Testimonial";
 export default async function Home() {
 
   // ✅ Connect to DB (server component allowed)
@@ -42,6 +42,7 @@ export default async function Home() {
       {/* ⭐ PASS bestsellerIds ALSO ⭐ */}
       <ProductCarousel products={products} bestsellerIds={bestsellerIds} />
       <WhyChooseRaven />
+      <Testimonials />
 
       {/*
       <AboutRaven />

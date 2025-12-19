@@ -78,7 +78,7 @@ const handleMouseMove = (e) => {
   return (
     <section
       onMouseMove={handleMouseMove}
-      className="relative w-full min-h-screen overflow-hidden bg-linear-to-br from-[#f7f1e6] via-[#fdfbf8] to-[#e9dfc7]"
+      className="relative w-full min-h-screen overflow-hidden bg-linear-to-br from-[#f7f1e6] via-[#fdfbf8] to-[#e9dfc7] padding-left px-0 sm:px-8 "
     >
       {/* ================= DECORATIVE BACKGROUND ================= */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
@@ -196,7 +196,7 @@ const handleMouseMove = (e) => {
 
 
             {/* TRUST */}
-            <div className="flex flex-wrap justify-center lg:justify-start gap-8 mt-12 pt-10 border-t border-[#1b180d]/10">
+            <div className="flex flex-wrap justify-center lg:justify-start gap-8 mt-8 pt-6 border-t border-[#1b180d]/10">
               {[
                 { value: "100%", label: "Natural" },
                 { value: "20+", label: "Ingredients" },
