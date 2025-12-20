@@ -57,7 +57,7 @@ export default function CartPage() {
               className="flex items-center justify-between bg-white border border-[#e7e1cf] rounded-lg p-4 shadow-sm hover:shadow-md transition"
             >
               {/* Product Info */}
-              <div className="flex items-start gap-4 flex-grow">
+              <div className="flex items-start gap-4 grow">
                 <div className="h-[90px] w-[90px] rounded-lg overflow-hidden border border-[#e7e1cf]">
                   <Image
                     src={item.image}
@@ -168,7 +168,7 @@ export default function CartPage() {
                 placeholder="Enter code"
                 value={discount}
                 onChange={(e) => setDiscount(e.target.value)}
-                className="flex-grow rounded-md border border-[#e7e1cf] bg-[#f3f0e7] text-sm py-2 px-3 focus:ring-1 focus:ring-[#eebd2b] outline-none"
+                className="grow rounded-md border border-[#e7e1cf] bg-[#f3f0e7] text-sm py-2 px-3 focus:ring-1 focus:ring-[#eebd2b] outline-none"
               />
               <button
                 type="button"
