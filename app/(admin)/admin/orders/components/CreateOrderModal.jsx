@@ -20,6 +20,7 @@ export default function CreateOrderModal({ onClose, onCreated }) {
     quantity: 1,
     shippingCharge: "",
     paymentMethod: "Cash",
+    price: "",
   });
 
   const update = (k, v) => setForm(p => ({ ...p, [k]: v }));
@@ -35,12 +36,19 @@ export default function CreateOrderModal({ onClose, onCreated }) {
   const product = products.find(p => p._id === form.productId);
   const variant = product?.variants?.find(v => v.size === form.variantSize);
 
+  useEffect(() => {
+    if (variant?.price != null) {
+      update("price", variant.price);
+    }
+  }, [variant]);
+
+
   const total = useMemo(() => {
     const qty = Number(form.quantity || 1);
-    const price = Number(variant?.price || 0);
+    const price = Number(form.price || 0);
     const ship = Number(form.shippingCharge || 0);
     return qty * price + ship;
-  }, [form, variant]);
+  }, [form]);
 
   const handleSave = async () => {
     try {
@@ -124,7 +132,12 @@ export default function CreateOrderModal({ onClose, onCreated }) {
               onChange={e => update("quantity", e.target.value)} />
             <Input type="number" label="Shipping"
               onChange={e => update("shippingCharge", e.target.value)} />
-            <Input label="Price" disabled value={variant?.price || ""} />
+            <Input
+              type="number"
+              label="Price"
+              value={form.price}
+              onChange={e => update("price", e.target.value)}
+            />
           </div>
 
           <Select

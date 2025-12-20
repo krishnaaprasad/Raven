@@ -22,6 +22,7 @@ export async function POST(req) {
   shippingCharge,
   paymentMethod,
   orderDate,
+  price,
 } = body;
 
 if (!userName || !phone || !productId || !variantSize) {
@@ -52,7 +53,11 @@ if (!variant || variant.price == null) {
 
 const qty = Math.max(1, Number(quantity || 1));
 const ship = Number(shippingCharge || 0);
-const unitPrice = Number(variant.price);
+const unitPrice =
+  price != null && price !== ""
+    ? Number(price)
+    : Number(variant.price);
+
 
 if (Number.isNaN(unitPrice)) {
   return NextResponse.json(

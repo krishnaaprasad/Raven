@@ -127,6 +127,9 @@ const orderCounterSchema = new mongoose.Schema({
   seq: { type: Number, default: 1 },
 });
 
+// ✅ Compound unique index
+orderCounterSchema.index({ prefix: 1, date: 1 }, { unique: true });
+
 export const OrderCounter =
   mongoose.models.OrderCounter ||
   mongoose.model("OrderCounter", orderCounterSchema);
