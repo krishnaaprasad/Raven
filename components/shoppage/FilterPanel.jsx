@@ -231,7 +231,7 @@ export default function FilterPanel({
         </button>
 
         {isOpen && (
-          <div className="fixed inset-0 z-[1300] bg-black/40">
+          <div className="fixed inset-0 z-1300 bg-black/40">
             <div className="absolute bottom-0 left-0 right-0 h-[85vh] bg-[#fcfbf8] rounded-t-2xl shadow-2xl flex flex-col">
               <div className="flex items-center justify-between px-5 py-4 border-b border-[#e7e1cf]">
                 <h2 className="font-serif text-lg font-semibold text-[#1b180d]">

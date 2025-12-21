@@ -122,15 +122,16 @@ export { Order };
 
 // Counter for generating incremental Raven Order IDs (e.g., RVN-20250124-0001)
 const orderCounterSchema = new mongoose.Schema({
-  prefix: { type: String, required: true, unique: true },
+  prefix: { type: String, required: true }, 
   date: { type: String, required: true },
   seq: { type: Number, default: 1 },
 });
 
-// ✅ Compound unique index
+// ✅ Only this compound index
 orderCounterSchema.index({ prefix: 1, date: 1 }, { unique: true });
 
 export const OrderCounter =
   mongoose.models.OrderCounter ||
   mongoose.model("OrderCounter", orderCounterSchema);
+
 

@@ -5,6 +5,7 @@ import axios from "axios";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import User from "@/models/User";
+import { generateSequentialOrderIdFromItems } from "@/lib/generateOrderId";
 
 // =============================
 // Helper → Generate Sequential Custom Order ID
@@ -116,7 +117,7 @@ export async function POST(req) {
     }
 
     // ✅ Generate custom order ID
-    const customOrderId = await generateSequentialOrderId(cartItems);
+    const customOrderId = await generateSequentialOrderIdFromItems(cartItems);
 
     const fullAddress = `${address1}, ${address2 || ""}, ${city}, ${state}, ${pincode}`;
 

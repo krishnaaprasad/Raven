@@ -5,6 +5,18 @@ import { X } from "lucide-react";
 import { toast } from "react-hot-toast";
 
 export default function CreateOrderModal({ onClose, onCreated }) {
+  const INDIAN_STATES = [
+  "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh",
+  "Goa", "Gujarat", "Haryana", "Himachal Pradesh", "Jharkhand",
+  "Karnataka", "Kerala", "Madhya Pradesh", "Maharashtra", "Manipur",
+  "Meghalaya", "Mizoram", "Nagaland", "Odisha", "Punjab",
+  "Rajasthan", "Sikkim", "Tamil Nadu", "Telangana", "Tripura",
+  "Uttar Pradesh", "Uttarakhand", "West Bengal",
+  "Andaman and Nicobar Islands", "Chandigarh",
+  "Dadra and Nagar Haveli and Daman and Diu",
+  "Delhi", "Jammu and Kashmir", "Ladakh", "Lakshadweep", "Puducherry"
+];
+
   const [products, setProducts] = useState([]);
   const [form, setForm] = useState({
     orderDate: new Date().toISOString().slice(0, 10),
@@ -21,6 +33,7 @@ export default function CreateOrderModal({ onClose, onCreated }) {
     shippingCharge: "",
     paymentMethod: "Cash",
     price: "",
+    remark: "",
   });
 
   const update = (k, v) => setForm(p => ({ ...p, [k]: v }));
@@ -91,7 +104,17 @@ export default function CreateOrderModal({ onClose, onCreated }) {
 
           <div className="grid grid-cols-2 gap-2">
             <Input label="City" onChange={e => update("city", e.target.value)} />
-            <Input label="State" onChange={e => update("state", e.target.value)} />
+
+            <Select
+              label="State"
+              value={form.state}
+              onChange={e => update("state", e.target.value)}
+            >
+              <option value="">Select state</option>
+              {INDIAN_STATES.map(s => (
+                <option key={s} value={s}>{s}</option>
+              ))}
+            </Select>
           </div>
 
           <Input label="Pincode" onChange={e => update("pincode", e.target.value)} />
@@ -149,6 +172,17 @@ export default function CreateOrderModal({ onClose, onCreated }) {
             <option>UPI</option>
             <option>Bank Transfer</option>
           </Select>
+          
+          <div>
+            <label className="text-xs text-gray-600">Remark / Note</label>
+            <textarea
+              rows={3}
+              value={form.remark}
+              onChange={e => update("remark", e.target.value)}
+              placeholder="Any internal note (sold by, special request, etc.)"
+              className="w-full border rounded-md px-3 py-2 text-sm"
+            />
+          </div>
 
           <div className="flex justify-between font-semibold pt-2">
             <span>Total</span>

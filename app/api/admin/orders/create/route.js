@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import connectToDatabase from "@/lib/mongodb";
 import { Order, OrderCounter } from "@/models/Order";
 import Product from "@/models/Product"; // ✅ ADD
+import { generateSequentialOrderIdFromItems } from "@/lib/generateOrderId";
+
 
 export async function POST(req) {
   try {
@@ -23,6 +25,7 @@ export async function POST(req) {
   paymentMethod,
   orderDate,
   price,
+  remark
 } = body;
 
 if (!userName || !phone || !productId || !variantSize) {
@@ -70,15 +73,20 @@ const totalAmount = qty * unitPrice + ship;
 
 
 
-    // ✅ MANUAL ORDER ID
-    const today = new Date().toISOString().slice(0, 10);
-    const counter = await OrderCounter.findOneAndUpdate(
-      { prefix: "MAN", date: today },
-      { $inc: { seq: 1 } },
-      { upsert: true, new: true }
-    );
+// ✅ Generate prefix from product (like production)
+const now = new Date();
+const datePart = now.toISOString().slice(0, 10).replace(/-/g, ""); // YYYYMMDD
 
-    const customOrderId = `MAN-${String(counter.seq).padStart(5, "0")}`;
+let prefix =
+  product.slug?.substring(0, 3).toUpperCase() ||
+  product.name?.substring(0, 3).toUpperCase() ||
+  "ORD";
+
+const today = datePart;
+
+// find by prefix+date
+const customOrderId = await generateSequentialOrderIdFromItems(product);
+
 
     // ✅ CREATE ORDER
     const order = await Order.create({
@@ -127,7 +135,7 @@ const totalAmount = qty * unitPrice + ship;
           from: "Created",
           to: "Processing",
           by: "admin",
-          note: "Manual order entry",
+          note: remark || "Manual order entry",
         },
       ],
     });
