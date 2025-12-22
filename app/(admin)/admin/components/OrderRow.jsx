@@ -36,7 +36,7 @@ function PaymentBadge({ status }) {
   );
 }
 
-export default function OrderRow({ order, onStatusUpdated }) {
+export default function OrderRow({ order, onStatusUpdated, showDeleted }) {
   const allowed = [
     "Processing",
     "Shipped",
@@ -204,17 +204,25 @@ const customerType =
           )}
         </td>
 
+        {showDeleted && (
+          <td className="px-5 py-3 text-[12px] text-[#6b6654] max-w-60">
+            {order.deleteReason || "--"}
+          </td>
+        )}
+
         <td className="px-5 py-3 min-w-[120px]">
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-2 justify-end">
             {/* View */}
             <a href={`/admin/orders/${order._id}`} title="View">
               <Eye className="w-5 h-5 text-[#b28c34] hover:scale-110 transition" />
             </a>
 
             {/* Delete */}
-            <button onClick={() => setShowDelete(true)} title="Delete">
-              <Trash2 className="w-5 h-5 text-red-600 hover:scale-110 transition" />
-            </button>
+            {!showDeleted && (
+                <button onClick={() => setShowDelete(true)} title="Delete">
+                  <Trash2 className="w-5 h-5 text-red-600 hover:scale-110 transition" />
+                </button>
+              )}
           </div>
         </td>
       </tr>

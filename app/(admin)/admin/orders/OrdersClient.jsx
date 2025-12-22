@@ -41,6 +41,7 @@ export default function OrdersClient() {
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const [showCreateOrder, setShowCreateOrder] = useState(false);
+  const [showDeleted, setShowDeleted] = useState(false);
 
 
   // date range picker state
@@ -59,13 +60,14 @@ export default function OrdersClient() {
   const pickerRef = useRef(null);
 
   // common fetch wrapper
-  const fetchOrders = async (page = 1) => {
+  const fetchOrders = async (page = 1, deletedMode = showDeleted) => {
     setLoading(true);
     try {
       const params = new URLSearchParams();
       params.set("page", page);
       params.set("limit", meta.limit ?? 10);
 
+      if (deletedMode) params.set("deleted", "true");
       if (q) params.set("q", q);
       if (paymentStatus) params.set("paymentStatus", paymentStatus);
       if (orderStatus) params.set("orderStatus", orderStatus);
@@ -89,12 +91,11 @@ export default function OrdersClient() {
 
   // initial load
   useEffect(() => {
-    // set default from/to based on initial range so server fetch respects date filter if desired
-    setFrom(format(range.startDate, "yyyy-MM-dd"));
-    setTo(format(range.endDate, "yyyy-MM-dd"));
+    // Initial load → NO date filter
     fetchOrders(1);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
 
   // close date picker on outside click
   useEffect(() => {
@@ -455,24 +456,47 @@ const exportCSV = async () => {
       </button>
     </div>
 
-    <div className="flex items-center gap-3">
+    <div className="flex items-center gap-3 ">
+      {/* 🗑 TOGGLE DELETED ORDERS */}
+      <button
+  onClick={() => {
+    const next = !showDeleted;
+    setShowDeleted(next);
+
+    // 🔄 Reset filters when switching views
+    setFrom("");
+    setTo("");
+    setQ("");
+    setPaymentStatus("");
+    setOrderStatus("");
+
+    // 🟢 Fetch with correct mode
+    fetchOrders(1, next);
+  }}
+  className={`h-10 px-4 rounded-lg text-sm font-semibold border transition
+    ${
+      showDeleted
+        ? "bg-red-600 text-white border-red-600"
+        : "border-[#e7e1cf] text-[#1b180d] hover:bg-[#f5f1e6]"
+    }`}
+>
+  {showDeleted ? "Active Orders" : "🗑 Deleted Orders"}
+</button>
+
+
       {/* CREATE ORDER */}
       <button
         onClick={() => setShowCreateOrder(true)}
         className="h-10 px-4 bg-[#1b180d] text-white rounded-lg text-sm font-semibold hover:bg-[#b28c34] transition"
       >
-        + Create Order
+        + Create
       </button>
 
       {/* EXPORT */}
-      <button
-        onClick={exportCSV}
-        className="flex items-center gap-2 h-10 px-4 border border-[#e7e1cf] rounded-lg text-sm text-[#1b180d] hover:bg-[#f5f1e6] transition"
-      >
+      <button>
         <Download size={16} /> Export
       </button>
     </div>
-
   </div>
 </div>
 
@@ -489,6 +513,9 @@ const exportCSV = async () => {
               <th className="px-6 py-4 text-left min-w-[120px]">Amount</th>
               <th className="px-6 py-4 text-left min-w-[120px]">Payment</th>
               <th className="px-6 py-4 text-left min-w-40">Status</th>
+              {showDeleted && (
+                <th className="px-6 py-4 text-left min-w-[200px]">Delete Reason</th>
+              )}
               <th className="px-6 py-4 text-left min-w-[120px]">Action</th>
             </tr>
           </thead>
@@ -505,6 +532,7 @@ const exportCSV = async () => {
                 <OrderRow
                   key={o._id}
                   order={o}
+                  showDeleted={showDeleted}
                   onStatusUpdated={resetAfterStatusUpdate}
                 />
               ))

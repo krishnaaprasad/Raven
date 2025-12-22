@@ -19,7 +19,12 @@ export async function GET(request) {
     const from = searchParams.get("from") || null;
     const to = searchParams.get("to") || null;
 
-    const filter = { deleted: { $ne: true } };
+    const showDeleted = searchParams.get("deleted") === "true";
+
+    const filter = showDeleted
+      ? { deleted: true }
+      : { deleted: { $ne: true } };
+
 
     // SEARCH
     if (q) {
