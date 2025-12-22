@@ -89,3 +89,50 @@ export async function PATCH(req, { params }) {
     );
   }
 }
+
+export async function DELETE(req, { params }) {
+  try {
+    await connectToDatabase();
+
+    const { id } = await params; // ✅ FIX like GET & PATCH
+
+    const { reason } = await req.json();
+
+    if (!reason) {
+      return NextResponse.json(
+        { success: false, error: "Delete reason required" },
+        { status: 400 }
+      );
+    }
+
+    const order = await Order.findById(id);
+    if (!order) {
+      return NextResponse.json(
+        { success: false, error: "Order not found" },
+        { status: 404 }
+      );
+    }
+
+    order.deleted = true;
+    order.deleteReason = reason;
+    order.deletedAt = new Date();
+
+    order.orderHistory.push({
+      from: order.order_status,
+      to: "Deleted",
+      by: "admin",
+      note: reason,
+      at: new Date(),
+    });
+
+    await order.save();
+
+    return NextResponse.json({ success: true });
+  } catch (err) {
+    console.error("❌ DELETE /api/admin/orders/[id]:", err);
+    return NextResponse.json(
+      { success: false, error: "Server error" },
+      { status: 500 }
+    );
+  }
+}

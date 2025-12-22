@@ -108,6 +108,10 @@ const orderSchema = new mongoose.Schema(
       type: [orderHistoryItem],
       default: [],
     },
+    // ---------- Soft delete ----------
+    deleted: { type: Boolean, default: false },
+    deleteReason: { type: String, default: null },
+    deletedAt: { type: Date, default: null },
   },
   { timestamps: true }
 );

@@ -19,7 +19,7 @@ export async function GET(request) {
     const from = searchParams.get("from") || null;
     const to = searchParams.get("to") || null;
 
-    const filter = {};
+    const filter = { deleted: { $ne: true } };
 
     // SEARCH
     if (q) {
