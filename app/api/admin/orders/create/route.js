@@ -85,8 +85,12 @@ let prefix =
 const today = datePart;
 
 // find by prefix+date
-const customOrderId = await generateSequentialOrderIdFromItems(product);
-
+const customOrderId = await generateSequentialOrderIdFromItems([
+  {
+    slug: product.slug,
+    name: product.name,
+  },
+]);
 
     // ✅ CREATE ORDER
     const order = await Order.create({
