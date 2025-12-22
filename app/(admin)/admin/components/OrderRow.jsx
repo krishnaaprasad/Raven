@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";  // ⭐ FIX FOR MODAL OUTSIDE TBODY
 import { ChevronDown } from "lucide-react";
 import { toast } from "react-hot-toast";
-import { Eye, Pencil, Trash2 } from "lucide-react";
+import { Eye, Trash2 } from "lucide-react";
 
 
 // ORDER STATUS COLORS
@@ -209,11 +209,6 @@ const customerType =
             {/* View */}
             <a href={`/admin/orders/${order._id}`} title="View">
               <Eye className="w-5 h-5 text-[#b28c34] hover:scale-110 transition" />
-            </a>
-
-            {/* Edit */}
-            <a href={`/admin/orders/${order._id}?edit=true`} title="Edit">
-              <Pencil className="w-5 h-5 text-blue-600 hover:scale-110 transition" />
             </a>
 
             {/* Delete */}
