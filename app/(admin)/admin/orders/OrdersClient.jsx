@@ -456,47 +456,60 @@ const exportCSV = async () => {
       </button>
     </div>
 
-    <div className="flex items-center gap-3 ">
-      {/* 🗑 TOGGLE DELETED ORDERS */}
+    <div className="flex flex-wrap items-center gap-3 justify-end">
+      {/* 🗂 Active / Deleted Toggle */}
       <button
-  onClick={() => {
-    const next = !showDeleted;
-    setShowDeleted(next);
+        onClick={() => {
+          const next = !showDeleted;
+          setShowDeleted(next);
 
-    // 🔄 Reset filters when switching views
-    setFrom("");
-    setTo("");
-    setQ("");
-    setPaymentStatus("");
-    setOrderStatus("");
+          setFrom("");
+          setTo("");
+          setQ("");
+          setPaymentStatus("");
+          setOrderStatus("");
 
-    // 🟢 Fetch with correct mode
-    fetchOrders(1, next);
-  }}
-  className={`h-10 px-4 rounded-lg text-sm font-semibold border transition
-    ${
-      showDeleted
-        ? "bg-red-600 text-white border-red-600"
-        : "border-[#e7e1cf] text-[#1b180d] hover:bg-[#f5f1e6]"
-    }`}
->
-  {showDeleted ? "Active Orders" : "🗑 Deleted Orders"}
-</button>
+          fetchOrders(1, next);
+        }}
+        className={`
+          h-10 px-4 rounded-lg text-sm font-semibold border transition
+          ${
+            showDeleted
+              ? "bg-[#f5f1e6] text-[#1b180d] border-[#b28c34]"
+              : "bg-[#fcfbf8] text-[#1b180d] border-[#e7e1cf] hover:border-[#b28c34]"
+          }
+        `}
+      >
+        {showDeleted ? "Deleted Orders" : "Active Orders"}
+      </button>
 
-
-      {/* CREATE ORDER */}
+      {/* ➕ Create Order */}
       <button
         onClick={() => setShowCreateOrder(true)}
-        className="h-10 px-4 bg-[#1b180d] text-white rounded-lg text-sm font-semibold hover:bg-[#b28c34] transition"
+        className="
+          h-10 px-4 rounded-lg text-sm font-semibold
+          bg-[#1b180d] text-white hover:bg-[#2a2618]
+          transition
+        "
       >
         + Create
       </button>
 
-      {/* EXPORT */}
-      <button>
-        <Download size={16} /> Export
+      {/* ⬇️ Export */}
+      <button
+        onClick={exportCSV}
+        className="
+          h-10 px-4 rounded-lg text-sm font-semibold border
+          border-[#e7e1cf] text-[#1b180d]
+          bg-[#fcfbf8] hover:bg-[#f5f1e6]
+          flex items-center gap-2 transition
+        "
+      >
+        <Download size={16} />
+        Export
       </button>
     </div>
+
   </div>
 </div>
 

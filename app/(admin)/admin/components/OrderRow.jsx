@@ -210,8 +210,8 @@ const customerType =
           </td>
         )}
 
-        <td className="px-5 py-3 min-w-[120px]">
-          <div className="flex flex-wrap items-center gap-2 justify-end">
+        <td className="px-5 py-3 min-w-20">
+          <div className="flex flex-wrap items-center gap-3 justify-start">
             {/* View */}
             <a href={`/admin/orders/${order._id}`} title="View">
               <Eye className="w-5 h-5 text-[#b28c34] hover:scale-110 transition" />
