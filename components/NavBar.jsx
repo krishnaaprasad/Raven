@@ -11,13 +11,20 @@ import {
   UserIcon,
   ChevronDownIcon,
 } from '@heroicons/react/24/outline';
-import { motion } from 'framer-motion';
+import { motion,AnimatePresence } from 'framer-motion';
 import { usePathname } from "next/navigation"; 
+import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
+import { useRouter } from "next/navigation";
+import LogoText from '@/components/LogoText';
+
+
+
 
 const AuthModal = dynamic(() => import('../app/auth/modal'), { ssr: false });
 
 export default function NavBar() {
   const pathname = usePathname(); // ⭐ ADDED
+  const router = useRouter();
   if (pathname.startsWith("/admin")) return null;
   
   const [showMiniCart, setShowMiniCart] = useState(false);
@@ -27,7 +34,19 @@ export default function NavBar() {
   const dropdownRef = useRef(null);
   const { cartCount, openCart } = useCart();
   const { data: session } = useSession();
-  
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+   
+
+  const handleClick = () => {
+    if (window.location.pathname !== "/") {
+      router.push("/#why-choose-raven");
+    } else {
+      document
+        .getElementById("why-choose-raven")
+        ?.scrollIntoView({ behavior: "smooth" });
+    }
+  };
 
   useEffect(() => {
     if (cartCount > 0) {
@@ -47,32 +66,28 @@ export default function NavBar() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [pathname]);
+
   return (
     <>
-      <nav className="relative bg-[#FAF5E8]/95 backdrop-blur-md border-b border-[#e4d5b5] top-0 z-999 shadow-[0_1px_8px_rgba(0,0,0,0.04)]">
+      <nav className="sticky top-0 z-50 bg-[#FAF5E8]/95 backdrop-blur-md border-b border-[#e4d5b5] shadow-[0_1px_8px_rgba(0,0,0,0.04)]">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="relative flex h-14 items-center justify-between">
+          <div className="relative flex h-12 items-center justify-between">
 
             {/* SHOP (Mobile) */}
-            <motion.div
-              initial={{ opacity: 0, y: 0 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, ease: 'easeOut' }}
-              className="flex items-center sm:hidden"
-            >
-              <Link href="/collection">
-                <button
-                  className="relative group flex items-center justify-center min-w-[90px] h-9 px-4 rounded-md overflow-hidden text-xs font-semibold tracking-wide uppercase text-[#1b180d] transition-all shadow-[0_2px_8px_rgba(0,0,0,0.08)] hover:shadow-[0_3px_10px_rgba(0,0,0,0.12)] font-[Manrope,sans-serif] cursor-pointer"
-                  style={{
-                    background: 'linear-gradient(45deg, #a66d30, #ffe58e 50%, #e0b057)',
-                  }}
-                >
-                  <span className="relative z-10">SHOP</span>
-                  {/* Shine Effect */}
-                  <span className="absolute top-0 left-[-80%] w-[60%] h-full bg-linear-to-tr from-transparent via-white/50 to-transparent rotate-25 opacity-0 group-hover:opacity-100 animate-shine-slow"></span>
-                </button>
-              </Link>
-            </motion.div>
+            {/* HAMBURGER (Mobile) */}
+            <div className="flex items-center sm:hidden">
+              <button
+                onClick={() => setMobileMenuOpen((prev) => !prev)}
+                aria-label="Open menu"
+                className="p-2"
+              >
+                <Bars3Icon className="h-6 w-6 text-[#1b180d]" />
+              </button>
+            </div>
+          
 
             {/* CENTER (Logo) */}
             <motion.div
@@ -82,19 +97,13 @@ export default function NavBar() {
               className="flex justify-center w-full absolute left-0 right-0 pointer-events-none"
             >
               <Link href="/" className="pointer-events-auto">
-                <Image
-                  src="/logo.png"
-                  alt="Raven Fragrance Logo"
-                  width={52}
-                  height={18}
-                  className="h-[18px] sm:h-[21px] w-auto object-contain transition-transform duration-300 hover:scale-[1.03]"
-                  priority
-                />
+                <LogoText size="lg" />
               </Link>
+
             </motion.div>
 
             {/* RIGHT (Icons + Desktop Shop Button) */}
-            <div className="ml-auto flex items-center space-x-3 sm:space-x-4">
+            <div className="ml-auto flex items-center space-x-4 sm:space-x-5">
 
               {/* SHOP NOW (Desktop) */}
               <motion.div
@@ -192,6 +201,83 @@ export default function NavBar() {
             </div>
           </div>
         </div>
+        <AnimatePresence>
+  {mobileMenuOpen && (
+    <>
+      {/* 🌑 Backdrop */}
+      <motion.div
+        className="fixed inset-0 z-9980 sm:hidden"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        onClick={() => setMobileMenuOpen(false)}
+      />
+
+      {/* 📜 Slide-down Menu */}
+      <motion.div
+        className="absolute left-0 right-0 top-full z-9990 bg-[#fcfbf8] border-b border-[#e7e1cf] shadow-xl sm:hidden"
+        initial={{ y: -20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        exit={{ y: -20, opacity: 0 }}
+        transition={{ duration: 0.25, ease: "easeOut" }}
+         drag="y"
+        dragDirectionLock
+        dragConstraints={{ top: 0, bottom: 300 }}
+        dragElastic={0.2}
+        onDragEnd={(e, info) => {
+          if (info.offset.y > 120) {
+            setMobileMenuOpen(false);
+          }
+        }}
+      >
+        <div className="px-6 py-6 space-y-5 font-[Outfit]">
+  {[
+    { name: "Shop", href: "/collection" },
+    { name: "Our Story", action: "scroll" },
+    { name: "Contact", href: "/contact-us" },
+  ].map((item) =>
+    item.action === "scroll" ? (
+      <button
+        key={item.name}
+        type="button"
+        onClick={handleClick}
+        className="block text-left text-sm uppercase tracking-widest text-[#1b180d] hover:text-[#b28c34] transition"
+      >
+        {item.name}
+      </button>
+    ) : (
+      <Link
+        key={item.name}
+        href={item.href}
+        onClick={() => setMobileMenuOpen(false)}
+        className="block text-sm uppercase tracking-widest text-[#1b180d] hover:text-[#b28c34] transition"
+      >
+        {item.name}
+      </Link>
+    )
+  )}
+
+
+          {/* CTA — same as desktop */}
+          <Link href="/collection" onClick={() => setMobileMenuOpen(false)}>
+            <button
+              className="relative group w-full flex items-center justify-center h-9 px-6 rounded-md overflow-hidden text-sm font-semibold tracking-wide uppercase text-[#1b180d] transition-all shadow-[0_3px_8px_rgba(0,0,0,0.12)] hover:shadow-[0_6px_15px_rgba(0,0,0,0.15)] font-[Outfit]"
+              style={{
+                background:
+                  "linear-gradient(45deg, #a66d30, #ffe58e 50%, #e0b057)",
+              }}
+            >
+              <span className="relative z-10">SHOP NOW</span>
+              <span className="absolute top-0 left-[-80%] w-[60%] h-full bg-linear-to-tr from-transparent via-white/50 to-transparent rotate-25 opacity-0 group-hover:opacity-100 animate-shine-slow"></span>
+            </button>
+          </Link>
+        </div>
+      </motion.div>
+    </>
+  )}
+</AnimatePresence>
+
+
       </nav>
 
       {showAuthModal && <AuthModal onClose={() => setShowAuthModal(false)} />}

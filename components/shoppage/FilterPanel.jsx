@@ -22,63 +22,62 @@ export default function FilterPanel({
 
   const debounceRef = useRef(null);
 
-  const options = useMemo(() => ({
-    fragranceFamily: [
-      { value: 'floral', label: 'Floral' },
-      { value: 'woody', label: 'Woody' },
-      { value: 'citrus', label: 'Citrus' },
-      { value: 'oriental', label: 'Oriental' },
-      { value: 'fresh', label: 'Fresh' },
-    ],
-    brands: [
-      { value: 'raven-signature', label: 'Raven Signature' },
-      { value: 'raven-noir', label: 'Raven Noir' },
-      { value: 'raven-essence', label: 'Raven Essence' },
-      { value: 'raven-luxe', label: 'Raven Luxe' },
-    ],
-  }), []);
+  const options = useMemo(
+    () => ({
+      fragranceFamily: [
+        { value: 'floral', label: 'Floral' },
+        { value: 'woody', label: 'Woody' },
+        { value: 'citrus', label: 'Citrus' },
+        { value: 'oriental', label: 'Oriental' },
+        { value: 'fresh', label: 'Fresh' },
+      ],
+    }),
+    []
+  );
 
-  const update = (filters) => {
-    setActiveFilters(filters);
+  const applyFilters = (filters) => {
+    if (isMobile) return;
 
     clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => {
       onFilterChange?.(filters);
     }, 150);
+  };
 
-    if (isMobile) setIsOpen(false);
+  const update = (filters) => {
+    setActiveFilters(filters);
+    applyFilters(filters);
   };
 
   const toggle = (key, val) => {
-    const arr = activeFilters[key].includes(val)
-      ? activeFilters[key].filter((v) => v !== val)
-      : [...activeFilters[key], val];
+    const current = activeFilters[key];
+    const updated = current.includes(val)
+      ? current.filter((v) => v !== val)
+      : [...current, val];
 
-    update({ ...activeFilters, [key]: arr });
-  };
-
-  const setPrice = (i, val) => {
-    const range = [...activeFilters.priceRange];
-    range[i] = Number(val);
-
-    if (range[0] > range[1]) {
-      i === 0 ? (range[1] = range[0]) : (range[0] = range[1]);
-    }
-
-    update({ ...activeFilters, priceRange: range });
+    update({ ...activeFilters, [key]: updated });
   };
 
   const clearAll = () => {
-    update({
+    const cleared = {
       fragranceFamily: [],
       brands: [],
       priceRange: [MIN_PRICE, MAX_PRICE],
-    });
+    };
+
+    setActiveFilters(cleared);
+
+    if (!isMobile) {
+      onFilterChange?.(cleared);
+    }
   };
 
-  const count =
-    activeFilters.fragranceFamily.length +
-    activeFilters.brands.length;
+  const handleApplyMobile = () => {
+    onFilterChange?.(activeFilters);
+    setIsOpen(false);
+  };
+
+  const count = activeFilters.fragranceFamily.length;
 
   const Section = ({ title, children }) => {
     const [open, setOpen] = useState(true);
@@ -87,7 +86,6 @@ export default function FilterPanel({
       <div className="border-b border-[#e7e1cf] last:border-b-0">
         <button
           type="button"
-          aria-expanded={open}
           onClick={() => setOpen(!open)}
           className="w-full flex justify-between items-center py-4"
         >
@@ -97,12 +95,14 @@ export default function FilterPanel({
           <Icon
             name="ChevronDownIcon"
             size={18}
-            className={`text-[#6b6453] transition ${open ? 'rotate-180' : ''}`}
+            className={`text-[#6b6453] transition ${
+              open ? 'rotate-180' : ''
+            }`}
           />
         </button>
 
         <div
-          className={`pb-4 space-y-3 overflow-hidden transition-all duration-300 ease-in-out ${
+          className={`pb-4 space-y-3 overflow-hidden transition-all duration-300 ${
             open ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
           }`}
         >
@@ -114,7 +114,6 @@ export default function FilterPanel({
 
   const content = (
     <div className="p-5">
-      {/* Sticky Header */}
       <div className="sticky top-0 bg-[#fcfbf8] z-10 pb-3 mb-4 border-b border-[#e7e1cf]">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -142,7 +141,6 @@ export default function FilterPanel({
         </div>
       </div>
 
-      {/* Fragrance */}
       <Section title="Fragrance Family">
         {options.fragranceFamily.map((o) => (
           <label
@@ -159,59 +157,9 @@ export default function FilterPanel({
           </label>
         ))}
       </Section>
-
-      {/* Brands
-      <Section title="Brands">
-        {options.brands.map((o) => (
-          <label
-            key={o.value}
-            className="flex items-center gap-3 text-sm cursor-pointer text-[#1b180d] hover:text-[#b28c34] transition"
-          >
-            <input
-              type="checkbox"
-              checked={activeFilters.brands.includes(o.value)}
-              onChange={() => toggle('brands', o.value)}
-              className="accent-[#b28c34]"
-            />
-            {o.label}
-          </label>
-        ))}
-      </Section> */}
-
-      {/* Price Range
-      <Section title="Price Range (₹)">
-        <div className="space-y-3">
-          <div className="flex justify-between text-xs text-[#6b6453]">
-            <span>₹{activeFilters.priceRange[0]}</span>
-            <span>₹{activeFilters.priceRange[1]}</span>
-          </div>
-
-          <div className="relative h-6">
-            <input
-              type="range"
-              min={MIN_PRICE}
-              max={MAX_PRICE}
-              step="100"
-              value={activeFilters.priceRange[0]}
-              onChange={(e) => setPrice(0, e.target.value)}
-              className="absolute w-full appearance-none bg-transparent accent-[#b28c34] z-20"
-            />
-            <input
-              type="range"
-              min={MIN_PRICE}
-              max={MAX_PRICE}
-              step="100"
-              value={activeFilters.priceRange[1]}
-              onChange={(e) => setPrice(1, e.target.value)}
-              className="absolute w-full appearance-none bg-transparent accent-[#b28c34] z-30"
-            />
-          </div>
-        </div>
-      </Section> */}
     </div>
   );
 
-  /* ---------------- MOBILE ---------------- */
   if (isMobile) {
     return (
       <>
@@ -246,7 +194,7 @@ export default function FilterPanel({
 
               <div className="p-4 border-t border-[#e7e1cf]">
                 <button
-                  onClick={() => setIsOpen(false)}
+                  onClick={handleApplyMobile}
                   className="w-full py-3 bg-[#b28c34] text-white rounded-md font-[Outfit] font-medium hover:bg-[#9a864c] transition"
                 >
                   Apply Filters
@@ -259,7 +207,6 @@ export default function FilterPanel({
     );
   }
 
-  /* ---------------- DESKTOP ---------------- */
   return (
     <div
       className={`h-full bg-[#fcfbf8] border border-[#e7e1cf] rounded-xl shadow-sm flex flex-col ${className}`}

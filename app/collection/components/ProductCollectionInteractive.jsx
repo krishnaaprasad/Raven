@@ -212,9 +212,8 @@ const handleAddToCart = (item) => {
             </div>
 
             {/* Applied Filters */}
-{(filters?.fragranceFamily?.length ||
-  filters?.brands?.length ||
-  filters?.priceRange?.length) && (
+{(filters.fragranceFamily.length > 0 ||
+  filters.brands.length > 0) && (
   <div className="flex flex-wrap gap-2 mb-5">
     {filters.fragranceFamily.map((f) => (
       <span
@@ -304,8 +303,8 @@ const handleAddToCart = (item) => {
         </button>
       )}
 
-      {(filters.fragranceFamily.length ||
-  filters.brands.length) && (
+  {(filters.fragranceFamily.length > 0 ||
+    filters.brands.length > 0) && (
   <div className="flex flex-wrap gap-2 mb-5">
     {filters.fragranceFamily.map((f) => (
       <button
