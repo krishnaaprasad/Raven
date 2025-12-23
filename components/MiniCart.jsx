@@ -173,13 +173,17 @@ export default function MiniCart() {
                     {/* IMAGE */}
                     <div
                       onClick={() => handleProductClick(item.slug)}
-                      className="w-20 h-20 rounded-lg bg-[#f7f2e8] overflow-hidden cursor-pointer"
+                      className="w-20 h-20 rounded-lg bg-[#f7f2e8] overflow-hidden cursor-pointer flex items-center justify-center"
                     >
-                      <img
-                        src={item.image}
-                        alt={item.name}
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                      />
+                      {item.image ? (
+                        <img
+                          src={item.image}
+                          alt={item.name}
+                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                        />
+                      ) : (
+                        <span className="text-[10px] text-[#7c6e5a]">No image</span>
+                      )}
                     </div>
 
                     {/* INFO */}

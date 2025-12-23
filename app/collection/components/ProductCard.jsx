@@ -3,13 +3,21 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import { Eye, Star, ShoppingBag, Sparkles } from 'lucide-react';
+import { useRouter } from "next/navigation";
+import { useCart } from "@/app/context/cartcontext";
+import { toast } from "react-hot-toast";
 
-const ProductCard = ({ product, onQuickView, onAddToCart }) => {
+const ProductCard = ({ product, onQuickView }) => {
   const [imageLoaded, setImageLoaded] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
+  const { addToCart, openCart } = useCart();
+  const router = useRouter();
 
-  const primaryImage =
-    product?.images?.[0]?.original || '/placeholder.png';
+const primaryImage =
+  typeof product?.images?.[0] === "string"
+    ? product.images[0]
+    : product?.images?.[0]?.original || null;
+
 
   const variant = product?.variants?.[0] || {};
   const price = variant.price ?? 0;
@@ -55,8 +63,13 @@ const ProductCard = ({ product, onQuickView, onAddToCart }) => {
           <p className="text-xs uppercase tracking-wide text-[#6b6453] font-[Outfit] mb-1">
             {product?.brand}
           </p>
-          <h3 className="font-serif text-base font-semibold text-[#1b180d] line-clamp-2 min-h-12">
-            {product?.name}
+          <h3
+            onClick={(e) => {
+              e.stopPropagation();
+              router.push(`/product/${product.slug}`);
+            }}
+            className="font-serif text-base font-semibold text-[#1b180d] line-clamp-2 min-h-12 cursor-pointer hover:text-[#b28c34] transition">
+            {product.name}
           </h3>
         </div>
 
@@ -112,17 +125,31 @@ const ProductCard = ({ product, onQuickView, onAddToCart }) => {
         {/* Add to cart */}
         <button
           disabled={outOfStock}
-          onClick={() =>
-            onAddToCart({
+          onClick={() => {
+          if (outOfStock) return;
+
+          addToCart(
+            {
               id: product._id,
               name: product.name,
               slug: product.slug,
+              price: Number(price) || 0,
               image: primaryImage,
-              price,
-              size,
-              quantity: 1,
-            })
-          }
+              size: size || "",
+            },
+            1
+          );
+
+          toast.success(`${product.name} added to cart`, {
+            style: {
+              background: "#1b180d",
+              color: "#fff",
+              border: "1px solid #B28C34",
+            },
+          });
+
+          setTimeout(() => openCart(), 50);
+        }}
           className={`w-full py-3 rounded-md font-[Outfit] text-sm font-medium transition flex items-center justify-center gap-2 ${
             outOfStock
               ? 'bg-[#d6cfbd] text-white cursor-not-allowed'

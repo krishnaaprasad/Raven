@@ -8,9 +8,14 @@ import Icon from '@/components/ui/AppIcon';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay } from 'swiper/modules';
 import 'swiper/css';
+import { useCart } from "@/app/context/cartcontext";
+import { toast } from "react-hot-toast";
+
 
 const QuickViewModal = ({ product, isOpen, onClose, onAddToCart }) => {
   const router = useRouter();
+  const { addToCart, openCart } = useCart();
+
 
   const variants = product?.variants || [];
   const defaultSize = variants?.[0]?.size || '';
@@ -47,45 +52,82 @@ const QuickViewModal = ({ product, isOpen, onClose, onAddToCart }) => {
 
   const price = activeVariant?.price || 0;
   const stock = activeVariant?.stock ?? 0;
+  
+  const images = (product?.images || [])
+  .map((img) => (typeof img === 'string' ? img : img?.original))
+  .filter(Boolean); // removes "", null, undefined
 
-  const handleAddToCart = () => {
-    if (stock <= 0) return;
 
-    onAddToCart({
+const handleAddToCart = () => {
+  if (!product || stock <= 0) return;
+
+  const imageSrc = images[0] || null;
+
+  addToCart(
+    {
+      id: product._id,
+      name: product.name,
+      slug: product.slug,
+      price: Number(price) || 0,
+      image: imageSrc,
+      size: selectedSize || "",
+    },
+    quantity
+  );
+
+  toast.success(`${product.name} added to cart`, {
+    style: {
+      background: "#1b180d",
+      color: "#fff",
+      border: "1px solid #B28C34",
+    },
+  });
+
+  onClose();
+  setTimeout(() => openCart(), 50);
+};
+
+
+  const handleBuyNow = () => {
+  if (!product || stock <= 0) return;
+
+  const imageSrc = images[0] || null;
+
+  const buyNowItem = {
     id: product._id,
     name: product.name,
     slug: product.slug,
-    image: product.images?.[0]?.original || product.image,
-    price: product.variants?.[0]?.price || product.price || 0,
-   size: selectedSize,
-    quantity: Number(quantity) || 1,
-  });
+    price: Number(price) || 0,
+    image: imageSrc,
+    size: selectedSize || "",
+    quantity,
+  };
+
+  sessionStorage.setItem("buyNowItem", JSON.stringify(buyNowItem));
   onClose();
+  router.push("/checkout?mode=buynow");
 };
 
-  const handleBuyNow = () => {
-    if (stock <= 0) return;
-
-    onAddToCart({
-      ...product,
-      price,
-      selectedSize,
-      quantity,
-    });
-    onClose();
-    router.push('/checkout?mode=buynow');
-  };
 
   const handleQuantityChange = (delta) => {
     const next = quantity + delta;
     if (next >= 1 && next <= 10) setQuantity(next);
   };
 
-  const image =
-    product?.images?.[0]?.original || product?.image || '/placeholder.png';
+
+  
+const viewDetails = () => {
+  if (!product) return;
+  closeQuickView(); // or handleClose() if you’re using animation
+  router.push(`/product/${product.slug}`);
+};
+
+const closeQuickView = () => {
+  if (onClose) onClose();
+};
 
   return (
-    <div className="fixed inset-0 z-[1400] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+    <div className="fixed inset-0 z-1400 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
       <div className="relative w-full max-w-4xl max-h-[90vh] bg-white rounded-xl shadow-2xl overflow-hidden">
         {/* Close */}
         <button
@@ -99,7 +141,7 @@ const QuickViewModal = ({ product, isOpen, onClose, onAddToCart }) => {
         <div className="overflow-y-auto max-h-[90vh]">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6">
             {/* Image */}
-            <div className="relative aspect-[3/4] overflow-hidden rounded-lg bg-[#f3f1ea]">
+            <div className="relative aspect-3/4 overflow-hidden rounded-lg bg-[#f3f1ea]">
             <Swiper
                 modules={[Autoplay]}
                 spaceBetween={10}
@@ -113,18 +155,17 @@ const QuickViewModal = ({ product, isOpen, onClose, onAddToCart }) => {
                 className="w-full h-full"
                 >
 
-                {(product?.images?.length
-                ? product.images
-                : [{ original: product?.image }]
-                ).map((img, i) => (
-                <SwiperSlide key={i}>
+                {(images.length ? images : [product?.image])
+                .filter(Boolean)
+                .map((src, i) => (
+                  <SwiperSlide key={i}>
                     <AppImage
-                    src={img?.original}
-                    alt={product?.name}
-                    className="w-full h-full object-cover"
+                      src={src}
+                      alt={product?.name}
+                      className="w-full h-full object-cover"
                     />
-                </SwiperSlide>
-                ))}
+                  </SwiperSlide>
+              ))}
             </Swiper>
 
             {product?.isNew && (
@@ -141,9 +182,13 @@ const QuickViewModal = ({ product, isOpen, onClose, onAddToCart }) => {
                 <p className="text-sm uppercase tracking-wide text-[#6b6453] font-[Outfit] mb-2">
                   {product?.brand}
                 </p>
-                <h2 className="font-serif text-2xl font-semibold text-[#1b180d] mb-3">
+                <h2
+                  onClick={viewDetails}
+                  className="text-3xl font-[Cormorant_Garamond] font-semibold text-[#1b180d] mb-3 cursor-pointer hover:text-[#b28c34] transition"
+                >
                   {product?.name}
                 </h2>
+
 
                 <div className="flex items-center gap-3">
                   <div className="flex">

@@ -120,6 +120,7 @@ const applyFilters = useCallback(
   [products]
 );
 
+
   /* ---------------- HANDLERS ---------------- */
   const handleFilterChange = (f) => {
   setFilters(f);
@@ -137,6 +138,8 @@ const applyFilters = useCallback(
     setSortBy(value);
     applySorting(value);
   };
+
+  
 
   const handleViewChange = (mode) => {
     setViewMode(mode);
@@ -156,39 +159,22 @@ const handleAddToCart = (item) => {
   if (!item) return;
 
   const variant = item?.variants?.[0] || {};
-  const price = Number(item?.price ?? variant?.price ?? 0) || 0;
+  const price = Number(variant.price) || 0;
 
-  const size =
-    item?.selectedSize ||
-    item?.size ||
-    variant?.size ||
-    '';
-
-  const productId =
-    item?._id?.toString?.() || item?.id?.toString?.();
-
-  if (!productId) {
-    console.error("❌ Missing productId for cart item:", item);
-    return;
-  }
-
-  addToCart({
-    productId,   // ✅ always string
-    name: item?.name || '',
-    slug: item?.slug || '',
-    image:
-      item?.image ||
-      item?.images?.[0]?.original ||
-      '',
-    price,
-    size,
-    quantity: Number(item?.quantity) > 0 ? Number(item.quantity) : 1,
-  });
+  addToCart(
+    {
+      id: item._id,
+      name: item.name,
+      slug: item.slug,
+      price,
+      image: item?.images?.[0]?.original || "",
+      size: variant.size || "",
+    },
+    1
+  );
 
   openCart();
 };
-
-
 
 
   const scrollToTop = () => {
