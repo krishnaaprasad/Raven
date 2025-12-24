@@ -26,7 +26,7 @@ export default function LogoText({ size = "base" }) {
       {/* R — Cinzel (fatter) */}
       <span
         className={`${cinzel.className} ${sizes[size]} font-medium text-[#1b180d] leading-none`}
-        style={{ letterSpacing: "0.30em",marginLeft: "-0.14em",transform: "translateY(-0.05em)", }}
+        style={{ letterSpacing: "0.30em",marginLeft: "-0.14em",transform: "translateY(-0.04em)", }}
       >
         R
       </span>

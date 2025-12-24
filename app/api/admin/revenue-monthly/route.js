@@ -10,6 +10,7 @@ export async function GET() {
       {
         $match: {
           payment_status: "PAID",   // FIXED
+          deleted: { $ne: true },
         },
       },
       {

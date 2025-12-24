@@ -24,6 +24,7 @@ export async function GET(req) {
       {
         $match: {
           payment_status: "PAID",   // FIXED
+          deleted: { $ne: true },
           createdAt: { $gte: startDate, $lte: endDate },
         },
       },
