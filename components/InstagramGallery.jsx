@@ -18,42 +18,42 @@ const instagramReels = [
     id: 1,
     thumbnail:
       "https://images.unsplash.com/photo-1541643600914-78b084683601?w=300&h=500&fit=crop",
-    instagramUrl: "https://www.instagram.com/ravenfragrance/",
+    instagramUrl: "https://www.instagram.com/ravenfragrance.in/",
     views: "12.5K",
   },
   {
     id: 2,
     thumbnail:
       "https://images.unsplash.com/photo-1594035910387-fea47794261f?w=300&h=500&fit=crop",
-    instagramUrl: "https://www.instagram.com/ravenfragrance/",
+    instagramUrl: "https://www.instagram.com/ravenfragrance.in/",
     views: "8.2K",
   },
   {
     id: 3,
     thumbnail:
       "https://images.unsplash.com/photo-1588405748880-12d1d2a59f75?w=300&h=500&fit=crop",
-    instagramUrl: "https://www.instagram.com/ravenfragrance/",
+    instagramUrl: "https://www.instagram.com/ravenfragrance.in/",
     views: "15.1K",
   },
   {
     id: 4,
     thumbnail:
       "https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?w=300&h=500&fit=crop",
-    instagramUrl: "https://www.instagram.com/ravenfragrance/",
+    instagramUrl: "https://www.instagram.com/ravenfragrance.in/",
     views: "9.8K",
   },
   {
     id: 5,
     thumbnail:
       "https://images.unsplash.com/photo-1595425970377-c9703cf48b6d?w=300&h=500&fit=crop",
-    instagramUrl: "https://www.instagram.com/ravenfragrance/",
+    instagramUrl: "https://www.instagram.com/ravenfragrance.in/",
     views: "11.3K",
   },
   {
     id: 6,
     thumbnail:
       "https://images.unsplash.com/photo-1619994403073-2cec844b8e63?w=300&h=500&fit=crop",
-    instagramUrl: "https://www.instagram.com/ravenfragrance/",
+    instagramUrl: "https://www.instagram.com/ravenfragrance.in/",
     views: "7.6K",
   },
 ];
