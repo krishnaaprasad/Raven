@@ -128,7 +128,7 @@ export default function InstagramGallery() {
               >
                 <div className="flex items-center justify-center gap-2 mb-2">
                   <item.icon className="w-5 h-5 text-[#b28c34]" />
-                  <span className="font-[outfit] text-2xl md:text-3xl font-semibold text-[#1b180d]">
+                  <span className="font-[outfit] text-xl md:text-3xl font-semibold text-[#1b180d]">
                     {item.value}
                   </span>
                 </div>
