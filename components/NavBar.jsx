@@ -91,10 +91,10 @@ export default function NavBar() {
 
             {/* CENTER (Logo) */}
             <motion.div
-              initial={{ opacity: 0, y: 0 }}
+              initial={{ opacity: 0, y: -8 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, ease: 'easeOut', delay: 0.15 }}
-              className="flex justify-center w-full absolute left-0 right-0 pointer-events-none"
+              transition={{ duration: 0.7, ease: "easeOut", delay: 0.15 }}
+              className="flex justify-center w-full absolute left-0 right-0 pointer-events-none mt-0.5"
             >
               <Link href="/" className="pointer-events-auto">
                 <LogoText size="lg" />

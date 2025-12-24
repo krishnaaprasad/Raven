@@ -3,9 +3,9 @@
 import { Cinzel } from "next/font/google";
 import localFont from "next/font/local";
 
+
 const cinzel = Cinzel({
   subsets: ["latin"],
-  weight: ["600", "600"],
   display: "swap",
 });
 
@@ -17,16 +17,16 @@ const futura = localFont({
 const sizes = {
   sm: "text-lg",
   base: "text-xl",
-  lg: "text-2xl",
+  lg: "text-3xl",
 };
 
-export default function LogoText({ size = "base" }) {
+export default function LogoText({ size = "lg" }) {
   return (
     <div className="flex items-center select-none leading-none">
       {/* R — Cinzel (fatter) */}
       <span
-        className={`${cinzel.className} ${sizes[size]} font-medium text-[#1b180d] leading-none`}
-        style={{ letterSpacing: "0.30em",marginLeft: "-0.14em",transform: "translateY(-0.04em)", }}
+        className={`${cinzel.className} ${sizes[size]}  text-[#1b180d] leading-none`}
+        style={{ letterSpacing: "0.30em",marginLeft: "-0.14em",transform: "translateY(-0.04em)",fontWeight: 560 }}
       >
         R
       </span>
