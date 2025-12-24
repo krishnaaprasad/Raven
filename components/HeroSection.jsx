@@ -156,7 +156,7 @@ const handleMouseMove = (e) => {
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
 
   {/* PRIMARY CTA */}
-  <Link href="/product">
+  <Link href="/collection">
     <button className="group relative px-10 py-4 rounded-full bg-[#b68615] text-white font-semibold shadow-xl overflow-hidden cursor-pointer">
       <span className="relative z-10 flex text-base sm:text-xl items-center gap-2">
         Explore Collection
