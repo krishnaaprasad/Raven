@@ -1,5 +1,4 @@
 import Marquee from "react-fast-marquee";
-import NavBar from '@/components/NavBar';
 import ScentStorySection from "@/components/ScentStorySection";
 import AboutRaven from '@/components/AboutRaven';
 import WhyChooseRaven from '@/components/WhyChooseRaven';
@@ -33,7 +32,7 @@ export default async function Home() {
     .map((p) => p._id);
 
   return (
-    <div className="homepage-theme">
+    <div className="homepage-theme" >
 
       {/* HERO VIDEO */}
       <HeroSection />

@@ -100,7 +100,7 @@ const handleMouseMove = (e) => {
   return (
     <section
   onMouseMove={handleMouseMove}
-  className="relative w-full min-h-screen overflow-hidden px-0 py-0"
+  className="relative w-full min-h-screen overflow-hidden -mt-[50px] pt-0"
 >
   {/* ===== LOVABLE STYLE MULTI-LAYER PARALLAX BACKGROUND ===== */}
 <div className="absolute inset-0 perspective-distant -z-10 overflow-hidden">

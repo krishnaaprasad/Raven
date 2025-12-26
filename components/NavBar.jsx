@@ -37,8 +37,10 @@ export default function NavBar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [pastMarquee, setPastMarquee] = useState(false);
+  const isHome = pathname === "/";
+  const MARQUEE_HEIGHT = 40;
 
-   
+ 
 
   const handleClick = () => {
     if (window.location.pathname !== "/") {
@@ -72,18 +74,18 @@ export default function NavBar() {
     setMobileMenuOpen(false);
   }, [pathname]);
 
- useEffect(() => {
+useEffect(() => {
   const handleScroll = () => {
     const y = window.scrollY;
 
-    // past marquee?
-    setPastMarquee(y > MARQUEE_HEIGHT);
+    if (isHome) {
+      setPastMarquee(y > MARQUEE_HEIGHT);
 
-    // solid after hero
-    if (pathname === "/") {
-      const threshold = window.innerHeight - 80;
-      setIsScrolled(y > threshold);
+      const heroThreshold = window.innerHeight - 80;
+      setIsScrolled(y > heroThreshold);
     } else {
+      // Other pages: no marquee, always solid navbar
+      setPastMarquee(true);
       setIsScrolled(true);
     }
   };
@@ -92,27 +94,24 @@ export default function NavBar() {
   handleScroll();
 
   return () => window.removeEventListener("scroll", handleScroll);
-}, [pathname]);
-  const MARQUEE_HEIGHT = 40;
+}, [isHome]);
 
- const showSolid = pathname !== "/" || isScrolled;
+
+ const showSolid = !isHome || isScrolled;
+
 
   return (
     <>
-      <nav
-  className={`fixed left-0 right-0 z-40 transition-all duration-500 ease-out
-  ${
-    pastMarquee ? "top-0" : "top-10"
-  }
-  ${
-    showSolid
-      ? "bg-[#fcfbf8]/95 backdrop-blur-md border-b border-[#e7e1cf] shadow-[0_2px_10px_rgba(0,0,0,0.06)]"
-      : "bg-transparent"
-  }`}
+   <nav
+  className={`fixed left-0 right-0 z-[1000] transition-all duration-500 ease-out
+    ${isHome && !pastMarquee ? "top-[40px]" : "top-0"}
+    ${
+      showSolid
+        ? "bg-[#fcfbf8]/95 backdrop-blur-md border-b border-[#e7e1cf] shadow-[0_2px_10px_rgba(0,0,0,0.06)]"
+        : "bg-transparent"
+    }
+  `}
 >
-
-
-
 
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="relative flex h-12 items-center justify-between">

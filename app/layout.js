@@ -78,16 +78,18 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" className={`${outfit.className} ${cormorantGaramond.className}`}>
+    <html lang="en" className={`${outfit.className} ${cormorantGaramond.className} `}>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased ` }
       >
         <Providers>
           <HomeMarquee /> {/* ✅ Client component handles fade + homepage check */}
           <NavBar />
           
           <QuickViewProvider>
-          {children}
+          <div className="pt-12">
+  {children}
+</div>
           <QuickViewModal />
         </QuickViewProvider>
           
