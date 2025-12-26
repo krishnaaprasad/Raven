@@ -50,7 +50,7 @@ useEffect(() => {
 
 const bgConfig = {
   mobile: {
-    position: "-64% 58%",
+    position: "-68% 59%",
     scale: 1.05,
     inset: "-inset-[140%]",
   },
