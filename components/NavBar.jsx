@@ -157,7 +157,7 @@ export default function NavBar() {
             {/* RIGHT (Icons + Desktop Shop Button) */}
             <div className="ml-auto flex items-center space-x-4 sm:space-x-5">
 
-              {/* SHOP NOW (Desktop) */}
+              {/* SHOP NOW (Desktop)
               <motion.div
                 initial={{ opacity: 0, y: 0 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -173,11 +173,11 @@ export default function NavBar() {
                     }}
                   >
                     <span className="relative z-10">SHOP NOW</span>
-                    {/* Shine Effect */}
+                    {/* Shine Effect 
                     <span className="absolute top-0 left-[-80%] w-[60%] h-full bg-linear-to-tr from-transparent via-white/50 to-transparent rotate-25 opacity-0 group-hover:opacity-100 animate-shine-slow"></span>
                   </button>
                 </Link>
-              </motion.div>
+              </motion.div>*/}
 
               {/* Account/Login */}
               {!session ? (
@@ -333,7 +333,7 @@ export default function NavBar() {
 
 
           {/* CTA — same as desktop */}
-          <Link href="/collection" onClick={() => setMobileMenuOpen(false)}>
+          {/* <Link href="/collection" onClick={() => setMobileMenuOpen(false)}>
             <button
               className="relative group w-full flex items-center justify-center h-9 px-6 rounded-md overflow-hidden text-sm font-semibold tracking-wide uppercase text-[#1b180d] transition-all shadow-[0_3px_8px_rgba(0,0,0,0.12)] hover:shadow-[0_6px_15px_rgba(0,0,0,0.15)] font-[Outfit]"
               style={{
@@ -344,7 +344,7 @@ export default function NavBar() {
               <span className="relative z-10">SHOP NOW</span>
               <span className="absolute top-0 left-[-80%] w-[60%] h-full bg-linear-to-tr from-transparent via-white/50 to-transparent rotate-25 opacity-0 group-hover:opacity-100 animate-shine-slow"></span>
             </button>
-          </Link>
+          </Link> */}
         </div>
       </motion.div>
     </>
