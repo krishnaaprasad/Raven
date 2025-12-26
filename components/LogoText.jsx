@@ -20,24 +20,29 @@ const sizes = {
   lg: "text-3xl",
 };
 
-export default function LogoText({ size = "lg" }) {
+export default function LogoText({ size = "lg", className = "" }) {
   return (
-    <div className="flex items-center select-none leading-none">
-      {/* R — Cinzel (fatter) */}
+    <div className={`flex items-center select-none leading-none ${className}`}>
+      {/* R — Cinzel */}
       <span
-        className={`${cinzel.className} ${sizes[size]}  text-[#1b180d] leading-none`}
-        style={{ letterSpacing: "0.30em",marginLeft: "-0.14em",transform: "translateY(-0.04em)",fontWeight: 560 }}
+        className={`${cinzel.className} ${sizes[size]} leading-none`}
+        style={{
+          letterSpacing: "0.30em",
+          marginLeft: "-0.14em",
+          transform: "translateY(-0.04em)",
+          fontWeight: 560,
+        }}
       >
         R
       </span>
 
-      {/* AVEN — Futura (nudged up & tight) */}
+      {/* AVEN — Futura */}
       <span
-        className={`${futura.className} ${sizes[size]} font-medium text-[#1b180d] leading-none`}
+        className={`${futura.className} ${sizes[size]} font-medium leading-none`}
         style={{
           letterSpacing: "0.18em",
-          marginLeft: "-0.14em",      // remove gap between R and A
-          transform: "translateY(-0.08em)", // ⬆️ lift AVEN to match R height
+          marginLeft: "-0.14em",
+          transform: "translateY(-0.08em)",
         }}
       >
         AVEN

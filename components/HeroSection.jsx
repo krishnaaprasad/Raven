@@ -32,6 +32,39 @@ export default function HeroSection() {
   const intervalRef = useRef(null);
   const [isAnimating, setIsAnimating] = useState(false);
   const touchStartX = useRef(null);
+  const heroLifestyleBg = "/hero-bg.jpg"; // place in /public
+  const [screen, setScreen] = useState("desktop");
+
+useEffect(() => {
+  const update = () => {
+    const w = window.innerWidth;
+    if (w < 640) setScreen("mobile");
+    else if (w < 1024) setScreen("tablet");
+    else setScreen("desktop");
+  };
+
+  update();
+  window.addEventListener("resize", update);
+  return () => window.removeEventListener("resize", update);
+}, []);
+
+const bgConfig = {
+  mobile: {
+    position: "-55% 57%",
+    scale: 1.05,
+    inset: "-inset-[140%]",
+  },
+  tablet: {
+    position: "-10% 50%",
+    scale: 2.12,
+    inset: "-inset-[130%]",
+  },
+  desktop: {
+    position: "61% 65%", // ✅ your perfect desktop framing
+    scale: 1.2,
+    inset: "-inset-[120%]",
+  },
+};
 
   useEffect(() => {
     setIsVisible(true);
@@ -77,17 +110,66 @@ const handleMouseMove = (e) => {
 
   return (
     <section
-      onMouseMove={handleMouseMove}
-      className="relative w-full min-h-screen overflow-hidden bg-linear-to-br from-[#f7f1e6] via-[#fdfbf8] to-[#e9dfc7] padding-left px-0 sm:px-8 "
-    >
+  onMouseMove={handleMouseMove}
+  className="relative w-full min-h-screen overflow-hidden pt-2"
+>
+  {/* ===== LOVABLE STYLE MULTI-LAYER PARALLAX BACKGROUND ===== */}
+<div className="absolute inset-0 perspective-distant -z-10 overflow-hidden">
+  {/* Layer 1 — main lifestyle image */}
+ <div
+  className={`absolute ${bgConfig[screen].inset} bg-no-repeat transition-transform duration-500 ease-out will-change-transform`}
+  style={{
+    backgroundImage: `url(${heroLifestyleBg})`,
+    backgroundPosition: bgConfig[screen].position,
+    transform: screen === "mobile"
+  ? `scale(${bgConfig[screen].scale})`
+  : `translate3d(${mousePosition.x * 0.8}px, ${mousePosition.y * 0.8}px, -100px) scale(${bgConfig[screen].scale})`,
+  }}
+/>
+
+  {/* Layer 3 — subtle light beams */}
+  <div
+    className="absolute fill inset-0 overflow-hidden transition-transform duration-300 ease-out"
+    style={{
+      transform: `translate3d(${mousePosition.x * 0.2}px, ${mousePosition.y * 0.2}px, -25px)`,
+    }}
+  >
+    <div className="absolute top-0 left-[15%] w-[120px] h-[70%] bg-linear-to-b from-[#b28c34]/10 via-[#b28c34]/5 to-transparent rotate-12 blur-2xl animate-pulse" />
+    <div className="absolute top-0 right-[20%] w-[100px] h-[60%] bg-linear-to-b from-[#fcfbf8]/15 via-[#fcfbf8]/5 to-transparent -rotate-10 blur-2xl animate-pulse [animation-delay:1.5s]" />
+  </div>
+
+  {/* Readability overlays */}
+  <div className="absolute inset-0 bg-linear-to-r from-[#1b180d]/70 via-[#1b180d]/40 to-transparent" />
+  <div className="absolute inset-0 bg-linear-to-b from-[#1b180d]/25 via-transparent to-transparent h-32" />
+<div className="absolute inset-0 bg-linear-to-t from-[#1b180d]/30 via-transparent to-transparent" />
+
+</div>
+
+{/* Floating bokeh particles */}
+<div
+  className="absolute inset-0 pointer-events-none overflow-hidden z-2 transition-transform duration-200"
+  style={{
+    transform: `translate3d(${mousePosition.x * -0.3}px, ${mousePosition.y * -0.3}px, 50px)`,
+  }}
+>
+  <div className="absolute w-32 h-32 rounded-full bg-linear-to-br from-[#b28c34]/25 to-transparent blur-2xl animate-float" style={{ top: "20%", left: "10%" }} />
+  <div className="absolute w-48 h-48 rounded-full bg-linear-to-br from-[#fcfbf8]/20 to-transparent blur-3xl animate-float [animation-delay:2s]" style={{ top: "55%", right: "5%" }} />
+  <div className="absolute w-24 h-24 rounded-full bg-linear-to-br from-[#b28c34]/30 to-transparent blur-xl animate-float [animation-delay:4s]" style={{ top: "70%", left: "30%" }} />
+</div>
+
       {/* ================= DECORATIVE BACKGROUND ================= */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute top-20 left-10 w-64 h-64 rounded-full bg-[#b28c34]/10 blur-3xl animate-float" />
-        <div className="absolute bottom-20 right-10 w-96 h-96 rounded-full bg-[#b28c34]/10 blur-3xl animate-float [animation-delay:2s]" />
-        <div className="absolute top-1/2 left-1/3 w-48 h-48 rounded-full bg-[#b28c34]/5 blur-2xl animate-float [animation-delay:4s]" />
+        <div className="absolute top-20 left-10 w-64 h-64 rounded-full bg-[#b28c34]/5 blur-3xl animate-float" />
+        <div className="absolute bottom-20 right-10 w-96 h-96 rounded-full bg-[#b28c34]/6 blur-3xl animate-float [animation-delay:2s]" />
+        <div className="absolute top-1/2 left-1/3 w-48 h-48 rounded-full bg-[#b28c34]/4 blur-2xl animate-float [animation-delay:4s]" />
+
+  {/* Overlay to keep it elegant & readable */}
+  <div className="absolute inset-0 bg-linear-to-br from-[#b28c34]/30 via-[#1b180d]/20 to-[#1b180d]/40" />
+</div>
+
 
         {/* GRID */}
-        <svg className="absolute inset-0 w-full h-full opacity-[0.03]">
+        <svg className="absolute inset-0 w-full h-full opacity-[0.02]">
           <pattern id="grid" width="60" height="60" patternUnits="userSpaceOnUse">
             <path
               d="M 60 0 L 0 0 0 60"
@@ -99,34 +181,34 @@ const handleMouseMove = (e) => {
           </pattern>
           <rect width="100%" height="100%" fill="url(#grid)" />
         </svg>
-      </div>
+    
 
       {/* ================= CONTENT ================= */}
-      <div className="relative z-10 mx-auto px-4 sm:px-6 lg:px-8 min-h-dvh">
+      <div className="relative z-10 mx-auto px-4 sm:px-6 lg:px-8 min-h-dvh pt-2">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center min-h-screen py-13">
 
           {/* ================= LEFT ================= */}
           <div
-            className={`order-2 lg:order-1 text-center lg:text-left transition-all duration-1000 ${
-            isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
-            }`}
-            >
+            className={`order-2 lg:order-1 text-center lg:text-left transition-all duration-1000
+           p-6 sm:p-10 lg:p-0
+            ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"}`}
+          >
             {/* TAG */}
             <div
               className={`inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#f59e0b]/10 border border-[#f59e0b]/20 mb-6 transition-all duration-700 delay-200 ${
                 isVisible ? "opacity-100" : "opacity-0 translate-y-4"
               }`}
             >
-              <Sparkles className="w-4 h-4 text-[#b28c34] " />
+              <Sparkles className="w-4 h-4 text-[#ecb023] " />
               <span
-                className={`text-xs sm:text-sm uppercase tracking-[0.2em] text-[#b28c34] leading-5 ${outfit.className}`}
+                className={`text-xs sm:text-sm uppercase tracking-[0.2em] text-[#ecb023] leading-5 ${outfit.className}`}
                 >
                 Premium Artisan Fragrances
                 </span>
             </div>
 
             {/* TITLE */}
-            <h1 className="font-serif text-7xl font-semibold sm:text-8xl xl:text-8xl text-[#1b180d] leading-tight mb-6">
+            <h1 className="font-serif text-7xl sm:text-8xl xl:text-8xl text-white leading-tight mb-6">
               Unveil
               <span
                 className={`block italic sm:text-8xl text-7xl font-bold relative mt-0 text-gold-gradient bg-clip-text ${cormorant.className}`}>
@@ -147,9 +229,9 @@ const handleMouseMove = (e) => {
             </h1>
 
             {/* DESCRIPTION */}
-            <p className="text-[#5f544e] max-w-md mx-auto lg:mx-0 text-lg mb-8 font-[Manrope,sans-serif]">
+            <p className="text-white/80 max-w-md mx-auto lg:mx-0 text-lg mb-8 font-[Manrope,sans-serif]">
               Discover fragrances that reveal, not mask. Each note crafted with rare botanicals to create{" "}
-              <span className="text-[#b28c34] font-medium">a scent uniquely yours</span>.
+              <span className="text-[#ecb023] font-medium">a scent uniquely yours</span>.
             </p>
 
             {/* CTA */}
@@ -166,37 +248,37 @@ const handleMouseMove = (e) => {
     </button>
   </Link>
 
-  {/* SECONDARY CTA — FIXED */}
   <button
-    onClick={() => {
-      const el = document.getElementById("why-choose-raven");
-      el?.scrollIntoView({ behavior: "smooth" });
-    }}
-    className="
-      inline-flex
-      w-fit
-      self-center sm:self-auto
-      px-8 sm:px-8
-      py-4 sm:py-4
-      rounded-full
-      border border-[#1b180d]/20
-      text-[#1b180d]
-      hover:bg-[#1b180d]
-      hover:text-[#fcfbf8]
-      transition
-      text-sm sm:text-base
-      font-medium
-      max-w-fit
-    "
-  >
-    Our Story
-  </button>
+  onClick={() => {
+    const el = document.getElementById("why-choose-raven");
+    el?.scrollIntoView({ behavior: "smooth" });
+  }}
+  className="
+    inline-flex
+    w-fit
+    self-center sm:self-auto
+    px-8
+    py-4
+    rounded-full
+    border border-white/30
+    text-white
+   hover:bg-[#fcfbf8] hover:border-[#b28c34]
+    hover:text-[#1b180d]
+    transition-all duration-300
+    text-sm sm:text-base
+    font-medium
+    max-w-fit
+  "
+>
+  Our Story
+</button>
+
 
 </div>
 
 
             {/* TRUST */}
-            <div className="flex flex-wrap justify-center lg:justify-start gap-8 mt-8 pt-6 border-t border-[#1b180d]/10">
+            <div className="flex flex-wrap justify-center lg:justify-start gap-8 mt-8 pt-6 border-t border-white/20">
               {[
                 { value: "100%", label: "Natural" },
                 { value: "20+", label: "Ingredients" },
@@ -204,7 +286,7 @@ const handleMouseMove = (e) => {
               ].map((b) => (
                 <div key={b.label}>
                   <div className="text-xl sm:text-3xl font-serif text-[#b28c34]">{b.value}</div>
-                  <div className="text-xs sm:text-sm tracking-widest text-[#5f544e] uppercase">
+                  <div className="text-xs sm:text-sm tracking-widest text-white/70 uppercase">
                     {b.label}
                   </div>
                 </div>
@@ -294,7 +376,6 @@ const handleMouseMove = (e) => {
           <div className="w-1.5 h-3 bg-[#b28c34] rounded-full animate-bounce" />
         </div>
       </div>
-
           </div>
         </div>
       </div>

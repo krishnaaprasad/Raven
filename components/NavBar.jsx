@@ -35,6 +35,8 @@ export default function NavBar() {
   const { cartCount, openCart } = useCart();
   const { data: session } = useSession();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [pastMarquee, setPastMarquee] = useState(false);
 
    
 
@@ -70,9 +72,48 @@ export default function NavBar() {
     setMobileMenuOpen(false);
   }, [pathname]);
 
+ useEffect(() => {
+  const handleScroll = () => {
+    const y = window.scrollY;
+
+    // past marquee?
+    setPastMarquee(y > MARQUEE_HEIGHT);
+
+    // solid after hero
+    if (pathname === "/") {
+      const threshold = window.innerHeight - 80;
+      setIsScrolled(y > threshold);
+    } else {
+      setIsScrolled(true);
+    }
+  };
+
+  window.addEventListener("scroll", handleScroll);
+  handleScroll();
+
+  return () => window.removeEventListener("scroll", handleScroll);
+}, [pathname]);
+  const MARQUEE_HEIGHT = 40;
+
+ const showSolid = pathname !== "/" || isScrolled;
+
   return (
     <>
-      <nav className="sticky top-0 z-50 bg-[#FAF5E8]/95 backdrop-blur-md border-b border-[#e4d5b5] shadow-[0_1px_8px_rgba(0,0,0,0.04)]">
+      <nav
+  className={`fixed left-0 right-0 z-40 transition-all duration-500 ease-out
+  ${
+    pastMarquee ? "top-0" : "top-10"
+  }
+  ${
+    showSolid
+      ? "bg-[#fcfbf8]/95 backdrop-blur-md border-b border-[#e7e1cf] shadow-[0_2px_10px_rgba(0,0,0,0.06)]"
+      : "bg-transparent"
+  }`}
+>
+
+
+
+
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="relative flex h-12 items-center justify-between">
 
@@ -84,7 +125,12 @@ export default function NavBar() {
                 aria-label="Open menu"
                 className="p-2"
               >
-                <Bars3Icon className="h-6 w-6 text-[#1b180d]" />
+                <Bars3Icon
+  className={`h-6 w-6 transition ${
+    showSolid ? "text-[#1b180d]" : "text-white"
+  }`}
+/>
+
               </button>
             </div>
           
@@ -97,7 +143,13 @@ export default function NavBar() {
               className="flex justify-center w-full absolute left-0 right-0 pointer-events-none mt-0.5"
             >
               <Link href="/" className="pointer-events-auto">
-                <LogoText size="lg" />
+                <LogoText
+  size="lg"
+  className={`transition-colors duration-500 ${
+    showSolid ? "text-[#1b180d]" : "text-white"
+  }`}
+/>
+
               </Link>
 
             </motion.div>
@@ -134,13 +186,21 @@ export default function NavBar() {
                   className="bg-transparent border-none outline-none"
                   aria-label="Login/Register"
                 >
-                  <UserIcon className="h-5 w-5 sm:h-6 sm:w-6 text-[#191919] hover:text-[#B4933A] cursor-pointer transition-transform hover:scale-110" />
+                  <UserIcon
+  className={`h-5 w-5 sm:h-6 sm:w-6 transition-transform hover:scale-110 ${
+    showSolid ? "text-[#191919] hover:text-[#B4933A]" : "text-white hover:text-[#ffe7a3]"
+  }`}
+/>
+
                 </button>
               ) : (
                 <div ref={dropdownRef} className="relative">
                   <button
                     onClick={() => setShowAccountMenu((prev) => !prev)}
-                    className="flex items-center space-x-1 text-[#191919] hover:text-[#B4933A] transition-all duration-300"
+                    className={`flex items-center space-x-1 transition-all duration-300 ${
+  showSolid ? "text-[#191919] hover:text-[#B4933A]" : "text-white hover:text-[#ffe7a3]"
+}`}
+
                     aria-label="My Account Menu"
                   >
                     <UserIcon className="h-5 w-5 sm:h-6 sm:w-6" />
@@ -182,11 +242,12 @@ export default function NavBar() {
   onClick={openCart}
   type="button"
 >
-  <ShoppingBagIcon
-    className={`h-5 w-5 sm:h-6 sm:w-6 text-[#191919] hover:text-[#B4933A] transition-transform duration-500 ${
-      animateCart ? "animate-bounce" : ""
-    }`}
-  />
+ <ShoppingBagIcon
+  className={`h-5 w-5 sm:h-6 sm:w-6 transition-transform duration-500 ${
+    showSolid ? "text-[#191919] hover:text-[#B4933A]" : "text-white hover:text-[#ffe7a3]"
+  } ${animateCart ? "animate-bounce" : ""}`}
+/>
+
 
   {cartCount > 0 && (
     <span className="absolute -top-2 -right-2 rounded-full bg-red-600 text-white text-xs w-5 h-5 flex items-center justify-center font-bold">
@@ -215,7 +276,10 @@ export default function NavBar() {
 
       {/* 📜 Slide-down Menu */}
       <motion.div
-        className="absolute left-0 right-0 top-full z-9990 bg-[#fcfbf8] border-b border-[#e7e1cf] shadow-xl sm:hidden"
+        className={`absolute left-0 right-0 top-full z-9990 border-b shadow-xl sm:hidden
+  ${showSolid ? "bg-[#fcfbf8]" : "bg-[#1b180d]/90 backdrop-blur-lg"}
+`}
+
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: -20, opacity: 0 }}
@@ -241,7 +305,12 @@ export default function NavBar() {
         key={item.name}
         type="button"
         onClick={handleClick}
-        className="block text-left text-sm uppercase tracking-widest text-[#1b180d] hover:text-[#b28c34] transition"
+        className={`block text-left text-sm uppercase tracking-widest transition
+  ${showSolid
+    ? "text-[#1b180d] hover:text-[#b28c34]"
+    : "text-white hover:text-[#ffe7a3]"
+  }`}
+
       >
         {item.name}
       </button>
@@ -250,7 +319,12 @@ export default function NavBar() {
         key={item.name}
         href={item.href}
         onClick={() => setMobileMenuOpen(false)}
-        className="block text-sm uppercase tracking-widest text-[#1b180d] hover:text-[#b28c34] transition"
+        className={`block text-sm uppercase tracking-widest transition
+  ${showSolid
+    ? "text-[#1b180d] hover:text-[#b28c34]"
+    : "text-white hover:text-[#ffe7a3]"
+  }`}
+
       >
         {item.name}
       </Link>
