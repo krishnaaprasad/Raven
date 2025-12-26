@@ -49,22 +49,11 @@ useEffect(() => {
 }, []);
 
 const bgConfig = {
-  mobile: {
-    position: "-68% 59%",
-    scale: 1.05,
-    inset: "-inset-[140%]",
-  },
-  tablet: {
-    position: "-10% 50%",
-    scale: 2.12,
-    inset: "-inset-[130%]",
-  },
-  desktop: {
-    position: "61% 65%", // ✅ your perfect desktop framing
-    scale: 1.2,
-    inset: "-inset-[120%]",
-  },
+  mobile: { position: "100% 105%" },
+  tablet: { position: "75% 55%" },
+  desktop: { position: "-10% 0%" },
 };
+
 
   useEffect(() => {
     setIsVisible(true);
@@ -111,21 +100,28 @@ const handleMouseMove = (e) => {
   return (
     <section
   onMouseMove={handleMouseMove}
-  className="relative w-full min-h-screen overflow-hidden pt-2"
+  className="relative w-full min-h-screen overflow-hidden px-0 py-0"
 >
   {/* ===== LOVABLE STYLE MULTI-LAYER PARALLAX BACKGROUND ===== */}
 <div className="absolute inset-0 perspective-distant -z-10 overflow-hidden">
   {/* Layer 1 — main lifestyle image */}
- <div
-  className={`absolute ${bgConfig[screen].inset} bg-no-repeat transition-transform duration-500 ease-out will-change-transform`}
-  style={{
-    backgroundImage: `url(${heroLifestyleBg})`,
-    backgroundPosition: bgConfig[screen].position,
-    transform: screen === "mobile"
-  ? `scale(${bgConfig[screen].scale})`
-  : `translate3d(${mousePosition.x * 0.8}px, ${mousePosition.y * 0.8}px, -100px) scale(${bgConfig[screen].scale})`,
-  }}
-/>
+ <div className="absolute inset-0 -z-10 overflow-hidden">
+  <Image
+    src={heroLifestyleBg}
+    alt="Hero background"
+    fill
+    priority
+    className="object-cover transition-transform duration-500 ease-out will-change-transform"
+    style={{
+      objectPosition: bgConfig[screen].position,
+      transform:
+        screen === "mobile"
+          ? "scale(1.05)"
+          : `translate3d(${mousePosition.x * 0.3}px, ${mousePosition.y * 0.3}px, 0) scale(1.08)`,
+    }}
+  />
+</div>
+
 
   {/* Layer 3 — subtle light beams */}
   <div
