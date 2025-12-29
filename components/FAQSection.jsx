@@ -87,7 +87,7 @@ export default function FAQSection() {
           <span className="font-[Outfit] text-xs uppercase tracking-[0.3em] text-[#9a864c]">
             Questions & Answers
           </span>
-          <h2 className="font-serif text-3xl md:text-4xl lg:text-5xl text-[#1b180d] mt-7 mb-6">
+          <h2 className="font-semibold text-3xl md:text-4xl lg:text-5xl text-[#1b180d] mt-7 mb-6">
             Frequently Asked Questions
           </h2>
           <p className="font-[Outfit] text-[#6b6453] max-w-2xl mx-auto">
@@ -111,7 +111,7 @@ export default function FAQSection() {
           onClick={() =>
             setOpenIndex(isOpen ? null : i)
           }
-          className="w-full flex justify-between items-center px-6 py-4 text-center font-[Cormorant_Garamond] text-base md:text-lg font-medium text-[#1b180d] hover:text-[#b28c34] transition"
+          className="w-full flex justify-between items-center px-6 py-4 text-center font-[Cormorant_Garamond] text-base md:text-lg font-medium text-[#1b180d] hover:text-[#b28c34] transition cursor-pointer"
         >
           {faq.question}
 
