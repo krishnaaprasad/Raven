@@ -10,10 +10,12 @@ import { Autoplay } from 'swiper/modules';
 import 'swiper/css';
 import { useCart } from "@/app/context/cartcontext";
 import { toast } from "react-hot-toast";
+import { useQuickView } from "@/app/context/QuickViewContext";
 
-
-const QuickViewModal = ({ product, isOpen, onClose, onAddToCart }) => {
+const QuickViewModal = () => {
   const router = useRouter();
+  const { product, isOpen, closeQuickView } = useQuickView();
+
   const { addToCart, openCart } = useCart();
 
 
@@ -83,7 +85,7 @@ const handleAddToCart = () => {
     },
   });
 
-  onClose();
+  closeQuickView();
   setTimeout(() => openCart(), 50);
 };
 
@@ -104,7 +106,7 @@ const handleAddToCart = () => {
   };
 
   sessionStorage.setItem("buyNowItem", JSON.stringify(buyNowItem));
-  onClose();
+  closeQuickView();
   router.push("/checkout?mode=buynow");
 };
 
@@ -122,16 +124,13 @@ const viewDetails = () => {
   router.push(`/product/${product.slug}`);
 };
 
-const closeQuickView = () => {
-  if (onClose) onClose();
-};
 
   return (
     <div className="fixed inset-0 z-1400 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
       <div className="relative w-full max-w-4xl max-h-[90vh] bg-white rounded-xl shadow-2xl overflow-hidden">
         {/* Close */}
         <button
-          onClick={onClose}
+          onClick={closeQuickView}
           className="absolute top-4 right-4 z-10 w-10 h-10 flex items-center justify-center bg-white/90 rounded-full hover:bg-[#f3f1ea] transition"
           aria-label="Close modal"
         >
@@ -258,31 +257,46 @@ const closeQuickView = () => {
                 </div>
               )}
 
-              {/* Quantity */}
-              <div>
-                <label className="block text-sm font-[Outfit] font-medium text-[#1b180d] mb-3">
-                  Quantity
-                </label>
-                <div className="flex items-center gap-4">
-                  <button
-                    onClick={() => handleQuantityChange(-1)}
-                    disabled={quantity <= 1}
-                    className="w-10 h-10 flex items-center justify-center border border-[#e7e1cf] rounded-md hover:bg-[#f3f1ea] disabled:opacity-50"
-                  >
-                    <Icon name="MinusIcon" size={18} />
-                  </button>
-                  <span className="w-12 text-center font-[Outfit] text-lg font-medium">
-                    {quantity}
-                  </span>
-                  <button
-                    onClick={() => handleQuantityChange(1)}
-                    disabled={quantity >= 10}
-                    className="w-10 h-10 flex items-center justify-center border border-[#e7e1cf] rounded-md hover:bg-[#f3f1ea] disabled:opacity-50"
-                  >
-                    <Icon name="PlusIcon" size={18} />
-                  </button>
-                </div>
-              </div>
+              {/* Quantity + More details */}
+<div className="flex items-end justify-between">
+  {/* Quantity */}
+  <div>
+    <label className="block text-sm font-[Outfit] font-medium text-[#1b180d] mb-3">
+      Quantity
+    </label>
+
+    <div className="flex items-center gap-3">
+      <button
+        onClick={() => handleQuantityChange(-1)}
+        disabled={quantity <= 1}
+        className="w-9 h-9 flex items-center justify-center border border-[#e7e1cf] rounded-md hover:bg-[#f3f1ea] disabled:opacity-50 transition"
+      >
+        <Icon name="MinusIcon" size={16} />
+      </button>
+
+      <span className="w-10 text-center font-[Outfit] text-base font-medium">
+        {quantity}
+      </span>
+
+      <button
+        onClick={() => handleQuantityChange(1)}
+        disabled={quantity >= 10}
+        className="w-9 h-9 flex items-center justify-center border border-[#e7e1cf] rounded-md hover:bg-[#f3f1ea] disabled:opacity-50 transition"
+      >
+        <Icon name="PlusIcon" size={16} />
+      </button>
+    </div>
+  </div>
+
+  {/* More details */}
+  <button
+    onClick={viewDetails}
+    className="font-[Outfit] text-sm text-[#6b6453] hover:text-[#b28c34] underline underline-offset-4 transition self-end cursor-pointer"
+  >
+    More details →
+  </button>
+</div>
+
 
               {/* Add to Cart */}
               <button
@@ -387,13 +401,6 @@ const closeQuickView = () => {
       </div>
     </div>
   );
-};
-
-QuickViewModal.propTypes = {
-  product: PropTypes.object,
-  isOpen: PropTypes.bool.isRequired,
-  onClose: PropTypes.func.isRequired,
-  onAddToCart: PropTypes.func.isRequired,
 };
 
 export default QuickViewModal;

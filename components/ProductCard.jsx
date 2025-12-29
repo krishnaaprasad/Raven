@@ -5,8 +5,6 @@ import Link from "next/link";
 import { useState } from "react";
 import { Star, Heart, ShoppingBag } from "lucide-react";
 import { Outfit, Cormorant_Garamond } from "next/font/google";
-import { useCart } from "@/app/context/cartcontext";
-import { toast } from "react-hot-toast";
 import { useQuickView } from "@/app/context/QuickViewContext";
 
 const outfit = Outfit({ subsets: ["latin"], display: "swap" });
@@ -19,7 +17,6 @@ const cormorant = Cormorant_Garamond({
 export default function ProductCard({ product, bestsellerIds = [] }) {
   if (!product) return null;
 
-  const { addToCart } = useCart();
   const [liked, setLiked] = useState(false);
 
   const { openQuickView } = useQuickView();
@@ -54,41 +51,6 @@ export default function ProductCard({ product, bestsellerIds = [] }) {
     ? Math.round(((mrp - price) / mrp) * 100)
     : 0;
 
-  // ======================================
-
-  const handleAddToCart = () => {
-    addToCart(
-      {
-        id: product._id,
-        slug,
-        name: product.name,
-        price,
-        size,
-        image,
-      },
-      1
-    );
-
-    toast.success(`${product.name} added to cart`, {
-      position: "top-right",
-      duration: 3500,
-      style: {
-        background: "#3B3024",
-        color: "white",
-        padding: "16px 20px",
-        fontSize: "16px",
-        borderRadius: "10px",
-        border: "1px solid #B68A3A",
-        boxShadow: "0px 8px 25px rgba(0,0,0,0.25)",
-      },
-      iconTheme: {
-        primary: "#B68A3A",
-        secondary: "white",
-      },
-    });
-
-    window.dispatchEvent(new Event("open-mini-cart"));
-  };
 
   return (
     <div

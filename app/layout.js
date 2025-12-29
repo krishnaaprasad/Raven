@@ -7,7 +7,7 @@ import { Analytics } from "@vercel/analytics/next"
 import Providers from "./Providers";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import HomeMarquee from "@/components/HomeMarquee"; // ✅ new client component
-import QuickViewModal from "@/components/QuickViewModal";
+import QuickViewModal from "@/app/collection/components/QuickViewModal";
 import { QuickViewProvider } from "@/app/context/QuickViewContext";
 
 import { Outfit } from 'next/font/google';
@@ -83,21 +83,25 @@ export default function RootLayout({ children }) {
         className={`${geistSans.variable} ${geistMono.variable} antialiased ` }
       >
         <Providers>
-          <HomeMarquee /> {/* ✅ Client component handles fade + homepage check */}
-          <NavBar />
-          
           <QuickViewProvider>
-          <div className="pt-12">
-  {children}
-</div>
-          <QuickViewModal />
-        </QuickViewProvider>
-          
-          <SpeedInsights />
-          <Analytics/>
-          <Footer />
+
+            <HomeMarquee />
+            <NavBar />
+
+            <div className="pt-12">
+              {children}
+            </div>
+
+            {/* 🔥 ONE GLOBAL MODAL */}
+            <QuickViewModal />
+
+            <Footer />
+            <WhatsAppButton />
+            <SpeedInsights />
+            <Analytics />
+
+          </QuickViewProvider>
         </Providers>
-        <WhatsAppButton />
       </body>
     </html>
   );

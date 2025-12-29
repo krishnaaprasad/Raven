@@ -3,10 +3,10 @@
 import { useState, useEffect, useCallback } from 'react';
 import ProductGridNavigation from '@/components/shoppage/ProductGridNavigation';
 import ProductGrid from './ProductGrid';
-import QuickViewModal from './QuickViewModal';
 import LoadingSkeleton from './LoadingSkeleton';
 import { ArrowUp, CheckCircle } from 'lucide-react';
 import { useCart } from '@/app/context/cartcontext';
+import { useQuickView } from "@/app/context/QuickViewContext";
 
 const ProductCollectionInteractive = ({ initialProducts }) => {
   const { addToCart, openCart } = useCart();
@@ -15,9 +15,7 @@ const ProductCollectionInteractive = ({ initialProducts }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [sortBy, setSortBy] = useState('featured');
   const [viewMode, setViewMode] = useState('grid');
-  
-  const [selectedProduct, setSelectedProduct] = useState(null);
-  const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
+  const { openQuickView } = useQuickView();
   const [isLoading, setIsLoading] = useState(false);
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [cartNotification, setCartNotification] = useState(null);
@@ -96,10 +94,6 @@ const ProductCollectionInteractive = ({ initialProducts }) => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleQuickView = (product) => {
-    setSelectedProduct(product);
-    setIsQuickViewOpen(true);
-  };
 
 const handleAddToCart = (item) => {
   if (!item) return;
@@ -154,7 +148,7 @@ const handleAddToCart = (item) => {
             ) : (
               <ProductGrid
                 products={paginatedProducts}
-                onQuickView={handleQuickView}
+                onQuickView={openQuickView}
                 onAddToCart={handleAddToCart}
                 viewMode={viewMode}
               />
@@ -175,14 +169,6 @@ const handleAddToCart = (item) => {
           </div>
         </div>
       </div>
-
-      {/* Quick View */}
-      <QuickViewModal
-        product={selectedProduct}
-        isOpen={isQuickViewOpen}
-        onClose={() => setIsQuickViewOpen(false)}
-        onAddToCart={handleAddToCart}
-      />
 
       {/* Cart Toast */}
       {cartNotification && (
