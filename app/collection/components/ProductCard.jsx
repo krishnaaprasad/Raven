@@ -68,7 +68,7 @@ const primaryImage =
               e.stopPropagation();
               router.push(`/product/${product.slug}`);
             }}
-            className="font-serif text-base font-semibold text-[#1b180d] line-clamp-2 min-h-12 cursor-pointer hover:text-[#b28c34] transition">
+            className="font-serif text-base font-semibold text-[#1b180d] line-clamp-2 cursor-pointer hover:text-[#b28c34] transition">
             {product.name}
           </h3>
         </div>

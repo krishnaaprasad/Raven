@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import FilterPanel from '@/components/shoppage/FilterPanel';
 import ProductGridNavigation from '@/components/shoppage/ProductGridNavigation';
 import ProductGrid from './ProductGrid';
 import QuickViewModal from './QuickViewModal';
@@ -16,11 +15,6 @@ const ProductCollectionInteractive = ({ initialProducts }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [sortBy, setSortBy] = useState('featured');
   const [viewMode, setViewMode] = useState('grid');
-  const [filters, setFilters] = useState({
-    fragranceFamily: [],
-    brands: [],
-    priceRange: [0, 20000],
-    });
   
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
@@ -84,54 +78,6 @@ const ProductCollectionInteractive = ({ initialProducts }) => {
     },
     [filteredProducts]
   );
-  /* ---------------- FILTER LOGIC ---------------- */
-const applyFilters = useCallback(
-  (filters) => {
-    let filtered = [...products];
-
-    if (filters?.fragranceFamily?.length > 0) {
-      filtered = filtered.filter((p) =>
-        filters.fragranceFamily.includes(
-          p?.fragranceType?.toLowerCase()
-        )
-      );
-    }
-
-    if (filters?.brands?.length > 0) {
-      filtered = filtered.filter((p) =>
-        filters.brands.includes(
-          p?.brand?.toLowerCase()?.replace(/\s+/g, '-')
-        )
-      );
-    }
-
-    // Price from variants
-    filtered = filtered.filter((p) => {
-      const price = p?.variants?.[0]?.price || 0;
-      return (
-        price >= filters.priceRange[0] &&
-        price <= filters.priceRange[1]
-      );
-    });
-
-    setFilteredProducts(filtered);
-    setCurrentPage(1);
-  },
-  [products]
-);
-
-
-  /* ---------------- HANDLERS ---------------- */
-  const handleFilterChange = (f) => {
-  setFilters(f);
-  setIsLoading(true);
-  setTimeout(() => {
-    applyFilters(f);
-    setIsLoading(false);
-  }, 200);
-};
-
-
   
 
   const handleSortChange = (value) => {
@@ -189,55 +135,10 @@ const handleAddToCart = (item) => {
 
   return (
     <div className="min-h-screen bg-[#fcfbf8]">
-      <div className="max-w-[1400px] mx-auto px-6 lg:px-8 py-10">
-        <div className="flex flex-col lg:flex-row gap-10">
-          {/* Filters */}
-          <aside className="hidden lg:block w-80 shrink-0">
-        <div className="sticky top-24 h-[calc(100vh-6rem)]">
-            <FilterPanel
-            onFilterChange={handleFilterChange}
-            className="h-full"
-            />
-        </div>
-        </aside>
-
-
+      <div className="max-w-[1400px] mx-auto px-6 lg:px-8 py-3">
+        <div className="flex flex-col gap-10">
           {/* Products */}
           <div className="flex-1 min-w-0">
-            <div className="lg:hidden mb-6">
-              <FilterPanel
-                onFilterChange={handleFilterChange}
-                isMobile
-              />
-            </div>
-
-            {/* Applied Filters */}
-{(filters.fragranceFamily.length > 0 ||
-  filters.brands.length > 0) && (
-  <div className="flex flex-wrap gap-2 mb-5">
-    {filters.fragranceFamily.map((f) => (
-      <span
-        key={f}
-        className="px-3 py-1 bg-[#f3efe3] text-[#1b180d] text-xs rounded-full"
-      >
-        {f}
-      </span>
-    ))}
-    {filters.brands.map((b) => (
-      <span
-        key={b}
-        className="px-3 py-1 bg-[#f3efe3] text-[#1b180d] text-xs rounded-full"
-      >
-        {b.replace('-', ' ')}
-      </span>
-    ))}
-    <span className="px-3 py-1 bg-[#f3efe3] text-xs rounded-full">
-      ₹{filters.priceRange[0]} - ₹{filters.priceRange[1]}
-    </span>
-  </div>
-)}
-
-
             <ProductGridNavigation
                 totalProducts={filteredProducts.length}
                 currentPage={currentPage}
@@ -247,7 +148,6 @@ const handleAddToCart = (item) => {
                 onViewChange={handleViewChange}
                 loading={isLoading}
                 />
-
 
             {isLoading ? (
               <LoadingSkeleton />
@@ -303,48 +203,7 @@ const handleAddToCart = (item) => {
         </button>
       )}
 
-  {(filters.fragranceFamily.length > 0 ||
-    filters.brands.length > 0) && (
-  <div className="flex flex-wrap gap-2 mb-5">
-    {filters.fragranceFamily.map((f) => (
-      <button
-        key={f}
-        onClick={() =>
-          handleFilterChange({
-            ...filters,
-            fragranceFamily: filters.fragranceFamily.filter(
-              (x) => x !== f
-            ),
-          })
-        }
-        className="flex items-center gap-1 px-3 py-1 bg-[#f3efe3] text-[#1b180d] text-xs rounded-full hover:bg-[#e7e1cf]"
-      >
-        {f.replace('-', ' ')}
-        <span>✕</span>
-      </button>
-    ))}
-
-    {filters.brands.map((b) => (
-      <button
-        key={b}
-        onClick={() =>
-          handleFilterChange({
-            ...filters,
-            brands: filters.brands.filter((x) => x !== b),
-          })
-        }
-        className="flex items-center gap-1 px-3 py-1 bg-[#f3efe3] text-[#1b180d] text-xs rounded-full hover:bg-[#e7e1cf]"
-      >
-        {b.replace('-', ' ')}
-        <span>✕</span>
-      </button>
-    ))}
-
-    <span className="px-3 py-1 bg-[#f3efe3] text-xs rounded-full">
-      ₹{filters.priceRange[0]} - ₹{filters.priceRange[1]}
-    </span>
-  </div>
-)}
+  
 
     </div>
   );
