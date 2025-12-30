@@ -28,7 +28,7 @@ export default function AboutRaven() {
     >
       {/* Soft subtle gold radial for depth */}
       <div
-        className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[420px] h-[180px] bg-[radial-gradient(ellipse_at_center,_rgba(201,174,113,0.10)_0%,_rgba(253,246,236,0.96)_100%)] rounded-3xl blur-[38px] z-0 pointer-events-none"
+        className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[420px] h-[180px] bg-[radial-gradient(ellipse_at_center,rgba(201,174,113,0.10)_0%,rgba(253,246,236,0.96)_100%)] rounded-3xl blur-[38px] z-0 pointer-events-none"
         aria-hidden="true"
       />
       <motion.div
@@ -63,9 +63,9 @@ export default function AboutRaven() {
         </motion.h2>
         {/* Gold underline with glow */}
         <div className="relative w-20 h-1 mx-auto mb-7">
-          <div className="w-full h-full rounded-full bg-gradient-to-r from-[#B28C34]/95 via-[#F9E8A7]/90 to-[#B28C34]/80" />
+          <div className="w-full h-full rounded-full bg-linear-to-r from-[#B28C34]/95 via-[#F9E8A7]/90 to-[#B28C34]/80" />
           <div
-            className="absolute left-1/2 top-full -translate-x-1/2 mt-1 w-36 h-6 bg-[radial-gradient(ellipse_at_center,_rgba(178,140,52,0.13)_0%,_rgba(249,232,167,0.03)_80%,transparent_100%)] pointer-events-none"
+            className="absolute left-1/2 top-full -translate-x-1/2 mt-1 w-36 h-6 bg-[radial-gradient(ellipse_at_center,rgba(178,140,52,0.13)_0%,rgba(249,232,167,0.03)_80%,transparent_100%)] pointer-events-none"
             style={{ filter: 'blur(7px)' }}
             aria-hidden="true"
           />
