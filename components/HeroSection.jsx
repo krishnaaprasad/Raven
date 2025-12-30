@@ -117,7 +117,7 @@ return (
     <section
   onMouseMove={canAnimate ? handleMouseMove : undefined}
 
-  className="relative w-full min-h-screen overflow-hidden -mt-[50px] pt-0"
+  className="relative w-full min-h-screen overflow-hidden -mt-[50px] pt-4"
 >
   
   {/* ===== LOVABLE STYLE MULTI-LAYER PARALLAX BACKGROUND ===== */}
@@ -348,13 +348,13 @@ return (
   allowTouchMove={swiperConfig.allowTouchMove}
   loop={products.length > 1}
   slidesPerView={1}
-  className="relative aspect-3/4 max-w-md mx-auto rounded-2xl shadow-2xl min-h-[55vh] sm:min-h-0"
+  className="relative aspect-3/5 sm:aspect-3/4 max-w-md mx-auto rounded-2xl shadow-2xl"
 >
 
 
   {products.length === 0 && (
   <SwiperSlide>
-    <div className="relative h-full rounded-2xl bg-[#f3f1ea] animate-pulse" />
+    <div className="relative rounded-2xl bg-[#f3f1ea] animate-pulse" />
   </SwiperSlide>
 )}
   {products.map((product, index) => (
