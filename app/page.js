@@ -36,7 +36,7 @@ export default async function Home() {
     <div className="homepage-theme" >
 
       {/* HERO VIDEO */}
-      <HeroSection />
+      <HeroSection products={products.slice(0, 5)} />
       {/* SECTIONS */}
       <RavenBadge />
       {/* ⭐ PASS bestsellerIds ALSO ⭐ */}

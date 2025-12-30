@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { Cormorant_Garamond, Outfit } from "next/font/google";
+import Head from "next/head";
 import { motion } from 'framer-motion';
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay } from "swiper/modules";
@@ -23,12 +24,12 @@ const outfit = Outfit({
 });
 
 
-export default function HeroSection() {
+export default function HeroSection({ products = [] }) {
   const [isVisible, setIsVisible] = useState(false);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
 
   /* ⭐ PRODUCT SLIDER STATE */
-  const [products, setProducts] = useState([]);
+  
   const intervalRef = useRef(null);
   const [isAnimating, setIsAnimating] = useState(false);
   const touchStartX = useRef(null);
@@ -59,19 +60,6 @@ const bgConfig = {
     setIsVisible(true);
   }, []);
 
-  /* ================= FETCH PRODUCTS ================= */
-  useEffect(() => {
-    async function loadProducts() {
-      try {
-        const res = await fetch("/api/products?limit=5");
-        const data = await res.json();
-        setProducts(data || []);
-      } catch (err) {
-        console.error("Hero products error", err);
-      }
-    }
-    loadProducts();
-  }, []);
 
 
 const handleMouseMove = (e) => {
@@ -97,7 +85,26 @@ const handleMouseMove = (e) => {
     }),
   };
 
-  return (
+  useEffect(() => {
+  if (!products[0]?.images?.[0]?.original) return;
+
+  const img = new window.Image();
+  img.src = products[0].images[0].original;
+}, [products]);
+
+
+return (
+  <>
+    <Head>
+      {products[0]?.images?.[0]?.original && (
+        <link
+          rel="preload"
+          as="image"
+          href={products[0].images[0].original}
+          fetchpriority="high"
+        />
+      )}
+    </Head>
     <section
   onMouseMove={handleMouseMove}
   className="relative w-full min-h-screen overflow-hidden -mt-[50px] pt-0"
@@ -110,7 +117,8 @@ const handleMouseMove = (e) => {
     src={heroLifestyleBg}
     alt="Hero background"
     fill
-    priority
+    priority={screen !== "mobile"}   // ⭐ KEY FIX
+    fetchPriority={screen !== "mobile" ? "high" : "auto"}
     className="object-cover transition-transform duration-500 ease-out will-change-transform"
     style={{
       objectPosition: bgConfig[screen].position,
@@ -301,6 +309,7 @@ const handleMouseMove = (e) => {
             <div className="absolute -inset-4 border border-[#b28c34]/10 rounded-3xl rotate-2" />
 
             <Swiper
+            key={products.length}
   modules={[Autoplay]}
   autoplay={{
     delay: 4000,
@@ -309,9 +318,23 @@ const handleMouseMove = (e) => {
   loop
   grabCursor
   slidesPerView={1}
-  className="relative aspect-3/4 max-w-md mx-auto  rounded-2xl shadow-2xl"
+  className="
+  relative
+  aspect-3/4
+  max-w-md
+  mx-auto
+  rounded-2xl
+  shadow-2xl
+  min-h-[65vh]     // ⭐ mobile lock
+  sm:min-h-0
+"
 >
-  {products.map((product) => (
+  {products.length === 0 && (
+  <SwiperSlide>
+    <div className="relative h-full rounded-2xl bg-[#f3f1ea] animate-pulse" />
+  </SwiperSlide>
+)}
+  {products.map((product, index) => (
     <SwiperSlide key={product._id}>
       <Link href={`/product/${product.slug}`}>
         <div
@@ -327,7 +350,10 @@ const handleMouseMove = (e) => {
             fill
             sizes="(max-width: 768px) 90vw, 500px"
             className="object-cover transition-transform duration-700"
-            priority={false}
+            priority={index === 0}
+            fetchPriority={index === 0 ? "high" : "auto"}
+            decoding="async"
+            loading={index === 0 ? "eager" : "lazy"} 
           />
 
           {/* OVERLAY */}
@@ -375,6 +401,7 @@ const handleMouseMove = (e) => {
           </div>
         </div>
       </div>
-    </section>
+      </section>
+    </>
   );
 }
