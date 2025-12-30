@@ -5,10 +5,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { Cormorant_Garamond, Outfit } from "next/font/google";
-import { motion } from 'framer-motion';
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay } from "swiper/modules";
-import Head from "next/head";
+
 const cormorant = Cormorant_Garamond({
   subsets: ["latin"],
   weight: ["600"],
@@ -23,6 +22,7 @@ const outfit = Outfit({
 });
 
 
+
 export default function HeroSection({ products = [] }) {
   const [isVisible, setIsVisible] = useState(false);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
@@ -32,10 +32,28 @@ export default function HeroSection({ products = [] }) {
   const intervalRef = useRef(null);
   const [isAnimating, setIsAnimating] = useState(false);
   const touchStartX = useRef(null);
-  const heroLifestyleBg = "/hero-bg.jpg"; // place in /public
   const [screen, setScreen] = useState("desktop");
-
+  const isDesktop = screen === "desktop";
   const [canAnimate, setCanAnimate] = useState(false);
+  const heroBg =
+  screen === "desktop"
+    ? "/hero-bg.webp"
+    : "/hero-bg-mobile.webp";
+
+    const swiperConfig = isDesktop
+  ? {
+      autoplay: { delay: 4000, disableOnInteraction: false },
+      speed: 600,
+      allowTouchMove: false,
+    }
+  : {
+      autoplay: { delay: 3000, disableOnInteraction: false },
+      speed: 300,
+      allowTouchMove: true,
+    };
+
+    
+  
 
 useEffect(() => {
   const desktop =
@@ -58,13 +76,6 @@ useEffect(() => {
   window.addEventListener("resize", update);
   return () => window.removeEventListener("resize", update);
 }, []);
-
-const bgConfig = {
-  mobile: { position: "75% 55%" },
-  tablet: { position: "75% 55%" },
-  desktop: { position: "-10% 0%" },
-};
-
 
   useEffect(() => {
     setIsVisible(true);
@@ -94,51 +105,39 @@ const handleMouseMove = (e) => {
     }),
   };
 
-  useEffect(() => {
+   useEffect(() => {
   if (!products[0]?.images?.[0]?.original) return;
-
   const img = new window.Image();
   img.src = products[0].images[0].original;
 }, [products]);
 
 
+
 return (
-  <>
-    <Head>
-      {products[0]?.images?.[0]?.original && (
-        <link
-          rel="preload"
-          as="image"
-          href={products[0].images[0].original}
-          fetchpriority="high"
-        />
-      )}
-    </Head>
     <section
-  onMouseMove={(e) => {
-  if (!canAnimate) return;
-  handleMouseMove(e);
-}}
+  onMouseMove={canAnimate ? handleMouseMove : undefined}
 
   className="relative w-full min-h-screen overflow-hidden -mt-[50px] pt-0"
 >
+  
   {/* ===== LOVABLE STYLE MULTI-LAYER PARALLAX BACKGROUND ===== */}
-<div className="absolute inset-0 perspective-distant -z-10 overflow-hidden">
+  {isDesktop && (
+   <div className="absolute inset-0 perspective-distant -z-10 overflow-hidden">
   {/* Layer 1 — main lifestyle image */}
  <div className="absolute inset-0 -z-10 overflow-hidden">
   <Image
-  src={heroLifestyleBg}
+  src={heroBg}
   alt="Hero background"
   fill
-  priority={screen === "desktop"}        // only desktop eager
-  fetchPriority={screen === "desktop" ? "high" : "auto"}
+  priority
+  fetchPriority="high"
   className="object-cover"
   style={{
-    objectPosition: bgConfig[screen].position,
+    objectPosition: "-10% 0%",
     transform:
-      canAnimate && screen === "desktop"
+      canAnimate
         ? `translate3d(${mousePosition.x * 0.3}px, ${mousePosition.y * 0.3}px, 0) scale(1.08)`
-        : "scale(1.02)",  // small static scale on mobile/tablet
+        : "scale(1.02)",
   }}
 />
 
@@ -162,7 +161,7 @@ return (
 <div className="absolute inset-0 bg-linear-to-t from-[#1b180d]/30 via-transparent to-transparent" />
 
 </div>
-
+)}
 {/* Floating bokeh particles */}
 <div
   className="absolute inset-0 pointer-events-none overflow-hidden z-2 transition-transform duration-200"
@@ -184,6 +183,22 @@ return (
   {/* Overlay to keep it elegant & readable */}
   <div className="absolute inset-0 bg-linear-to-br from-[#b28c34]/30 via-[#1b180d]/20 to-[#1b180d]/40" />
 </div>
+
+{/* simple static bg for mobile / tablet */}
+{!isDesktop && (
+  <div className="absolute inset-0 -z-10">
+    <Image
+      src={heroBg}
+      alt="Hero background"
+      fill
+      className="object-cover"
+      priority={false}
+      fetchPriority="auto"
+    />
+    <div className="absolute inset-0 bg-linear-to-r from-[#1b180d]/70 via-[#1b180d]/40 to-transparent" />
+  </div>
+)}
+
 
 
         {/* GRID */}
@@ -315,25 +330,27 @@ return (
 
           {/* ================= RIGHT ================= */}
           <div
-            className={`order-1 lg:order-2 relative transition-all duration-1000 ${
-              isVisible ? "opacity-100 scale-100" : "opacity-0 scale-95"
-            }`}
+  className={`order-1 lg:order-2 relative ${
+    isVisible ? "opacity-100 scale-100" : "opacity-0 scale-95"
+  } ${
+    screen === "mobile" ? "transition-none" : "transition-all duration-1000"
+  }`}
 >
+
 
             <div className="absolute -inset-6 border border-[#b28c34]/20 rounded-3xl -rotate-3" />
             <div className="absolute -inset-4 border border-[#b28c34]/10 rounded-3xl rotate-2" />
 
             <Swiper
   modules={[Autoplay]}
-  autoplay={{
-    delay: 4000,
-    disableOnInteraction: false,
-  }}
+  autoplay={swiperConfig.autoplay}
+  speed={swiperConfig.speed}
+  allowTouchMove={swiperConfig.allowTouchMove}
   loop={products.length > 1}
   slidesPerView={1}
-  speed={600}                 // not too high
   className="relative aspect-3/4 max-w-md mx-auto rounded-2xl shadow-2xl min-h-[55vh] sm:min-h-0"
 >
+
 
   {products.length === 0 && (
   <SwiperSlide>
@@ -346,9 +363,10 @@ return (
         <div
           className="relative h-full rounded-2xl overflow-hidden border border-[#b28c34]/20 shadow-2xl cursor-pointer"
           style={{
-            transform: canAnimate
-              ? `perspective(1000px) rotateY(${mousePosition.x * 0.5}deg) rotateX(${-mousePosition.y * 0.5}deg)`
-              : "none",
+            transform:
+              isDesktop && canAnimate
+                ? `perspective(1000px) rotateY(${mousePosition.x * 0.5}deg) rotateX(${-mousePosition.y * 0.5}deg)`
+                : "translateZ(0)",
           }}
         >
           {/* IMAGE */}
@@ -358,10 +376,10 @@ return (
             fill
             sizes="(max-width: 768px) 90vw, 500px"
             className="object-cover transition-transform duration-700"
-            priority={index === 0}
-            fetchPriority={index === 0 ? "high" : "auto"}
+            priority={isDesktop && index === 0}
+            fetchPriority={isDesktop && index === 0 ? "high" : "auto"}
             decoding="async"
-            loading={index === 0 ? "eager" : "lazy"} 
+            loading={isDesktop && index === 0 ? "eager" : "lazy"}
           />
 
           {/* OVERLAY */}
@@ -410,6 +428,5 @@ return (
         </div>
       </div>
     </section>
-    </>
   );
 }
