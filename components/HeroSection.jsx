@@ -348,7 +348,7 @@ return (
   allowTouchMove={swiperConfig.allowTouchMove}
   loop={products.length > 1}
   slidesPerView={1}
-  className="relative aspect-3/5 sm:aspect-3/4 max-w-md mx-auto rounded-2xl shadow-2xl"
+  className="relative aspect-[3/4.2] sm:aspect-3/4 max-w-md mx-auto rounded-2xl shadow-2xl"
 >
 
 
