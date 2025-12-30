@@ -63,7 +63,7 @@ const bgConfig = {
   useEffect(() => {
     async function loadProducts() {
       try {
-        const res = await fetch("/api/products?limit=5", { cache: "force-cache" })
+        const res = await fetch("/api/products?limit=5");
         const data = await res.json();
         setProducts(data || []);
       } catch (err) {
@@ -113,11 +113,11 @@ const handleMouseMove = (e) => {
     priority
     className="object-cover transition-transform duration-500 ease-out will-change-transform"
     style={{
-      objectPosition: bgConfig[screen]?.position || "center",
+      objectPosition: bgConfig[screen].position,
       transform:
-        screen === "desktop"
-          ? `translate3d(${mousePosition.x * 0.3}px, ${mousePosition.y * 0.3}px, 0) scale(1.08)`
-          : "scale(1.05)", // ⭐ SAME on first paint
+        screen === "mobile"
+          ? "scale(1.05)"
+          : `translate3d(${mousePosition.x * 0.3}px, ${mousePosition.y * 0.3}px, 0) scale(1.08)`,
     }}
   />
 </div>
@@ -180,7 +180,7 @@ const handleMouseMove = (e) => {
     
 
       {/* ================= CONTENT ================= */}
-      <div className="relative z-10 mx-auto px-4 sm:px-6 lg:px-8 min-h-screen pt-2">
+      <div className="relative z-10 mx-auto px-4 sm:px-6 lg:px-8 min-h-dvh pt-2">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center min-h-screen py-13">
 
           {/* ================= LEFT ================= */}
@@ -299,51 +299,25 @@ const handleMouseMove = (e) => {
 
             <div className="absolute -inset-6 border border-[#b28c34]/20 rounded-3xl -rotate-3" />
             <div className="absolute -inset-4 border border-[#b28c34]/10 rounded-3xl rotate-2" />
-            
-            <div className="
-  relative
-  aspect-3/4
-  max-w-md
-  mx-auto
-  rounded-2xl
-  min-h-[70vh]
-  sm:min-h-0
-">
-  {products.length === 0 && (
-    <div className="absolute inset-0 bg-[#f3f1ea] rounded-2xl animate-pulse" />
-  )}
+
             <Swiper
-            key="hero-swiper"
-              modules={[Autoplay]}
-              autoplay={{
-                delay: 4000,
-                disableOnInteraction: false,
-              }}
-              loop
-              grabCursor
-              slidesPerView={1}
-              className="
-                relative
-                aspect-3/4
-                sm:aspect-3/4
-                max-w-md
-                mx-auto
-                rounded-2xl
-                shadow-2xl
-                min-h-[70vh]     // ⭐ mobile height boost
-                sm:min-h-0
-              "
-            >
+  modules={[Autoplay]}
+  autoplay={{
+    delay: 4000,
+    disableOnInteraction: false,
+  }}
+  loop
+  grabCursor
+  slidesPerView={1}
+  className="relative aspect-3/4 max-w-md mx-auto  rounded-2xl shadow-2xl"
+>
   {products.map((product) => (
     <SwiperSlide key={product._id}>
       <Link href={`/product/${product.slug}`}>
         <div
           className="relative h-full rounded-2xl overflow-hidden border border-[#b28c34]/20 shadow-2xl cursor-pointer"
           style={{
-            transform:
-              screen === "desktop"
-                ? `perspective(1000px) rotateY(${mousePosition.x * 0.4}deg) rotateX(${-mousePosition.y * 0.4}deg)`
-                : "none", // ⭐ disable on mobile/tablet
+            transform: `perspective(1000px) rotateY(${mousePosition.x * 0.5}deg) rotateX(${-mousePosition.y * 0.5}deg)`,
           }}
         >
           {/* IMAGE */}
@@ -351,10 +325,9 @@ const handleMouseMove = (e) => {
             src={product.images?.[0]?.original || "/placeholder.jpg"}
             alt={product.name}
             fill
-            sizes="(max-width: 768px) 95vw, 500px"
+            sizes="(max-width: 768px) 90vw, 500px"
             className="object-cover transition-transform duration-700"
-            priority={true}              // ⭐ IMPORTANT
-            fetchPriority="high"         // ⭐ LCP hint
+            priority={false}
           />
 
           {/* OVERLAY */}
@@ -399,7 +372,6 @@ const handleMouseMove = (e) => {
           <div className="w-1.5 h-3 bg-[#b28c34] rounded-full animate-bounce" />
         </div>
       </div>
-            </div>
           </div>
         </div>
       </div>
