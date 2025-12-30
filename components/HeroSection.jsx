@@ -36,6 +36,17 @@ export default function HeroSection({ products = [] }) {
   const heroLifestyleBg = "/hero-bg.jpg"; // place in /public
   const [screen, setScreen] = useState("desktop");
 
+  const [canAnimate, setCanAnimate] = useState(false);
+
+useEffect(() => {
+  const desktop =
+    window.matchMedia("(min-width: 1024px)").matches &&
+    !("ontouchstart" in window);
+
+  setCanAnimate(desktop);
+}, []);
+
+
 useEffect(() => {
   const update = () => {
     const w = window.innerWidth;
@@ -50,7 +61,7 @@ useEffect(() => {
 }, []);
 
 const bgConfig = {
-  mobile: { position: "100% 105%" },
+  mobile: { position: "75% 55%" },
   tablet: { position: "75% 55%" },
   desktop: { position: "-10% 0%" },
 };
@@ -59,7 +70,6 @@ const bgConfig = {
   useEffect(() => {
     setIsVisible(true);
   }, []);
-
 
 
 const handleMouseMove = (e) => {
@@ -106,7 +116,11 @@ return (
       )}
     </Head>
     <section
-  onMouseMove={handleMouseMove}
+  onMouseMove={(e) => {
+  if (!canAnimate) return;
+  handleMouseMove(e);
+}}
+
   className="relative w-full min-h-screen overflow-hidden -mt-[50px] pt-0"
 >
   {/* ===== LOVABLE STYLE MULTI-LAYER PARALLAX BACKGROUND ===== */}
@@ -122,10 +136,9 @@ return (
     className="object-cover transition-transform duration-500 ease-out will-change-transform"
     style={{
       objectPosition: bgConfig[screen].position,
-      transform:
-        screen === "mobile"
-          ? "scale(1.05)"
-          : `translate3d(${mousePosition.x * 0.3}px, ${mousePosition.y * 0.3}px, 0) scale(1.08)`,
+      transform: canAnimate
+        ? `translate3d(${mousePosition.x * 0.3}px, ${mousePosition.y * 0.3}px, 0) scale(1.08)`
+        : "scale(1.05)",
     }}
   />
 </div>
@@ -309,14 +322,13 @@ return (
             <div className="absolute -inset-4 border border-[#b28c34]/10 rounded-3xl rotate-2" />
 
             <Swiper
-            key={products.length}
   modules={[Autoplay]}
   autoplay={{
     delay: 4000,
     disableOnInteraction: false,
   }}
   loop
-  grabCursor
+  grabCursor={canAnimate}
   slidesPerView={1}
   className="
   relative
@@ -325,7 +337,7 @@ return (
   mx-auto
   rounded-2xl
   shadow-2xl
-  min-h-[65vh]     // ⭐ mobile lock
+  min-h-[60vh]     // ⭐ mobile lock
   sm:min-h-0
 "
 >
@@ -340,7 +352,9 @@ return (
         <div
           className="relative h-full rounded-2xl overflow-hidden border border-[#b28c34]/20 shadow-2xl cursor-pointer"
           style={{
-            transform: `perspective(1000px) rotateY(${mousePosition.x * 0.5}deg) rotateX(${-mousePosition.y * 0.5}deg)`,
+            transform: canAnimate
+              ? `perspective(1000px) rotateY(${mousePosition.x * 0.5}deg) rotateX(${-mousePosition.y * 0.5}deg)`
+              : "none",
           }}
         >
           {/* IMAGE */}
