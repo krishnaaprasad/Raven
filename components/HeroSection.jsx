@@ -5,11 +5,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { Cormorant_Garamond, Outfit } from "next/font/google";
-import Head from "next/head";
 import { motion } from 'framer-motion';
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay } from "swiper/modules";
-
+import Head from "next/head";
 const cormorant = Cormorant_Garamond({
   subsets: ["latin"],
   weight: ["600"],
@@ -128,19 +127,21 @@ return (
   {/* Layer 1 — main lifestyle image */}
  <div className="absolute inset-0 -z-10 overflow-hidden">
   <Image
-    src={heroLifestyleBg}
-    alt="Hero background"
-    fill
-    priority={screen !== "mobile"}   // ⭐ KEY FIX
-    fetchPriority={screen !== "mobile" ? "high" : "auto"}
-    className="object-cover transition-transform duration-500 ease-out will-change-transform"
-    style={{
-      objectPosition: bgConfig[screen].position,
-      transform: canAnimate
+  src={heroLifestyleBg}
+  alt="Hero background"
+  fill
+  priority={screen === "desktop"}        // only desktop eager
+  fetchPriority={screen === "desktop" ? "high" : "auto"}
+  className="object-cover"
+  style={{
+    objectPosition: bgConfig[screen].position,
+    transform:
+      canAnimate && screen === "desktop"
         ? `translate3d(${mousePosition.x * 0.3}px, ${mousePosition.y * 0.3}px, 0) scale(1.08)`
-        : "scale(1.05)",
-    }}
-  />
+        : "scale(1.02)",  // small static scale on mobile/tablet
+  }}
+/>
+
 </div>
 
 
@@ -206,10 +207,11 @@ return (
 
           {/* ================= LEFT ================= */}
           <div
-            className={`order-2 lg:order-1 text-center lg:text-left transition-all duration-1000
-           p-6 sm:p-10 lg:p-0
-            ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"}`}
+            className={`order-2 lg:order-1 text-center lg:text-left p-6 sm:p-10 lg:p-0
+            ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}
+            ${screen === "mobile" ? "transition-none" : "transition-all duration-1000"}`}
           >
+
             {/* TAG */}
             <div
               className={`inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#f59e0b]/10 border border-[#f59e0b]/20 mb-6 transition-all duration-700 delay-200 ${
@@ -309,7 +311,7 @@ return (
                 </div>
               ))}
             </div>
-          </div>
+            </div>
 
           {/* ================= RIGHT ================= */}
           <div
@@ -327,20 +329,12 @@ return (
     delay: 4000,
     disableOnInteraction: false,
   }}
-  loop
-  grabCursor={canAnimate}
+  loop={products.length > 1}
   slidesPerView={1}
-  className="
-  relative
-  aspect-3/4
-  max-w-md
-  mx-auto
-  rounded-2xl
-  shadow-2xl
-  min-h-[60vh]     // ⭐ mobile lock
-  sm:min-h-0
-"
+  speed={600}                 // not too high
+  className="relative aspect-3/4 max-w-md mx-auto rounded-2xl shadow-2xl min-h-[55vh] sm:min-h-0"
 >
+
   {products.length === 0 && (
   <SwiperSlide>
     <div className="relative h-full rounded-2xl bg-[#f3f1ea] animate-pulse" />
@@ -415,7 +409,7 @@ return (
           </div>
         </div>
       </div>
-      </section>
+    </section>
     </>
   );
 }
