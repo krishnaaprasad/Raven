@@ -113,7 +113,7 @@ export default function HeroSection() {
         >
           Fragrance with intention. Strength held back. For those who understand
           that true presence doesn’t need to announce itself -{" "}
-          <span className="text-[#b28c34] font-medium">it’s felt</span>, not
+          <span className="text-[#d39b17] font-medium">it’s felt</span>, not
           performed.
         </motion.p>
 
@@ -126,7 +126,7 @@ export default function HeroSection() {
         >
           <Link
             href="/collection"
-            className="group inline-flex items-center gap-3 px-10 py-4 rounded-full border border-[#b28c34]/60 text-white uppercase tracking-[0.25em] text-xs sm:text-sm hover:bg-[#b28c34]/10 transition"
+            className="group inline-flex items-center gap-3 px-10 py-4  text-white uppercase tracking-[0.25em] text-xs sm:text-xs transition"
           >
             Explore Collection
             <ArrowRight className="w-4 h-4 text-[#b28c34] group-hover:translate-x-1 transition" />
