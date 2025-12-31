@@ -103,7 +103,8 @@ export default function HeroSection() {
           transition={{ duration: 1, delay: 0.3 }}
           className={`max-w-2xl mx-auto text-white/85 text-sm sm:text-base md:text-lg leading-relaxed px-2 ${outfit.className}`}
         >
-          Raven Fragrance Crafted for those who prefer restraint over excess. Presence that is felt, not performed.
+          Raven Fragrance Crafted for those who prefer restraint over excess. <br/>
+          Presence that is felt, not performed.
         </motion.p>
 
         {/* CTA */}
