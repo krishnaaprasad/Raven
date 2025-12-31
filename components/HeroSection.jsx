@@ -103,10 +103,7 @@ export default function HeroSection() {
           transition={{ duration: 1, delay: 0.3 }}
           className={`max-w-2xl mx-auto text-white/85 text-sm sm:text-base md:text-lg leading-relaxed px-2 ${outfit.className}`}
         >
-          Fragrance with intention. Strength held back. For those who understand
-          that true presence doesn’t need to announce itself -{" "}
-          <span className="text-white/85 font-medium">it’s felt</span>, not
-          performed.
+          Raven Fragrance Crafted for those who prefer restraint over excess. Presence that is felt, not performed.
         </motion.p>
 
         {/* CTA */}
