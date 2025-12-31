@@ -105,7 +105,7 @@ export default function HeroSection() {
         >
           Fragrance with intention. Strength held back. For those who understand
           that true presence doesn’t need to announce itself -{" "}
-          <span className="text-[#b63939] font-medium">it’s felt</span>, not
+          <span className="text-white/85 font-medium">it’s felt</span>, not
           performed.
         </motion.p>
 
