@@ -44,7 +44,7 @@ export default function HeroSection() {
   return (
     <section
   onMouseMove={onMouseMove}
-  className="relative min-h-screen overflow-hidden flex items-center justify-center -mt-12"
+  className="relative min-h-screen overflow-hidden pb-20 sm:pb-28 flex items-center justify-center -mt-12"
 >
 
       {/* ===== BACKGROUND IMAGE ===== */}
@@ -93,7 +93,7 @@ export default function HeroSection() {
           blur-2xl
         " />
       </div>
-      <div className="relative z-10 max-w-5xl bottom-6 mx-auto text-center">
+      <div className="relative z-10 max-w-5xl mx-auto text-center">
         {/* Title */}
         <motion.h1
           initial={{ opacity: 0, y: 30 }}
@@ -135,7 +135,7 @@ export default function HeroSection() {
       </div>
 
       {/* ===== SCROLL INDICATOR ===== */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2">
+      <div className="absolute bottom-12 sm:bottom-15 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2">
         <span className={`text-white/50 text-[10px] tracking-[0.3em] ${outfit.className}`}>
           SCROLL
         </span>
