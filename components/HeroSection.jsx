@@ -91,21 +91,24 @@ export default function HeroSection() {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: mounted ? 1 : 0, y: mounted ? 0 : 30 }}
           transition={{ duration: 1 }}
-          className={`text-white text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl leading-tight mb-6 ${cormorant.className}`}
+          className={`text-[#eaeaea] text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl leading-tight mb-6 ${cormorant.className}`}
         >
           Presence Over Noise
         </motion.h1>
 
         {/* Description */}
-        <motion.p
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: mounted ? 1 : 0, y: mounted ? 0 : 20 }}
-          transition={{ duration: 1, delay: 0.3 }}
-          className={`max-w-2xl mx-auto text-white/85 text-sm sm:text-base md:text-lg leading-relaxed px-2 ${outfit.className}`}
-        >
-          Raven Fragrance Crafted for those who prefer restraint over excess. <br/>
-          Presence that is felt, not performed.
-        </motion.p>
+<motion.p
+  initial={{ opacity: 0, y: 20 }}
+  animate={{ opacity: mounted ? 1 : 0, y: mounted ? 0 : 20 }}
+  transition={{ duration: 1, delay: 0.3 }}
+  className={`max-w-2xl mx-auto text-white/85 
+              text-sm sm:text-base md:text-lg 
+              leading-relaxed px-2 ${outfit.className}`}
+>
+  Raven Fragrance crafted for those who prefer restraint over excess.
+  <span className="hidden sm:inline"><br /></span>
+  Presence that is felt, not performed.
+</motion.p>
 
         {/* CTA */}
         <motion.div
@@ -116,10 +119,10 @@ export default function HeroSection() {
         >
           <Link
             href="/collection"
-            className="group inline-flex items-center gap-3 px-10 py-4  text-white uppercase tracking-[0.25em] text-xs sm:text-xs transition"
+            className="group inline-flex items-center gap-3 px-10 py-4 mt-12 sm:mt-16 text-[#EAEAEA] uppercase tracking-[0.25em] text-xs sm:text-sm transition"
           >
-            The Trio Collection
-            <ArrowRight className="w-4 h-4 text-[#ffffff] group-hover:translate-x-1 transition" />
+            Three Signatures
+            <ArrowRight className="w-4 h-4 text-[#EAEAEA] group-hover:translate-x-1 transition" />
           </Link>
         </motion.div>
       </div>
