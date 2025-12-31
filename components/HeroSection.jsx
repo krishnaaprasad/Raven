@@ -69,15 +69,7 @@ export default function HeroSection() {
       
     
       
-      {/* ===== GOLD DUST GLOW ===== */}
-      <motion.div
-        className="absolute right-[-10%] top-[20%] w-[600px] h-[600px] rounded-full bg-[radial-gradient(circle,rgba(178,140,52,0.25),transparent_60%)] blur-3xl"
-        animate={{
-          x: isDesktop ? mouse.x * -0.5 : 0,
-          y: isDesktop ? mouse.y * -0.5 : 0,
-        }}
-        transition={{ duration: 0.4 }}
-      />
+     
 
       {/* ===== CONTENT ===== */}
             <div className="absolute inset-0 z-1 pointer-events-none">
@@ -113,7 +105,7 @@ export default function HeroSection() {
         >
           Fragrance with intention. Strength held back. For those who understand
           that true presence doesn’t need to announce itself -{" "}
-          <span className="text-[#d39b17] font-medium">it’s felt</span>, not
+          <span className="text-[#b63939] font-medium">it’s felt</span>, not
           performed.
         </motion.p>
 
@@ -129,7 +121,7 @@ export default function HeroSection() {
             className="group inline-flex items-center gap-3 px-10 py-4  text-white uppercase tracking-[0.25em] text-xs sm:text-xs transition"
           >
             Explore Collection
-            <ArrowRight className="w-4 h-4 text-[#b28c34] group-hover:translate-x-1 transition" />
+            <ArrowRight className="w-4 h-4 text-[#ffffff] group-hover:translate-x-1 transition" />
           </Link>
         </motion.div>
       </div>
@@ -140,7 +132,7 @@ export default function HeroSection() {
           SCROLL
         </span>
         <div className="w-5 h-8 border border-white/30 rounded-full flex justify-center pt-2">
-          <div className="w-1 h-2 bg-[#b28c34] rounded-full animate-bounce" />
+          <div className="w-1 h-2 bg-[#ffffff] rounded-full animate-bounce" />
         </div>
       </div>
     </section>
