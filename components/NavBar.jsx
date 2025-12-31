@@ -103,8 +103,8 @@ useEffect(() => {
   return (
     <>
    <nav
-  className={`fixed left-0 right-0 z-[1000] transition-all duration-500 ease-out
-    ${isHome && !pastMarquee ? "top-[40px]" : "top-0"}
+  className={`fixed left-0 right-0 z-1000 transition-all duration-500 ease-out
+    ${isHome && !pastMarquee ? "top-10" : "top-0"}
     ${
       showSolid
         ? "bg-[#fcfbf8]/95 backdrop-blur-md border-b border-[#e7e1cf] shadow-[0_2px_10px_rgba(0,0,0,0.06)]"
