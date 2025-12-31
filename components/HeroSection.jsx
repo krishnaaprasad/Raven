@@ -126,7 +126,7 @@ export default function HeroSection() {
         </motion.div>
       </div>
 
-      {/* ===== SCROLL INDICATOR ===== */}
+      {/* ===== SCROLL INDICATOR =====
       <div className="absolute bottom-12 sm:bottom-15 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2">
         <span className={`text-white/50 text-[10px] tracking-[0.3em] ${outfit.className}`}>
           SCROLL
@@ -134,7 +134,7 @@ export default function HeroSection() {
         <div className="w-5 h-8 border border-white/30 rounded-full flex justify-center pt-2">
           <div className="w-1 h-2 bg-[#ffffff] rounded-full animate-bounce" />
         </div>
-      </div>
+      </div> */}
     </section>
   );
 }
