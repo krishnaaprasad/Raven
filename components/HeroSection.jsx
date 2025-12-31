@@ -80,6 +80,19 @@ export default function HeroSection() {
       />
 
       {/* ===== CONTENT ===== */}
+            <div className="absolute inset-0 z-1 pointer-events-none">
+        <div className="
+          absolute
+          top-1/2 left-1/2
+          -translate-x-1/2 -translate-y-1/2
+          w-[120%] h-[60%]
+          bg-linear-to-b
+          from-black/40
+          via-black/25
+          to-transparent
+          blur-2xl
+        " />
+      </div>
       <div className="relative z-10 max-w-5xl bottom-6 mx-auto text-center">
         {/* Title */}
         <motion.h1
