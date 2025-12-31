@@ -105,9 +105,9 @@ export default function HeroSection() {
               text-sm sm:text-base md:text-lg 
               leading-relaxed px-2 ${outfit.className}`}
 >
-  Raven Fragrance crafted for those who prefer restraint over excess.
+  Raven Fragrance crafted for those who prefer restraint over excess. 
   <span className="hidden sm:inline"><br /></span>
-  Presence that is felt, not performed.
+  {" "} Presence that is felt, not performed.
 </motion.p>
 
         {/* CTA */}
