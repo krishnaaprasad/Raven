@@ -101,7 +101,7 @@ export default function HeroSection() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: mounted ? 1 : 0, y: mounted ? 0 : 20 }}
           transition={{ duration: 1, delay: 0.3 }}
-          className={`max-w-2xl mx-auto text-white/85 text-sm sm:text-base md:text-lg leading-relaxed ${outfit.className}`}
+          className={`max-w-2xl mx-auto text-white/85 text-sm sm:text-base md:text-lg leading-relaxed px-2 ${outfit.className}`}
         >
           Fragrance with intention. Strength held back. For those who understand
           that true presence doesn’t need to announce itself -{" "}
