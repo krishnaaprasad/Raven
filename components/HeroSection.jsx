@@ -120,7 +120,7 @@ export default function HeroSection() {
             href="/collection"
             className="group inline-flex items-center gap-3 px-10 py-4  text-white uppercase tracking-[0.25em] text-xs sm:text-xs transition"
           >
-            Explore Collection
+            The Trio Collection
             <ArrowRight className="w-4 h-4 text-[#ffffff] group-hover:translate-x-1 transition" />
           </Link>
         </motion.div>
