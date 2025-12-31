@@ -44,7 +44,7 @@ export default function HeroSection() {
   return (
     <section
   onMouseMove={onMouseMove}
-  className="relative min-h-screen overflow-hidden pb-20 sm:pb-28 flex items-center justify-center -mt-12"
+  className="relative min-h-screen overflow-hidden  flex items-center justify-center -mt-12"
 >
 
       {/* ===== BACKGROUND IMAGE ===== */}
