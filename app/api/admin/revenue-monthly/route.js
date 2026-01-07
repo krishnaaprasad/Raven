@@ -9,46 +9,43 @@ export async function GET() {
     const result = await Order.aggregate([
       {
         $match: {
-          payment_status: "PAID",   // FIXED
+          payment_status: "PAID",
           deleted: { $ne: true },
         },
       },
       {
         $group: {
-          _id: { $month: "$createdAt" },
+          _id: {
+            year: { $year: "$createdAt" },
+            month: { $month: "$createdAt" },
+          },
           revenue: { $sum: "$totalAmount" },
           orders: { $sum: 1 },
         },
       },
-      { $sort: { "_id": 1 } },
+      {
+        $project: {
+          _id: 0,
+          year: "$_id.year",
+          monthIndex: "$_id.month",
+          revenue: 1,
+          orders: 1,
+        },
+      },
+      {
+        $sort: {
+          year: 1,
+          monthIndex: 1,
+        },
+      },
     ]);
 
-    const monthNames = [
-      "",
-      "January",
-      "February",
-      "March",
-      "April",
-      "May",
-      "June",
-      "July",
-      "August",
-      "September",
-      "October",
-      "November",
-      "December",
-    ];
-
-    const formatted = result.map((r) => ({
-      month: monthNames[r._id],
-      revenue: r.revenue,
-      orders: r.orders,
-      monthIndex: r._id,
-    }));
-
-    return NextResponse.json({ data: formatted });
+    return NextResponse.json({ data: result });
   } catch (err) {
     console.error("Revenue Monthly API Error:", err);
-    return NextResponse.json({ error: "Failed to load monthly revenue" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to load monthly revenue" },
+      { status: 500 }
+    );
   }
 }

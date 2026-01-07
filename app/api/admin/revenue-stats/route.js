@@ -8,17 +8,18 @@ export async function GET(req) {
     await connectToDatabase();
 
     const { searchParams } = new URL(req.url);
-    const month = searchParams.get("month");
-    const year = new Date().getFullYear();
+    const month = Number(searchParams.get("month"));
+    const year = Number(searchParams.get("year"));
 
-    if (!month) {
-      return NextResponse.json({ error: "month param required" }, { status: 400 });
+    if (!month || !year) {
+      return NextResponse.json(
+        { error: "month and year params required" },
+        { status: 400 }
+      );
     }
 
-    const m = Number(month);
-
-    const startDate = new Date(year, m - 1, 1);
-    const endDate = new Date(year, m, 0, 23, 59, 59); // last day of that month
+    const startDate = new Date(year, month - 1, 1);
+    const endDate = new Date(year, month, 0, 23, 59, 59);
 
     const orders = await Order.aggregate([
       {

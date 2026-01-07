@@ -5,8 +5,10 @@ import { useEffect, useState } from "react";
 export default function RevenueChart() {
   const [monthlyData, setMonthlyData] = useState([]);
   const [dailyData, setDailyData] = useState([]);
-  const [selectedMonth, setSelectedMonth] = useState(null);
+  const [selectedMonth, setSelectedMonth] = useState(null); // { monthIndex, year }
   const [hover, setHover] = useState(null);
+  const monthIndex = selectedMonth ? selectedMonth.monthIndex : null;
+  const year = selectedMonth ? selectedMonth.year : null;
 
   useEffect(() => {
     loadMonthly();
@@ -16,15 +18,23 @@ export default function RevenueChart() {
     try {
       const res = await fetch("/api/admin/revenue-monthly");
       const json = await res.json();
-      setMonthlyData(json.data || []);
+
+      const sorted = (json.data || []).sort((a, b) => {
+        if (a.year !== b.year) return a.year - b.year;
+        return a.monthIndex - b.monthIndex;
+      });
+
+      setMonthlyData(sorted);
     } catch (err) {
       console.error("Monthly revenue API error:", err);
     }
   }
 
-  async function loadDaily(monthIndex) {
+  async function loadDaily(monthIndex, year) {
     try {
-      const res = await fetch(`/api/admin/revenue-stats?month=${monthIndex}`);
+      const res = await fetch(
+  `/api/admin/revenue-stats?month=${monthIndex}&year=${year}`
+);
       const json = await res.json();
       setDailyData(json.data || []);
       setSelectedMonth(monthIndex);
@@ -43,7 +53,7 @@ export default function RevenueChart() {
       <div className="flex justify-between items-center mb-4">
         <p className="text-lg font-serif text-[#1b180d]">
           {selectedMonth
-            ? `Revenue for ${monthName(selectedMonth)}`
+            ? `Revenue for ${monthName(selectedMonth.monthIndex)} ${selectedMonth.year}`
             : "Revenue by Month"}
         </p>
 
@@ -69,7 +79,7 @@ export default function RevenueChart() {
               return (
                 <g
                   key={i}
-                  onClick={() => loadDaily(m.monthIndex)}
+                  onClick={() => loadDaily(m.monthIndex, m.year)}
                   onMouseEnter={() => setHover({ index: i })}
                   onMouseLeave={() => setHover(null)}
                   style={{ cursor: "pointer" }}
@@ -90,7 +100,7 @@ export default function RevenueChart() {
                     fontSize="12"
                     fill="#6b6654"
                   >
-                    {(m.month || "").substring(0, 3)}
+                    {`${monthShort(m.monthIndex)} ${String(m.year).slice(-2)}`}
                   </text>
 
                   {hover?.index === i && (
@@ -184,3 +194,12 @@ function monthName(num) {
     "July","August","September","October","November","December",
   ][num];
 }
+
+function monthShort(num) {
+  return [
+    "",
+    "Jan","Feb","Mar","Apr","May","Jun",
+    "Jul","Aug","Sep","Oct","Nov","Dec",
+  ][num];
+}
+
