@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import connectToDatabase from "@/lib/mongodb";
 import Product from "@/models/Product";
 
@@ -11,7 +13,8 @@ export async function GET(req) {
     const products = await Product.find({ deleted: { $ne: true } })
       .sort({ createdAt: -1 }) // latest first
       .limit(limit)
-      .select("slug name images rating reviewCount variants");
+      .select("slug name images rating reviewCount variants")
+      .lean();
 
     return Response.json(products);
   } catch (error) {

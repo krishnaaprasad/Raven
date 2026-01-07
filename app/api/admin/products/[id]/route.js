@@ -2,6 +2,7 @@
 import { NextResponse } from "next/server";
 import connectToDatabase from "@/lib/mongodb";
 import Product from "@/models/Product";
+import { revalidatePath } from "next/cache";
 
 // GET /api/admin/products/[id]  → single product for Edit page
 export async function GET(req, { params }) {
@@ -51,6 +52,10 @@ export async function PATCH(req, { params }) {
     ) {
       product.deleted = !!body.deleted;
       await product.save();
+
+      revalidatePath("/");
+      revalidatePath("/shop");
+      revalidatePath(`/product/${product.slug}`);
 
       return NextResponse.json({
         success: true,

@@ -18,7 +18,7 @@ export default async function Home() {
   await connectToDatabase();
 
   // ✅ Fetch products dynamically
-  const rawProducts = await Product.find({ deleted: false }).lean();
+  const rawProducts = await Product.find({ deleted: { $ne: true } }).lean();
 
   // Convert ObjectId + dates → strings (Next.js requirement)
   const products = JSON.parse(JSON.stringify(rawProducts));
