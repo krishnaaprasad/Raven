@@ -3,6 +3,7 @@
 import { NextResponse } from "next/server";
 import connectToDatabase from "@/lib/mongodb";
 import { Order } from "@/models/Order";
+import User from "@/models/User";
 
 
 export async function GET(request) {
@@ -62,7 +63,11 @@ export async function GET(request) {
     const total = await Order.countDocuments(filter);
 
     const orders = await Order.find(filter)
-      .populate("userId", "isGuest")   // <-- ADDED
+      .populate({
+        path: "userId",
+        model: "User",
+        select: "isGuest",
+      })
       .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
       .limit(limit)
