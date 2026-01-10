@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import Marquee from "react-fast-marquee";
 import ScentStorySection from "@/components/ScentStorySection";
 import AboutRaven from '@/components/AboutRaven';

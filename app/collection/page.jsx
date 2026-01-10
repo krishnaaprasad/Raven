@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import SearchComponent from '@/components/shoppage/SearchComponent';
 import ProductCollectionInteractive from './components/ProductCollectionInteractive';
 import connectToDatabase from '@/lib/mongodb';
