@@ -1,82 +1,131 @@
 "use client";
 
-import { Leaf, Sparkles, Star } from "lucide-react";
-import { Cormorant_Garamond } from 'next/font/google';
+import { useState } from "react";
 
-const cormorantGaramond = Cormorant_Garamond({
-  subsets: ['latin'],
-  weight: ['400', '700'],
-  display: 'swap',
-})
-
-const features = [
-  {
-    icon: Leaf,
-    title: "NATURE INSPIRED",
-    description: "Botanical blends crafted from earth's finest notes.",
-  },
-  {
-    icon: Sparkles,
-    title: "NO HARSH ADDITIVES",
-    description: "Free from sulfates, parabens, and synthetics.",
-  },
-  {
-    icon: Star,
-    title: "GLOW WITH GRACE",
-    description: "Fragrance that speaks softly but lingers boldly.",
-  },
+const badges = [
+  { title: "EDP", subtitle: "Eau De Parfum", icon: droplet() },
+  { title: "High Quality", subtitle: "Fragrance", icon: award() },
+  { title: "Small Batch", subtitle: "Crafted", icon: batch() },
+  { title: "Secure", subtitle: "Payment", icon: lock() },
+  { title: "Cruelty Free", subtitle: "Ethical Choice", icon: heart() },
+  { title: "No Harsh", subtitle: "Additives", icon: ban() },
+  { title: "Trusted", subtitle: "Delivery", icon: truck() },
 ];
 
-export default function RavenBadge() {
+export default function TrustBadges() {
+  const [paused, setPaused] = useState(false);
+
   return (
     <section
-      // Lovable background: --background: 40 30% 97%;
-      className="py-5 sm:py-5 md:py-16 lg:py-13 bg-[hsl(40_30%_97%)]"
+      className="relative bg-white py-10 sm:py-12 overflow-hidden"
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
     >
-      <div className=" mx-auto px-4 sm:px-6">
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-4 md:gap-8 lg:gap-12">
-          {features.map((feature, index) => {
-            const Icon = feature.icon;
+      {/* Fade edges */}
+      <div className="absolute left-0 top-0 bottom-0 w-16 sm:w-24 bg-linear-to-r from-white to-transparent z-10" />
+      <div className="absolute right-0 top-0 bottom-0 w-16 sm:w-24 bg-linear-to-l from-white to-transparent z-10" />
 
-            return (
-              <div
-                key={index}
-                className="flex flex-col items-center text-center group p-4 sm:p-5 md:p-6"
-              >
-                {/* Icon with dashed border */}
-                <div className="relative mb-4 sm:mb-5 md:mb-6">
-                  <div
-                    // border-gold/40 → hsl(32 65% 45% / 0.4)
-                    className="w-16 h-16 sm:w-18 sm:h-18 md:w-20 md:h-20 rounded-full border-2 border-dashed border-[hsl(32_65%_45%/_0.4)] flex items-center justify-center group-hover:border-[hsl(32_65%_45%)] transition-colors duration-300"
-                  >
-                    <Icon
-                      // text-gold → hsl(32 65% 45%)
-                      className="w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 text-[hsl(32_65%_45%)]"
-                      strokeWidth={1.5}
-                    />
-                  </div>
-                </div>
-
-                {/* Title */}
-                <h3
-                  // text-foreground → hsl(30 15% 15%)
-                  className="cormorantGaramond.className text-base sm:text-lg md:text-xl font-semibold mb-2 text-[hsl(30_15%_15%)] uppercase tracking-[0.18em]"
-                >
-                  {feature.title}
-                </h3>
-
-                {/* Description */}
-                <p
-                  // text-muted-foreground → hsl(30 10% 45%)
-                  className="outfit.className text-[hsl(30_10%_45%)] text-xs sm:text-sm leading-relaxed max-w-[220px] sm:max-w-none"
-                >
-                  {feature.description}
-                </p>
+      {/* Slider viewport */}
+      <div className="overflow-hidden">
+        <div
+          className="flex w-max"
+          style={{
+            animation: `marquee 35s linear infinite`,
+            animationPlayState: paused ? "paused" : "running",
+          }}
+        >
+          {[...badges, ...badges].map((b, i) => (
+            <div
+              key={i}
+              className="flex flex-col items-center text-center mx-6 sm:mx-10 min-w-[120px] sm:min-w-40"
+            >
+              <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-full border border-[#eee] flex items-center justify-center text-[#111] mb-3 sm:mb-5 hover:bg-[#fafafa] transition">
+                {b.icon}
               </div>
-            );
-          })}
+
+              <div className="font-serif text-[10px] sm:text-xs tracking-[0.25em] uppercase text-[#111]">
+                {b.title}
+              </div>
+              <div className="font-serif text-[10px] sm:text-xs tracking-[0.25em] uppercase text-[#666]">
+                {b.subtitle}
+              </div>
+            </div>
+          ))}
         </div>
       </div>
+
+      {/* Local keyframes (guaranteed to work) */}
+      <style>{`
+        @keyframes marquee {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
+      `}</style>
     </section>
+  );
+}
+
+/* ---------- ICONS ---------- */
+
+function droplet() {
+  return (
+    <svg viewBox="0 0 24 24" className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" strokeWidth="1.2">
+      <path d="M12 2 C12 2 6 10 6 14a6 6 0 0 0 12 0C18 10 12 2 12 2Z" />
+    </svg>
+  );
+}
+
+function award() {
+  return (
+    <svg viewBox="0 0 24 24" className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" strokeWidth="1.2">
+      <circle cx="12" cy="8" r="5" />
+      <path d="M8 13l-2 9 6-4 6 4-2-9" />
+    </svg>
+  );
+}
+
+function batch() {
+  return (
+    <svg viewBox="0 0 24 24" className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" strokeWidth="1.2">
+      <rect x="4" y="4" width="16" height="16" rx="2" />
+      <path d="M8 9h8M8 13h8M8 17h5" />
+    </svg>
+  );
+}
+
+function lock() {
+  return (
+    <svg viewBox="0 0 24 24" className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" strokeWidth="1.2">
+      <rect x="5" y="11" width="14" height="9" rx="2" />
+      <path d="M8 11V7a4 4 0 1 1 8 0v4" />
+    </svg>
+  );
+}
+
+function heart() {
+  return (
+    <svg viewBox="0 0 24 24" className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" strokeWidth="1.2">
+      <path d="M12 21s-7-4.5-7-10a4 4 0 0 1 7-2 4 4 0 0 1 7 2c0 5.5-7 10-7 10Z" />
+    </svg>
+  );
+}
+
+function ban() {
+  return (
+    <svg viewBox="0 0 24 24" className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" strokeWidth="1.2">
+      <circle cx="12" cy="12" r="8" />
+      <path d="M5 5l14 14" />
+    </svg>
+  );
+}
+
+function truck() {
+  return (
+    <svg viewBox="0 0 24 24" className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" strokeWidth="1.2">
+      <rect x="2" y="7" width="13" height="8" rx="1" />
+      <path d="M15 10h4l3 3v2h-7" />
+      <circle cx="7" cy="18" r="1" />
+      <circle cx="17" cy="18" r="1" />
+    </svg>
   );
 }
