@@ -12,7 +12,7 @@ const ProductCard = ({ product, onQuickView }) => {
   const [isHovered, setIsHovered] = useState(false);
   const { addToCart, openCart } = useCart();
   const router = useRouter();
-
+  
 const primaryImage =
   typeof product?.images?.[0] === "string"
     ? product.images[0]
@@ -26,12 +26,12 @@ const primaryImage =
 
   return (
     <div
-      className="group relative bg-white border border-[#e7e1cf] rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300"
+      className="group relative bg-white border border-[#ffffff]  overflow-hidden  transition-all duration-300"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
       {/* Image */}
-      <div className="relative aspect-[3/4] overflow-hidden bg-[#f3f1ea]">
+      <div className="relative aspect-3/4 overflow-hidden bg-[#f8f7f3]">
         {!imageLoaded && (
           <div className="absolute inset-0 bg-[#f3f1ea] animate-pulse" />
         )}
@@ -49,8 +49,8 @@ const primaryImage =
         {isHovered && (
           <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
             <button
-              onClick={() => onQuickView(product)}
-              className="flex items-center gap-2 px-6 py-3 bg-white text-[#1b180d] rounded-md font-[Outfit] text-sm font-medium hover:bg-[#b28c34] hover:text-white transition"
+              onClick={() => onQuickView?.(product)}
+              className="flex items-center gap-2 px-6 py-3 bg-white text-[#1b180d] rounded-md font-[Outfit] text-sm font-medium hover:bg-[#3a3833] hover:text-white transition"
             >
               <Eye size={18} />
               Quick View
@@ -62,15 +62,15 @@ const primaryImage =
       {/* Info */}
       <div className="p-5 space-y-3">
         <div>
-          <p className="text-xs uppercase tracking-wide text-[#6b6453] font-[Outfit] mb-1">
+          {/* <p className="text-xs uppercase tracking-wide text-[#6b6453] font-[Outfit] mb-1">
             {product?.brand}
-          </p>
+          </p> */}
           <h3
             onClick={(e) => {
               e.stopPropagation();
               router.push(`/product/${product.slug}`);
             }}
-            className="font-serif text-base font-semibold text-[#1b180d] line-clamp-2 cursor-pointer hover:text-[#b28c34] transition">
+            className="font-serif text-base font-semibold text-[#1b180d] line-clamp-2 cursor-pointer hover:text-[#33312d] transition">
             {product.name}
           </h3>
         </div>
@@ -78,8 +78,8 @@ const primaryImage =
         {isHovered && (
           <div className="space-y-2">
             <div className="flex items-center gap-2">
-              <Sparkles size={14} className="text-[#b28c34]" />
-              <span className="text-xs text-[#6b6453] font-[Outfit]">
+              <Sparkles size={14} className="text-[#1f1d18]" />
+              <span className="text-xs text-[#1f1d18] font-[Outfit]">
                 {product?.fragranceType}
               </span>
             </div>
@@ -87,7 +87,7 @@ const primaryImage =
               {product?.topNotes?.slice(0, 3)?.map((note, i) => (
                 <span
                   key={i}
-                  className="px-2 py-1 bg-[#f3f1ea] text-[#6b6453] text-xs rounded"
+                  className="px-2 py-1 bg-[#f3f1ea] text-[#3d3a32] text-xs rounded"
                 >
                   {note}
                 </span>
@@ -105,8 +105,8 @@ const primaryImage =
                 size={14}
                 className={
                   i < Math.floor(product?.rating || 0)
-                    ? 'text-[#b28c34] fill-[#b28c34]'
-                    : 'text-[#d1cbb8]'
+                    ? 'text-[#201a0c] fill-[#464032]'
+                    : 'text-[#e9e7e3]'
                 }
               />
             ))}
@@ -154,12 +154,12 @@ const primaryImage =
         }}
           className={`w-full py-3 rounded-md font-[Outfit] text-sm font-medium transition flex items-center justify-center gap-2 ${
             outOfStock
-              ? 'bg-[#d6cfbd] text-white cursor-not-allowed'
-              : 'bg-[#b28c34] text-white hover:bg-[#9a864c]'
+              ? 'bg-[#d3d3d3] text-black cursor-not-allowed border-black/20'
+              : 'bg-[#ffffff] text-black hover:bg-[#3a3833] hover:text-white border border-black'
           }`}
         >
           <ShoppingBag size={18} />
-          {outOfStock ? 'Out of Stock' : 'Add to Cart'}
+          {outOfStock ? 'Out of Stock' : 'Add to Bag'}
         </button>
       </div>
     </div>

@@ -14,8 +14,10 @@ import Product from "@/models/Product";
 import HeroSection from "@/components/HeroSection";
 import Testimonials from "@/components/Testimonial";
 import FAQSection from '@/components/FAQSection';
-export default async function Home() {
 
+
+export default async function Home() {
+  
   // ✅ Connect to DB (server component allowed)
   await connectToDatabase();
 
@@ -33,7 +35,6 @@ export default async function Home() {
     )
     .slice(0, 3) // top 3
     .map((p) => p._id);
-
   return (
     <div className="homepage-theme" >
 

@@ -5,6 +5,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 // import ProductCard from "./ProductCard";
 import ProductCard from "@/app/collection/components/ProductCard";
 import { Outfit, Cormorant_Garamond } from "next/font/google";
+import { useQuickView } from "@/app/context/QuickViewContext";
 
 const outfit = Outfit({ subsets: ["latin"], display: "swap" });
 const cormorant = Cormorant_Garamond({
@@ -15,7 +16,7 @@ const cormorant = Cormorant_Garamond({
 
 export default function ProductCarousel({ products = [] }) {
   const scrollRef = useRef(null);
-
+  const { openQuickView } = useQuickView();
   const scroll = (dir) => {
     if (scrollRef.current) {
       const width = scrollRef.current.offsetWidth;
@@ -48,7 +49,7 @@ export default function ProductCarousel({ products = [] }) {
               Designed for daily wear, lasting presence, and controlled projection.<br/>Fragrances that stay close, evolve slowly, and leave an impression without demanding attention.
             </p>
 
-            <span className={`text-[#31302d] tracking-[0.25em] italic text-sm block mb-2 -skew-x-6 ${outfit.className}`}>
+            <span className={`text-[#31302d] uppercase font-semibold tracking-[0.20em] italic text-sm block mb-2 py-4 -skew-x-6 ${outfit.className}`}>
               Each Created With Purpose
             </span> 
           </div>
@@ -78,7 +79,11 @@ export default function ProductCarousel({ products = [] }) {
         {/* ----------------------------- */}
         <div className="grid grid-cols-2 gap-4 px-2 sm:hidden">
           {products.map((p) => (
-            <ProductCard key={p._id} product={p} />
+            <ProductCard
+      key={p._id}
+      product={p}
+      onQuickView={openQuickView}
+    />
           ))}
         </div>
 
@@ -90,12 +95,16 @@ export default function ProductCarousel({ products = [] }) {
           className="hidden sm:flex gap-4 sm:gap-5 lg:gap-6 overflow-x-auto scrollbar-hide px-4 pb-4 snap-x snap-mandatory justify-center"
         >
           {products
-            .filter(p => selectedSlugs.includes(p.slug))
-            .map((p) => (
-              <div key={p._id} className="shrink-0 w-[220px] lg:w-[260px] xl:w-[290px]">
-                <ProductCard product={p} />
-              </div>
-          ))}
+  .filter(p => selectedSlugs.includes(p.slug))
+  .map((p) => (
+    <div key={p._id} className="shrink-0 w-[220px] lg:w-[260px] xl:w-[290px]">
+      <ProductCard
+        product={p}
+        onQuickView={openQuickView}
+      />
+    </div>
+))}
+
 
         </div>
 
