@@ -26,28 +26,28 @@ export default function ProductCarousel({ products = [] }) {
   };
 
   return (
-    <section className="py-14 sm:py-18 md:py-20 lg:py-16 bg-[#F7F2E8]">
+    <section className="py-10 sm:py-18 md:py-20 lg:py-12 bg-[#F7F2E8]">
       <div className="mx-auto px-4 sm:px-9">
 
         {/* HEADER */}
-        <div className="flex flex-col sm:flex-row justify-between items-end mb-10 px-4 gap-4">
+        <div className="flex flex-col sm:flex-row justify-center items-end mb-10 px-4 gap-4">
 
-          <div className="text-center sm:text-left">
-            <span className={`text-[#B68A3A] uppercase tracking-[0.25em] text-xs block mb-2 ${outfit.className}`}>
+          <div className="text-center">
+            {/* <span className={`text-[#B68A3A] uppercase tracking-[0.25em] text-xs block mb-2 ${outfit.className}`}>
               Our Collection
-            </span>
+            </span> */}
 
-            <h2 className={`text-3xl sm:text-4xl lg:text-5xl font-semibold text-[#3B3024] ${cormorant.className}`}>
-              Featured Fragrances
+            <h2 className={`text-4xl sm:text-5xl lg:text-6xl font-semibold text-[#3B3024] ${cormorant.className}`}>
+              Three Signatures
             </h2>
 
-            <p className={`text-[#7C6E5A] text-sm mt-2 max-w-md mx-auto sm:mx-0 ${outfit.className}`}>
-              Discover our carefully curated selection of premium scents
+            <p className={`text-[#7C6E5A] text-lg sm:text-xl mt-2 max-w-[600px] mx-auto sm:mx-0 py-4 ${outfit.className}`}>
+              Each fragrance crafted with intention, formulated for presence, designed for those who understand restraint.
             </p>
           </div>
 
           {/* ARROWS (hidden on mobile) */}
-          <div className="hidden sm:flex gap-2 sm:gap-3">
+          {/* <div className="hidden sm:flex gap-2 sm:gap-3">
             <button
               onClick={() => scroll("left")}
               className="w-11 h-11 sm:w-12 sm:h-12 rounded-full border-2 border-[#E6DDCF] hover:border-[#B68A3A] flex items-center justify-center transition"
@@ -61,7 +61,7 @@ export default function ProductCarousel({ products = [] }) {
             >
               <ChevronRight className="w-6 h-6 text-[#7C6E5A]" />
             </button>
-          </div>
+          </div> */}
         </div>
 
         {/* ----------------------------- */}
