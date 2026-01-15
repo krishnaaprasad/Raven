@@ -31,18 +31,20 @@ const primaryImage =
       onMouseLeave={() => setIsHovered(false)}
     >
       {/* Image */}
-      <div className="relative aspect-3/4 overflow-hidden bg-[#f3f1ea]">
+      <div className="relative aspect-[3/4] overflow-hidden bg-[#f3f1ea]">
         {!imageLoaded && (
           <div className="absolute inset-0 bg-[#f3f1ea] animate-pulse" />
         )}
 
         <Image
-          src={primaryImage}
-          alt={product?.name}
-          fill
-          className="object-cover transition-transform duration-500 group-hover:scale-105"
-          onLoad={() => setImageLoaded(true)}
-        />
+  src={primaryImage}
+  alt={product?.name}
+  fill
+  sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+  className="object-cover transition-transform duration-500 group-hover:scale-105"
+  onLoad={() => setImageLoaded(true)}
+/>
+
 
         {isHovered && (
           <div className="absolute inset-0 bg-black/50 flex items-center justify-center">

@@ -2,7 +2,8 @@
 
 import { useRef } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import ProductCard from "./ProductCard";
+// import ProductCard from "./ProductCard";
+import ProductCard from "@/app/collection/components/ProductCard";
 import { Outfit, Cormorant_Garamond } from "next/font/google";
 
 const outfit = Outfit({ subsets: ["latin"], display: "swap" });
@@ -24,9 +25,11 @@ export default function ProductCarousel({ products = [] }) {
       });
     }
   };
+  const selectedSlugs = ["rebel", "escape", "oud-intense","mystique"];
+
 
   return (
-    <section className="py-10 sm:py-18 md:py-20 lg:py-12 bg-[#F7F2E8]">
+    <section className="py-10 sm:py-18 md:py-20 lg:py-12 bg-[#ffffff]">
       <div className="mx-auto px-4 sm:px-9">
 
         {/* HEADER */}
@@ -38,13 +41,19 @@ export default function ProductCarousel({ products = [] }) {
             </span> */}
 
             <h2 className={`text-4xl sm:text-5xl lg:text-6xl font-semibold text-[#3B3024] ${cormorant.className}`}>
-              Three Signatures
+              The Collection
             </h2>
 
-            <p className={`text-[#7C6E5A] text-lg sm:text-xl mt-2 max-w-[600px] mx-auto sm:mx-0 py-4 ${outfit.className}`}>
-              Each fragrance crafted with intention, formulated for presence, designed for those who understand restraint.
+            <p className={`text-[#3a3733] text-lg sm:text-xl mt-2 max-w-[900px] mx-auto sm:mx-0 py-4 ${outfit.className}`}>
+              Designed for daily wear, lasting presence, and controlled projection.<br/>Fragrances that stay close, evolve slowly, and leave an impression without demanding attention.
             </p>
+
+            <span className={`text-[#31302d] tracking-[0.25em] italic text-sm block mb-2 -skew-x-6 ${outfit.className}`}>
+              Each Created With Purpose
+            </span> 
           </div>
+
+           
 
           {/* ARROWS (hidden on mobile) */}
           {/* <div className="hidden sm:flex gap-2 sm:gap-3">
@@ -78,13 +87,16 @@ export default function ProductCarousel({ products = [] }) {
         {/* ----------------------------- */}
         <div
           ref={scrollRef}
-          className="hidden sm:flex gap-4 sm:gap-5 lg:gap-6 overflow-x-auto scrollbar-hide px-4 pb-4 snap-x snap-mandatory"
+          className="hidden sm:flex gap-4 sm:gap-5 lg:gap-6 overflow-x-auto scrollbar-hide px-4 pb-4 snap-x snap-mandatory justify-center"
         >
-          {products.map((p) => (
-            <div key={p._id} className="snap-start">
-              <ProductCard product={p} />
-            </div>
+          {products
+            .filter(p => selectedSlugs.includes(p.slug))
+            .map((p) => (
+              <div key={p._id} className="shrink-0 w-[220px] lg:w-[260px] xl:w-[290px]">
+                <ProductCard product={p} />
+              </div>
           ))}
+
         </div>
 
       </div>

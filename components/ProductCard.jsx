@@ -67,7 +67,7 @@ export default function ProductCard({ product, bestsellerIds = [] }) {
        onMouseLeave={() => setHover(false)}
     >
       
-      <div className="relative overflow-hidden rounded-xl bg-[#FAF7EF] border border-[#E6DDCF] hover:border-[#B68A3A] transition-all duration-500 shadow-[0_4px_20px_rgba(0,0,0,0.04)] hover:shadow-[0_15px_40px_rgba(0,0,0,0.12)]">
+      <div className="relative overflow-hidden rounded-xl bg-[#ffffff] border border-[#E6DDCF] hover:border-[#000000] transition-all duration-500 shadow-[0_4px_20px_rgba(0,0,0,0.04)] hover:shadow-[0_15px_40px_rgba(0,0,0,0.12)]">
         
         {/* ---------------------- */}
         {/* BADGES ON TOP LEFT     */}
@@ -75,13 +75,13 @@ export default function ProductCard({ product, bestsellerIds = [] }) {
         <div className="absolute top-3 left-3 flex  gap-1 z-20">
 
           {isNew && (
-            <span className="px-3 md:px-4 py-1 text-[10px] md:text-[12px] rounded-full bg-[#B68A3A] text-white font-semibold uppercase tracking-wide shadow">
+            <span className="px-3 md:px-4 py-1 text-[10px] md:text-[12px] rounded-full bg-[#ffffff] text-black font-semibold uppercase tracking-wide shadow">
               NEW
             </span>
           )}
 
           {isBestseller && (
-            <span className="px-3 md:px-4 py- text-[10px] md:text-[12px] rounded-full bg-black text-white font-semibold uppercase tracking-wide shadow">
+            <span className="px-3 md:px-4 py- text-[10px] md:text-[12px] rounded-full bg-white text-black font-semibold uppercase tracking-wide shadow">
               BESTSELLER
             </span>
           )}
@@ -144,7 +144,7 @@ export default function ProductCard({ product, bestsellerIds = [] }) {
         <div className="absolute bottom-3 left-3 right-3 hidden sm:block opacity-0 group-hover:opacity-100 translate-y-3 group-hover:translate-y-0 transition-all duration-500 pointer-events-auto z-20">
           <button
             onClick={() => openQuickView(product)}
-            className="w-full bg-[#B68A3A] text-white py-2 rounded-full flex items-center justify-center gap-2 font-semibold shadow-md hover:brightness-110"
+            className="w-full bg-[#22221a] text-white py-2 rounded-full flex items-center justify-center gap-2 font-semibold shadow-md hover:brightness-110"
           >
             <ShoppingBag className="w-4 h-4" />
             Add to Cart
@@ -157,7 +157,7 @@ export default function ProductCard({ product, bestsellerIds = [] }) {
 
           {/* RATING */}
           <div className="flex items-center gap-1 mb-1.5">
-            <Star className="w-4 h-4 fill-[#B68A3A] text-[#B68A3A]" />
+            <Star className="w-4 h-4 fill-[#ffffff] text-[#000000]" />
 
             <span className={`text-sm font-semibold ${outfit.className}`}>
               {product.rating?.toFixed(1) || "4.8"}
@@ -169,19 +169,19 @@ export default function ProductCard({ product, bestsellerIds = [] }) {
           </div>
 
           {/* TAGLINE */}
-          <span className={`text-[11px] uppercase tracking-[0.15em] text-[#B68A3A] block mb-1 ${outfit.className}`}>
+          <span className={`text-[11px] uppercase tracking-[0.15em] text-[#000000] block mb-1 ${outfit.className}`}>
             {tagline}
           </span>
 
           {/* NAME */}
-          <h3 className={`text-xl font-semibold text-[#3B3024] ${cormorant.className}`}>
+          <h3 className={`text-xl font-semibold text-[#2b231a] ${cormorant.className}`}>
             {product.name}
           </h3>
 
           {/* PRICE + MOBILE ADD */}
           <div className="flex items-center justify-between mt-2">
 
-            <span className={`text-[#B68A3A] text-xl font-bold ${cormorant.className}`}>
+            <span className={`text-[#141008] text-xl font-bold ${cormorant.className}`}>
               ₹{price}
             </span>
 
@@ -194,7 +194,7 @@ export default function ProductCard({ product, bestsellerIds = [] }) {
             {/* MOBILE ADD BUTTON */}
             <button
               onClick={() => openQuickView(product)}
-              className="sm:hidden w-9 h-9 rounded-full bg-[#B68A3A] flex items-center justify-center shadow-md active:scale-95 transition"
+              className="sm:hidden w-9 h-9 rounded-full bg-[#22221a] flex items-center justify-center shadow-md active:scale-95 transition"
             >
               <ShoppingBag className="w-4 h-4 text-white" />
             </button>
