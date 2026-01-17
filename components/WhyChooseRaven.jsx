@@ -1,116 +1,106 @@
-"use client";
+import Image from "next/image";
+import { Outfit, Cormorant_Garamond } from "next/font/google";
 
-import { Leaf, Beaker, Sparkles } from "lucide-react";
-import { Cormorant_Garamond } from 'next/font/google';
+const outfit = Outfit({
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600"],
+  variable: "--font-body",
+  display: "swap",
+});
 
-const cormorantGaramond = Cormorant_Garamond({
-  subsets: ['latin'],
-  weight: ['400', '700'],
-  display: 'swap',
-})
+const garamond = Cormorant_Garamond({
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600"],
+  variable: "--font-display",
+  display: "swap",
+});
 
 const WhyChooseRaven = () => {
-  const reasons = [
+  const craftItems = [
     {
-      icon: Leaf,
-      emoji: "🌿",
-      title: "Rare Ingredients",
+      title: "Small-Batch Integrity",
       description:
-        "We distill only the rarest botanicals and natural absolutes sourced ethically, chosen for depth and uniqueness.",
+        "Every Raven fragrance is produced in limited runs. This allows focus on quality control, fresh production, and formulation consistency.",
     },
     {
-      icon: Beaker,
-      emoji: "🔬",
-      title: "Artisan Craft",
+      title: "Intentional Composition",
       description:
-        "No mass production. Small batches, hand-finished. Each bottle is a work of art shaped by time, skill, and purpose.",
+        "Raven fragrances are designed to last through the day, sit close to the skin, and evolve naturally over time.",
     },
     {
-      icon: Sparkles,
-      emoji: "🌗",
-      title: "Philosophy First",
+      title: "Transparent by Design",
       description:
-        "We create not for trend, but for meaning. Raven is fragrance as a personal revelation — wear your story, not a fashion.",
+        "Clearly stated concentration. Thoughtful ingredient sourcing. Honest performance expectations. No exaggeration. No gimmicks. Fragrance made properly.",
     },
+  ];
+
+  const images = [
+    "/craft-small-batch.jpg",
+    "/craft-composition.jpg",
+    "/craft-transparent.jpg",
+    "/craft-artisan.jpg",
   ];
 
   return (
     <section
-      id="why-choose-raven"
-      className="scroll-mt-4
-      py-10 sm:py-18 md:py-20 lg:py-13 
-      relative overflow-hidden 
-      bg-[hsl(33,47%,96%)]
-      "
+      className={`py-12 sm:py-17 md:py-24 lg:py-25 bg-white relative overflow-hidden ${outfit.variable} ${garamond.variable}`}
     >
-      {/* Decorative Background Blur Balls */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-0 right-0 w-[40vw] max-w-96 h-[40vw] max-h-96 bg-[hsl(32_65%_45%/0.05)] rounded-full blur-3xl" />
-        <div className="absolute bottom-0 left-0 w-[30vw] max-w-72 h-[30vw] max-h-72 bg-[hsl(32_65%_45%/0.05)] rounded-full blur-3xl" />
-      </div>
+      <div className=" mx-auto px-4 sm:px-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 xl:gap-20 items-start">
 
-      <div className=" mx-auto px-4 sm:px-6 relative z-10">
-
-        {/* Section Header */}
-        <div className="text-center mb-10 sm:mb-12 lg:mb-16 max-w-3xl mx-auto">
-          <span className="text-[hsl(32_65%_45%)] text-xs sm:text-sm uppercase tracking-[0.25em] mb-3 sm:mb-4 block outfit.className">
-            The Raven Difference
-          </span>
-
-          <h2 className="cormorantGaramond.className text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-semibold text-[hsl(30_15%_15%)] mb-4 sm:mb-6">
-            Why Choose Raven?
-          </h2>
-
-          <p className="text-[hsl(30_10%_45%)] outfit.className text-sm sm:text-base md:text-lg leading-relaxed px-4 sm:px-0">
-            Raven stands alone in a world of fleeting trends. Every note, every bottle,
-            is an act of craft — a journey toward truth and a fragrance meant to reveal, not mask.
-          </p>
-        </div>
-
-        {/* Reasons Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-4 md:gap-6 lg:gap-8">
-          {reasons.map((reason, index) => (
-            <div
-              key={index}
-              className="
-                group text-center p-6 sm:p-5 md:p-6 lg:p-8 
-                rounded-2xl 
-                border 
-                border-[hsl(35_20%_82%/0.3)]
-                bg-[hsl(40_25%_95%/0.5)] 
-                hover:bg-[hsl(40_25%_95%)] 
-                hover:border-[hsl(32_65%_45%/0.3)]
-                transition-all duration-500
-              "
-            >
-              {/* Emoji / Icon */}
-              <div className="mb-4 sm:mb-5 md:mb-6">
-                <span className="text-3xl sm:text-4xl md:text-5xl">
-                  {reason.emoji}
-                </span>
+          {/* Left: Image Grid */}
+          <div className="grid grid-cols-2 gap-3 sm:gap-4">
+            {images.map((src, index) => (
+              <div key={index} className="aspect-square overflow-hidden relative">
+                <Image
+                  src={src}
+                  alt={`Craft process ${index + 1}`}
+                  fill
+                  className="object-cover grayscale hover:grayscale-0 transition-all duration-700"
+                  sizes="(max-width: 768px) 50vw, 25vw"
+                />
               </div>
+            ))}
+          </div>
 
-              {/* Title */}
-              <h3
-                className="
-                  cormorantGaramond.className
-                  text-lg sm:text-xl md:text-2xl font-semibold 
-                  mb-2 sm:mb-3 
-                  text-[hsl(30_15%_15%)] 
-                  group-hover:text-[hsl(32_65%_45%)] 
-                  transition-colors duration-300
-                "
-              >
-                {reason.title}
-              </h3>
+          {/* Right: Content */}
+          <div className="lg:pt-2">
+            <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-light text-gray-900 mb-4 sm:mb-6 tracking-tight leading-[1.1]">
+              Craft Over Commerce
+            </h2>
 
-              {/* Description */}
-              <p className="text-[hsl(30_10%_45%)] outfit.className text-sm md:text-base leading-relaxed">
-                {reason.description}
+            <div className="mb-10 sm:mb-12 space-y-4">
+              <p className="text-gray-700 font-body text-base sm:text-lg leading-relaxed">
+                Our process starts with the formula. Each decision is deliberate.<br/>
+                Each ingredient earns its place. Nothing exists without reason.
               </p>
             </div>
-          ))}
+
+            <div className="space-y-10 sm:space-y-12">
+              {craftItems.map((item, index) => (
+                <div key={index} className="group">
+                  <h3 className="font-display text-sm sm:text-base font-medium text-gray-900 uppercase tracking-[0.15em] mb-3 sm:mb-4 pb-2 border-b border-gray-200 inline-block">
+                    {item.title}
+                  </h3>
+                  <p className="text-gray-600 font-body text-sm sm:text-base leading-[1.8]">
+                    {item.description}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
+
+        {/* Quote Section */}
+<div className="text-center max-w-2xl mx-auto mt-10 sm:mt-7 lg:mt-7 pt-7 sm:pt-9 border-t border-gray-100">
+  
+  <blockquote className="font-display italic text-xl sm:text-2xl md:text-3xl font-light text-gray-800 tracking-tight leading-relaxed">
+    <span className="text-gray-300 mr-1">“</span>
+    We believe trust comes from clarity
+    <span className="text-gray-300 ml-1">”</span>
+  </blockquote>
+</div>
+
       </div>
     </section>
   );
