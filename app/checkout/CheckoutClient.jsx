@@ -12,6 +12,7 @@ import usePageMetadata from '../hooks/usePageMetadata';
 import { useSession } from 'next-auth/react';
 import AuthModal from '../auth/modal';
 import { loadFailedOrderData } from '../context/cartcontext';
+import { event } from "@/lib/ga";
 
 // ❌ REMOVE: import { useSearchParams } from "next/navigation";
 const formatAmount = (amount) => {
@@ -48,6 +49,29 @@ export default function CheckoutClient() {
     // Otherwise normal cart checkout
     setCheckoutItems(cartContextItems);
     }, [mode, cartContextItems]);
+
+      // 🔥 GA4: Track begin_checkout
+      useEffect(() => {
+        if (!checkoutItems?.length) return;
+
+        event({
+          action: "begin_checkout",
+          params: {
+            currency: "INR",
+            value: checkoutItems.reduce(
+              (sum, i) => sum + i.price * i.quantity,
+              0
+            ),
+            items: checkoutItems.map((item) => ({
+              item_id: item.id,
+              item_name: item.name,
+              price: item.price,
+              quantity: item.quantity,
+              item_variant: item.size,
+            })),
+          },
+        });
+      }, [checkoutItems]);
 
 
   // ✅ Restore failed cart if cartItems is empty
@@ -341,7 +365,7 @@ export default function CheckoutClient() {
               onChange={handleChange}
               placeholder=" "
               autoComplete="off"
-              className={`peer w-full h-[44px] px-4 pr-10 text-[15px] text-[#1b180d] bg-[#fcfbf8] rounded-md border outline-none transition-all
+              className={`peer w-full h-11 px-4 pr-10 text-[15px] text-[#1b180d] bg-[#fcfbf8] rounded-md border outline-none transition-all
                 ${
                   hasError
                     ? 'border-red-500'
@@ -359,7 +383,7 @@ export default function CheckoutClient() {
               {label}
             </label>
             {isPhone && (
-              <div ref={tooltipRef} className="absolute right-3 top-[10px] z-[9999]">
+              <div ref={tooltipRef} className="absolute right-3 top-2.5 z-9999">
                 <button
                   type="button"
                   onClick={(e) => {
@@ -373,7 +397,7 @@ export default function CheckoutClient() {
                 </button>
                 {showPhoneTip && (
                   <div
-                    className="absolute left-[-240px] top-[-6px] bg-white border border-[#e7e1cf] text-[#1b180d] text-xs rounded-md shadow-lg p-2 w-[220px] animate-fadeIn"
+                    className="absolute -left-60 -top-1.5 bg-white border border-[#e7e1cf] text-[#1b180d] text-xs rounded-md shadow-lg p-2 w-[220px] animate-fadeIn"
                     style={{
                       zIndex: 999999,
                       boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
@@ -451,7 +475,7 @@ export default function CheckoutClient() {
                     <div ref={stateDropdownRef} className="relative mb-5 w-[95%] max-w-[640px]">
                       <div
                         onClick={() => setShowStateList(!showStateList)}
-                        className={`flex justify-between items-center h-[44px] px-4 border rounded-md bg-[#fcfbf8] cursor-pointer ${
+                        className={`flex justify-between items-center h-11 px-4 border rounded-md bg-[#fcfbf8] cursor-pointer ${
                           errors.state
                             ? 'border-red-500'
                             : 'border-[#e7e1cf] hover:border-[#b28c34]'
@@ -528,7 +552,7 @@ export default function CheckoutClient() {
                 <input
                   value="India"
                   readOnly
-                  className="w-full h-[44px] px-4 border rounded-md bg-[#f7f4ec] text-[15px] border-[#e7e1cf] cursor-not-allowed"
+                  className="w-full h-11 px-4 border rounded-md bg-[#f7f4ec] text-[15px] border-[#e7e1cf] cursor-not-allowed"
                 />
                 <span className="absolute -top-2 left-4 bg-[#fcfbf8] px-1 text-xs text-[#9a864c] font-medium">
                   Country

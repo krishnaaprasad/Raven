@@ -1,6 +1,7 @@
 'use client'
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { v4 as uuidv4 } from "uuid";
+import { event } from "@/lib/ga";
 
 const CartContext = createContext()
 const CART_EXPIRY_MS = 30 * 24 * 60 * 60 * 1000 // 30 days
@@ -131,6 +132,23 @@ export function CartProvider({ children }) {
       }
 
       saveToLocal(updated)
+      // 🔥 GA4 Track add_to_cart (safe + non-blocking)
+      event({
+        action: "add_to_cart",
+        params: {
+          currency: "INR",
+          value: product.price * quantity,
+          items: [
+            {
+              item_id: product.id,
+              item_name: product.name,
+              price: product.price,
+              quantity,
+              item_variant: product.size,
+            },
+          ],
+        },
+      })
       return updated
     })
   }

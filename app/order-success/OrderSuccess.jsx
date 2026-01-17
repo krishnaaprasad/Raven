@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useCart } from '../context/cartcontext';
 import { useSession } from 'next-auth/react';
 import { CreditCard, Banknote, Wallet, AlertCircle, HelpCircle } from "lucide-react";
+import { event } from "@/lib/ga"; // ← ADD THIS
 
 const formatAmount = (amount) => {
   if (!amount || isNaN(amount)) return "0.00";
@@ -52,6 +53,29 @@ export default function OrderSuccess() {
       setReferenceId(verifyData.referenceId || "N/A");
 
         if (verifyData?.success === true && orderJson?.success === true) {
+            // 🔥 GA4: Track successful purchase
+          event({
+            action: "purchase",
+            params: {
+              transaction_id: mergedOrder.customOrderId || mergedOrder._id,
+              currency: "INR",
+              value:
+                (mergedOrder.cartItems || []).reduce(
+                  (sum, i) => sum + i.price * i.quantity,
+                  0
+                ) + (mergedOrder.shippingCharge || 0),
+
+              shipping: mergedOrder.shippingCharge || 0,
+
+              items: (mergedOrder.cartItems || []).map((item) => ({
+                item_id: item.productId || item.id || item._id || item.slug,
+                item_name: item.name,
+                price: item.price,
+                quantity: item.quantity,
+                item_variant: item.size,
+              })),
+            },
+          });
           clearCart();
             localStorage.removeItem("failedOrder");
             localStorage.removeItem("checkoutUser");

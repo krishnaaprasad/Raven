@@ -1,5 +1,6 @@
 'use client'
 
+
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
@@ -23,6 +24,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useCart } from '@/app/context/cartcontext';
 import { toast } from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
+import { event } from "@/lib/ga";
 
 // ---------- Cloudinary Helper ----------
 function buildCloudinaryUrl(url, { w, h, crop = 'fill', quality = 'auto' } = {}) {
@@ -79,6 +81,23 @@ export default function ProductClient({ slug }) {
         if (res.ok && data) {
           setProduct(data);
           setSelected(data.variants?.[0]);
+          // 🔥 GA4: Track product view
+event({
+  action: "view_item",
+  params: {
+    currency: "INR",
+    value: data.variants?.[0]?.price || 0,
+    items: [
+      {
+        item_id: data._id,
+        item_name: data.name,
+        price: data.variants?.[0]?.price || 0,
+        category: "Perfume",
+      },
+    ],
+  },
+});
+
         } else {
           router.replace("/");
           toast.error("This product is no longer available");
@@ -130,6 +149,23 @@ export default function ProductClient({ slug }) {
       },
       quantity
     );
+
+    // 🔥 GA4: Track add to cart
+    event({
+      action: "add_to_cart",
+      params: {
+        currency: "INR",
+        value: selected.price * quantity,
+        items: [
+          {
+            item_id: product._id,
+            item_name: product.name,
+            price: selected.price,
+            quantity,
+          },
+        ],
+      },
+    });
 
     toast.success(`${product.name} (${selected.size}) added to cart!`);
     setTimeout(() => setIsAdding(false), 800);
