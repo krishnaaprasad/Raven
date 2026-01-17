@@ -9,6 +9,7 @@ import WhatsAppButton from "@/components/WhatsAppButton";
 import HomeMarquee from "@/components/HomeMarquee"; // ✅ new client component
 import QuickViewModal from "@/app/collection/components/QuickViewModal";
 import { QuickViewProvider } from "@/app/context/QuickViewContext";
+import Script from "next/script";
 
 import { Outfit } from 'next/font/google';
 import { Cormorant_Garamond } from 'next/font/google';
@@ -78,28 +79,43 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" className={`${outfit.className} ${cormorantGaramond.className} `}>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased ` }
-      >
+    <html lang="en" className={`${outfit.className} ${cormorantGaramond.className}`}>
+      <head>
+        {process.env.NEXT_PUBLIC_GA_ID && (
+          <>
+            <Script
+              strategy="afterInteractive"
+              src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GA_ID}`}
+            />
+            <Script id="ga-init" strategy="afterInteractive">
+              {`
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){dataLayer.push(arguments);}
+                gtag('js', new Date());
+                gtag('config', '${process.env.NEXT_PUBLIC_GA_ID}', {
+                  page_path: window.location.pathname,
+                });
+              `}
+            </Script>
+          </>
+        )}
+      </head>
+
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <Providers>
           <QuickViewProvider>
-
             <HomeMarquee />
             <NavBar />
 
-            <div className="pt-12">
-              {children}
-            </div>
+            <div className="pt-12">{children}</div>
 
-            {/* 🔥 ONE GLOBAL MODAL */}
             <QuickViewModal />
 
             <Footer />
             <WhatsAppButton />
+
             <SpeedInsights />
             <Analytics />
-
           </QuickViewProvider>
         </Providers>
       </body>
