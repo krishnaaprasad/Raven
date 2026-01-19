@@ -1,39 +1,16 @@
 import Image from "next/image";
-import { Outfit, Cormorant_Garamond } from "next/font/google";
+import { Playfair_Display, Inter, Montserrat, Darker_Grotesque } from "next/font/google";
 
-const outfit = Outfit({
+const playfair = Playfair_Display({ subsets: ["latin"] });
+const inter = Inter({ subsets: ["latin"] });
+const montserrat = Montserrat({ subsets: ["latin"], weight: ["400", "500"] });
+
+const darker = Darker_Grotesque({
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600"],
-  variable: "--font-body",
-  display: "swap",
+  weight: ["400"],
 });
 
-const garamond = Cormorant_Garamond({
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600"],
-  variable: "--font-display",
-  display: "swap",
-});
-
-const WhyChooseRaven = () => {
-  const craftItems = [
-    {
-      title: "Small-Batch Integrity",
-      description:
-        "Every Raven fragrance is produced in limited runs. This allows focus on quality control, fresh production, and formulation consistency.",
-    },
-    {
-      title: "Intentional Composition",
-      description:
-        "Raven fragrances are designed to last through the day, sit close to the skin, and evolve naturally over time.",
-    },
-    {
-      title: "Transparent by Design",
-      description:
-        "Clearly stated concentration. Thoughtful ingredient sourcing. Honest performance expectations. No exaggeration. No gimmicks. Fragrance made properly.",
-    },
-  ];
-
+const CraftSection = () => {
   const images = [
     "/craft-small-batch.jpg",
     "/craft-composition.jpg",
@@ -41,77 +18,84 @@ const WhyChooseRaven = () => {
     "/craft-artisan.jpg",
   ];
 
+  const principles = [
+    {
+      titles: "Small-Batch Integrity",
+      desc: "Every bottle is part of a limited production run, ensuring quality control and formulation consistency that mass production cannot achieve.",
+    },
+    {
+      titles: "Transparent Formulation",
+      desc: "We share our concentration levels, ingredient sourcing, and creation process because authenticity requires openness.",
+    },
+    {
+      titles: "Intentional Composition",
+      desc: "Each note is chosen for purpose, not popularity. We build fragrances that evolve with intention rather than follow trends.",
+    },
+  ];
+
   return (
-    <section
-      className={`py-6 sm:py-8 md:py-14 lg:py-15 bg-white relative overflow-hidden ${outfit.variable} ${garamond.variable}`}
-    >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-21 xl:gap-21 items-start">
+    <section className="bg-white py-16 md:py-24">
+      <div className="max-w-[1100px] mx-auto px-4 sm:px-6">
+        <div className="grid lg:grid-cols-2 gap-10 lg:gap-14 items-center">
 
-
-         {/* Left Column */}
-<div className="flex h-full items-center  justify-center lg:justify-center">
-  <div className="w-full grid grid-cols-2 gap-3 sm:gap-4 max-w-[340px] sm:max-w-[380px] lg:max-w-[420px]">
-    {images.map((src, index) => (
-      <div key={index} className="aspect-square overflow-hidden relative">
-        <Image
-          src={src}
-          alt={`Craft process ${index + 1}`}
-          fill
-          className="object-cover grayscale hover:grayscale-0 transition-all duration-700"
-          sizes="(max-width: 640px) 170px, (max-width: 1024px) 190px, 210px"
-        />
-      </div>
-    ))}
-  </div>
-</div>
-
-
-          {/* Right: Content */}
-          
-<div className="lg:pt-3">
-  <h2
-    className={`${garamond.className} text-3xl sm:text-4xl md:text-5xl font-light text-gray-900 mb-0 sm:mb-4 tracking-tight leading-[1.1]`}
-  >
-    Craft Over Commerce
-  </h2>
-
-
-            <div className="mb-6 sm:mb-8 space-y-2">
-              <p className="text-gray-700 font-body text-base sm:text-lg leading-relaxed">
-                Our process starts with the formula. Each decision is deliberate.<br/>
-                Each ingredient earns its place. Nothing exists without reason.
-              </p>
+          {/* LEFT GRID */}
+          <div className="flex justify-center lg:justify-start">
+            <div className="grid grid-cols-2 gap-3 w-[280px] sm:w-[340px] md:w-[380px]">
+              {images.map((src, i) => (
+                <div key={i} className="relative aspect-square overflow-hidden rounded-sm">
+                  <Image
+                    src={src}
+                    alt=""
+                    fill
+                    className="object-cover grayscale hover:grayscale-0 transition duration-700"
+                  />
+                </div>
+              ))}
             </div>
+          </div>
 
-            <div className="space-y-6 sm:space-y-8">
-              {craftItems.map((item, index) => (
-                <div key={index} className="group">
-                  <h3 className="font-display text-sm sm:text-lg font-medium text-gray-900  tracking-[0.15em] mb-1 sm:mb-0 pb-1 inline-block">
-                    {item.title}
-                  </h3>
-                  <p className="text-gray-600 font-display text-sm sm:text-base leading-[1.8]">
-                    {item.description}
+          {/* RIGHT CONTENT */}
+          <div>
+            {/* Heading */}
+            <h2
+              className={`${playfair.className} text-3xl sm:text-4xl md:text-5xl leading-tight text-[#111] mb-6`}
+            >
+              Craft Over Commerce
+            </h2>
+
+            {/* Intro */}
+            <p
+              className={`${inter.className} text-[15px] sm:text-[16px] leading-[1.75] text-[#555] max-w-[520px] mb-10`}
+            >
+              Our approach to fragrance creation prioritizes formulation integrity
+              over market demands. Every decision is made with intention, every
+              ingredient chosen for purpose.
+            </p>
+
+            {/* Principles */}
+            <div className="space-y-8">
+              {principles.map((p, i) => (
+                <div key={i}>
+                  <h5
+                    className={`${inter.className} text-[16px]  text-[#666] mb-2`}
+>
+
+                    {p.titles}
+                  </h5>
+                  <p
+                    className={`${inter.className} text-[15px] leading-[1.75] text-[#666] max-w-[520px]`}
+                  >
+                    {p.desc}
                   </p>
                 </div>
               ))}
             </div>
           </div>
+
         </div>
-
-        {/* Quote Section */}
-<div className="text-center max-w-2xl mx-auto mt-10 sm:mt-7 lg:mt-7 pt-7 sm:pt-9 border-t border-gray-100">
-  
-  <blockquote className="font-display italic text-xl sm:text-2xl md:text-3xl font-light text-gray-800 tracking-tight leading-relaxed">
-    <span className="text-gray-300 mr-1">“</span>
-    We believe trust comes from clarity
-    <span className="text-gray-300 ml-1">”</span>
-  </blockquote>
-</div>
-
       </div>
     </section>
   );
 };
 
-export default WhyChooseRaven;
+export default CraftSection;
