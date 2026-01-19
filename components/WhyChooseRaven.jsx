@@ -43,46 +43,54 @@ const WhyChooseRaven = () => {
 
   return (
     <section
-      className={`py-12 sm:py-17 md:py-24 lg:py-25 bg-white relative overflow-hidden ${outfit.variable} ${garamond.variable}`}
+      className={`py-6 sm:py-8 md:py-14 lg:py-15 bg-white relative overflow-hidden ${outfit.variable} ${garamond.variable}`}
     >
-      <div className=" mx-auto px-4 sm:px-6">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 xl:gap-20 items-start">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-21 xl:gap-21 items-start">
 
-          {/* Left: Image Grid */}
-          <div className="grid grid-cols-2 gap-3 sm:gap-4">
-            {images.map((src, index) => (
-              <div key={index} className="aspect-square overflow-hidden relative">
-                <Image
-                  src={src}
-                  alt={`Craft process ${index + 1}`}
-                  fill
-                  className="object-cover grayscale hover:grayscale-0 transition-all duration-700"
-                  sizes="(max-width: 768px) 50vw, 25vw"
-                />
-              </div>
-            ))}
-          </div>
+
+         {/* Left Column */}
+<div className="flex h-full items-center lg:pl-25 justify-center lg:justify-center">
+  <div className="w-full grid grid-cols-2 gap-3 sm:gap-4 max-w-[340px] sm:max-w-[380px] lg:max-w-[420px]">
+    {images.map((src, index) => (
+      <div key={index} className="aspect-square overflow-hidden relative">
+        <Image
+          src={src}
+          alt={`Craft process ${index + 1}`}
+          fill
+          className="object-cover grayscale hover:grayscale-0 transition-all duration-700"
+          sizes="(max-width: 640px) 170px, (max-width: 1024px) 190px, 210px"
+        />
+      </div>
+    ))}
+  </div>
+</div>
+
 
           {/* Right: Content */}
-          <div className="lg:pt-2">
-            <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-light text-gray-900 mb-4 sm:mb-6 tracking-tight leading-[1.1]">
-              Craft Over Commerce
-            </h2>
+          
+<div className="lg:pt-3">
+  <h2
+    className={`${garamond.className} text-3xl sm:text-4xl md:text-5xl font-light text-gray-900 mb-0 sm:mb-4 tracking-tight leading-[1.1]`}
+  >
+    Craft Over Commerce
+  </h2>
 
-            <div className="mb-10 sm:mb-12 space-y-4">
+
+            <div className="mb-6 sm:mb-8 space-y-2">
               <p className="text-gray-700 font-body text-base sm:text-lg leading-relaxed">
                 Our process starts with the formula. Each decision is deliberate.<br/>
                 Each ingredient earns its place. Nothing exists without reason.
               </p>
             </div>
 
-            <div className="space-y-10 sm:space-y-12">
+            <div className="space-y-6 sm:space-y-8">
               {craftItems.map((item, index) => (
                 <div key={index} className="group">
-                  <h3 className="font-display text-sm sm:text-base font-medium text-gray-900 uppercase tracking-[0.15em] mb-3 sm:mb-4 pb-2 border-b border-gray-200 inline-block">
+                  <h3 className="font-display text-sm sm:text-lg font-medium text-gray-900  tracking-[0.15em] mb-1 sm:mb-0 pb-1 inline-block">
                     {item.title}
                   </h3>
-                  <p className="text-gray-600 font-body text-sm sm:text-base leading-[1.8]">
+                  <p className="text-gray-600 font-display text-sm sm:text-base leading-[1.8]">
                     {item.description}
                   </p>
                 </div>
