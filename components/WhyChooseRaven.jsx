@@ -50,7 +50,7 @@ const WhyChooseRaven = () => {
 
 
          {/* Left Column */}
-<div className="flex h-full items-center lg:pl-25 justify-center lg:justify-center">
+<div className="flex h-full items-center  justify-center lg:justify-center">
   <div className="w-full grid grid-cols-2 gap-3 sm:gap-4 max-w-[340px] sm:max-w-[380px] lg:max-w-[420px]">
     {images.map((src, index) => (
       <div key={index} className="aspect-square overflow-hidden relative">
