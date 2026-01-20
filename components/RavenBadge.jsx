@@ -17,14 +17,11 @@ export default function TrustBadges() {
 
   return (
     <section
-      className="relative bg-white py-10 sm:py-12 overflow-hidden"
+      className="relative bg-[#fffcfc] py-10 sm:py-12 overflow-hidden"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >
-      {/* Fade edges */}
-      <div className="absolute left-0 top-0 bottom-0 w-16 sm:w-24 bg-linear-to-r from-white to-transparent z-10" />
-      <div className="absolute right-0 top-0 bottom-0 w-16 sm:w-24 bg-linear-to-l from-white to-transparent z-10" />
-
+      
       {/* Slider viewport */}
       <div className="overflow-hidden">
         <div
