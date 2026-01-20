@@ -91,7 +91,7 @@ export default function InstagramGallery() {
   };
 
   return (
-    <section className="py-20 bg-[rgb(248,240,235)] overflow-hidden">
+    <section className="py-20 bg-[#fffcfc] overflow-hidden">
       <div className="max-w-7xl mx-auto px-6 mb-14">
         {/* Header */}
         <motion.div

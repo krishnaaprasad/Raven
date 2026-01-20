@@ -46,7 +46,7 @@ export default async function Home() {
       <ProductCarousel products={products} bestsellerIds={bestsellerIds} />
       <WhyChooseRaven />
       <Testimonials />
-      <FAQSection />
+      {/* <FAQSection /> */}
       <InstagramGallery /> 
       {/*
       <AboutRaven />

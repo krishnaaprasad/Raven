@@ -46,20 +46,15 @@ export default async function ProductCollectionPage() {
       {/* 🔝 Header */}
       {/* 🔝 Header */}
 <section className="bg-[#f9f6ef] border-b border-[#e7e1cf]">
-  <div className="max-w-[1100px] mx-auto px-6 py-8 text-center">
+  <div className="max-w-[1100px] mx-auto px-6 py-16 sm:py-18 text-center">
     
-    <h1 className="font-[Cormorant_Garamond] text-3xl sm:text-4xl md:text-5xl font-semibold text-[#1b180d] mb-4 leading-tight">
-      Luxury Perfume Collection for Men & Women
+    <h1 className="font-[Cormorant_Garamond] text-3xl sm:text-4xl md:text-5xl font-semibold text-[#1b180d] mb-2 leading-tight">
+      The Collection
     </h1>
 
-    <p className="font-[Outfit] text-base sm:text-lg text-[#6b6453] max-w-2xl mx-auto mb-8">
-      Discover Raven Fragrance’s luxury perfumes — premium Raven perfumes for men & women with long-lasting, elegant scents.
+    <p className="font-system-UI text-base sm:text-lg text-[#6b6453] max-w-2xl mx-auto mb-8">
+      Three signature fragrances, each created with intention. Designed to express quiet confidence and a presence that doesn’t ask for attention.
     </p>
-
-    {/* Search */}
-    <div className="max-w-xl mx-auto font-[Outfit]">
-      <SearchComponent placeholder="Search luxury fragrances, brands, notes..." />
-    </div>
 
   </div>
 </section>

@@ -34,7 +34,7 @@ const CraftSection = () => {
   ];
 
   return (
-    <section className="bg-white py-8 md:py-14">
+    <section className="bg-[#fffcfc] py-8 md:py-14">
       <div className="max-w-[1100px] mx-auto px-4 sm:px-6">
         <div className="grid lg:grid-cols-2 gap-10 lg:gap-14 items-center">
 
