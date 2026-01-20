@@ -34,7 +34,7 @@ const CraftSection = () => {
   ];
 
   return (
-    <section className="bg-white py-16 md:py-24">
+    <section className="bg-white py-8 md:py-14">
       <div className="max-w-[1100px] mx-auto px-4 sm:px-6">
         <div className="grid lg:grid-cols-2 gap-10 lg:gap-14 items-center">
 
@@ -77,9 +77,8 @@ const CraftSection = () => {
               {principles.map((p, i) => (
                 <div key={i}>
                   <h5
-                    className={`${inter.className} text-[16px]  text-[#666] mb-2`}
->
-
+                    className={`${inter.className} text-[16px]  text-[#585757] mb-2`}
+                  >
                     {p.titles}
                   </h5>
                   <p
@@ -90,9 +89,21 @@ const CraftSection = () => {
                 </div>
               ))}
             </div>
+            
           </div>
 
+
         </div>
+                  {/* Quote Section */}
+<div className="mt-7 md:mt-7 flex justify-center">
+  <div className="text-center max-w-xl border-t border-[#eee] pt-8">
+    <blockquote className="italic text-[16px] sm:text-[21px] md:text-[23px] leading-[1.6] text-[#666]">
+      <span className="text-[#ccc] mr-1">“</span>
+      We believe trust comes from clarity
+      <span className="text-[#ccc] ml-1">”</span>
+    </blockquote>
+  </div>
+</div>
       </div>
     </section>
   );
