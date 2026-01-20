@@ -128,7 +128,7 @@ const handleAddToCart = (item) => {
   );
 
   return (
-    <div className="min-h-screen bg-[#fcfbf8]">
+    <div className="min-h-screen bg-[#ffffff]">
       <div className="max-w-[1400px] mx-auto px-6 lg:px-8 py-3">
         <div className="flex flex-col gap-10">
           {/* Products */}
@@ -184,7 +184,7 @@ const handleAddToCart = (item) => {
       {showScrollTop && (
         <button
           onClick={scrollToTop}
-          className="fixed bottom-8 left-8 z-50 w-12 h-12 bg-[#b28c34] text-white rounded-full shadow-lg flex items-center justify-center hover:bg-[#9a864c] transition">
+          className="fixed bottom-8 left-8 z-50 w-12 h-12 bg-[#252421] text-white rounded-full shadow-lg flex items-center justify-center hover:bg-[#9a864c] transition">
           <ArrowUp size={22} />
         </button>
       )}

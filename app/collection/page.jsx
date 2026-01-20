@@ -42,13 +42,13 @@ export default async function ProductCollectionPage() {
   }
 
   return (
-    <main className=" min-h-screen bg-[#fcfbf8]">
+    <main className=" min-h-screen bg-[#ffffff]">
       {/* 🔝 Header */}
       {/* 🔝 Header */}
-<section className="bg-[#f9f6ef] border-b border-[#e7e1cf]">
+<section className="bg-[#ffffff] border-b border-[#dddddd]">
   <div className="max-w-[1100px] mx-auto px-6 py-16 sm:py-18 text-center">
     
-    <h1 className="font-[Cormorant_Garamond] text-3xl sm:text-4xl md:text-5xl font-semibold text-[#1b180d] mb-2 leading-tight">
+    <h1 className=" text-3xl sm:text-4xl md:text-5xl font-semibold text-[#1b180d] mb-2 leading-tight">
       The Collection
     </h1>
 

@@ -9,7 +9,7 @@ const ProductGrid = ({
   if (!products || products.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-20 px-4">
-        <div className="w-24 h-24 mb-6 text-[#bdb6a5]">
+        <div className="w-24 h-24 mb-6 text-[#464440]">
           <svg
             viewBox="0 0 24 24"
             fill="none"

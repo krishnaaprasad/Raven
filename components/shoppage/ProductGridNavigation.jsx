@@ -49,11 +49,11 @@ export default function ProductGridNavigation({
 
   return (
     <div
-      className={`w-full bg-[#fcfbf8] px-4 py-4  space-y-3 ${className}`}
+      className={`w-full bg-[#ffffff] px-4 py-4  space-y-3 ${className}`}
     >
       {/* 🔝 Top Row */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <p className="text-sm text-[#6b6453] font-[Outfit]">
+        <p className="text-sm text-[#3b3933] font-[Outfit]">
           Showing{' '}
           <span className="text-[#1b180d] font-medium">{start}-{end}</span> of{' '}
           <span className="text-[#1b180d] font-medium">{totalProducts}</span>
@@ -65,7 +65,7 @@ export default function ProductGridNavigation({
           <div className="relative w-full sm:w-60" ref={ref}>
             <button
               onClick={() => setOpen(!open)}
-              className="w-full flex items-center justify-between px-4 py-2.5 bg-[#fcfbf8] border border-[#e7e1cf] rounded-md text-sm font-[Outfit] text-[#1b180d] hover:bg-[#f3efe3] transition"
+              className="w-full flex items-center justify-between px-4 py-2.5 bg-[#ffffff] border border-[#e4e4e4] rounded-md text-sm font-[Outfit] text-[#1b180d] hover:bg-[#e6e6e6] transition"
             >
               <div className="flex items-center gap-2 truncate">
                 <Icon name="BarsArrowDownIcon" size={16} />
@@ -77,15 +77,15 @@ export default function ProductGridNavigation({
             </button>
 
             {open && (
-              <div className="absolute left-0 right-0 mt-2 bg-[#fcfbf8] border border-[#e7e1cf] rounded-lg shadow-lg z-50 overflow-hidden">
+              <div className="absolute left-0 right-0 mt-2 bg-[#ffffff] border border-[#e4e4e4] rounded-lg shadow-lg z-50 overflow-hidden">
                 {SORT_OPTIONS.map((o) => (
                   <button
                     key={o.value}
                     onClick={() => handleSort(o.value)}
                     className={`w-full px-4 py-3 flex items-center justify-between text-sm font-[Outfit] transition ${
                       sortBy === o.value
-                        ? 'bg-[#f3efe3] text-[#b28c34]'
-                        : 'text-[#1b180d] hover:bg-[#f3efe3]'
+                        ? 'bg-[#f1f1f1] text-[#1b180d]'
+                        : 'text-[#1b180d] hover:bg-[#e7e7e7]'
                     }`}
                   >
                     <span>{o.label}</span>
@@ -93,7 +93,7 @@ export default function ProductGridNavigation({
                       <Icon
                         name="CheckIcon"
                         size={16}
-                        className="text-[#b28c34]"
+                        className="text-[#1b180d]"
                       />
                     )}
                   </button>
@@ -103,7 +103,7 @@ export default function ProductGridNavigation({
           </div>
 
           {/* 👁 View Toggle (desktop only) */}
-          <div className="hidden sm:flex items-center border border-[#e7e1cf] rounded-md overflow-hidden">
+          <div className="hidden sm:flex items-center border border-[#e2e2e2] rounded-md overflow-hidden">
             <button
               onClick={() => {
                 setViewMode('grid');
@@ -111,7 +111,7 @@ export default function ProductGridNavigation({
               }}
               className={`p-2 ${
                 viewMode === 'grid'
-                  ? 'bg-[#f3efe3] text-[#b28c34]'
+                  ? 'bg-[#f1f1f1] text-[#1b180d]'
                   : 'text-[#6b6453] hover:text-[#1b180d]'
               }`}
             >
@@ -124,7 +124,7 @@ export default function ProductGridNavigation({
               }}
               className={`p-2 ${
                 viewMode === 'list'
-                  ? 'bg-[#f3efe3] text-[#b28c34]'
+                  ? 'bg-[#f1f1f1] text-[#1b180d]'
                   : 'text-[#6b6453] hover:text-[#1b180d]'
               }`}
             >

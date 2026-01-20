@@ -33,7 +33,7 @@ const primaryImage =
       {/* Image */}
       <div className="relative aspect-3/4 overflow-hidden bg-[#f8f7f3]">
         {!imageLoaded && (
-          <div className="absolute inset-0 bg-[#f3f1ea] animate-pulse" />
+          <div className="absolute inset-0 bg-[#ffffff] animate-pulse" />
         )}
 
         <Image
