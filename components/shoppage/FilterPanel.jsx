@@ -1,23 +1,17 @@
 'use client';
 
 import { useState, useRef, useMemo } from 'react';
-import Icon from '@/components/ui/AppIcon';
-
-const MIN_PRICE = 0;
-const MAX_PRICE = 5000;
+import { Funnel, X } from 'lucide-react';
 
 export default function FilterPanel({
   onFilterChange,
   initialFilters = {},
-  className = '',
   isMobile = false,
 }) {
   const [isOpen, setIsOpen] = useState(!isMobile);
 
   const [activeFilters, setActiveFilters] = useState({
     fragranceFamily: initialFilters.fragranceFamily || [],
-    brands: initialFilters.brands || [],
-    priceRange: initialFilters.priceRange || [MIN_PRICE, MAX_PRICE],
   });
 
   const debounceRef = useRef(null);
@@ -36,40 +30,27 @@ export default function FilterPanel({
   );
 
   const applyFilters = (filters) => {
-    if (isMobile) return;
-
     clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => {
       onFilterChange?.(filters);
     }, 150);
   };
 
-  const update = (filters) => {
-    setActiveFilters(filters);
-    applyFilters(filters);
-  };
+  const toggle = (value) => {
+    const current = activeFilters.fragranceFamily;
+    const updated = current.includes(value)
+      ? current.filter((v) => v !== value)
+      : [...current, value];
 
-  const toggle = (key, val) => {
-    const current = activeFilters[key];
-    const updated = current.includes(val)
-      ? current.filter((v) => v !== val)
-      : [...current, val];
-
-    update({ ...activeFilters, [key]: updated });
+    const next = { fragranceFamily: updated };
+    setActiveFilters(next);
+    if (!isMobile) applyFilters(next);
   };
 
   const clearAll = () => {
-    const cleared = {
-      fragranceFamily: [],
-      brands: [],
-      priceRange: [MIN_PRICE, MAX_PRICE],
-    };
-
+    const cleared = { fragranceFamily: [] };
     setActiveFilters(cleared);
-
-    if (!isMobile) {
-      onFilterChange?.(cleared);
-    }
+    onFilterChange?.(cleared);
   };
 
   const handleApplyMobile = () => {
@@ -79,123 +60,102 @@ export default function FilterPanel({
 
   const count = activeFilters.fragranceFamily.length;
 
-  const Section = ({ title, children }) => {
-    const [open, setOpen] = useState(true);
-
-    return (
-      <div className="border-b border-[#e7e1cf] last:border-b-0">
-        <button
-          type="button"
-          onClick={() => setOpen(!open)}
-          className="w-full flex justify-between items-center py-4"
-        >
-          <span className="font-[Outfit] text-sm font-medium text-[#1b180d]">
-            {title}
-          </span>
-          <Icon
-            name="ChevronDownIcon"
-            size={18}
-            className={`text-[#6b6453] transition ${
-              open ? 'rotate-180' : ''
-            }`}
-          />
-        </button>
-
-        <div
-          className={`pb-4 space-y-3 overflow-hidden transition-all duration-300 ${
-            open ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
-          }`}
-        >
-          {children}
-        </div>
-      </div>
-    );
-  };
-
   const content = (
-    <div className="p-5">
-      <div className="sticky top-0 bg-[#fcfbf8] z-10 pb-3 mb-4 border-b border-[#e7e1cf]">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Icon name="FunnelIcon" size={18} className="text-[#1b180d]" />
-            <h3 className="font-[Outfit] text-base font-semibold text-[#1b180d]">
-              Filters
-            </h3>
-            {count > 0 ? (
-              <span className="bg-[#b28c34] text-white text-xs font-medium px-2 py-0.5 rounded-full">
-                {count}
-              </span>
-            ) : (
-              <span className="text-xs text-[#6b6453]">No filters</span>
-            )}
-          </div>
+  <div className="p-8 space-y-5 bg-white border border-[#e6e6e6] ">
 
-          {count > 0 && (
-            <button
-              onClick={clearAll}
-              className="text-sm text-[#b28c34] font-medium hover:underline"
-            >
-              Clear
-            </button>
-          )}
-        </div>
+    {/* Header */}
+    <div className="flex justify-between items-center pb-6 border-b border-[#ededed]">
+      <div className="flex items-center gap-3">
+        <Funnel size={16} className="text-[#111]" />
+        <span className="text-xs tracking-[0.25em] uppercase text-[#111] font-medium">
+          Discover by Intention
+        </span>
+        {count > 0 && (
+          <span className="text-[11px] bg-black text-white px-2 py-0.5 rounded-full">
+            {count}
+          </span>
+        )}
       </div>
 
-      <Section title="Fragrance Family">
-        {options.fragranceFamily.map((o) => (
-          <label
-            key={o.value}
-            className="flex items-center gap-3 text-sm cursor-pointer text-[#1b180d] hover:text-[#b28c34] transition"
-          >
-            <input
-              type="checkbox"
-              checked={activeFilters.fragranceFamily.includes(o.value)}
-              onChange={() => toggle('fragranceFamily', o.value)}
-              className="accent-[#b28c34]"
-            />
-            {o.label}
-          </label>
-        ))}
-      </Section>
+      {count > 0 && (
+        <button
+          onClick={clearAll}
+          className="text-xs text-[#777] hover:text-black underline"
+        >
+          Clear
+        </button>
+      )}
     </div>
-  );
 
+    {/* Section */}
+    <div className="space-y-6">
+      <p className="text-sm text-[#666]">Fragrance Family</p>
+
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+        {options.fragranceFamily.map((o) => {
+          const active = activeFilters.fragranceFamily.includes(o.value);
+
+          return (
+            <button
+              key={o.value}
+              onClick={() => toggle(o.value)}
+              className={`
+                py-3 px-4 text-xs tracking-[0.2em] uppercase transition-all duration-300
+                border rounded-md
+                ${
+                  active
+                    ? "bg-black text-white border-black"
+                    : "bg-white text-[#111] border-[#e5e5e5] hover:border-black"
+                }
+              `}
+            >
+              {o.label}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  </div>
+);
+
+
+  // MOBILE
   if (isMobile) {
     return (
       <>
         <button
           onClick={() => setIsOpen(true)}
-          className="w-full flex items-center justify-between px-4 py-3 bg-[#1b180d] text-white rounded-md"
+          className="w-full border border-[#e5e5e5] px-4 py-3 flex justify-between items-center bg-white"
         >
-          <div className="flex items-center gap-2">
-            <Icon name="FunnelIcon" size={18} />
-            <span className="font-[Outfit] text-sm font-medium">Filters</span>
-          </div>
+          <span className="text-xs tracking-widest uppercase text-[#111]">
+            Filters
+          </span>
+
           {count > 0 && (
-            <span className="bg-[#b28c34] text-white text-xs font-medium px-2 py-0.5 rounded-full">
+            <span className="text-[11px] border border-[#ddd] px-2 py-0.5 rounded-full text-[#555]">
               {count}
             </span>
           )}
         </button>
 
         {isOpen && (
-          <div className="fixed inset-0 z-1300 bg-black/40">
-            <div className="absolute bottom-0 left-0 right-0 h-[85vh] bg-[#fcfbf8] rounded-t-2xl shadow-2xl flex flex-col">
-              <div className="flex items-center justify-between px-5 py-4 border-b border-[#e7e1cf]">
-                <h2 className="font-serif text-lg font-semibold text-[#1b180d]">
+          <div className="fixed inset-0 z-50 bg-black/20">
+            <div className="absolute bottom-0 left-0 right-0 bg-white rounded-t-2xl max-h-[85vh] flex flex-col">
+              <div className="flex justify-between items-center px-6 py-4 border-b border-[#eee]">
+                <span className="text-xs tracking-widest uppercase text-[#111]">
                   Filters
-                </h2>
+                </span>
                 <button onClick={() => setIsOpen(false)}>
-                  <Icon name="XMarkIcon" size={22} className="text-[#1b180d]" />
+                  <X size={18} />
                 </button>
               </div>
 
               <div className="flex-1 overflow-y-auto">{content}</div>
 
-              <div className="p-4 border-t border-[#e7e1cf]">
+              <div className="p-4 border-t border-[#eee]">
                 <button
                   onClick={handleApplyMobile}
-                  className="w-full py-3 bg-[#b28c34] text-white rounded-md font-[Outfit] font-medium hover:bg-[#9a864c] transition"
+                  className="w-full py-3 border border-[#111] text-[#111] hover:bg-[#f7f7f7] transition"
                 >
                   Apply Filters
                 </button>
@@ -207,11 +167,14 @@ export default function FilterPanel({
     );
   }
 
-  return (
-    <div
-      className={`h-full bg-[#fcfbf8] border border-[#e7e1cf] rounded-xl shadow-sm flex flex-col ${className}`}
-    >
-      <div className="flex-1 overflow-y-auto">{content}</div>
+ return (
+  <div className="w-full">
+    <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="border border-[#e6e6e6]  bg-white">
+        {content}
+      </div>
     </div>
-  );
+  </div>
+);
+
 }

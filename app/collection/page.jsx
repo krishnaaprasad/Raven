@@ -4,7 +4,7 @@ import SearchComponent from '@/components/shoppage/SearchComponent';
 import ProductCollectionInteractive from './components/ProductCollectionInteractive';
 import connectToDatabase from '@/lib/mongodb';
 import Product from '@/models/Product';
-
+import FilterPanel from '@/components/shoppage/FilterPanel';
 // ✅ SEO metadata (optimized)
 export const metadata = {
   title: 'Luxury Perfume Collection for Men & Women | Raven Fragrance India',
@@ -45,7 +45,7 @@ export default async function ProductCollectionPage() {
     <main className=" min-h-screen bg-[#ffffff]">
       {/* 🔝 Header */}
       {/* 🔝 Header */}
-<section className="bg-[#ffffff] border-b border-[#dddddd]">
+<section className="bg-[#ffffff] ">
   <div className="max-w-[1100px] mx-auto px-6 py-16 sm:py-18 text-center">
     
     <h1 className=" text-3xl sm:text-4xl md:text-5xl font-semibold text-[#1b180d] mb-2 leading-tight">
@@ -59,7 +59,7 @@ export default async function ProductCollectionPage() {
   </div>
 </section>
 
-
+<FilterPanel />
       {/* 🛍 Collection */}
       <ProductCollectionInteractive initialProducts={products} />
     </main>
