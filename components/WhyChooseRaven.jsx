@@ -95,14 +95,15 @@ const CraftSection = () => {
 
         </div>
                   {/* Quote Section */}
-<div className="mt-7 md:mt-7 flex justify-center">
-  <div className="text-center max-w-xl border-t border-[#eee] pt-8">
+<div className="mt-10 md:mt-12 flex justify-center">
+  
     <blockquote className="italic text-[16px] sm:text-[21px] md:text-[23px] leading-[1.6] text-[#666]">
       <span className="text-[#ccc] mr-1">“</span>
       We believe trust comes from clarity
       <span className="text-[#ccc] ml-1">”</span>
+      
     </blockquote>
-  </div>
+  
 </div>
       </div>
     </section>

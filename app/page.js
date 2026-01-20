@@ -45,10 +45,9 @@ export default async function Home() {
       {/* ⭐ PASS bestsellerIds ALSO ⭐ */}
       <ProductCarousel products={products} bestsellerIds={bestsellerIds} />
       <WhyChooseRaven />
-      <FAQSection />
       <Testimonials />
+      <FAQSection />
       <InstagramGallery /> 
-
       {/*
       <AboutRaven />
       <RebelSpirit />

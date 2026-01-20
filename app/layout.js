@@ -11,24 +11,13 @@ import QuickViewModal from "@/app/collection/components/QuickViewModal";
 import { QuickViewProvider } from "@/app/context/QuickViewContext";
 import Script from "next/script";
 
-import { Outfit } from 'next/font/google';
-import { Cormorant_Garamond } from 'next/font/google';
 
-const cormorantGaramond = Cormorant_Garamond({
-  subsets: ['latin'],
-  weight: ['400', '700'],
-  display: 'swap',
-})
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
 });
 
-const outfit = Outfit({
-  subsets: ['latin'],
-  display: 'swap', // Optional: controls font display behavior
-});
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
@@ -79,7 +68,7 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" className={`${outfit.className} ${cormorantGaramond.className}`}>
+    <html lang="en" >
       <head>
         {process.env.NEXT_PUBLIC_GA_ID && (
           <>
