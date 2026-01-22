@@ -16,6 +16,8 @@ import { usePathname } from "next/navigation";
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
 import { useRouter } from "next/navigation";
 import LogoText from '@/components/LogoText';
+import { useTheme } from "@/app/theme-provider";
+import { Sun, Moon } from "lucide-react";
 
 
 
@@ -26,7 +28,8 @@ export default function NavBar() {
   const pathname = usePathname(); // ⭐ ADDED
   const router = useRouter();
   if (pathname.startsWith("/admin")) return null;
-  
+  const { theme, toggleTheme } = useTheme();
+
   const [showMiniCart, setShowMiniCart] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [animateCart, setAnimateCart] = useState(false);
@@ -177,6 +180,7 @@ useEffect(() => {
                   </button>
                 </Link>
               </motion.div>*/}
+  
 
               {/* Account/Login */}
               {!session ? (
@@ -255,9 +259,18 @@ useEffect(() => {
   )}
 </button>
 
-              <MiniCart
+              <MiniCart/>
+                          <button
+  onClick={toggleTheme}
+  className="relative w-12 h-7 rounded-full bg-(--bg-elevated) border border-(--border) transition-colors duration-300"
+>
+  <span
+    className={`absolute top-0.5 h-6 w-6 rounded-full bg-(--text) transition-all duration-300 ${
+      theme === "dark" ? "translate-x-5" : "translate-x-0.5"
+    }`}
+  />
+</button>
 
-              />
             </div>
           </div>
         </div>

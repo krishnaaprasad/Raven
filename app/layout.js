@@ -10,6 +10,7 @@ import HomeMarquee from "@/components/HomeMarquee"; // ✅ new client component
 import QuickViewModal from "@/app/collection/components/QuickViewModal";
 import { QuickViewProvider } from "@/app/context/QuickViewContext";
 import Script from "next/script";
+import { ThemeProvider } from "./theme-provider";
 
 
 
@@ -91,6 +92,7 @@ export default function RootLayout({ children }) {
       </head>
 
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+      <ThemeProvider>
         <Providers>
           <QuickViewProvider>
             <HomeMarquee />
@@ -106,7 +108,8 @@ export default function RootLayout({ children }) {
             <SpeedInsights />
             <Analytics />
           </QuickViewProvider>
-        </Providers>
+         </Providers>
+      </ThemeProvider>  
       </body>
     </html>
   );
