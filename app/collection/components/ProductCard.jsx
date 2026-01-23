@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import Image from 'next/image';
-import { Eye, Star, ShoppingBag, Sparkles } from 'lucide-react';
+import { useState } from "react";
+import Image from "next/image";
+import { Eye, Star, ShoppingBag, Sparkles } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/app/context/cartcontext";
 import { toast } from "react-hot-toast";
@@ -12,45 +12,58 @@ const ProductCard = ({ product, onQuickView }) => {
   const [isHovered, setIsHovered] = useState(false);
   const { addToCart, openCart } = useCart();
   const router = useRouter();
-  
-const primaryImage =
-  typeof product?.images?.[0] === "string"
-    ? product.images[0]
-    : product?.images?.[0]?.original || null;
 
+  const primaryImage =
+    typeof product?.images?.[0] === "string"
+      ? product.images[0]
+      : product?.images?.[0]?.original || null;
 
   const variant = product?.variants?.[0] || {};
   const price = variant.price ?? 0;
-  const size = variant.size ?? '';
+  const size = variant.size ?? "";
   const outOfStock = variant?.stock <= 0;
 
   return (
     <div
-      className="group relative bg-white border border-[#ffffff]  overflow-hidden  transition-all duration-300"
+      className="
+        group relative
+        bg-(--theme-bg)
+        border border-(--theme-border)
+        overflow-hidden
+        transition-colors duration-500
+      "
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {/* Image */}
-      <div className="relative aspect-3/4 overflow-hidden bg-[#f8f7f3]">
+      {/* IMAGE */}
+      <div className="relative aspect-3/4 overflow-hidden bg-(--theme-soft)">
         {!imageLoaded && (
-          <div className="absolute inset-0 bg-[#ffffff] animate-pulse" />
+          <div className="absolute inset-0 bg-(--theme-soft) animate-pulse" />
         )}
 
         <Image
-  src={primaryImage}
-  alt={product?.name}
-  fill
-  sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-  className="object-cover transition-transform duration-500 group-hover:scale-105"
-  onLoad={() => setImageLoaded(true)}
-/>
-
+          src={primaryImage}
+          alt={product?.name}
+          fill
+          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+          className="object-cover transition-transform duration-500 group-hover:scale-105"
+          onLoad={() => setImageLoaded(true)}
+        />
 
         {isHovered && (
-          <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
             <button
               onClick={() => onQuickView?.(product)}
-              className="flex items-center gap-2 px-6 py-3 bg-white text-[#1b180d] rounded-md font-[Outfit] text-sm font-medium hover:bg-[#3a3833] hover:text-white transition"
+              className="
+                flex items-center gap-2
+                px-6 py-3
+                bg-(--theme-bg)
+                text-(--theme-text)
+                border border-(--theme-border)
+                text-sm uppercase tracking-widest
+                hover:bg-(--theme-soft)
+                transition
+              "
             >
               <Eye size={18} />
               Quick View
@@ -59,35 +72,41 @@ const primaryImage =
         )}
       </div>
 
-      {/* Info */}
+      {/* INFO */}
       <div className="p-5 space-y-3">
-        <div>
-          {/* <p className="text-xs uppercase tracking-wide text-[#6b6453] font-[Outfit] mb-1">
-            {product?.brand}
-          </p> */}
-          <h3
-            onClick={(e) => {
-              e.stopPropagation();
-              router.push(`/product/${product.slug}`);
-            }}
-            className="font-serif text-base font-semibold text-[#1b180d] line-clamp-2 cursor-pointer hover:text-[#33312d] transition">
-            {product.name}
-          </h3>
-        </div>
+        <h3
+          onClick={(e) => {
+            e.stopPropagation();
+            router.push(`/product/${product.slug}`);
+          }}
+          className="
+            font-[Crimson_Text]
+            text-base font-semibold
+            text-(--theme-text)
+            line-clamp-2 cursor-pointer
+            hover:opacity-80 transition
+          "
+        >
+          {product.name}
+        </h3>
 
         {isHovered && (
           <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <Sparkles size={14} className="text-[#1f1d18]" />
-              <span className="text-xs text-[#1f1d18] font-[Outfit]">
-                {product?.fragranceType}
-              </span>
+            <div className="flex items-center gap-2 text-(--theme-muted) text-xs">
+              <Sparkles size={14} />
+              {product?.fragranceType}
             </div>
+
             <div className="flex flex-wrap gap-1">
               {product?.topNotes?.slice(0, 3)?.map((note, i) => (
                 <span
                   key={i}
-                  className="px-2 py-1 bg-[#f3f1ea] text-[#3d3a32] text-xs rounded"
+                  className="
+                    px-2 py-1
+                    bg-(--theme-soft)
+                    text-(--theme-muted)
+                    text-xs rounded
+                  "
                 >
                   {note}
                 </span>
@@ -96,7 +115,7 @@ const primaryImage =
           </div>
         )}
 
-        {/* Rating */}
+        {/* RATING */}
         <div className="flex items-center gap-2">
           <div className="flex">
             {[...Array(5)].map((_, i) => (
@@ -105,61 +124,64 @@ const primaryImage =
                 size={14}
                 className={
                   i < Math.floor(product?.rating || 0)
-                    ? 'text-[#201a0c] fill-[#464032]'
-                    : 'text-[#e9e7e3]'
+                    ? "text-(--theme-text) fill-(--theme-text)"
+                    : "text-(--theme-border)"
                 }
               />
             ))}
           </div>
-          <span className="text-xs text-[#6b6453] font-[Outfit]">
+          <span className="text-xs text-(--theme-muted)">
             {product?.rating} ({product?.reviewCount || 0})
           </span>
         </div>
 
-        {/* Price */}
-        <div>
-          <p className="font-serif text-lg font-semibold text-[#1b180d]">
-            ₹{price.toLocaleString('en-IN')}
-          </p>
-         
-        </div>
+        {/* PRICE */}
+        <p className="font-[Crimson_Text] text-lg font-semibold text-(--theme-text)">
+          ₹{price.toLocaleString("en-IN")}
+        </p>
 
-        {/* Add to cart */}
+        {/* ADD TO CART */}
         <button
           disabled={outOfStock}
           onClick={() => {
-          if (outOfStock) return;
+            if (outOfStock) return;
 
-          addToCart(
-            {
-              id: product._id,
-              name: product.name,
-              slug: product.slug,
-              price: Number(price) || 0,
-              image: primaryImage,
-              size: size || "",
-            },
-            1
-          );
+            addToCart(
+              {
+                id: product._id,
+                name: product.name,
+                slug: product.slug,
+                price: Number(price) || 0,
+                image: primaryImage,
+                size: size || "",
+              },
+              1
+            );
 
-          toast.success(`${product.name} added to cart`, {
-            style: {
-              background: "#1b180d",
-              color: "#fff",
-              border: "1px solid #B28C34",
-            },
-          });
+            toast.success(`${product.name} added to cart`, {
+              style: {
+                background: "var(--theme-bg)",
+                color: "var(--theme-text)",
+                border: "1px solid var(--theme-border)",
+              },
+            });
 
-          setTimeout(() => openCart(), 50);
-        }}
-          className={`w-full py-3 rounded-md font-[Outfit] text-sm font-medium transition flex items-center justify-center gap-2 ${
-            outOfStock
-              ? 'bg-[#d3d3d3] text-black cursor-not-allowed border-black/20'
-              : 'bg-[#ffffff] text-black hover:bg-[#3a3833] hover:text-white border border-black'
-          }`}
+            setTimeout(() => openCart(), 50);
+          }}
+          className={`
+            w-full py-3
+            text-sm uppercase tracking-widest
+            border transition
+            flex items-center justify-center gap-2
+            ${
+              outOfStock
+                ? "bg-(--theme-soft) text-(--theme-muted) cursor-not-allowed border-(--theme-border)"
+                : "bg-(--theme-bg) text-(--theme-text) border-(--theme-border) hover:bg-(--theme-soft)"
+            }
+          `}
         >
           <ShoppingBag size={18} />
-          {outOfStock ? 'Out of Stock' : 'Add to Bag'}
+          {outOfStock ? "Out of Stock" : "Add to Bag"}
         </button>
       </div>
     </div>

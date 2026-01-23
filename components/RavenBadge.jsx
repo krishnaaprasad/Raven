@@ -2,27 +2,32 @@
 
 import { useState } from "react";
 
-const badges = [
-  { title: "EDP", subtitle: "Eau De Parfum", icon: droplet() },
-  { title: "High Quality", subtitle: "Fragrance", icon: award() },
-  { title: "Small Batch", subtitle: "Crafted", icon: batch() },
-  { title: "Secure", subtitle: "Payment", icon: lock() },
-  { title: "Cruelty Free", subtitle: "Ethical Choice", icon: heart() },
-  { title: "No Harsh", subtitle: "Additives", icon: ban() },
-  { title: "Trusted", subtitle: "Delivery", icon: truck() },
-];
-
 export default function TrustBadges() {
   const [paused, setPaused] = useState(false);
 
+  const badges = [
+    { title: "EDP", subtitle: "Eau De Parfum", icon: Droplet },
+    { title: "High Quality", subtitle: "Fragrance", icon: Award },
+    { title: "Small Batch", subtitle: "Crafted", icon: Batch },
+    { title: "Secure", subtitle: "Payment", icon: Lock },
+    { title: "Cruelty Free", subtitle: "Ethical Choice", icon: Heart },
+    { title: "No Harsh", subtitle: "Additives", icon: Ban },
+    { title: "Trusted", subtitle: "Delivery", icon: Truck },
+  ];
+
   return (
     <section
-      className="relative bg-[#fffcfc] py-10 sm:py-12 overflow-hidden"
+      className="
+        relative
+        bg-[var(--theme-bg)]
+        border-y border-[var(--theme-border)]
+        py-10 sm:py-12
+        overflow-hidden
+        transition-colors duration-500
+      "
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >
-      
-      {/* Slider viewport */}
       <div className="overflow-hidden">
         <div
           className="flex w-max"
@@ -36,14 +41,27 @@ export default function TrustBadges() {
               key={i}
               className="flex flex-col items-center text-center mx-6 sm:mx-10 min-w-[120px] sm:min-w-40"
             >
-              <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-full border border-[#eee] flex items-center justify-center text-[#111] mb-3 sm:mb-5 hover:bg-[#fafafa] transition">
-                {b.icon}
+              <div
+                className="
+                  w-10 h-10 sm:w-14 sm:h-14
+                  rounded-full
+                  border border-[var(--theme-border)]
+                  flex items-center justify-center
+                  text-[var(--theme-text)]
+                  mb-3 sm:mb-5
+                  bg-[var(--theme-bg)]
+                  hover:bg-[var(--theme-soft)]
+                  transition-colors duration-300
+                "
+              >
+                <b.icon />
               </div>
 
-              <div className="font-serif text-[10px] sm:text-xs tracking-[0.25em] uppercase text-[#111]">
+              <div className="font-[Crimson_Text] text-[10px] sm:text-xs tracking-[0.25em] uppercase text-[var(--theme-text)]">
                 {b.title}
               </div>
-              <div className="font-serif text-[10px] sm:text-xs tracking-[0.25em] uppercase text-[#666]">
+
+              <div className="font-[system-ui] text-[10px] sm:text-xs tracking-[0.2em] uppercase text-[var(--theme-muted)]">
                 {b.subtitle}
               </div>
             </div>
@@ -51,7 +69,6 @@ export default function TrustBadges() {
         </div>
       </div>
 
-      {/* Local keyframes (guaranteed to work) */}
       <style>{`
         @keyframes marquee {
           0% { transform: translateX(0); }
@@ -62,9 +79,10 @@ export default function TrustBadges() {
   );
 }
 
+
 /* ---------- ICONS ---------- */
 
-function droplet() {
+function Droplet() {
   return (
     <svg viewBox="0 0 24 24" className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" strokeWidth="1.2">
       <path d="M12 2 C12 2 6 10 6 14a6 6 0 0 0 12 0C18 10 12 2 12 2Z" />
@@ -72,7 +90,7 @@ function droplet() {
   );
 }
 
-function award() {
+function Award() {
   return (
     <svg viewBox="0 0 24 24" className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" strokeWidth="1.2">
       <circle cx="12" cy="8" r="5" />
@@ -81,7 +99,7 @@ function award() {
   );
 }
 
-function batch() {
+function Batch() {
   return (
     <svg viewBox="0 0 24 24" className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" strokeWidth="1.2">
       <rect x="4" y="4" width="16" height="16" rx="2" />
@@ -90,7 +108,7 @@ function batch() {
   );
 }
 
-function lock() {
+function Lock() {
   return (
     <svg viewBox="0 0 24 24" className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" strokeWidth="1.2">
       <rect x="5" y="11" width="14" height="9" rx="2" />
@@ -99,7 +117,7 @@ function lock() {
   );
 }
 
-function heart() {
+function Heart() {
   return (
     <svg viewBox="0 0 24 24" className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" strokeWidth="1.2">
       <path d="M12 21s-7-4.5-7-10a4 4 0 0 1 7-2 4 4 0 0 1 7 2c0 5.5-7 10-7 10Z" />
@@ -107,7 +125,7 @@ function heart() {
   );
 }
 
-function ban() {
+function Ban() {
   return (
     <svg viewBox="0 0 24 24" className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" strokeWidth="1.2">
       <circle cx="12" cy="12" r="8" />
@@ -116,7 +134,7 @@ function ban() {
   );
 }
 
-function truck() {
+function Truck() {
   return (
     <svg viewBox="0 0 24 24" className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" strokeWidth="1.2">
       <rect x="2" y="7" width="13" height="8" rx="1" />

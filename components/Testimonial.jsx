@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { Crimson_Text } from "next/font/google";
 
 const crimson = Crimson_Text({
@@ -91,14 +91,14 @@ export default function TestimonialsMarquee() {
   };
 
   return (
-    <section className="relative py-12 md:py-20 bg-white dark:bg-[#ffffff] overflow-hidden">
+    <section className="relative py-12 md:py-20 bg-(--theme-bg) overflow-hidden transition-colors duration-500">
 
       {/* Header */}
       <div className="max-w-4xl mx-auto px-4 text-center mb-12">
-        <h2 className={`${crimson.className} text-[36px] sm:text-[60px] font-light text-666 dark:text-666 mb-3`}>
+        <h2 className={`${crimson.className} text-[36px] sm:text-[60px] font-light text-(--theme-text) mb-3`}>
           Voices of Intention
         </h2>
-        <p className="font-[system-ui] text-[#666] dark:text-666 text-[16px] sm:text-[20px]">
+        <p className="font-[system-ui] text-(--theme-muted) text-[16px] sm:text-[20px]">
           From those who understand that presence speaks louder than performance.
         </p>
       </div>
@@ -119,26 +119,29 @@ export default function TestimonialsMarquee() {
           {[...testimonials, ...testimonials].map((t, i) => (
             <div
               key={i}
-              className="min-w-[260px] sm:min-w-[320px] lg:min-w-[380px] 
-                border border-[#e5e5e5] dark:border-black/20 
-                bg-white dark:bg-transparent 
-                p-5 sm:p-6 lg:p-8"
+              className="
+                min-w-[260px] sm:min-w-[320px] lg:min-w-[380px]
+                border border-(--theme-border)
+                bg-(--theme-soft)
+                p-5 sm:p-6 lg:p-8
+                transition-colors duration-500
+              "
             >
-              <p className="font-[system-ui] italic text-666 dark:text-black text-[15px] sm:text-[17px] lg:text-[18px] leading-relaxed mb-5">
+              <p className="font-[system-ui] italic text-(--theme-text) text-[15px] sm:text-[17px] lg:text-[18px] leading-relaxed mb-5">
                 “{t.text}”
               </p>
 
-              <div className="h-px w-12 bg-[#e5e5e5] dark:bg-white/20 mb-5" />
+              <div className="h-px w-12 bg-(--theme-border) mb-5" />
 
-              <p className="font-[system-ui] text-[13px] sm:text-sm tracking-wide text-888 dark:text-666 font-medium">
+              <p className="font-[system-ui] text-[13px] sm:text-sm tracking-wide text-(--theme-muted) font-medium">
                 {t.name}
               </p>
 
-              <p className="font-[system-ui] text-[13px] sm:text-sm text-888 dark:text-666 mt-1">
+              <p className="font-[system-ui] text-[13px] sm:text-sm text-(--theme-muted) mt-1">
                 Purchased: {t.product}
               </p>
 
-              <p className="font-[system-ui] text-[13px] sm:text-sm text-888 dark:text-666 mt-1">
+              <p className="font-[system-ui] text-[13px] sm:text-sm text-(--theme-muted) mt-1">
                 {t.location}
               </p>
             </div>

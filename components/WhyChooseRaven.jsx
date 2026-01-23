@@ -34,7 +34,7 @@ const CraftSection = () => {
   ];
 
   return (
-    <section className="bg-[#fffcfc] py-8 md:py-14">
+    <section className="bg-[var(--theme-bg)] py-8 md:py-14 transition-colors duration-500">
       <div className="max-w-[1100px] mx-auto px-4 sm:px-6">
         <div className="grid lg:grid-cols-2 gap-10 lg:gap-14 items-center">
 
@@ -42,7 +42,7 @@ const CraftSection = () => {
           <div className="flex justify-center lg:justify-start">
             <div className="grid grid-cols-2 gap-3 w-[280px] sm:w-[340px] md:w-[380px]">
               {images.map((src, i) => (
-                <div key={i} className="relative aspect-square overflow-hidden rounded-sm">
+                <div key={i} className="relative aspect-square overflow-hidden rounded-sm bg-[var(--theme-soft)]">
                   <Image
                     src={src}
                     alt=""
@@ -56,55 +56,47 @@ const CraftSection = () => {
 
           {/* RIGHT CONTENT */}
           <div>
-            {/* Heading */}
             <h2
-              className={`${playfair.className} text-3xl sm:text-4xl md:text-5xl leading-tight text-[#111] mb-6`}
+              className={`${playfair.className} text-3xl sm:text-4xl md:text-5xl leading-tight text-[var(--theme-text)] mb-6`}
             >
               Craft Over Commerce
             </h2>
 
-            {/* Intro */}
             <p
-              className={`${inter.className} text-[15px] sm:text-[16px] leading-[1.75] text-[#555] max-w-[520px] mb-10`}
+              className={`${inter.className} text-[15px] sm:text-[16px] leading-[1.75] text-[var(--theme-muted)] max-w-[520px] mb-10`}
             >
               Our approach to fragrance creation prioritizes formulation integrity
               over market demands. Every decision is made with intention, every
               ingredient chosen for purpose.
             </p>
 
-            {/* Principles */}
             <div className="space-y-8">
               {principles.map((p, i) => (
                 <div key={i}>
                   <h5
-                    className={`${inter.className} text-[16px]  text-[#585757] mb-2`}
+                    className={`${inter.className} text-[16px] text-[var(--theme-text)] mb-2`}
                   >
                     {p.titles}
                   </h5>
                   <p
-                    className={`${inter.className} text-[15px] leading-[1.75] text-[#666] max-w-[520px]`}
+                    className={`${inter.className} text-[15px] leading-[1.75] text-[var(--theme-muted)] max-w-[520px]`}
                   >
                     {p.desc}
                   </p>
                 </div>
               ))}
             </div>
-            
           </div>
-
-
         </div>
-                  {/* Quote Section */}
-<div className="mt-10 md:mt-12 flex justify-center">
-  
-    <blockquote className="italic text-[16px] sm:text-[21px] md:text-[23px] leading-[1.6] text-[#666]">
-      <span className="text-[#ccc] mr-1">“</span>
-      We believe trust comes from clarity
-      <span className="text-[#ccc] ml-1">”</span>
-      
-    </blockquote>
-  
-</div>
+
+        {/* Quote */}
+        <div className="mt-10 md:mt-12 flex justify-center">
+          <blockquote className="italic text-[16px] sm:text-[21px] md:text-[23px] leading-[1.6] text-[var(--theme-muted)]">
+            <span className="opacity-30 mr-1">“</span>
+            We believe trust comes from clarity
+            <span className="opacity-30 ml-1">”</span>
+          </blockquote>
+        </div>
       </div>
     </section>
   );

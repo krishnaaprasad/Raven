@@ -49,7 +49,13 @@ export default function PhilosophyInteractive() {
   ];
 
   const quoteData = {
-    quote: "Strength is most powerful when held back. Presence is most felt when not performed.",
+    quote: (
+  <>
+    Strength is most powerful when held back.
+    <br />
+    Presence is most felt when not performed.
+  </>
+),
     author: "Raven Philosophy"
   };
 

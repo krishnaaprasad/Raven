@@ -2,57 +2,48 @@
 
 import { useRef, useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import Image from "next/image";
 import {
   Instagram,
   Play,
-  CheckCircle,
   Users,
   Heart,
   Star,
 } from "lucide-react";
 
-// 👉 Replace with your real reel thumbnails later
 const instagramReels = [
   {
     id: 1,
-    thumbnail:
-      "https://images.unsplash.com/photo-1541643600914-78b084683601?w=300&h=500&fit=crop",
+    thumbnail: "https://images.unsplash.com/photo-1541643600914-78b084683601?w=300&h=500&fit=crop",
     instagramUrl: "https://www.instagram.com/ravenfragrance.in/",
     views: "12.5K",
   },
   {
     id: 2,
-    thumbnail:
-      "https://images.unsplash.com/photo-1594035910387-fea47794261f?w=300&h=500&fit=crop",
+    thumbnail: "https://images.unsplash.com/photo-1594035910387-fea47794261f?w=300&h=500&fit=crop",
     instagramUrl: "https://www.instagram.com/ravenfragrance.in/",
     views: "8.2K",
   },
   {
     id: 3,
-    thumbnail:
-      "https://images.unsplash.com/photo-1588405748880-12d1d2a59f75?w=300&h=500&fit=crop",
+    thumbnail: "https://images.unsplash.com/photo-1588405748880-12d1d2a59f75?w=300&h=500&fit=crop",
     instagramUrl: "https://www.instagram.com/ravenfragrance.in/",
     views: "15.1K",
   },
   {
     id: 4,
-    thumbnail:
-      "https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?w=300&h=500&fit=crop",
+    thumbnail: "https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?w=300&h=500&fit=crop",
     instagramUrl: "https://www.instagram.com/ravenfragrance.in/",
     views: "9.8K",
   },
   {
     id: 5,
-    thumbnail:
-      "https://images.unsplash.com/photo-1595425970377-c9703cf48b6d?w=300&h=500&fit=crop",
+    thumbnail: "https://images.unsplash.com/photo-1595425970377-c9703cf48b6d?w=300&h=500&fit=crop",
     instagramUrl: "https://www.instagram.com/ravenfragrance.in/",
     views: "11.3K",
   },
   {
     id: 6,
-    thumbnail:
-      "https://images.unsplash.com/photo-1619994403073-2cec844b8e63?w=300&h=500&fit=crop",
+    thumbnail: "https://images.unsplash.com/photo-1619994403073-2cec844b8e63?w=300&h=500&fit=crop",
     instagramUrl: "https://www.instagram.com/ravenfragrance.in/",
     views: "7.6K",
   },
@@ -91,8 +82,9 @@ export default function InstagramGallery() {
   };
 
   return (
-    <section className="py-20 bg-[#fffcfc] overflow-hidden">
+    <section className="py-20 bg-(--theme-bg) overflow-hidden transition-colors duration-500">
       <div className="max-w-7xl mx-auto px-6 mb-14">
+
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 24 }}
@@ -101,13 +93,11 @@ export default function InstagramGallery() {
           viewport={{ once: true }}
           className="text-center"
         >
-          
-
-          <h2 className="font-[Cormorant_Garamond] text-3xl sm:text-4xl md:text-5xl font-semibold text-[#1b180d] mb-4">
+          <h2 className="font-[Cormorant_Garamond] text-3xl sm:text-4xl md:text-5xl font-semibold text-(--theme-text) mb-4">
             Loved by Fragrance Lovers
           </h2>
 
-          <p className="font-[Outfit] text-base sm:text-lg text-[#6b6453] max-w-2xl mx-auto mb-12">
+          <p className="font-[Outfit] text-base sm:text-lg text-(--theme-muted) max-w-2xl mx-auto mb-12">
             Real moments from our community who wear Raven Fragrance every day.
           </p>
 
@@ -127,12 +117,12 @@ export default function InstagramGallery() {
                 className="text-center"
               >
                 <div className="flex items-center justify-center gap-2 mb-2">
-                  <item.icon className="w-5 h-5 text-[#b28c34]" />
-                  <span className="font-[outfit] text-xl md:text-3xl font-semibold text-[#1b180d]">
+                  <item.icon className="w-5 h-5 text-(--theme-muted)" />
+                  <span className="font-[Outfit] text-xl md:text-3xl font-semibold text-(--theme-text)">
                     {item.value}
                   </span>
                 </div>
-                <p className="font-[Outfit] text-sm text-[#6b6453]">
+                <p className="font-[Outfit] text-sm text-(--theme-muted)">
                   {item.label}
                 </p>
               </motion.div>
@@ -154,7 +144,12 @@ export default function InstagramGallery() {
             whileHover={{ scale: 1.03, y: -6 }}
             transition={{ duration: 0.3 }}
             onClick={() => handleClick(reel.instagramUrl)}
-            className="relative shrink-0 w-40 sm:w-[180px] md:w-[200px] aspect-9/16 rounded-2xl overflow-hidden cursor-pointer group shadow-lg bg-[#f3f1ea]"
+            className="
+              relative shrink-0 w-40 sm:w-[180px] md:w-[200px] aspect-9/16 
+              rounded-2xl overflow-hidden cursor-pointer group 
+              shadow-lg bg-(--theme-soft)
+              border border-(--theme-border)
+            "
           >
             <img
               src={reel.thumbnail}
@@ -200,7 +195,7 @@ export default function InstagramGallery() {
         viewport={{ once: true }}
         className="max-w-7xl mx-auto px-6 mt-10"
       >
-        <p className="text-center font-[Outfit] text-sm text-[#6b6453]">
+        <p className="text-center font-[Outfit] text-sm text-(--theme-muted)">
           Real stories from our customers • Tap to explore on Instagram
         </p>
       </motion.div>
