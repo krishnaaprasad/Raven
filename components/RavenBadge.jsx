@@ -19,7 +19,7 @@ export default function TrustBadges() {
     <section
       className="
         relative
-        bg-(--theme-soft)
+        bg-(--theme-bg)
         border-y border-(--theme-border)
         py-10 sm:py-12
         overflow-hidden

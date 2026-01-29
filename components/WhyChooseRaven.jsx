@@ -34,9 +34,9 @@ const CraftSection = () => {
   ];
 
   return (
-    <section className="bg-(--theme-soft) py-8 md:py-14 transition-colors duration-500">
+    <section className="bg-(--theme-bg) py-8 md:py-20 transition-colors duration-500">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid lg:grid-cols-2 gap-10 lg:gap-14 items-center">
+        <div className="grid lg:grid-cols-2 gap-10 lg:gap-19 items-center">
 
           
          {/* LEFT GRID */}
@@ -48,7 +48,7 @@ const CraftSection = () => {
       sm:w-[620px] sm:h-[500px]
       md:w-[880px] md:h-[530px]
       flex items-center justify-center
-      bg-(--theme-bg)
+      bg-(--theme-soft)
       border border-(--theme-border)
       transition-colors duration-500
     "

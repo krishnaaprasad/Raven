@@ -11,7 +11,7 @@ export default function ProductCarousel({ products = [] }) {
   const selectedSlugs = ["escape", "oud-intense", "mystique"];
 
   return (
-    <section className="py-8 sm:py-12 md:py-16 bg-(--theme-bg) transition-colors duration-500">
+    <section className="py-8 sm:py-12 md:py-16 bg-(--theme-soft) transition-colors duration-500">
       <div className="mx-auto px-4 sm:px-6 ">
 
         {/* HEADER */}

@@ -91,7 +91,7 @@ export default function TestimonialsMarquee() {
   };
 
   return (
-    <section className="relative py-12 md:py-20 bg-(--theme-bg) overflow-hidden transition-colors duration-500">
+    <section className="relative py-12 md:py-20 bg-(--theme-soft) overflow-hidden transition-colors duration-500">
 
       {/* Header */}
       <div className="max-w-4xl mx-auto px-4 text-center mb-12">
@@ -122,7 +122,7 @@ export default function TestimonialsMarquee() {
               className="
                 min-w-[260px] sm:min-w-[320px] lg:min-w-[380px]
                 border border-(--theme-border)
-                bg-(--theme-soft)
+                bg-(--theme-bg)
                 p-5 sm:p-6 lg:p-8
                 transition-colors duration-500
               "
