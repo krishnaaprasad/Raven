@@ -19,8 +19,8 @@ export default function TrustBadges() {
     <section
       className="
         relative
-        bg-[var(--theme-bg)]
-        border-y border-[var(--theme-border)]
+        bg-(--theme-soft)
+        border-y border-(--theme-border)
         py-10 sm:py-12
         overflow-hidden
         transition-colors duration-500
@@ -45,23 +45,23 @@ export default function TrustBadges() {
                 className="
                   w-10 h-10 sm:w-14 sm:h-14
                   rounded-full
-                  border border-[var(--theme-border)]
+                  border border-(--theme-border)
                   flex items-center justify-center
-                  text-[var(--theme-text)]
+                  text-(--theme-text)
                   mb-3 sm:mb-5
-                  bg-[var(--theme-bg)]
-                  hover:bg-[var(--theme-soft)]
+                  bg-(--theme-bg)
+                  hover:bg-(--theme-soft)
                   transition-colors duration-300
                 "
               >
                 <b.icon />
               </div>
 
-              <div className="font-[Crimson_Text] text-[10px] sm:text-xs tracking-[0.25em] uppercase text-[var(--theme-text)]">
+              <div className="font-[Crimson_Text] text-[10px] sm:text-xs tracking-[0.25em] uppercase text-(--theme-text)">
                 {b.title}
               </div>
 
-              <div className="font-[system-ui] text-[10px] sm:text-xs tracking-[0.2em] uppercase text-[var(--theme-muted)]">
+              <div className="font-[system-ui] text-[10px] sm:text-xs tracking-[0.2em] uppercase text-(--theme-muted)">
                 {b.subtitle}
               </div>
             </div>

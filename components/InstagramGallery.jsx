@@ -82,7 +82,7 @@ export default function InstagramGallery() {
   };
 
   return (
-    <section className="py-20 bg-(--theme-bg) overflow-hidden transition-colors duration-500">
+    <section className="py-20 bg-(--theme-soft) overflow-hidden transition-colors duration-500">
       <div className="max-w-7xl mx-auto px-6 mb-14">
 
         {/* Header */}
