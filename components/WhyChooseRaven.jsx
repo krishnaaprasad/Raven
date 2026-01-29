@@ -35,33 +35,33 @@ const CraftSection = () => {
 
   return (
     <section className="bg-(--theme-soft) py-8 md:py-14 transition-colors duration-500">
-      <div className="max-w-[1100px] mx-auto px-4 sm:px-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid lg:grid-cols-2 gap-10 lg:gap-14 items-center">
 
-          {/* LEFT GRID */}
+          
          {/* LEFT GRID */}
 <div className="flex justify-center lg:justify-start">
   {/* OUTER FRAME */}
   <div
     className="
-      w-[360px] h-[360px]
+      w-[300px] h-[310px]
       sm:w-[620px] sm:h-[500px]
       md:w-[880px] md:h-[530px]
       flex items-center justify-center
-      bg-[var(--theme-bg)]
-      border border-[var(--theme-border)]
+      bg-(--theme-bg)
+      border border-(--theme-border)
       transition-colors duration-500
     "
   >
     {/* INNER GRID */}
-    <div className="grid grid-cols-2 gap-2 w-[70%]">
+    <div className="grid grid-cols-2 gap-2 w-[55%]">
       {images.map((src, i) => (
         <div
           key={i}
           className="
             relative aspect-square overflow-hidden
-            bg-[var(--theme-soft)]
-            border border-[var(--theme-border)]/40
+            bg-(--theme-soft)
+            border border-(--theme-border)/40
           "
         >
           <Image
