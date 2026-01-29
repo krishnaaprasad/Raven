@@ -61,63 +61,63 @@ export default function FilterPanel({
   const count = activeFilters.fragranceFamily.length;
 
   const content = (
-  <div className="p-8 space-y-5 bg-white border border-[#e6e6e6] ">
+    <div className="p-8 space-y-5 bg-[var(--theme-bg)] border border-[var(--theme-border)] transition-colors duration-500">
 
-    {/* Header */}
-    <div className="flex justify-between items-center pb-6 border-b border-[#ededed]">
-      <div className="flex items-center gap-3">
-        <Funnel size={16} className="text-[#111]" />
-        <span className="text-xs tracking-[0.25em] uppercase text-[#111] font-medium">
-          Discover by Intention
-        </span>
-        {count > 0 && (
-          <span className="text-[11px] bg-black text-white px-2 py-0.5 rounded-full">
-            {count}
+      {/* Header */}
+      <div className="flex justify-between items-center pb-6 border-b border-[var(--theme-border)]">
+        <div className="flex items-center gap-3">
+          <Funnel size={16} className="text-[var(--theme-text)]" />
+          <span className="text-xs tracking-[0.25em] uppercase text-[var(--theme-text)] font-medium">
+            Discover by Intention
           </span>
+
+          {count > 0 && (
+            <span className="text-[11px] bg-[var(--theme-text)] text-[var(--theme-bg)] px-2 py-0.5 rounded-full">
+              {count}
+            </span>
+          )}
+        </div>
+
+        {count > 0 && (
+          <button
+            onClick={clearAll}
+            className="text-xs text-[var(--theme-muted)] hover:text-[var(--theme-text)] underline"
+          >
+            Clear
+          </button>
         )}
       </div>
 
-      {count > 0 && (
-        <button
-          onClick={clearAll}
-          className="text-xs text-[#777] hover:text-black underline"
-        >
-          Clear
-        </button>
-      )}
-    </div>
+      {/* Section */}
+      <div className="space-y-6">
+        <p className="text-sm text-[var(--theme-muted)]">Fragrance Family</p>
 
-    {/* Section */}
-    <div className="space-y-6">
-      <p className="text-sm text-[#666]">Fragrance Family</p>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+          {options.fragranceFamily.map((o) => {
+            const active = activeFilters.fragranceFamily.includes(o.value);
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-        {options.fragranceFamily.map((o) => {
-          const active = activeFilters.fragranceFamily.includes(o.value);
-
-          return (
-            <button
-              key={o.value}
-              onClick={() => toggle(o.value)}
-              className={`
-                py-3 px-4 text-xs tracking-[0.2em] uppercase transition-all duration-300
-                border rounded-md
-                ${
-                  active
-                    ? "bg-black text-white border-black"
-                    : "bg-white text-[#111] border-[#e5e5e5] hover:border-black"
-                }
-              `}
-            >
-              {o.label}
-            </button>
-          );
-        })}
+            return (
+              <button
+                key={o.value}
+                onClick={() => toggle(o.value)}
+                className={`
+                  py-3 px-4 text-xs tracking-[0.2em] uppercase transition-all duration-300
+                  border rounded-md
+                  ${
+                    active
+                      ? "bg-[var(--theme-text)] text-[var(--theme-bg)] border-[var(--theme-text)]"
+                      : "bg-[var(--theme-bg)] text-[var(--theme-text)] border-[var(--theme-border)] hover:border-[var(--theme-text)]"
+                  }
+                `}
+              >
+                {o.label}
+              </button>
+            );
+          })}
+        </div>
       </div>
     </div>
-  </div>
-);
-
+  );
 
   // MOBILE
   if (isMobile) {
@@ -125,37 +125,37 @@ export default function FilterPanel({
       <>
         <button
           onClick={() => setIsOpen(true)}
-          className="w-full border border-[#e5e5e5] px-4 py-3 flex justify-between items-center bg-white"
+          className="w-full border border-[var(--theme-border)] px-4 py-3 flex justify-between items-center bg-[var(--theme-bg)] transition-colors duration-500"
         >
-          <span className="text-xs tracking-widest uppercase text-[#111]">
+          <span className="text-xs tracking-widest uppercase text-[var(--theme-text)]">
             Filters
           </span>
 
           {count > 0 && (
-            <span className="text-[11px] border border-[#ddd] px-2 py-0.5 rounded-full text-[#555]">
+            <span className="text-[11px] border border-[var(--theme-border)] px-2 py-0.5 rounded-full text-[var(--theme-muted)]">
               {count}
             </span>
           )}
         </button>
 
         {isOpen && (
-          <div className="fixed inset-0 z-50 bg-black/20">
-            <div className="absolute bottom-0 left-0 right-0 bg-white rounded-t-2xl max-h-[85vh] flex flex-col">
-              <div className="flex justify-between items-center px-6 py-4 border-b border-[#eee]">
-                <span className="text-xs tracking-widest uppercase text-[#111]">
+          <div className="fixed inset-0 z-50 bg-black/30">
+            <div className="absolute bottom-0 left-0 right-0 bg-[var(--theme-bg)] rounded-t-2xl max-h-[85vh] flex flex-col transition-colors duration-500">
+              <div className="flex justify-between items-center px-6 py-4 border-b border-[var(--theme-border)]">
+                <span className="text-xs tracking-widest uppercase text-[var(--theme-text)]">
                   Filters
                 </span>
                 <button onClick={() => setIsOpen(false)}>
-                  <X size={18} />
+                  <X size={18} className="text-[var(--theme-text)]" />
                 </button>
               </div>
 
               <div className="flex-1 overflow-y-auto">{content}</div>
 
-              <div className="p-4 border-t border-[#eee]">
+              <div className="p-4 border-t border-[var(--theme-border)]">
                 <button
                   onClick={handleApplyMobile}
-                  className="w-full py-3 border border-[#111] text-[#111] hover:bg-[#f7f7f7] transition"
+                  className="w-full py-3 border border-[var(--theme-text)] text-[var(--theme-text)] hover:bg-[var(--theme-soft)] transition"
                 >
                   Apply Filters
                 </button>
@@ -167,14 +167,13 @@ export default function FilterPanel({
     );
   }
 
- return (
-  <div className="w-full">
-    <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
-      <div className="border border-[#e6e6e6]  bg-white">
-        {content}
+  return (
+    <div className="w-full">
+      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="border border-[var(--theme-border)] bg-[var(--theme-bg)] transition-colors duration-500">
+          {content}
+        </div>
       </div>
     </div>
-  </div>
-);
-
+  );
 }

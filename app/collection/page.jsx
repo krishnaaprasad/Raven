@@ -1,10 +1,11 @@
 export const dynamic = "force-dynamic";
 
-import SearchComponent from '@/components/shoppage/SearchComponent';
+
 import ProductCollectionInteractive from './components/ProductCollectionInteractive';
 import connectToDatabase from '@/lib/mongodb';
 import Product from '@/models/Product';
 import FilterPanel from '@/components/shoppage/FilterPanel';
+
 // ✅ SEO metadata (optimized)
 export const metadata = {
   title: 'Luxury Perfume Collection for Men & Women | Raven Fragrance India',
@@ -35,33 +36,45 @@ export default async function ProductCollectionPage() {
       .select('-__v')
       .lean();
 
-    // ✅ Ensure plain objects for Client Components
     products = JSON.parse(JSON.stringify(rawProducts));
   } catch (error) {
     console.error('❌ Failed to load products:', error);
   }
 
   return (
-    <main className=" min-h-screen bg-[#ffffff]">
+    <main className="min-h-screen bg-[var(--theme-bg)] transition-colors duration-500">
+
       {/* 🔝 Header */}
-      {/* 🔝 Header */}
-<section className="bg-[#ffffff] ">
-  <div className="max-w-[1100px] mx-auto px-6 py-16 sm:py-18 text-center">
-    
-    <h1 className=" text-3xl sm:text-4xl md:text-5xl font-semibold text-[#1b180d] mb-2 leading-tight">
-      The Collection
-    </h1>
+      <section className="bg-[var(--theme-bg)]">
+        <div className="max-w-[1100px] mx-auto px-6 py-16 sm:py-18 text-center">
 
-    <p className="font-system-UI text-base sm:text-lg text-[#6b6453] max-w-2xl mx-auto mb-8">
-      Three signature fragrances, each created with intention. Designed to express quiet confidence and a presence that doesn’t ask for attention.
-    </p>
+          <h1 className="
+            text-3xl sm:text-4xl md:text-5xl 
+            font-semibold 
+            text-[var(--theme-text)] 
+            mb-2 leading-tight
+          ">
+            The Collection
+          </h1>
 
-  </div>
-</section>
+          <p className="
+            font-system-UI 
+            text-base sm:text-lg 
+            text-[var(--theme-muted)] 
+            max-w-2xl mx-auto mb-8
+          ">
+            Three signature fragrances, each created with intention. Designed to express quiet confidence and a presence that doesn’t ask for attention.
+          </p>
 
-<FilterPanel />
+        </div>
+      </section>
+
+      {/* Filters */}
+      <FilterPanel />
+
       {/* 🛍 Collection */}
       <ProductCollectionInteractive initialProducts={products} />
+
     </main>
   );
 }

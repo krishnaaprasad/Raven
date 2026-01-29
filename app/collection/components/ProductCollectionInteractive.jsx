@@ -31,8 +31,6 @@ const ProductCollectionInteractive = ({ initialProducts }) => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-
-
   /* ---------------- SORTING ---------------- */
   const applySorting = useCallback(
     (sortValue) => {
@@ -76,14 +74,11 @@ const ProductCollectionInteractive = ({ initialProducts }) => {
     },
     [filteredProducts]
   );
-  
 
   const handleSortChange = (value) => {
     setSortBy(value);
     applySorting(value);
   };
-
-  
 
   const handleViewChange = (mode) => {
     setViewMode(mode);
@@ -94,28 +89,26 @@ const ProductCollectionInteractive = ({ initialProducts }) => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const handleAddToCart = (item) => {
+    if (!item) return;
 
-const handleAddToCart = (item) => {
-  if (!item) return;
+    const variant = item?.variants?.[0] || {};
+    const price = Number(variant.price) || 0;
 
-  const variant = item?.variants?.[0] || {};
-  const price = Number(variant.price) || 0;
+    addToCart(
+      {
+        id: item._id,
+        name: item.name,
+        slug: item.slug,
+        price,
+        image: item?.images?.[0]?.original || "",
+        size: variant.size || "",
+      },
+      1
+    );
 
-  addToCart(
-    {
-      id: item._id,
-      name: item.name,
-      slug: item.slug,
-      price,
-      image: item?.images?.[0]?.original || "",
-      size: variant.size || "",
-    },
-    1
-  );
-
-  openCart();
-};
-
+    openCart();
+  };
 
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -128,20 +121,21 @@ const handleAddToCart = (item) => {
   );
 
   return (
-    <div className="min-h-screen bg-[#ffffff]">
+    <div className="min-h-screen bg-[var(--theme-bg)] transition-colors duration-500">
       <div className="max-w-[1400px] mx-auto px-6 lg:px-8 py-3">
         <div className="flex flex-col gap-10">
+
           {/* Products */}
           <div className="flex-1 min-w-0">
             <ProductGridNavigation
-                totalProducts={filteredProducts.length}
-                currentPage={currentPage}
-                productsPerPage={productsPerPage}
-                onPageChange={handlePageChange}
-                onSortChange={handleSortChange}
-                onViewChange={handleViewChange}
-                loading={isLoading}
-                />
+              totalProducts={filteredProducts.length}
+              currentPage={currentPage}
+              productsPerPage={productsPerPage}
+              onPageChange={handlePageChange}
+              onSortChange={handleSortChange}
+              onViewChange={handleViewChange}
+              loading={isLoading}
+            />
 
             {isLoading ? (
               <LoadingSkeleton />
@@ -172,7 +166,14 @@ const handleAddToCart = (item) => {
 
       {/* Cart Toast */}
       {cartNotification && (
-        <div className="fixed bottom-8 right-8 z-50 bg-[#2e7d32] text-white px-6 py-4 rounded-lg shadow-lg flex items-center gap-3">
+        <div className="
+          fixed bottom-8 right-8 z-50
+          bg-[var(--theme-bg)]
+          text-[var(--theme-text)]
+          border border-[var(--theme-border)]
+          px-6 py-4 rounded-lg shadow-lg
+          flex items-center gap-3
+        ">
           <CheckCircle size={22} />
           <span className="font-[Outfit] text-sm font-medium">
             {cartNotification}
@@ -184,13 +185,21 @@ const handleAddToCart = (item) => {
       {showScrollTop && (
         <button
           onClick={scrollToTop}
-          className="fixed bottom-8 left-8 z-50 w-12 h-12 bg-[#252421] text-white rounded-full shadow-lg flex items-center justify-center hover:bg-[#9a864c] transition">
+          className="
+            fixed bottom-8 left-8 z-50
+            w-12 h-12 rounded-full
+            bg-[var(--theme-bg)]
+            border border-[var(--theme-border)]
+            text-[var(--theme-text)]
+            shadow-lg
+            flex items-center justify-center
+            hover:bg-[var(--theme-soft)]
+            transition
+          "
+        >
           <ArrowUp size={22} />
         </button>
       )}
-
-  
-
     </div>
   );
 };

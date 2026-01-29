@@ -49,23 +49,39 @@ export default function ProductGridNavigation({
 
   return (
     <div
-      className={`w-full bg-[#ffffff] px-4 py-4  space-y-3 ${className}`}
+      className={`
+        w-full 
+        bg-(--theme-bg)
+        px-4 py-4 space-y-3
+        transition-colors duration-500
+        ${className}
+      `}
     >
       {/* 🔝 Top Row */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <p className="text-sm text-[#3b3933] font-[Outfit]">
+        <p className="text-sm text-(--theme-muted) font-[Outfit]">
           Showing{' '}
-          <span className="text-[#1b180d] font-medium">{start}-{end}</span> of{' '}
-          <span className="text-[#1b180d] font-medium">{totalProducts}</span>
+          <span className="text-(--theme-text) font-medium">{start}-{end}</span> of{' '}
+          <span className="text-(--theme-text) font-medium">{totalProducts}</span>
         </p>
 
         {/* Sort + View */}
         <div className="flex items-center gap-3 w-full sm:w-auto">
-          {/* ✅ Sort Dropdown */}
+          {/* Sort Dropdown */}
           <div className="relative w-full sm:w-60" ref={ref}>
             <button
               onClick={() => setOpen(!open)}
-              className="w-full flex items-center justify-between px-4 py-2.5 bg-[#ffffff] border border-[#e4e4e4] rounded-md text-sm font-[Outfit] text-[#1b180d] hover:bg-[#e6e6e6] transition"
+              className="
+                w-full flex items-center justify-between
+                px-4 py-2.5
+                bg-(--theme-bg)
+                border border-(--theme-border)
+                rounded-md
+                text-sm font-[Outfit]
+                text-(--theme-text)
+                hover:bg-(--theme-soft)
+                transition-colors duration-300
+              "
             >
               <div className="flex items-center gap-2 truncate">
                 <Icon name="BarsArrowDownIcon" size={16} />
@@ -77,23 +93,37 @@ export default function ProductGridNavigation({
             </button>
 
             {open && (
-              <div className="absolute left-0 right-0 mt-2 bg-[#ffffff] border border-[#e4e4e4] rounded-lg shadow-lg z-50 overflow-hidden">
+              <div
+                className="
+                  absolute left-0 right-0 mt-2
+                  bg-(--theme-bg)
+                  border border-(--theme-border)
+                  rounded-lg
+                  shadow-lg z-50 overflow-hidden
+                "
+              >
                 {SORT_OPTIONS.map((o) => (
                   <button
                     key={o.value}
                     onClick={() => handleSort(o.value)}
-                    className={`w-full px-4 py-3 flex items-center justify-between text-sm font-[Outfit] transition ${
-                      sortBy === o.value
-                        ? 'bg-[#f1f1f1] text-[#1b180d]'
-                        : 'text-[#1b180d] hover:bg-[#e7e7e7]'
-                    }`}
+                    className={`
+                      w-full px-4 py-3
+                      flex items-center justify-between
+                      text-sm font-[system-ui]
+                      transition-colors duration-200
+                      ${
+                        sortBy === o.value
+                          ? 'bg-(--theme-soft) text-(--theme-text)'
+                          : 'text-(--theme-text) hover:bg-(--theme-soft)'
+                      }
+                    `}
                   >
                     <span>{o.label}</span>
                     {sortBy === o.value && (
                       <Icon
                         name="CheckIcon"
                         size={16}
-                        className="text-[#1b180d]"
+                        className="text-(--theme-text)"
                       />
                     )}
                   </button>
@@ -102,33 +132,20 @@ export default function ProductGridNavigation({
             )}
           </div>
 
-          {/* 👁 View Toggle (desktop only) */}
-          <div className="hidden sm:flex items-center border border-[#e2e2e2] rounded-md overflow-hidden">
+          {/* View Toggle (desktop only) */}
+          <div className="hidden sm:flex items-center border border-(--theme-border) rounded-md overflow-hidden">
             <button
               onClick={() => {
                 setViewMode('grid');
                 onViewChange?.('grid');
               }}
-              className={`p-2 ${
+              className={`p-2 transition-colors ${
                 viewMode === 'grid'
-                  ? 'bg-[#f1f1f1] text-[#1b180d]'
-                  : 'text-[#6b6453] hover:text-[#1b180d]'
+                  ? 'bg-(--theme-soft) text-(--theme-text)'
+                  : 'text-(--theme-muted) hover:text-(--theme-text)'
               }`}
             >
               <Icon name="Squares2X2Icon" size={18} />
-            </button>
-            <button
-              onClick={() => {
-                setViewMode('list');
-                onViewChange?.('list');
-              }}
-              className={`p-2 ${
-                viewMode === 'list'
-                  ? 'bg-[#f1f1f1] text-[#1b180d]'
-                  : 'text-[#6b6453] hover:text-[#1b180d]'
-              }`}
-            >
-              <Icon name="ListBulletIcon" size={18} />
             </button>
           </div>
         </div>
