@@ -39,20 +39,43 @@ const CraftSection = () => {
         <div className="grid lg:grid-cols-2 gap-10 lg:gap-14 items-center">
 
           {/* LEFT GRID */}
-          <div className="flex justify-center lg:justify-start">
-            <div className="grid grid-cols-2 gap-3 w-[280px] sm:w-[340px] md:w-[380px]">
-              {images.map((src, i) => (
-                <div key={i} className="relative aspect-square overflow-hidden rounded-sm bg-(--theme-soft)">
-                  <Image
-                    src={src}
-                    alt=""
-                    fill
-                    className="object-cover grayscale hover:grayscale-0 transition duration-700"
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
+         {/* LEFT GRID */}
+<div className="flex justify-center lg:justify-start">
+  {/* OUTER FRAME */}
+  <div
+    className="
+      w-[360px] h-[360px]
+      sm:w-[620px] sm:h-[500px]
+      md:w-[880px] md:h-[530px]
+      flex items-center justify-center
+      bg-[var(--theme-bg)]
+      border border-[var(--theme-border)]
+      transition-colors duration-500
+    "
+  >
+    {/* INNER GRID */}
+    <div className="grid grid-cols-2 gap-2 w-[70%]">
+      {images.map((src, i) => (
+        <div
+          key={i}
+          className="
+            relative aspect-square overflow-hidden
+            bg-[var(--theme-soft)]
+            border border-[var(--theme-border)]/40
+          "
+        >
+          <Image
+            src={src}
+            alt=""
+            fill
+            className="object-cover grayscale hover:grayscale-0 transition duration-700"
+          />
+        </div>
+      ))}
+    </div>
+  </div>
+</div>
+
 
           {/* RIGHT CONTENT */}
           <div>

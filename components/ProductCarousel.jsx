@@ -8,7 +8,7 @@ export default function ProductCarousel({ products = [] }) {
   const scrollRef = useRef(null);
   const { openQuickView } = useQuickView();
 
-  const selectedSlugs = ["rebel", "escape", "oud-intense", "mystique"];
+  const selectedSlugs = ["escape", "oud-intense", "mystique"];
 
   return (
     <section className="py-8 sm:py-12 md:py-16 bg-(--theme-bg) transition-colors duration-500">
@@ -36,7 +36,9 @@ export default function ProductCarousel({ products = [] }) {
         {/* MOBILE GRID VERSION */}
         {/* ----------------------------- */}
         <div className="grid grid-cols-2 gap-4 px-1 sm:hidden">
-          {products.map((p) => (
+          {products
+            .filter((p) => selectedSlugs.includes(p.slug))
+            .map((p) => (
             <ProductCard
               key={p._id}
               product={p}
@@ -65,7 +67,7 @@ export default function ProductCarousel({ products = [] }) {
             .map((p) => (
               <div
                 key={p._id}
-                className="shrink-0 w-[220px] lg:w-[260px] xl:w-[290px]"
+                className="w-full sm:w-[260px] lg:w-[375px]"
               >
                 <ProductCard
                   product={p}
