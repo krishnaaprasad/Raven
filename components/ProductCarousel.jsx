@@ -3,19 +3,21 @@
 import { useRef } from "react";
 import ProductCard from "@/app/collection/components/ProductCard";
 import { useQuickView } from "@/app/context/QuickViewContext";
+import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 
 export default function ProductCarousel({ products = [] }) {
   const scrollRef = useRef(null);
   const { openQuickView } = useQuickView();
 
-  const selectedSlugs = ["escape", "oud-intense", "mystique"];
+  const selectedSlugs = ["lucifer", "oud-intense", "mystique"];
 
   return (
     <section className="py-8 sm:py-12 md:py-16 bg-(--theme-soft) transition-colors duration-500">
       <div className="mx-auto px-4 sm:px-6 ">
 
         {/* HEADER */}
-        <div className="flex flex-col justify-center items-center mb-12 gap-3 text-center">
+        <div className="flex flex-col justify-center items-center mb-6 gap-3 text-center">
 
           <h2 className="text-4xl sm:text-5xl lg:text-6xl font-light text-(--theme-text) font-[Crimson_Text] tracking-tight">
             The Collection
@@ -32,6 +34,30 @@ export default function ProductCarousel({ products = [] }) {
           </span>
         </div>
 
+        {/* Shop All button */}
+        <div className="mb-4 sm:mb-6">
+          <div className="flex justify-center sm:justify-end">
+            <Link
+              href="/collection"
+              className="
+                group inline-flex items-center gap-2
+                text-xs sm:text-sm uppercase tracking-widest
+                text-(--theme-text)
+                border border-(--theme-border)
+                px-6 py-3
+                transition-all duration-300
+                hover:bg-(--theme-bg)
+                hover:shadow-sm
+              "
+            >
+              Shop All
+              <ArrowRight
+                size={16}
+                className="transition-transform duration-300 group-hover:translate-x-1"
+              />
+            </Link>
+          </div>
+</div>
         {/* ----------------------------- */}
         {/* MOBILE GRID VERSION */}
         {/* ----------------------------- */}
