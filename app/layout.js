@@ -11,7 +11,7 @@ import QuickViewModal from "@/app/collection/components/QuickViewModal";
 import { QuickViewProvider } from "@/app/context/QuickViewContext";
 import Script from "next/script";
 import { ThemeProvider } from "./theme-provider";
-
+import { Crimson_Text } from 'next/font/google';
 
 
 const geistSans = Geist({
@@ -19,6 +19,11 @@ const geistSans = Geist({
   subsets: ["latin"],
 });
 
+export const crimson = Crimson_Text({
+  subsets: ['latin'],
+  weight: ['400', '600', '700'],
+  display: 'swap',
+});
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
