@@ -153,7 +153,7 @@ const DirectContact = ({ className = "" }) => {
                 leading-relaxed
               "
             >
-              We typically respond within 24–48 hours during business days.
+              We typically respond within 24-48 hours during business days.
               For urgent matters, please call our studio during business hours.
             </p>
           </div>
