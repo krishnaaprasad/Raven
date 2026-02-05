@@ -3,14 +3,31 @@ import mongoose from "mongoose";
 
 const orderHistoryItem = new mongoose.Schema(
   {
+    type: {
+      type: String, // STATUS | EDIT | DELETE
+      default: "STATUS",
+    },
+
     from: { type: String },
     to: { type: String },
-    by: { type: String }, // 'admin' or 'system'
-    at: { type: Date, default: Date.now },
+
+    by: { type: String }, // admin / system
     note: { type: String },
+
+    at: { type: Date, default: Date.now },
+
+    // ✅ THIS WAS MISSING
+    changes: [
+      {
+        field: { type: String },
+        from: mongoose.Schema.Types.Mixed,
+        to: mongoose.Schema.Types.Mixed,
+      },
+    ],
   },
   { _id: false }
 );
+
 
 const orderSchema = new mongoose.Schema(
   {

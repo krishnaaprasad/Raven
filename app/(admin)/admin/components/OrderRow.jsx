@@ -4,8 +4,9 @@ import { useState, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";  // ⭐ FIX FOR MODAL OUTSIDE TBODY
 import { ChevronDown } from "lucide-react";
 import { toast } from "react-hot-toast";
-import { Eye, Trash2 } from "lucide-react";
-
+import { Eye, Trash2, Pencil } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import EditManualOrderModal from "./EditManualOrderModal";
 
 // ORDER STATUS COLORS
 const ORDER_COLORS = {
@@ -52,6 +53,8 @@ export default function OrderRow({ order, onStatusUpdated, showDeleted }) {
   const [selectedStatus, setSelectedStatus] = useState(null);
   const [showDelete, setShowDelete] = useState(false);
   const [deleteReason, setDeleteReason] = useState("");
+  const isManualOrder =
+  order.paymentGateway === "Manual" || Boolean(order.manualOrderId);
 
 
   const dropdownRef = useRef(null);
@@ -121,7 +124,20 @@ const customerType =
       : "Logged User"
     : "Guest User";
 
+  const [editOpen, setEditOpen] = useState(false);
 
+
+
+const [products, setProducts] = useState([]);
+useEffect(() => {
+  (async () => {
+    const res = await fetch("/api/admin/products?limit=1000");
+    const json = await res.json();
+    if (json.success) setProducts(json.data || []);
+  })();
+}, []);
+
+const didInitProduct = useRef(false);
 
   return (
     <>
@@ -210,8 +226,20 @@ const customerType =
           </td>
         )}
 
+        
+
         <td className="px-5 py-3 min-w-20">
-          <div className="flex flex-wrap items-center gap-3 justify-start">
+          <div className="flex items-center gap-3">
+            {/* Edit — ONLY manual */}
+            {isManualOrder && (
+              <button
+                title="Edit Manual Order"
+                onClick={() => setEditOpen(true)}
+              >
+                <Pencil className="w-5 h-5 text-blue-600 hover:scale-110 transition" />
+              </button>
+            )}
+
             {/* View */}
             <a href={`/admin/orders/${order._id}`} title="View">
               <Eye className="w-5 h-5 text-[#b28c34] hover:scale-110 transition" />
@@ -219,10 +247,10 @@ const customerType =
 
             {/* Delete */}
             {!showDeleted && (
-                <button onClick={() => setShowDelete(true)} title="Delete">
-                  <Trash2 className="w-5 h-5 text-red-600 hover:scale-110 transition" />
-                </button>
-              )}
+              <button onClick={() => setShowDelete(true)} title="Delete">
+                <Trash2 className="w-5 h-5 text-red-600 hover:scale-110 transition" />
+              </button>
+            )}
           </div>
         </td>
       </tr>
@@ -308,6 +336,20 @@ const customerType =
             </div>,
             document.body
           )}
+
+     {editOpen &&
+  createPortal(
+    <EditManualOrderModal
+      order={order}
+      products={products}
+      onClose={() => setEditOpen(false)}
+      onUpdated={onStatusUpdated}
+    />,
+    document.body
+  )}
+
+
+
     </>
   );
 }

@@ -168,6 +168,7 @@ export default function CreateOrderModal({ onClose, onCreated }) {
             <option>Cash</option>
             <option>UPI</option>
             <option>Bank Transfer</option>
+            <option>FOC</option>
           </Select>
           
           <div>
@@ -201,14 +202,22 @@ export default function CreateOrderModal({ onClose, onCreated }) {
   );
 }
 
-function Input({ label, ...props }) {
+function Input({ label, type, ...props }) {
   return (
     <div>
       {label && <label className="text-xs text-gray-600">{label}</label>}
-      <input {...props} className="w-full h-9 border rounded-md px-3 text-sm" />
+      <input
+        {...props}
+        type={type}
+        inputMode={type === "number" ? "numeric" : undefined}
+        onWheel={type === "number" ? e => e.target.blur() : undefined}
+        className="w-full h-9 border rounded-md px-3 text-sm"
+      />
     </div>
   );
 }
+
+
 
 function Select({ label, children, ...props }) {
   return (

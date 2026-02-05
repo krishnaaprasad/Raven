@@ -444,43 +444,65 @@ export default function OrderDetailsClient({ orderFromServer }) {
             ) : (
               <div className="relative pl-3">
                 <div className="absolute left-3 top-1 bottom-1 border-l-2 border-dashed border-[#e7e1cf]" />
-                <div className="space-y-4">
-                  {history
-                    .slice()
-                    .reverse()
-                    .map((h, idx) => (
-                      <div
-                        key={idx}
-                        className="relative flex items-start gap-3 pl-2"
-                      >
-                        <div className="z-10 mt-0.5 flex items-center justify-center w-5 h-5 rounded-full bg-[#b28c34] text-white text-[10px] ring-4 ring-[#fcfbf8]">
-                          {h.to === "Shipped" || h.to === "Out for Delivery" ? (
-                            <Truck className="w-3 h-3" />
-                          ) : h.to === "Delivered" ? (
-                            <CheckCircle2 className="w-3 h-3" />
-                          ) : (
-                            <Clock3 className="w-3 h-3" />
-                          )}
-                        </div>
-                        <div className="text-sm lg:text-sm">
-                          <p className="font-semibold text-[#1b180d]">
-                            {h.from} → {h.to}
-                          </p>
-                          <p className="text-[11px] text-[#6b6654]">
-                            {formattedHistoryDate[idx] || ""}
-                            {session?.user?.name && (
-                              <span> · by {session.user.name}</span>
-                            )}
-                          </p>
-                          {h.note && (
-                            <p className="text-[11px] text-[#9a864c] mt-1">
-                              {h.note}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                </div>
+<div className="space-y-4">
+  {history
+    .slice()
+    .reverse()
+    .map((h, idx) => (
+      <div
+        key={idx}
+        className="relative flex items-start gap-3 pl-2"
+      >
+        <div className="z-10 mt-0.5 flex items-center justify-center w-5 h-5 rounded-full bg-[#b28c34] text-white text-[10px] ring-4 ring-[#fcfbf8]">
+          {h.to === "Shipped" || h.to === "Out for Delivery" ? (
+            <Truck className="w-3 h-3" />
+          ) : h.to === "Delivered" ? (
+            <CheckCircle2 className="w-3 h-3" />
+          ) : (
+            <Clock3 className="w-3 h-3" />
+          )}
+        </div>
+        <div className="text-sm lg:text-sm">
+          {Array.isArray(h.changes) ? (
+            <>
+              <p className="font-semibold text-[#1b180d]">
+                Manual Order Edited
+              </p>
+              <ul className="mt-1 space-y-0.5 text-[11px] text-[#6b6654]">
+                {h.changes.map((c, i) => (
+                  <li key={i}>
+                    • {c.field}:{" "}
+                    <span className="line-through text-red-600">
+                      {String(c.from)}
+                    </span>{" "}
+                    →{" "}
+                    <span className="text-green-700 font-medium">
+                      {String(c.to)}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </>
+          ) : h.from && h.to ? (
+            <p className="font-semibold text-[#1b180d]">
+              {h.from} → {h.to}
+            </p>
+          ) : null}
+          <p className="text-[11px] text-[#6b6654]">
+            {formattedHistoryDate[idx] || ""}
+            {session?.user?.name && (
+              <span> · by {session.user.name}</span>
+            )}
+          </p>
+          {h.note && (
+            <p className="text-[11px] text-[#9a864c] mt-1">
+              {h.note}
+            </p>
+          )}
+        </div>
+      </div>
+    ))}
+</div>
               </div>
             )}
           </div>
