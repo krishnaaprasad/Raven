@@ -75,7 +75,7 @@ export default function CraftCredentials({ credentials = [] }) {
 
                 {/* Description */}
                 <p className="
-                  text-[15.5px]
+                  text-[14px]
                   leading-normal
                   text-[var(--theme-muted)]
                   font-[Manrope,sans-serif]

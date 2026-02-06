@@ -38,14 +38,14 @@ const craftCredentials = [
     icon: "ShieldCheck",
     title: "Transparent Ingredients",
     description:
-      "Full disclosure of ingredients and concentration — no hidden formulas or marketing noise.",
+      "Full disclosure of ingredients and concentration - no hidden formulas or marketing noise.",
   },
   {
     id: "c3",
     icon: "Sparkles",
     title: "High Concentration",
     description:
-      "18–22% fragrance oil concentration for long-lasting depth without overpowering presence.",
+      "18-22% fragrance oil concentration for long-lasting depth without overpowering presence.",
   },
   {
     id: "c4",
