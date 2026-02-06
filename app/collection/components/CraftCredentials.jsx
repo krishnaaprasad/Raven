@@ -52,13 +52,13 @@ export default function CraftCredentials({ credentials = [] }) {
                 {/* Icon */}
                 <div className="
                   mx-auto mb-8
-                  w-20 h-20
+                  w-17 h-17
                   flex items-center justify-center
                   bg-[var(--theme-bg)]
                   border border-[var(--theme-border)]
                   text-[var(--theme-text)]
                 ">
-                  <Icon size={22} strokeWidth={1.25} />
+                  <Icon size={32} strokeWidth={1.25} />
                 </div>
 
                 {/* Title */}
