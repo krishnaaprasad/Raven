@@ -1,6 +1,6 @@
 export const dynamic = "force-dynamic";
 
-
+import CraftCredentials from "./components/CraftCredentials";
 import ProductCollectionInteractive from './components/ProductCollectionInteractive';
 import connectToDatabase from '@/lib/mongodb';
 import Product from '@/models/Product';
@@ -24,6 +24,37 @@ export const metadata = {
     canonical: 'https://ravenfragrance.in/collection',
   },
 };
+
+const craftCredentials = [
+  {
+    id: "c1",
+    icon: "Beaker",
+    title: "Small-Batch Craft",
+    description:
+      "Every fragrance is produced in limited runs to maintain formulation integrity and consistency.",
+  },
+  {
+    id: "c2",
+    icon: "ShieldCheck",
+    title: "Transparent Ingredients",
+    description:
+      "Full disclosure of ingredients and concentration — no hidden formulas or marketing noise.",
+  },
+  {
+    id: "c3",
+    icon: "Sparkles",
+    title: "High Concentration",
+    description:
+      "18–22% fragrance oil concentration for long-lasting depth without overpowering presence.",
+  },
+  {
+    id: "c4",
+    icon: "CheckCircle2",
+    title: "Ethical Sourcing",
+    description:
+      "Responsibly sourced ingredients from verified partners with sustainability in focus.",
+  },
+];
 
 export default async function ProductCollectionPage() {
   await connectToDatabase();
@@ -74,6 +105,9 @@ export default async function ProductCollectionPage() {
 
       {/* 🛍 Collection */}
       <ProductCollectionInteractive initialProducts={products} />
+
+      {/* 🧪 Craft Transparency */}
+      <CraftCredentials credentials={craftCredentials} />
 
     </main>
   );
