@@ -77,6 +77,7 @@ export default function ProductReviews({ productId, onSummary }) {
 }, [avg, total]);
 
 
+
   function sortReviews(list, option) {
     const sorted = [...list];
     if (option === "newest") {
@@ -123,15 +124,21 @@ export default function ProductReviews({ productId, onSummary }) {
     <div className="flex flex-col md:flex-row bg-[#FCF8F3] rounded-xl px-0 md:px-6 py-6 border border-[#ede7d7]">
       {/* LEFT: Summary Sidebar */}
       <div className="md:w-[290px] w-full shrink-0 px-4 mb-10 md:mb-0">
-        <div className="text-[2.5rem] leading-none font-extrabold text-[#b28c34] flex items-center mb-2">
-          {avg}
-          <span className="ml-2">
-            <Stars count={Math.round(avg)} />
-          </span>
-        </div>
-        <div className="text-[#95874f] text-[13px] mb-5">
-          Based on {total} review{total !== 1 ? "s" : ""}
-        </div>
+        {total === 0 ? (
+          <p className="text-sm text-[#95874f]">No reviews yet. Be the first to review this product.</p>
+        ) : (
+          <>
+            <div className="text-[2.5rem] leading-none font-extrabold text-[#b28c34] flex items-center mb-2">
+              {avg}
+              <span className="ml-2">
+                <Stars count={Math.round(avg)} />
+              </span>
+            </div>
+            <div className="text-[#95874f] text-[13px] mb-5">
+              Based on {total} review{total !== 1 ? "s" : ""}
+            </div>
+          </>
+        )}
         <div className="space-y-2 mb-8">
           {countArr.map((c, i) => (
             <div className="flex items-center gap-2" key={i}>

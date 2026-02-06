@@ -36,8 +36,9 @@ const ProductSchema = new mongoose.Schema(
     ingredients: [String],
 
     // ⭐ NEW — for dynamic rating everywhere
-    rating: { type: Number, default: 4.8 },
+    rating: { type: Number, default: null },
     reviewCount: { type: Number, default: 0 },
+
 
     // SOFT DELETE
     deleted: { type: Boolean, default: false },

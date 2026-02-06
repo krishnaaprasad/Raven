@@ -15,7 +15,8 @@ export async function GET(req) {
 
     const reviews = await Review.find({
       productId,
-      deleted: false
+      deleted: false,
+      status: "ACTIVE",
     }).sort({ createdAt: -1 });
 
     return Response.json(reviews, { status: 200 });
@@ -59,8 +60,13 @@ export async function POST(req) {
 
     const avgRating =
       reviews.length > 0
-        ? reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length
-        : 0;
+        ? Number(
+            (
+              reviews.reduce((acc, r) => acc + r.rating, 0) /
+              reviews.length
+            ).toFixed(1)
+          )
+        : null;
 
     // ⭐ Update product's rating & review count
     await Product.findByIdAndUpdate(

@@ -71,24 +71,27 @@ const ProductCard = ({ product }) => {
         </h3>
 
         {/* Rating */}
-        <div className="flex items-center gap-2">
-          <div className="flex">
-            {[...Array(5)].map((_, i) => (
-              <Star
-                key={i}
-                size={13}
-                className={
-                  i < Math.floor(product?.rating || 0)
-                    ? "text-(--theme-text) fill-(--theme-text)"
-                    : "text-(--theme-border)"
-                }
-              />
-            ))}
+        {product?.reviewCount > 0 && product?.rating != null && (
+          <div className="flex items-center gap-2">
+            <div className="flex">
+              {[...Array(5)].map((_, i) => (
+                <Star
+                  key={i}
+                  size={13}
+                  className={
+                    i < Math.round(product.rating)
+                      ? "text-(--theme-text) fill-(--theme-text)"
+                      : "text-(--theme-border)"
+                  }
+                />
+              ))}
+            </div>
+
+            <span className="text-xs text-(--theme-muted)">
+              {product.rating}
+            </span>
           </div>
-          <span className="text-xs text-(--theme-muted)">
-            {product?.rating || 0}
-          </span>
-        </div>
+        )}
 
         {/* Price */}
         <p className="font-[Crimson_Text] text-lg font-semibold text-(--theme-text)">
