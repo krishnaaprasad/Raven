@@ -229,7 +229,7 @@ const didInitProduct = useRef(false);
         
 
         <td className="px-5 py-3 min-w-20">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-4">
             {/* Edit — ONLY manual */}
             {isManualOrder && (
               <button
