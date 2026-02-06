@@ -36,12 +36,12 @@ export default function CraftCredentials({ credentials = [] }) {
 
         {/* Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-12">
-          {credentials.map((item) => {
+          {credentials.map((item, index) => {
             const Icon = ICONS[item.title] || Sparkles;
 
             return (
               <div
-                key={item.id}
+                key={item.id || `${item.title}-${index}`}
                 className="
                   text-center
                   px-8 py-10

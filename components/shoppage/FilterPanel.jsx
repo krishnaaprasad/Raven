@@ -61,7 +61,7 @@ export default function FilterPanel({
   const count = activeFilters.fragranceFamily.length;
 
   const content = (
-    <div className="p-8 space-y-5 bg-(--theme-soft) border border-[var(--theme-border)] transition-colors duration-500">
+    <div className="p-8 space-y-5 bg-[var(--theme-soft)] border border-[var(--theme-border)] transition-colors duration-500">
 
       {/* Header */}
       <div className="flex justify-between items-center pb-6 border-b border-[var(--theme-border)]">
