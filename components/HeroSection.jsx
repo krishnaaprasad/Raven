@@ -6,6 +6,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import { Cormorant_Garamond, Outfit } from "next/font/google";
+import { useTheme } from "@/app/theme-provider";
 
 const cormorant = Cormorant_Garamond({
   subsets: ["latin"],
@@ -24,6 +25,8 @@ export default function HeroSection() {
   const [mounted, setMounted] = useState(false);
   const [mouse, setMouse] = useState({ x: 0, y: 0 });
 
+  const { theme } = useTheme(); // ✅ hook inside component
+
   const isDesktop =
     typeof window !== "undefined" &&
     window.matchMedia("(min-width: 1024px)").matches;
@@ -31,6 +34,14 @@ export default function HeroSection() {
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // ✅ SAFE theme-based image selection
+  const heroImage = mounted
+    ? theme === "dark"
+      ? "/Hero-Black.png"
+      : "/Hero-White.Jpeg"
+    : "/Hero-Black.png";
+    
 
   const onMouseMove = (e) => {
     if (!isDesktop) return;
@@ -43,10 +54,9 @@ export default function HeroSection() {
 
   return (
     <section
-  onMouseMove={onMouseMove}
-  className="relative min-h-screen overflow-hidden  flex items-center justify-center -mt-12"
->
-
+      onMouseMove={onMouseMove}
+      className="relative min-h-screen overflow-hidden flex items-center justify-center -mt-12"
+    >
       {/* ===== BACKGROUND IMAGE ===== */}
       <motion.div
         className="absolute inset-0"
@@ -59,58 +69,54 @@ export default function HeroSection() {
         transition={{ duration: 0.6, ease: "easeOut" }}
       >
         <Image
-          src="/hero-abstract.jpg"
+          src={heroImage}
           alt="Raven Fragrance Hero"
           fill
           priority
           className="object-cover"
         />
       </motion.div>
-      
-    
-      
-     
+
+      {/* ===== OVERLAY ===== */}
+      <div className="absolute inset-0 z-1 pointer-events-none">
+        <div
+          className="
+            absolute top-1/2 left-1/2
+            -translate-x-1/2 -translate-y-1/2
+            w-[120%] h-[60%]
+            bg-linear-to-b
+            from-black/55 via-black/35 to-transparent
+            blur-2xl
+          "
+        />
+      </div>
 
       {/* ===== CONTENT ===== */}
-            <div className="absolute inset-0 z-1 pointer-events-none">
-        <div className="
-          absolute
-          top-1/2 left-1/2
-          -translate-x-1/2 -translate-y-1/2
-          w-[120%] h-[60%]
-          bg-linear-to-b
-          from-black/40
-          via-black/25
-          to-transparent
-          blur-2xl
-        " />
-      </div>
       <div className="relative z-10 max-w-5xl mx-auto text-center">
-        {/* Title */}
         <motion.h1
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: mounted ? 1 : 0, y: mounted ? 0 : 30 }}
           transition={{ duration: 1 }}
-          className={`text-[#eaeaea] text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl leading-tight mb-6 ${cormorant.className}`}
+          className={`text-[#eaeaea] text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl
+          leading-tight mb-6 drop-shadow-[0_6px_20px_rgba(0,0,0,0.35)]
+          ${cormorant.className}`}
         >
           Presence Over Noise
         </motion.h1>
 
-        {/* Description */}
-<motion.p
-  initial={{ opacity: 0, y: 20 }}
-  animate={{ opacity: mounted ? 1 : 0, y: mounted ? 0 : 20 }}
-  transition={{ duration: 1, delay: 0.3 }}
-  className={`max-w-2xl mx-auto text-white/85 
-              text-sm sm:text-base md:text-lg 
-              leading-relaxed px-2 ${outfit.className}`}
->
-  Raven Fragrance crafted for those who prefer restraint over excess. 
-  <span className="hidden sm:inline"><br /></span>
-  {" "} Presence that is felt, not performed.
-</motion.p>
+        <motion.p
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: mounted ? 1 : 0, y: mounted ? 0 : 20 }}
+          transition={{ duration: 1, delay: 0.3 }}
+          className={`max-w-2xl mx-auto text-white/90 drop-shadow-[0_2px_10px_rgba(0,0,0,0.25)]
+          text-sm sm:text-base md:text-lg leading-relaxed px-2
+          ${outfit.className}`}
+        >
+          Raven Fragrance crafted for those who prefer restraint over excess.
+          <span className="hidden sm:inline"><br /></span>{" "}
+          Presence that is felt, not performed.
+        </motion.p>
 
-        {/* CTA */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: mounted ? 1 : 0, y: mounted ? 0 : 20 }}
@@ -119,23 +125,14 @@ export default function HeroSection() {
         >
           <Link
             href="/collection"
-            className="group inline-flex items-center gap-3 px-10 py-4 mt-12 sm:mt-16 text-[#EAEAEA] uppercase tracking-[0.25em] text-xs sm:text-sm transition"
+            className="group inline-flex items-center gap-3 px-10 py-4 mt-12 sm:mt-20 font-bold
+            text-[#EAEAEA] uppercase tracking-[0.25em] text-xs sm:text-sm transition"
           >
             Three Signatures
-            <ArrowRight className="w-4 h-4 text-[#EAEAEA] group-hover:translate-x-1 transition" />
+            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition" />
           </Link>
         </motion.div>
       </div>
-
-      {/* ===== SCROLL INDICATOR =====
-      <div className="absolute bottom-12 sm:bottom-15 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2">
-        <span className={`text-white/50 text-[10px] tracking-[0.3em] ${outfit.className}`}>
-          SCROLL
-        </span>
-        <div className="w-5 h-8 border border-white/30 rounded-full flex justify-center pt-2">
-          <div className="w-1 h-2 bg-[#ffffff] rounded-full animate-bounce" />
-        </div>
-      </div> */}
     </section>
   );
 }
