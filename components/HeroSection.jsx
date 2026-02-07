@@ -38,9 +38,9 @@ export default function HeroSection() {
   // ✅ SAFE theme-based image selection
   const heroImage = mounted
     ? theme === "dark"
-      ? "/Hero-Black.png"
-      : "/Hero-White.Jpeg"
-    : "/Hero-Black.png";
+      ? "/Hero-Black.PNG"
+      : "/Hero-White.JPEG"
+    : "/Hero-Black.PNG";
     
 
   const onMouseMove = (e) => {
@@ -78,13 +78,13 @@ export default function HeroSection() {
       </motion.div>
 
       {/* ===== OVERLAY ===== */}
-      <div className="absolute inset-0 z-1 pointer-events-none">
+      <div className="absolute inset-0 z-[1] pointer-events-none">
         <div
           className="
             absolute top-1/2 left-1/2
             -translate-x-1/2 -translate-y-1/2
             w-[120%] h-[60%]
-            bg-linear-to-b
+            bg-gradient-to-b
             from-black/55 via-black/35 to-transparent
             blur-2xl
           "
@@ -97,7 +97,7 @@ export default function HeroSection() {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: mounted ? 1 : 0, y: mounted ? 0 : 30 }}
           transition={{ duration: 1 }}
-          className={`text-[#eaeaea] text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl
+          className={`${theme === "dark" ? "text-[#eaeaea]" : "text-neutral-900"} text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl
           leading-tight mb-6 drop-shadow-[0_6px_20px_rgba(0,0,0,0.35)]
           ${cormorant.className}`}
         >
@@ -108,7 +108,7 @@ export default function HeroSection() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: mounted ? 1 : 0, y: mounted ? 0 : 20 }}
           transition={{ duration: 1, delay: 0.3 }}
-          className={`max-w-2xl mx-auto text-white/90 drop-shadow-[0_2px_10px_rgba(0,0,0,0.25)]
+          className={`max-w-2xl mx-auto ${theme === "dark" ? "text-white/90" : "text-neutral-800"} drop-shadow-[0_2px_10px_rgba(0,0,0,0.25)]
           text-sm sm:text-base md:text-lg leading-relaxed px-2
           ${outfit.className}`}
         >
