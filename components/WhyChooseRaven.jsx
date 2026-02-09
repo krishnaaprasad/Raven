@@ -44,7 +44,7 @@ const CraftSection = () => {
   {/* OUTER FRAME */}
   <div
     className="
-      w-[300px] h-[310px]
+      w-[340px] h-[340px]
       sm:w-[620px] sm:h-[500px]
       md:w-[880px] md:h-[530px]
       flex items-center justify-center
@@ -54,7 +54,13 @@ const CraftSection = () => {
     "
   >
     {/* INNER GRID */}
-    <div className="grid grid-cols-2 gap-2 w-[55%]">
+    <div className="
+  grid grid-cols-2 gap-3
+  w-[65%]
+  sm:w-[58%]
+  lg:w-[55%]
+">
+
       {images.map((src, i) => (
         <div
           key={i}
@@ -68,7 +74,8 @@ const CraftSection = () => {
             src={src}
             alt=""
             fill
-            className="object-cover grayscale hover:grayscale-0 transition duration-700"
+            className="object-cover grayscale hover:grayscale-0 transition duration-700 scale-[1.05] sm:scale-100"
+
           />
         </div>
       ))}

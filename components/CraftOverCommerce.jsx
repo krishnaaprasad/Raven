@@ -84,11 +84,25 @@ const WhyChooseRaven = () => {
               "
             >
               {/* Emoji / Icon */}
-              <div className="mb-4 sm:mb-5 md:mb-6">
-                <span className="text-3xl sm:text-4xl md:text-5xl">
-                  {reason.emoji}
-                </span>
+              <div className="mb-5 flex justify-center">
+                <div
+                  className="
+                    flex items-center justify-center
+                    w-29 h-29            /* ✅ BIG on mobile */
+                    sm:w-14 sm:h-14     /* slightly smaller on sm+ */
+                    md:w-16 md:h-16
+                    rounded-full
+                    bg-white/70
+                    border border-[hsl(35_20%_82%/0.4)]
+                    shadow-sm
+                  "
+                >
+                  <span className="text-3xl sm:text-3xl md:text-4xl leading-none">
+                    {reason.emoji}
+                  </span>
+                </div>
               </div>
+
 
               {/* Title */}
               <h3
