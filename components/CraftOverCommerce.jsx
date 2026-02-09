@@ -88,7 +88,7 @@ const WhyChooseRaven = () => {
                 <div
                   className="
                     flex items-center justify-center
-                    w-29 h-29            /* ✅ BIG on mobile */
+                    w-28 h-28            /* ✅ BIG on mobile */
                     sm:w-14 sm:h-14     /* slightly smaller on sm+ */
                     md:w-16 md:h-16
                     rounded-full
