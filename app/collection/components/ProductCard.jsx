@@ -71,27 +71,34 @@ const ProductCard = ({ product }) => {
         </h3>
 
         {/* Rating */}
-        {product?.reviewCount > 0 && product?.rating != null && (
-          <div className="flex items-center gap-2">
-            <div className="flex">
-              {[...Array(5)].map((_, i) => (
-                <Star
-                  key={i}
-                  size={13}
-                  className={
-                    i < Math.round(product.rating)
-                      ? "text-(--theme-text) fill-(--theme-text)"
-                      : "text-(--theme-border)"
-                  }
-                />
-              ))}
-            </div>
+        {/* Rating (reserve space even if no reviews) */}
+<div className="flex items-center gap-2 min-h-[18px]">
+  {product?.reviewCount > 0 && product?.rating != null ? (
+    <>
+      <div className="flex">
+        {[...Array(5)].map((_, i) => (
+          <Star
+            key={i}
+            size={13}
+            className={
+              i < Math.round(product.rating)
+                ? "text-(--theme-text) fill-(--theme-text)"
+                : "text-(--theme-border)"
+            }
+          />
+        ))}
+      </div>
 
-            <span className="text-xs text-(--theme-muted)">
-              {product.rating}
-            </span>
-          </div>
-        )}
+      <span className="text-xs text-(--theme-muted)">
+        {Number(product.rating).toFixed(1)}
+      </span>
+    </>
+  ) : (
+    // 👇 invisible placeholder to preserve height
+    <span className="text-xs opacity-0">0.0</span>
+  )}
+</div>
+
 
         {/* Price */}
         <p className="font-[Crimson_Text] text-lg font-semibold text-(--theme-text)">
