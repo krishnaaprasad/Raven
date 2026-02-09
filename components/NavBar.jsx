@@ -95,6 +95,15 @@ export default function NavBar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [isHome]);
 
+const logoColor = (() => {
+  // Transparent navbar (hero area)
+  if (!showSolid) return "white";
+
+  // Solid navbar
+  return theme === "dark" ? "white" : "black";
+})();
+
+
   return (
     <>
       <nav
@@ -127,9 +136,8 @@ export default function NavBar() {
               <Link href="/" className="pointer-events-auto">
                 <LogoText
                   size="lg"
-                  className={`transition-colors duration-300 ${
-                    showSolid ? "text-[var(--theme-text)]" : "text-white"
-                  }`}
+                  color={logoColor}
+                  className="transition-colors duration-300"
                 />
               </Link>
             </div>
