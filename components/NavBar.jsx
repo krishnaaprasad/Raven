@@ -17,6 +17,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import LogoText from '@/components/LogoText';
 import { useTheme } from "@/app/theme-provider";
 import { Sun, Moon } from "lucide-react";
+import { X } from "lucide-react";
 
 const AuthModal = dynamic(() => import('@/app/auth/modal'), {
   ssr: false,
@@ -95,13 +96,12 @@ export default function NavBar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [isHome]);
 
-const logoColor = (() => {
-  // Transparent navbar (hero area)
-  if (!showSolid) return "white";
+const logoColor = theme === "dark" ? "white" : "black";
 
-  // Solid navbar
-  return theme === "dark" ? "white" : "black";
-})();
+const sidebarTop = pastMarquee
+  ? "3rem"            // marquee gone → only navbar
+  : "calc(40px + 3rem)"; // marquee + navbar
+
 
 
   return (
@@ -111,7 +111,7 @@ const logoColor = (() => {
           fixed left-0 right-0 z-1000 transition-all duration-500
           ${isHome && !pastMarquee ? "top-10" : "top-0"}
           ${showSolid
-            ? "bg-[var(--theme-bg)] border-b border-[var(--theme-border)] backdrop-blur-md"
+            ? "bg-(--theme-bg) border-b border-(--theme-border) backdrop-blur-md"
             : "bg-transparent"}
         `}
       >
@@ -119,17 +119,42 @@ const logoColor = (() => {
           <div className="relative flex h-12 items-center justify-between">
 
             {/* Mobile hamburger */}
-            <div className="sm:hidden">
-              <button onClick={() => setMobileMenuOpen(p => !p)}>
-                <Bars3Icon
-                  className={`h-6 w-6 ${
-                    showSolid
-                      ? "text-[var(--theme-text)]"
-                      : "text-white"
-                  }`}
-                />
-              </button>
+            {/* Hamburger (mobile + desktop) */}
+            <div>
+              <button
+  onClick={() => setMobileMenuOpen(p => !p)}
+  className="relative w-8 h-8 flex items-center justify-center"
+  aria-label="Toggle menu"
+>
+  <AnimatePresence mode="wait" initial={false}>
+    {!mobileMenuOpen ? (
+      <motion.span
+        key="menu"
+        initial={{ rotate: -90, opacity: 0 }}
+        animate={{ rotate: 0, opacity: 1 }}
+        exit={{ rotate: 90, opacity: 0 }}
+        transition={{ duration: 0.2 }}
+        className={showSolid ? "text-(--theme-text)" : "text-white"}
+      >
+        <Bars3Icon className="h-6 w-6" />
+      </motion.span>
+    ) : (
+      <motion.span
+        key="close"
+        initial={{ rotate: 90, opacity: 0 }}
+        animate={{ rotate: 0, opacity: 1 }}
+        exit={{ rotate: -90, opacity: 0 }}
+        transition={{ duration: 0.2 }}
+        className="text-(--theme-text)"
+      >
+        <X className="h-6 w-6" />
+      </motion.span>
+    )}
+  </AnimatePresence>
+</button>
+
             </div>
+
 
             {/* Logo */}
             <div className="absolute left-0 right-0 flex justify-center pointer-events-none">
@@ -228,27 +253,41 @@ const logoColor = (() => {
 
       <>
       <motion.div
-        className="fixed inset-0 bg-black/20 z-[998]"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        onClick={() => setMobileMenuOpen(false)}
-      />
+      
+  initial={{
+    x: typeof window !== "undefined" && window.innerWidth >= 640 ? -320 : 0,
+    y: typeof window !== "undefined" && window.innerWidth < 640 ? -20 : 0,
+    opacity: 0,
+  }}
+  animate={{ x: 0, y: 0, opacity: 1 }}
+  exit={{
+    x: typeof window !== "undefined" && window.innerWidth >= 640 ? -320 : 0,
+    y: typeof window !== "undefined" && window.innerWidth < 640 ? -20 : 0,
+    opacity: 0,
+  }}
+  transition={{ duration: 0.3, ease: "easeOut" }}
+  className="
+    fixed z-[9999]
+    bg-(--theme-bg)
+    border-r border-(--theme-border)
+    backdrop-blur-md
 
-    <motion.div
-      initial={{ y: -20, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      exit={{ y: -20, opacity: 0 }}
-      transition={{ duration: 0.25, ease: "easeOut" }}
-      className="
-   fixed top-[3rem] left-0 right-0
-   z-[9999]
-   bg-[var(--theme-bg)]
-   border-b border-[var(--theme-border)]
-  backdrop-blur-md
-  sm:hidden"
-    >
-      <div className="px-6 py-6 space-y-6 font-[Outfit]">
+    /* DESKTOP */
+    sm:left-0 sm:h-[calc(100vh-var(--sidebar-top))] sm:w-[320px]
+
+    /* MOBILE */
+    left-0 right-0
+    border-b sm:border-b-0
+  "
+  style={{
+  top: sidebarTop,
+  "--sidebar-top": sidebarTop,
+}}
+
+>
+
+
+      <div className="px-8 pt-16 pb-10 space-y-7 font-[Outfit]">
 
         <Link
           href="/collection"
@@ -258,15 +297,13 @@ const logoColor = (() => {
           Shop
         </Link>
 
-        <button
-          onClick={() => {
-            handleClick()
-            setMobileMenuOpen(false)
-          }}
-          className="block text-left text-sm uppercase tracking-widest text-[var(--theme-text)] hover:opacity-60"
+        <Link
+          href="/philosophy"
+          onClick={() => setMobileMenuOpen(false)}
+          className="block text-sm uppercase tracking-widest text-[var(--theme-text)] hover:opacity-60"
         >
-          Our Story
-        </button>
+          Philosophy
+        </Link>
 
         <Link
           href="/contact-us"
@@ -319,3 +356,4 @@ const logoColor = (() => {
     </>
   );
 }
+
