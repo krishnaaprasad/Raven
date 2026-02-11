@@ -1,9 +1,17 @@
 "use client";
+
+import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
 import Image from "next/image";
 import { useTheme } from "@/app/theme-provider";
 
 export default function HeroSection() {
+  const [isVisible, setIsVisible] = useState(false);
   const { theme } = useTheme();
+
+  useEffect(() => {
+    setIsVisible(true);
+  }, []);
 
   const desktopImage =
     theme === "dark"
@@ -16,63 +24,58 @@ export default function HeroSection() {
       : "/hero-mobile-light.PNG";
 
   return (
-    <section
-  id="hero-section"
-  className="
-    bg-(--theme-bg)
+    <section className="bg-(--theme-bg)
     relative
     min-h-svh
     overflow-hidden
     flex
     items-center
     justify-center
-    -mt-12
-  "
->
+    -mt-12 ">
 
-      {/* Navbar readability scrim */}
-<div
-  className="
-    pointer-events-none
-    absolute top-0 left-0 right-0
-    h-24
-    bg-linear-to-b
-    from-black/45
-    to-transparent
-    md:h-[110px]
-  "
-/>
       {/* ===================== */}
-      {/* DESKTOP HERO (1920×1080 SAFE) */}
+      {/* DESKTOP HERO IMAGE */}
       {/* ===================== */}
-      <div className="hidden md:flex w-full h-full items-center justify-center">
-        <div className="relative w-full max-w-[1920px] aspect-video">
+      <div className="hidden md:flex absolute inset-0 items-center justify-center">
+        <motion.div
+          key={`desktop-${theme}`}
+          initial={{ scale: 1.05, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 1.5, ease: "easeOut" }}
+          className="w-full h-full"
+        >
           <Image
             src={desktopImage}
-            alt="Raven Fragrance"
+            alt="Raven Fragrance Collection"
             fill
             priority
-            sizes="(min-width: 1024px) 100vw"
-            className="object-contain"
+            className="object-cover object-center"
           />
-        </div>
+        </motion.div>
       </div>
 
       {/* ===================== */}
-      {/* MOBILE HERO */}
+      {/* MOBILE HERO IMAGE */}
       {/* ===================== */}
-      <div className="flex md:hidden w-full h-full items-center justify-center">
-        <div className="relative w-full max-w-[420px] aspect-[9/19.5]">
+      <div className="flex md:hidden absolute inset-0 items-center justify-center">
+        <motion.div
+          key={`mobile-${theme}`}
+          initial={{ scale: 1.05, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 1.5, ease: "easeOut" }}
+          className="w-full h-full"
+        >
           <Image
             src={mobileImage}
-            alt="Raven Fragrance Mobile"
+            alt="Raven Fragrance Collection"
             fill
             priority
-            sizes="100vw"
-            className="object-contain"
+            className="object-cover object-center"
           />
-        </div>
+        </motion.div>
       </div>
+
+      
     </section>
   );
 }
