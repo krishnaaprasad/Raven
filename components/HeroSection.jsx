@@ -7,13 +7,13 @@ export default function HeroSection() {
 
   const desktopImage =
     theme === "dark"
-      ? "/hero-desktop-dark.png"
-      : "/hero-desktop-light.png";
+      ? "/hero-desktop-dark.PNG"
+      : "/hero-desktop-light.PNG";
 
   const mobileImage =
     theme === "dark"
-      ? "/hero-mobile-dark.png"
-      : "/hero-mobile-light.png";
+      ? "/hero-mobile-dark.PNG"
+      : "/hero-mobile-light.PNG";
 
   return (
     <section
