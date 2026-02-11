@@ -6,24 +6,29 @@ export const metadata = {
 
 export default function TermsConditionsPage() {
   return (
-    <section className="px-5 md:px-20 py-16 bg-[#f9f6f3] text-stone-700 leading-relaxed">
-      <div className="max-w-4xl mx-auto bg-white rounded-xl shadow-lg p-8 md:p-14">
-        <h1 className="text-4xl md:text-5xl font-serif text-[#b66f19] mb-6 text-center">
+    <section className="bg-(--theme-bg) text-(--theme-text) px-5 md:px-20 py-16 transition-colors duration-500">
+      <div className="max-w-4xl mx-auto border border-(--theme-border) bg-(--theme-soft) p-8 md:p-14">
+
+        {/* Heading */}
+        <h1 className="text-4xl md:text-5xl font-[Crimson_Text] text-center mb-6 tracking-tight">
           Terms & Conditions
         </h1>
-        <p className="text-sm text-gray-500 text-center mb-10">
+
+        <p className="text-sm text-(--theme-muted) text-center mb-10 font-[system-ui]">
           Last updated: October 2025
         </p>
 
-        <p className="mb-10 text-[1.05rem] text-center text-gray-600">
+        <p className="mb-10 text-[1.05rem] text-center text-(--theme-muted) font-[system-ui] leading-relaxed">
           By accessing and using our website, you agree to comply with and be bound by
           the following Terms & Conditions. Please read them carefully before making a purchase.
         </p>
 
         {/* 1. General */}
         <section className="mb-10">
-          <h2 className="text-2xl font-semibold text-[#c49939] mb-4">1. General</h2>
-          <ul className="list-disc pl-6 space-y-2">
+          <h2 className="text-2xl font-semibold mb-4 font-[Crimson_Text]">
+            1. General
+          </h2>
+          <ul className="list-disc pl-6 space-y-2 text-(--theme-muted) font-[system-ui] leading-relaxed">
             <li>
               Raven Fragrance reserves the right to modify or update these terms at any
               time without prior notice.
@@ -46,10 +51,10 @@ export default function TermsConditionsPage() {
 
         {/* 2. Orders & Payments */}
         <section className="mb-10">
-          <h2 className="text-2xl font-semibold text-[#c49939] mb-4">
+          <h2 className="text-2xl font-semibold mb-4 font-[Crimson_Text]">
             2. Orders & Payments
           </h2>
-          <ul className="list-disc pl-6 space-y-2">
+          <ul className="list-disc pl-6 space-y-2 text-(--theme-muted) font-[system-ui] leading-relaxed">
             <li>Orders are processed only after successful payment confirmation.</li>
             <li>Raven Fragrance reserves the right to cancel or refuse any order.</li>
             <li>
@@ -65,10 +70,10 @@ export default function TermsConditionsPage() {
 
         {/* 3. Intellectual Property */}
         <section className="mb-10">
-          <h2 className="text-2xl font-semibold text-[#c49939] mb-4">
+          <h2 className="text-2xl font-semibold mb-4 font-[Crimson_Text]">
             3. Intellectual Property
           </h2>
-          <ul className="list-disc pl-6 space-y-2">
+          <ul className="list-disc pl-6 space-y-2 text-(--theme-muted) font-[system-ui] leading-relaxed">
             <li>
               All trademarks, logos, images, and written content on this website are the
               property of Raven Fragrance.
@@ -86,10 +91,10 @@ export default function TermsConditionsPage() {
 
         {/* 4. Limitation of Liability */}
         <section className="mb-10">
-          <h2 className="text-2xl font-semibold text-[#c49939] mb-4">
+          <h2 className="text-2xl font-semibold mb-4 font-[Crimson_Text]">
             4. Limitation of Liability
           </h2>
-          <ul className="list-disc pl-6 space-y-2">
+          <ul className="list-disc pl-6 space-y-2 text-(--theme-muted) font-[system-ui] leading-relaxed">
             <li>
               Raven Fragrance is not liable for any direct or indirect damages arising
               from the use of our website or products.
@@ -106,32 +111,44 @@ export default function TermsConditionsPage() {
 
         {/* 5. Governing Law */}
         <section className="mb-10">
-          <h2 className="text-2xl font-semibold text-[#c49939] mb-4">
+          <h2 className="text-2xl font-semibold mb-4 font-[Crimson_Text]">
             5. Governing Law
           </h2>
-          <p>
+          <p className="text-(--theme-muted) font-[system-ui] leading-relaxed">
             These Terms & Conditions are governed by the laws of India. Any disputes or
             claims shall fall under the exclusive jurisdiction of the courts in{" "}
-            <span className="text-[#ad563c] font-medium">Mumbai, Maharashtra</span>.
+            <span className="font-medium text-(--theme-text)">
+              Mumbai, Maharashtra
+            </span>.
           </p>
         </section>
 
         {/* 6. Contact */}
-        <section>
-          <h2 className="text-2xl font-semibold text-[#c49939] mb-4">
+        <section className="border-t border-(--theme-border) pt-8">
+          <h2 className="text-2xl font-semibold mb-4 font-[Crimson_Text]">
             6. Contact Information
           </h2>
-          <p>
+          <p className="text-(--theme-muted) font-[system-ui] leading-relaxed">
             For any questions or concerns regarding these Terms & Conditions, please
-            contact us at: <br />
-            <span className="text-[#ad563c] font-semibold">
-              contact@ravenfragrance.in
+            contact us at:
+          </p>
+
+          <p className="mt-3 font-semibold text-(--theme-text)">
+            contact@ravenfragrance.in
+          </p>
+
+          <p className="text-(--theme-muted) font-[system-ui]">
+            Support Hours: Monday – Saturday, 10:00 AM – 6:00 PM
+          </p>
+
+          <p className="text-(--theme-muted) font-[system-ui] mt-2">
+            Legal Entity Name:{" "}
+            <span className="font-medium text-(--theme-text)">
+              ABHISHEK SURESH AMBRE
             </span>
-            <br />
-            Support Hours: Monday – Saturday, 10:00 AM – 6:00 PM <br />
-            Legal Entity Name: <strong>ABHISHEK SURESH AMBRE</strong>
           </p>
         </section>
+
       </div>
     </section>
   );

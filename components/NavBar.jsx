@@ -126,15 +126,15 @@ const sidebarTop = pastMarquee
             : "bg-transparent"}
         `}
       >
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="relative flex h-12 items-center justify-between">
+        <div className="max-w-8xl mx-auto px-6">
+          <div className="relative flex h-12 items-center justify-between ">
 
             {/* Mobile hamburger */}
             {/* Hamburger (mobile + desktop) */}
             <div>
               <button
   onClick={() => setMobileMenuOpen(p => !p)}
-  className="relative w-8 h-8 flex items-center justify-center"
+  className="relative w-8 h-8 flex items-center justify-center cursor-pointer"
   aria-label="Toggle menu"
 >
   <AnimatePresence mode="wait" initial={false}>
@@ -180,7 +180,7 @@ const sidebarTop = pastMarquee
             </div>
 
             {/* Right icons */}
-            <div className="ml-auto flex items-center gap-4">
+            <div className="ml-auto flex items-center gap-4 ">
 
               {/* Theme */}
               <button
@@ -189,9 +189,9 @@ const sidebarTop = pastMarquee
                 aria-pressed={theme === 'dark'}
               >
                 {theme === "dark" ? (
-                  <Sun className="h-5 w-5 text-(--theme-text)" />
+                  <Sun className="h-5 w-5 text-(--theme-text) cursor-pointer" />
                 ) : (
-                  <Moon className="h-5 w-5 text-(--theme-text)" />
+                  <Moon className="h-5 w-5 text-(--theme-text) cursor-pointer" />
                 )}
               </button>
 
@@ -199,16 +199,16 @@ const sidebarTop = pastMarquee
               <div className="hidden sm:block">
                 {!session ? (
                   <button onClick={() => setShowAuthModal(true)}>
-                    <UserIcon className="h-6 w-6 text-(--theme-text)" />
+                    <UserIcon className="h-5 w-5 text-(--theme-text) cursor-pointer" />
                   </button>
                 ) : (
                   <div ref={dropdownRef} className="relative">
                     <button
                       onClick={() => setShowAccountMenu(p => !p)}
-                      className="flex items-center gap-1 text-(--theme-text)"
+                      className="flex items-center gap-1 text-(--theme-text) cursor-pointer"
                     >
-                      <UserIcon className="h-5 w-5" />
-                      <ChevronDownIcon className="h-4 w-4" />
+                      <UserIcon className="h-5 w-5 text-(--theme-text) cursor-pointer" />
+                      <ChevronDownIcon className="h-5 w-5" />
                     </button>
 
                     {showAccountMenu && (
@@ -247,7 +247,7 @@ const sidebarTop = pastMarquee
               {/* Cart */}
               <button onClick={openCart} className="relative">
                 <ShoppingBagIcon
-                  className={`h-5 w-5 text-(--theme-text) ${
+                  className={`h-5 w-5 text-(--theme-text) cursor-pointer${
                     animateCart ? "animate-bounce" : ""
                   }`}
                 />

@@ -1,5 +1,5 @@
 'use client';
-
+import { Crimson_Text } from "next/font/google";
 import { useEffect, useRef, useState } from 'react';
 import { useCart } from '../context/cartcontext';
 import { useRouter } from 'next/navigation';
@@ -19,6 +19,12 @@ const formatAmount = (amount) => {
   if (!amount || isNaN(amount)) return "0.00";
   return parseFloat(amount).toFixed(2);
 };
+
+const crimson = Crimson_Text({
+  subsets: ["latin"],
+  weight: ["400", "600", "700"],
+  display: "swap",
+});
 
 export default function CheckoutClient() {
   // Get search param safely WITHOUT useSearchParams()
@@ -365,15 +371,15 @@ export default function CheckoutClient() {
               onChange={handleChange}
               placeholder=" "
               autoComplete="off"
-              className={`peer w-full h-11 px-4 pr-10 text-[15px] text-[#1b180d] bg-[#fcfbf8] rounded-md border outline-none transition-all
+              className={`peer w-full h-11 px-4 pr-10 text-[15px] text-(--theme-text) bg-(--theme-bg) rounded-md border outline-none transition-all
                 ${
                   hasError
                     ? 'border-red-500'
-                    : 'border-[#e7e1cf] focus:border-[#b28c34] focus:ring-1 focus:ring-[#b28c34]'
+                    : 'border-(--theme-border) focus:border-(--theme-text) focus:ring-1 focus:ring-(--theme-text)'
                 }`}
             />
             <label
-              className={`absolute left-4 text-[#9a864c] bg-[#fcfbf8] px-1 transition-all duration-300 pointer-events-none
+              className={`absolute left-4 text-(--theme-muted) bg-(--theme-bg) px-1 transition-all duration-300 pointer-events-none
                 ${
                   hasValue
                     ? '-top-2 text-xs font-medium'
@@ -391,13 +397,13 @@ export default function CheckoutClient() {
                     e.stopPropagation();
                     setShowPhoneTip((prev) => !prev);
                   }}
-                  className="text-[#9a864c] hover:text-[#1b180d] focus:outline-none"
+                  className="text-(--theme-muted) hover:text-(--theme-text) focus:outline-none"
                 >
                   <FiHelpCircle size={18} />
                 </button>
                 {showPhoneTip && (
                   <div
-                    className="absolute -left-60 -top-1.5 bg-white border border-[#e7e1cf] text-[#1b180d] text-xs rounded-md shadow-lg p-2 w-[220px] animate-fadeIn"
+                    className="absolute -left-60 -top-1.5 bg-(--theme-bg) border border-(--theme-border) text-(--theme-text) text-xs rounded-md shadow-lg p-2 w-[220px] animate-fadeIn"
                     style={{
                       zIndex: 999999,
                       boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
@@ -417,15 +423,15 @@ export default function CheckoutClient() {
 
   if (!checkoutItems.length)
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#fcfbf8]">
-        <h1 className="text-lg font-semibold text-[#9a864c]">Your cart is empty</h1>
+      <div className="min-h-screen flex items-center justify-center bg-(--theme-bg)">
+        <h1 className="text-lg font-semibold text-(--theme-muted)">Your cart is empty</h1>
       </div>
     );
 
   return (
     <>
       {showAuthModal && <AuthModal onClose={() => setShowAuthModal(false)} />}
-      <main className="min-h-screen bg-[#fcfbf8] text-[#1b180d] font-[Manrope,sans-serif] px-4 sm:px-6 lg:px-10 py-10">
+      <main className="min-h-screen bg-(--theme-bg) text-(--theme-text) font-sans px-4 sm:px-6 lg:px-10 py-10 transition-colors duration-300">
         <form
           onSubmit={handleSubmit(handlePayment, scrollToError)}
           className="grid grid-cols-1 lg:grid-cols-12 gap-x-12 gap-y-10 max-w-6xl mx-auto"
@@ -433,17 +439,17 @@ export default function CheckoutClient() {
           {/* LEFT SIDE */}
           <section className="lg:col-span-7">
             <div className="flex items-center justify-between mb-8">
-              <h2 className="text-[24px] font-bold">Shipping Information</h2>
+              <h2 className={`${crimson.className} text-[24px] font-bold text-(--theme-text)`}>Shipping Information</h2>
               {!session ? (
                 <button
                   type="button"
                   onClick={() => setShowAuthModal(true)}
-                  className="text-[15px] text-[#b28c34] hover:text-[#1b180d] underline font-medium transition"
+                  className="text-[15px] text-(--theme-text) underline hover:opacity-70 transition"
                 >
                   Sign In
                 </button>
               ) : (
-                <p className="text-[14px] text-[#1b180d]">Hi, {session.user.name?.split(' ')[0]}</p>
+                <p className="text-[14px] text-(--theme-text)">Hi, {session.user.name?.split(' ')[0]}</p>
               )}
             </div>
 
@@ -475,28 +481,28 @@ export default function CheckoutClient() {
                     <div ref={stateDropdownRef} className="relative mb-5 w-[95%] max-w-[640px]">
                       <div
                         onClick={() => setShowStateList(!showStateList)}
-                        className={`flex justify-between items-center h-11 px-4 border rounded-md bg-[#fcfbf8] cursor-pointer ${
+                        className={`flex justify-between items-center h-11 px-4 border rounded-md bg-(--theme-bg) cursor-pointer ${
                           errors.state
                             ? 'border-red-500'
-                            : 'border-[#e7e1cf] hover:border-[#b28c34]'
+                            : 'border-(--theme-border) hover:border-(--theme-text)'
                         }`}
                       >
                         <span
                           className={`text-[15px] ${
-                            field.value ? 'text-[#1b180d]' : 'text-[#9a864c]'
+                            field.value ? 'text-(--theme-text)' : 'text-(--theme-muted)'
                           }`}
                         >
                           {field.value || 'Select State / Territory'}
                         </span>
                         <FiChevronDown
-                          className={`text-[#9a864c] transition-transform ${
+                          className={`text-(--theme-muted) transition-transform ${
                             showStateList ? 'rotate-180' : ''
                           }`}
                         />
                       </div>
 
                       {showStateList && (
-                        <div className="absolute z-20 mt-1 w-full bg-white border border-[#e7e1cf] rounded-lg shadow-lg max-h-56 overflow-y-auto">
+                        <div className="absolute z-20 mt-1 w-full bg-(--theme-bg) border border-(--theme-border) rounded-lg shadow-lg max-h-56 overflow-y-auto">
                           <input
                             type="text"
                             value={stateSearch}
@@ -512,7 +518,7 @@ export default function CheckoutClient() {
                                 setShowStateList(false);
                                 setStateSearch('');
                               }}
-                              className="px-4 py-2 text-sm hover:bg-[#fff9e5] cursor-pointer text-[#1b180d]"
+                              className="px-4 py-2 text-sm hover:bg-(--theme-soft) cursor-pointer text-(--theme-text)"
                             >
                               {s}
                             </div>
@@ -540,9 +546,9 @@ export default function CheckoutClient() {
                     id="saveAddress"
                     checked={saveAddress}
                     onChange={() => setSaveAddress(!saveAddress)}
-                    className="accent-[#b28c34] h-4 w-4"
+                    className="accent-black dark:accent-white h-4 w-4"
                   />
-                  <label htmlFor="saveAddress" className="text-[14px] text-[#1b180d]">
+                  <label htmlFor="saveAddress" className="text-[14px] text-(--theme-text)">
                     Save this address for future orders
                   </label>
                 </div>
@@ -552,9 +558,9 @@ export default function CheckoutClient() {
                 <input
                   value="India"
                   readOnly
-                  className="w-full h-11 px-4 border rounded-md bg-[#f7f4ec] text-[15px] border-[#e7e1cf] cursor-not-allowed"
+                  className="w-full h-11 px-4 border rounded-md bg-(--theme-bg) text-[15px] border-(--theme-border) cursor-not-allowed"
                 />
-                <span className="absolute -top-2 left-4 bg-[#fcfbf8] px-1 text-xs text-[#9a864c] font-medium">
+                <span className="absolute -top-2 left-4 bg-(--theme-bg) px-1 text-xs text-(--theme-muted) font-medium">
                   Country
                 </span>
               </div>
@@ -572,8 +578,8 @@ export default function CheckoutClient() {
                       key={key}
                       className={`flex justify-between items-center p-3 border rounded-md cursor-pointer transition-all duration-200 ${
                         shipping === key
-                          ? 'border-[#b28c34] bg-[#fff9e5]'
-                          : 'border-[#e7e1cf] hover:bg-[#fffaf0] hover:border-[#b28c34]'
+                          ? 'border-(--theme-text) bg-(--theme-soft)'
+                          : 'border-(--theme-border) hover:bg-(--theme-soft) hover:border-(--theme-text)'
                       }`}
                     >
                       <div className="flex items-center gap-3">
@@ -581,21 +587,21 @@ export default function CheckoutClient() {
                           type="radio"
                           checked={shipping === key}
                           onChange={() => setShipping(key)}
-                          className="accent-[#b28c34] h-4 w-4"
+                          className="accent-black dark:accent-white h-4 w-4"
                         />
                         <div>
-                          <p className="font-semibold text-[15px] text-[#1b180d]">{title}</p>
-                          <p className="text-xs text-[#9a864c]">{desc}</p>
+                          <p className="font-semibold text-[15px] text-(--theme-text)">{title}</p>
+                          <p className="text-xs text-(--theme-muted)">{desc}</p>
                         </div>
                       </div>
-                      <p className="font-medium text-[14px] text-[#1b180d]">₹{price}.00</p>
+                      <p className="font-medium text-[14px] text-(--theme-text)">₹{price}.00</p>
                     </label>
                   ))}
                 </div>
               </div>
 
               <div className="mt-5">
-                <Link href="/Cart" className="text-sm text-[#9a864c] underline hover:text-[#1b180d] transition">
+                <Link href="/Cart" className="text-sm text-(--theme-muted) underline hover:text-(--theme-text) transition">
                   ← Return to Cart
                 </Link>
               </div>
@@ -603,7 +609,7 @@ export default function CheckoutClient() {
           </section>
 
           {/* RIGHT SUMMARY */}
-          <aside className="lg:col-span-5 border border-[#e7e1cf] rounded-lg p-6 bg-white shadow-sm h-fit sticky top-10">
+          <aside className="lg:col-span-5 border border-(--theme-border) rounded-lg p-6 bg-(--theme-bg) shadow-sm h-fit sticky top-10">
             <h3 className="text-[20px] font-bold mb-4">Order Summary</h3>
             <div className="space-y-4">
               {checkoutItems.map((item, i) => (
@@ -614,37 +620,37 @@ export default function CheckoutClient() {
                       alt={item.name}
                       width={65}
                       height={65}
-                      className="rounded-md border border-[#e7e1cf] object-cover"
+                      className="rounded-md border border-(--theme-border) object-cover"
                       unoptimized
                     />
-                    <span className="absolute -top-2 -right-2 bg-[#ddad1b] text-white text-[12px] font-semibold px-1 rounded-full">
+                    <span className="absolute -top-2 -right-2 bg-(--theme-text) text-(--theme-bg) text-[12px] font-semibold px-1 rounded-full">
                       {item.quantity}
                     </span>
                   </div>
                   <div className="flex-1">
-                    <p className="text-[15px] font-medium text-[#1b180d] font-serif">{item.name}</p>
-                    <p className="text-xs text-[#9a864c]">{item.size}</p>
-                    <p className="text-xs text-[#9a864c]">Qty × {item.quantity}</p>
+                    <p className="text-[15px] font-medium text-(--theme-text) font-serif">{item.name}</p>
+                    <p className="text-xs text-(--theme-muted)">{item.size} ml</p>
+                    <p className="text-xs text-(--theme-muted)">Qty × {item.quantity}</p>
                   </div>
-                  <p className="text-[15px] font-semibold text-[#1b180d]">
+                  <p className="text-[15px] font-semibold text-(--theme-text)">
                     ₹{formatAmount(item.price * item.quantity)}
                   </p>
                 </div>
               ))}
             </div>
 
-            <div className="my-4 border-t border-[#e7e1cf]" />
+            <div className="my-4 border-t border-(--theme-border)" />
             <div className="text-[15px] space-y-1">
               <div className="flex justify-between">
-                <span className="text-[#9a864c]">Subtotal</span>
+                <span className="text-(--theme-muted)">Subtotal</span>
                 <span>₹{formatAmount(subtotal)}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-[#9a864c]">Shipping</span>
+                <span className="text-(--theme-muted)">Shipping</span>
                 <span>₹{formatAmount(shippingCharges[shipping])}</span>
               </div>
             </div>
-            <div className="my-4 border-t border-[#e7e1cf]" />
+            <div className="my-4 border-t border-(--theme-border)" />
             <div className="flex justify-between items-center text-[16px] font-bold">
               <span>Total</span>
               <span>₹{formatAmount(total)}</span>
@@ -652,7 +658,7 @@ export default function CheckoutClient() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full mt-4 py-2.5 bg-[#eebd2b] text-[#1b180d] text-[15px] font-semibold rounded-md hover:bg-[#d8a91a] transition disabled:opacity-60"
+              className="w-full mt-4 py-2.5 bg-(--theme-text) text-(--theme-bg) text-[15px] font-semibold rounded-md hover:opacity-90 transition disabled:opacity-60 cursor-pointer"
             >
               {loading ? 'Processing…' : 'Continue to Payment'}
             </button>

@@ -105,21 +105,12 @@ export default function Footer() {
             <ul className="space-y-3 font-[Manrope,sans-serif]">
   {[
     { label: "Home", href: "/" },
-    { label: "Shop", href: "/collection" },
-    { label: "About Us", action: "scroll" },
+    { label: "Collection", href: "/collection" },
+    { label: "Philosophy", href: "/philosophy" },
     { label: "Contact Us", href: "/contact-us" },
   ].map((item) => (
     <li key={item.label}>
-      {item.action === "scroll" ? (
-        <button
-          type="button"
-          onClick={handleClick}
-          className="group relative text-left text-[#fcfbf8]/70 text-sm hover:text-[#f8f7f4] transition cursor-pointer"
-        >
-          {item.label}
-          <span className="absolute left-0 -bottom-1 h-0.5 w-0 bg-[#4b4947] transition-all duration-300 group-hover:w-full" />
-        </button>
-      ) : (
+      
         <Link
           href={item.href}
           className="group relative text-[#fcfbf8]/70 text-sm hover:text-[#f8f7f4] transition"
@@ -127,7 +118,7 @@ export default function Footer() {
           {item.label}
           <span className="absolute left-0 -bottom-1 h-0.5 w-0 bg-[#4b4947] transition-all duration-300 group-hover:w-full" />
         </Link>
-      )}
+      
     </li>
   ))}
 </ul>

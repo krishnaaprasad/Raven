@@ -5,6 +5,13 @@ import { useCart } from '../context/cartcontext';
 import { useSession } from 'next-auth/react';
 import { CreditCard, Banknote, Wallet, AlertCircle, HelpCircle } from "lucide-react";
 import { event } from "@/lib/ga"; // ← ADD THIS
+import { Crimson_Text } from "next/font/google";
+
+const crimson = Crimson_Text({
+  subsets: ["latin"],
+  weight: ["400", "600", "700"],
+  display: "swap",
+});
 
 const formatAmount = (amount) => {
   if (!amount || isNaN(amount)) return "0.00";
@@ -122,7 +129,7 @@ export default function OrderSuccess() {
 
   if (!status)
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#fcfbf8] text-[#9a864c] text-lg font-medium animate-pulse">
+      <div className="min-h-screen flex items-center justify-center bg-(--theme-bg) text-(--theme-muted) text-lg font-medium animate-pulse">
         Verifying your payment...
       </div>
     );
@@ -134,16 +141,16 @@ export default function OrderSuccess() {
   const total = subtotal + shipping;
 
   return (
-    <section className="bg-[#fcfbf8] min-h-screen font-[Manrope,sans-serif] text-[#1b180d]">
+    <section className="bg-(--theme-bg) min-h-screen font-sans text-(--theme-text) transition-colors duration-300">
       <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
 
         {/* 🔴 Payment Failed Banner */}
         {!isSuccess && (
-          <div className="max-w-3xl mx-auto mb-6 bg-red-100 border border-red-300 text-red-700 rounded-lg p-4 flex items-start gap-3">
+          <div className="max-w-3xl mx-auto mb-6 bg-(--theme-soft) border-(--theme-border) text-(--theme-text) rounded-lg p-4 flex items-start gap-3">
             <AlertCircle size={20} className="shrink-0 mt-0.5" />
             <div>
               <p className="font-semibold text-[16px]">Payment Failed</p>
-              <p className="text-sm text-[#7a4f4f] leading-snug">
+              <p className="text-sm text-(--theme-muted) leading-snug">
                 {failureReason || "We couldn’t process your payment. Please try again."}
               </p>
             </div>
@@ -152,10 +159,10 @@ export default function OrderSuccess() {
 
         {/* Title */}
         <div className="text-center max-w-3xl mx-auto">
-          <h1 className="text-[32px] md:text-5xl font-bold leading-tight tracking-tight">
+          <h1 className={`${crimson.className} text-[32px] md:text-5xl font-bold leading-tight tracking-tight text-(--theme-text)`}>
             {isSuccess ? 'Thank you for your order!' : 'Payment Failed'}
           </h1>
-          <p className="text-[#6b6654] text-base md:text-lg mt-3">
+          <p className="text-(--theme-muted) text-base md:text-lg mt-3">
             {isSuccess
               ? 'Your confirmation and order details have been sent to your email.'
               : 'Your order attempt has been recorded. Please retry payment or contact support.'}
@@ -164,7 +171,7 @@ export default function OrderSuccess() {
 
         {/* ✅ Show order details for both success & failed */}
         {orderData && (
-          <div className="max-w-4xl mx-auto mt-10 bg-white rounded-xl border border-[#e7e1cf] shadow-sm">
+          <div className="max-w-4xl mx-auto mt-10 bg-(--theme-bg) rounded-xl border border-(--theme-border) shadow-sm">
             <div className="p-6 md:p-8">
               <h2 className="text-[22px] font-bold leading-tight tracking-tight">
                 Order #{orderData.customOrderId || orderData._id}
@@ -172,13 +179,13 @@ export default function OrderSuccess() {
             </div>
 
             {/* Items */}
-            <div className="border-t border-[#e7e1cf] p-6 md:p-8">
+            <div className="border-t border-(--theme-border) p-6 md:p-8">
               <div className="space-y-4">
                 {items.map((item, i) => (
                   <div key={i} className="flex items-start justify-between gap-4">
                     <div className="flex items-start gap-4">
                       <div
-                        className="w-18 h-18 rounded-lg border border-[#e7e1cf] bg-center bg-cover shrink-0"
+                        className="w-18 h-18 rounded-lg border border-(--theme-border) bg-center bg-cover shrink-0"
                         style={{
                           backgroundImage: item.image
                             ? `url(${item.image})`
@@ -186,13 +193,13 @@ export default function OrderSuccess() {
                         }}
                       />
                       <div className="flex flex-col justify-center pt-1">
-                        <p className="text-base font-medium">{item.name}</p>
-                        <p className="text-sm text-[#6b6654]">
-                          {item.size} | Qty: {item.quantity}
+                        <p className={`${crimson.className} text-base font-medium text-(--theme-text)`}>{item.name}</p>
+                        <p className="text-sm text-(--theme-muted)">
+                          {item.size} ml | Qty: {item.quantity}
                         </p>
                       </div>
                     </div>
-                    <p className="text-base font-medium">
+                    <p className={`${crimson.className} text-base font-medium text-(--theme-text)`}>
                       ₹{formatAmount(item.price * item.quantity)}
                     </p>
                   </div>
@@ -200,19 +207,19 @@ export default function OrderSuccess() {
               </div>
 
               {/* Totals */}
-              <div className="mt-8 border-t border-[#e7e1cf] pt-6 flex justify-end">
+              <div className="mt-8 border-t border-(--theme-border) pt-6 flex justify-end">
                 <div className="w-full max-w-xs space-y-3 text-sm">
-                  <div className="flex justify-between text-[#6b6654]">
+                  <div className="flex justify-between text-(--theme-muted)">
                     <span>Subtotal</span>
-                    <span className="text-[#1b180d]">₹{formatAmount(subtotal)}</span>
+                    <span className="text-(--theme-text)">₹{formatAmount(subtotal)}</span>
                   </div>
-                  <div className="flex justify-between text-[#6b6654]">
+                  <div className="flex justify-between text-(--theme-muted)">
                     <span>Shipping ({orderData.deliveryType})</span>
-                    <span className="text-[#1b180d]">
+                    <span className="text-(--theme-text)">
                       {shipping ? `₹${formatAmount(shipping)}` : 'Free'}
                     </span>
                   </div>
-                  <div className="flex justify-between text-[#1b180d] text-base font-bold border-t border-[#e7e1cf] pt-3 mt-2">
+                  <div className="flex justify-between text-(--theme-text) text-base font-bold border-t border-(--theme-border) pt-3 mt-2">
                     <span>Total</span>
                     <span>₹{formatAmount(total)}</span>
                   </div>
@@ -223,9 +230,9 @@ export default function OrderSuccess() {
             {/* Shipping & Payment Info */}
             <div className="border-t border-[#e7e5e1] p-6 md:p-8 grid md:grid-cols-2 gap-8">
               <div>
-                <h3 className="text-base font-bold text-[#1b180d]">Shipping Address</h3>
-                <p className="mt-3 text-[#6b6654] text-[15px] leading-relaxed">
-                  <span className="block font-medium text-[#1b180d]">{orderData.userName}</span>
+                <h3 className={`${crimson.className} text-base font-bold text-(--theme-text)`}>Shipping Address</h3>
+                <p className="mt-3 text-(--theme-muted) text-[15px] leading-relaxed">
+                  <span className="block font-medium text-(--theme-text)">{orderData.userName}</span>
                   <span className="block">
                     {[orderData.addressDetails?.address1, orderData.addressDetails?.address2]
                       .filter(Boolean)
@@ -242,18 +249,18 @@ export default function OrderSuccess() {
 
               {/* ✅ Bulletproof Payment Method Display */}
 <div>
-  <h3 className="text-base font-bold text-[#1b180d]">Payment Method</h3>
+  <h3 className="text-base font-bold text-(--theme-text)">Payment Method</h3>
   <div className="mt-3 flex items-start gap-3">
     {(() => {
       const methodRaw = orderData?.paymentMethod || "";
       const method = methodRaw.toUpperCase();
       const details = orderData?.paymentDetails || {};
-      let icon = <CreditCard size={18} className="text-[#b28c34] mt-0.5" />;
+      let icon = <CreditCard size={18} className="text-(--theme-text) mt-0.5" />;
       let label = "Cashfree Payment";
 
       // 🟡 UPI
       if (method.includes("UPI") || details?.upi_id) {
-        icon = <Banknote size={18} className="text-[#b28c34] mt-0.5" />;
+        icon = <Banknote size={18} className="text-(--theme-text) mt-0.5" />;
         const upiId =
           details?.upiId ||
           details?.upi_id ||
@@ -263,7 +270,7 @@ export default function OrderSuccess() {
 
       // 🟢 NetBanking
       else if (method.includes("NETBANKING") || details?.type === "NETBANKING") {
-        icon = <Wallet size={18} className="text-[#b28c34] mt-0.5" />;
+        icon = <Wallet size={18} className="text-(--theme-text) mt-0.5" />;
         label = details?.bankCode
           ? `NetBanking (${details.bankCode})`
           : "NetBanking Payment";
@@ -274,13 +281,13 @@ export default function OrderSuccess() {
         const last4 = details?.last4 || "XXXX";
         const network = details?.network || "Card";
         const bank = details?.bank ? ` – ${details.bank}` : "";
-        icon = <CreditCard size={18} className="text-[#b28c34] mt-0.5" />;
+        icon = <CreditCard size={18} className="text-(--theme-text) mt-0.5" />;
         label = `${network} (ending in ${last4})`;
       }
 
       // 🪙 Wallet
       else if (details?.type === "WALLET") {
-        icon = <Wallet size={18} className="text-[#b28c34] mt-0.5" />;
+        icon = <Wallet size={18} className="text-(--theme-text) mt-0.5" />;
         label = details?.provider
           ? `Wallet (${details.provider})`
           : "Wallet Payment";
@@ -288,7 +295,7 @@ export default function OrderSuccess() {
 
       // ⚪️ Default Fallback
       else {
-        icon = <CreditCard size={18} className="text-[#b28c34] mt-0.5" />;
+        icon = <CreditCard size={18} className="text-(--theme-text) mt-0.5" />;
         label = "Online Payment (via Cashfree)";
       }
 
@@ -296,7 +303,7 @@ export default function OrderSuccess() {
         <>
           {icon}
           <div>
-            <p className="text-[#1b180d] font-medium text-[15px] leading-snug">
+            <p className="text-(--theme-text) font-medium text-[15px] leading-snug">
               {label}
             </p>
           </div>
@@ -313,7 +320,7 @@ export default function OrderSuccess() {
                   <div className="flex flex-col items-center gap-3 sm:gap-4 md:flex-row md:justify-center md:items-center md:gap-5 mb-5">
                     <Link
                       href="/"
-                      className="bg-[#eebd2b] text-[#1b180d] font-semibold py-2 px-6 rounded-md hover:bg-[#d8a91a] transition-all duration-200 text-sm sm:text-[15px] shadow-sm w-[75%] sm:w-auto"
+                      className="bg-(--theme-text) text-(--theme-bg) font-semibold py-2 px-6 rounded-md hover:opacity-90 transition-all duration-200 text-sm sm:text-[15px] shadow-sm w-[75%] sm:w-auto"
                     >
                       Continue Shopping
                     </Link>
@@ -321,14 +328,14 @@ export default function OrderSuccess() {
                       <Link
                         href={`/api/invoice?orderId=${orderData._id}`}
                         target="_blank"
-                        className="flex-1 sm:flex-none border border-[#b28c34] text-[#1b180d] font-medium py-2 px-6 rounded-md hover:bg-[#fcf8ef] hover:border-[#9a864c] transition-all duration-200 text-sm sm:text-[13px] cursor-pointer text-center"
+                        className="flex-1 sm:flex-none border border-(--theme-border) text-(--theme-text) font-medium py-2 px-6 rounded-md hover:bg-(--theme-soft) hover:bg-(--theme-soft) transition-all duration-200 text-sm sm:text-[13px] cursor-pointer text-center"
                       >
                         View Receipt (PDF)
                       </Link>
                       {session && (
                         <Link
                           href="/my-account?tab=Orders"
-                          className="flex-1 sm:flex-none border border-[#b28c34] text-[#1b180d] font-medium py-2 px-6 rounded-md hover:bg-[#fcf8ef] hover:border-[#9a864c] transition-all duration-200 text-sm sm:text-[13px] cursor-pointer"
+                          className="flex-1 sm:flex-none border border-(--theme-border) text-(--theme-text) font-medium py-2 px-6 rounded-md hover:bg-(--theme-soft) hover:bg-(--theme-soft) transition-all duration-200 text-sm sm:text-[13px] cursor-pointer"
                         >
                           View Order History
                         </Link>
@@ -340,19 +347,19 @@ export default function OrderSuccess() {
                 <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4">
                   <Link
                     href="/checkout"
-                    className="bg-red-500 text-white font-medium py-2 px-6 rounded-md hover:bg-red-600 transition-all duration-200 text-sm sm:text-base"
+                    className="bg-(--theme-text) text-(--theme-bg) font-medium py-2 px-6 rounded-md hover:bg-red-600 transition-all duration-200 text-sm sm:text-base"
                   >
                     Retry Payment
                   </Link>
                   <Link
                     href="/Cart"
-                    className="border border-[#b28c34] text-[#1b180d] font-medium py-2 px-6 rounded-md hover:bg-[#fcf8ef] transition-all duration-200 text-sm sm:text-base"
+                    className="border border-(--theme-border) text-(--theme-text) font-medium py-2 px-6 rounded-md hover:bg-(--theme-soft) transition-all duration-200 text-sm sm:text-base"
                   >
                     Return to Cart
                   </Link>
                   <Link
                     href="/"
-                    className="bg-[#eebd2b] text-[#1b180d] font-medium py-2 px-6 rounded-md hover:bg-[#d8a91a] transition-all duration-200 text-sm sm:text-base"
+                    className="bg-(--theme-text) text-(--theme-text) font-medium py-2 px-6 rounded-md hover:opacity-90 transition-all duration-200 text-sm sm:text-base"
                   >
                     Continue Shopping
                   </Link>
@@ -362,13 +369,13 @@ export default function OrderSuccess() {
 
             {/* 💬 Support Section */}
             {!isSuccess && (
-              <div className="max-w-4xl mx-auto mt-8 text-center border-t border-[#e7e1cf] pt-4">
+              <div className="max-w-4xl mx-auto mt-8 text-center border-t border-(--theme-border) pt-4">
                 <div className="flex flex-col items-center gap-2 mb-3">
-                  <HelpCircle size={22} className="text-[#b28c34]" />
-                  <p className="text-sm text-[#6b6654] leading-relaxed max-w-md">
+                  <HelpCircle size={22} className="text-(--theme-text)" />
+                  <p className="text-sm text-(--theme-muted) leading-relaxed max-w-md">
                     Need help with your payment? <br />
-                    Reach out to our <span className="text-[#b28c34] font-medium">Support Team</span> at <br />
-                    <a href="mailto:support@ravenfragrance.in" className="text-[#1b180d] hover:underline">
+                    Reach out to our <span className="text-(--theme-text) font-medium">Support Team</span> at <br />
+                    <a href="mailto:support@ravenfragrance.in" className="text-(--theme-text) hover:underline">
                       contact@ravenfragrance.in
                     </a>{' '}
                     or{' '}
@@ -376,7 +383,7 @@ export default function OrderSuccess() {
                       href="https://wa.me/918424832375"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-[#1b180d] hover:underline"
+                      className="text-(--theme-text) hover:underline"
                     >
                       WhatsApp Us
                     </a>
