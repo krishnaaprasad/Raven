@@ -4,8 +4,14 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Eye, EyeOff, X } from 'lucide-react';
 import { signIn } from 'next-auth/react';
 
-const primary = '#ecab13';
-const textMuted = '#8d8d8d';
+import { Crimson_Text } from "next/font/google";
+
+const crimson = Crimson_Text({
+  subsets: ["latin"],
+  weight: ["400", "600", "700"],
+  display: "swap",
+});
+
 
 export default function LoginRegisterPage({ onClose, onLoginSuccess }) {
   const [isRegistering, setIsRegistering] = useState(false);
@@ -130,7 +136,7 @@ export default function LoginRegisterPage({ onClose, onLoginSuccess }) {
     <button
       type="button"
       onClick={handleGoogle}
-      className="w-full flex items-center justify-center gap-3 py-2 px-4 rounded-lg border border-gray-200 bg-white font-semibold text-[#3b3b3b] shadow hover:shadow-md transition duration-150 mb-2"
+      className="w-full flex items-center justify-center gap-3 py-2 px-4 rounded-lg border border-(--theme-border) bg-(--theme-bg) text-(--theme-text) font-medium hover:bg-(--theme-soft) transition duration-150 mb-2 cursor-pointer"
     >
       <img
         src="https://www.svgrepo.com/show/355037/google.svg"
@@ -152,16 +158,17 @@ export default function LoginRegisterPage({ onClose, onLoginSuccess }) {
       }}
     >
       <div
-        className="relative max-w-sm w-full bg-white rounded-2xl shadow-2xl overflow-hidden border border-[#f3f1ea]"
+        className="relative max-w-sm w-full bg-(--theme-bg) rounded-2xl shadow-xl overflow-hidden border border-(--theme-border) transition-colors duration-300"
         style={{ boxShadow: '0 8px 40px rgba(0,0,0,.08)' }}
       >
         {/* Close Button */}
         {onClose && (
           <button
             onClick={onClose}
-            className="absolute top-3 right-3 z-50 text-white bg-[#d4a017]
+            className="absolute top-3 right-3 z-50 text-(--theme-bg) bg-(--theme-text)
             rounded-full w-8 h-8 flex items-center justify-center
-            shadow-md hover:bg-[#b88b11] border border-white transition-all duration-200"
+            hover:opacity-90 transition-all duration-200"
+
           >
             <X size={18} />
           </button>
@@ -179,12 +186,13 @@ export default function LoginRegisterPage({ onClose, onLoginSuccess }) {
                 animate="animate"
                 exit="exit"
                 transition={{ duration: 0.3, ease: 'easeInOut' }}
-                className="absolute inset-0 flex flex-col justify-center px-5 py-8 bg-white"
+                className="absolute inset-0 flex flex-col justify-center px-5 py-8 bg-(--theme-bg)"
               >
-                <h2 className="text-2xl font-bold text-stone-900 mb-1 text-center">
+                <h2 className={`${crimson.className} text-2xl font-bold text-(--theme-text) mb-1 text-center`}>
+
                   Create Account
                 </h2>
-                <p className="text-base mb-5 text-center" style={{ color: textMuted }}>
+                <p className="text-base mb-5 text-center text-(--theme-muted)">
                   Let’s get you started.
                 </p>
                 <GoogleButton label="Sign up with Google" />
@@ -199,16 +207,14 @@ export default function LoginRegisterPage({ onClose, onLoginSuccess }) {
                     onChange={handleChange}
                     type="text"
                     placeholder="Full Name"
-                    className="w-full border rounded-lg p-3 bg-[#f8f8f8] border-[#efefef] focus:ring-2 focus:ring-yellow-400 font-medium"
-                  />
+                    className="w-full border rounded-lg p-3 bg-(--theme-bg) border-(--theme-border) text-(--theme-text) focus:ring-1 focus:ring-(--theme-text) focus:border-(--theme-text) outline-none font-medium transition"                  />
                   <input
                     id="email"
                     value={formData.email}
                     onChange={handleChange}
                     type="email"
                     placeholder="Email"
-                    className="w-full border rounded-lg p-3 bg-[#f8f8f8] border-[#efefef] focus:ring-2 focus:ring-yellow-400 font-medium"
-                  />
+                    className="w-full border rounded-lg p-3 bg-(--theme-bg) border-(--theme-border) text-(--theme-text) focus:ring-1 focus:ring-(--theme-text) focus:border-(--theme-text) outline-none font-medium transition"                  />
                   <div className="grid grid-cols-2 gap-3">
                     <input
                       id="password"
@@ -216,7 +222,7 @@ export default function LoginRegisterPage({ onClose, onLoginSuccess }) {
                       onChange={handleChange}
                       type="password"
                       placeholder="Password"
-                      className="border rounded-lg p-3 bg-[#f8f8f8] border-[#efefef] focus:ring-2 focus:ring-yellow-400 font-medium"
+                      className="border rounded-lg p-3 bg-(--theme-bg) border-(--theme-border) focus:ring-1 focus:ring-(--theme-text) font-medium"
                     />
                     <input
                       id="confirmPassword"
@@ -224,24 +230,24 @@ export default function LoginRegisterPage({ onClose, onLoginSuccess }) {
                       onChange={handleChange}
                       type="password"
                       placeholder="Confirm"
-                      className="border rounded-lg p-3 bg-[#f8f8f8] border-[#efefef] focus:ring-2 focus:ring-yellow-400 font-medium"
+                      className="border rounded-lg p-3 bg-(--theme-bg) border-(--theme-border) focus:ring-1 focus:ring-(--theme-text) font-medium"
                     />
                   </div>
                   {error && <p className="text-red-600 text-sm font-medium">{error}</p>}
                   <button
                     type="submit"
                     disabled={loading}
-                    className="w-full font-bold py-3 rounded-lg mt-2 bg-[#ecab13] text-[#191919] shadow-md"
+                    className="w-full font-bold py-3 rounded-lg mt-2 bg-(--theme-text) text-(--theme-bg) hover:opacity-90 shadow-md cursor-pointer"
                   >
                     {loading ? 'Processing...' : 'Register'}
                   </button>
                 </form>
 
-                <p className="text-center text-sm mt-5 text-[#8d8d8d]">
+                <p className="text-center text-sm mt-5 text-(--theme-muted)">
                   Already have an account?{' '}
                   <button
                     onClick={() => handleSwitch(false)}
-                    className="font-medium hover:underline text-[#ecab13]"
+                    className="font-medium hover:underline text-(--theme-text) cursor-pointer"
                   >
                     Sign in
                   </button>
@@ -256,12 +262,12 @@ export default function LoginRegisterPage({ onClose, onLoginSuccess }) {
                 animate="animate"
                 exit="exit"
                 transition={{ duration: 0.3, ease: 'easeInOut' }}
-                className="absolute inset-0 flex flex-col justify-center px-5 py-8 bg-white"
+                className="absolute inset-0 flex flex-col justify-center px-5 py-8 bg-(--theme-bg)"
               >
-                <h2 className="text-2xl font-bold text-stone-900 mb-2 text-center">
+                <h2 className={`${crimson.className} text-2xl font-bold text-(--theme-text) mb-1 text-center`}>
                   Welcome Back
                 </h2>
-                <p className="text-base mb-5 text-center" style={{ color: textMuted }}>
+                <p className="text-base mb-5 text-center text-(--theme-muted)">
                   Please enter your details to sign in.
                 </p>
                 <GoogleButton label="Sign in with Google" />
@@ -276,8 +282,7 @@ export default function LoginRegisterPage({ onClose, onLoginSuccess }) {
                     onChange={handleChange}
                     type="email"
                     placeholder="Email"
-                    className="w-full border rounded-lg p-3 bg-[#f8f8f8] border-[#efefef] focus:ring-2 focus:ring-yellow-400 font-medium"
-                  />
+                    className="w-full border rounded-lg p-3 bg-(--theme-bg) border-(--theme-border) text-(--theme-text) focus:ring-1 focus:ring-(--theme-text) focus:border-(--theme-text) outline-none font-medium transition"                  />
                   <div className="relative">
                     <input
                       id="password"
@@ -285,12 +290,12 @@ export default function LoginRegisterPage({ onClose, onLoginSuccess }) {
                       onChange={handleChange}
                       type={showPassword ? 'text' : 'password'}
                       placeholder="Password"
-                      className="w-full border rounded-lg p-3 pr-10 bg-[#f8f8f8] border-[#efefef] focus:ring-2 focus:ring-yellow-400 font-medium"
+                      className="w-full border rounded-lg p-3 pr-10 bg-(--theme-bg) border-(--theme-border) focus:ring-1 focus:ring-(--theme-text) font-medium"
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-3 text-gray-500"
+                      className="absolute right-3 top-3 text-(--theme-muted)"
                     >
                       {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                     </button>
@@ -299,17 +304,17 @@ export default function LoginRegisterPage({ onClose, onLoginSuccess }) {
                   <button
                     type="submit"
                     disabled={loading}
-                    className="w-full font-bold py-3 rounded-lg bg-[#ecab13] text-[#191919] shadow-md"
+                    className="w-full font-bold py-3 rounded-lg bg-(--theme-text) text-(--theme-bg) hover:opacity-90 shadow-md cursor-pointer"
                   >
                     {loading ? 'Signing in...' : 'Sign In'}
                   </button>
                 </form>
 
-                <p className="text-center text-sm mt-6 text-[#8d8d8d]">
+                <p className="text-center text-sm mt-6 text-(--theme-muted)">
                   Don’t have an account?{' '}
                   <button
                     onClick={() => handleSwitch(true)}
-                    className="font-medium hover:underline text-[#ecab13]"
+                    className="font-medium hover:underline text-(--theme-text) cursor-pointer"
                   >
                     Sign up
                   </button>

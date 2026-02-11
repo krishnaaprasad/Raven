@@ -25,6 +25,10 @@ const nextConfig = {
       },
       { protocol: "https", 
         hostname: "img.rocket.new"
+      },
+      {
+        protocol: "https",
+        hostname: "www.svgrepo.com", // keep for future uploads (optional)
       }
     ],
   },
