@@ -4,6 +4,13 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { Crimson_Text } from "next/font/google";
+
+const crimson = Crimson_Text({
+  subsets: ["latin"],
+  weight: ["600", "700"],
+  display: "swap",
+});
 
 export default function OrdersList() {
   const [orders, setOrders] = useState([]);
@@ -29,7 +36,7 @@ export default function OrdersList() {
   if (loading) {
     return (
       <div className="py-6">
-        <p className="text-center text-[#9a864c]">Loading your orders…</p>
+        <p className="text-center text-(--theme-muted)">Loading your orders…</p>
       </div>
     );
   }
@@ -37,75 +44,45 @@ export default function OrdersList() {
   if (!orders.length) {
     return (
       <div className="py-6">
-        <p className="text-center text-[#6b6654]">You haven't placed any orders yet.</p>
+        <p className="text-center text-(--theme-muted)">You haven't placed any orders yet.</p>
       </div>
     );
   }
 
     const statusBadge = (status) => {
-      const s = (status || "").toLowerCase();
+    const s = (status || "").toLowerCase();
 
-      if (s === "delivered") {
-        return (
-          <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-green-100 text-green-700 text-sm font-medium">
-            <span className="text-lg leading-none">✓</span>
-            <span>Delivered</span>
-          </span>
-        );
-      }
+    let label = "Processing";
+    let symbol = "⏳";
 
-      if (s === "shipped") {
-        return (
-          <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-100 text-orange-700 text-sm font-medium">
-            <span className="text-lg leading-none">🚚</span>
-            <span>Shipped</span>
-          </span>
-        );
-      }
+    if (s === "delivered") {
+      label = "Delivered";
+      symbol = "✓";
+    } else if (s === "shipped") {
+      label = "Shipped";
+      symbol = "🚚";
+    } else if (s === "out for delivery") {
+      label = "Out for Delivery";
+      symbol = "📦";
+    } else if (s === "processing") {
+      label = "Processing";
+      symbol = "⏳";
+    } else if (s === "payment awaiting") {
+      label = "Payment Awaiting";
+      symbol = "💳";
+    } else if (s === "cancelled" || s === "failed") {
+      label = "Cancelled";
+      symbol = "✕";
+    }
 
-      if (s === "out for delivery") {
-        return (
-          <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-yellow-100 text-yellow-700 text-sm font-medium">
-            <span className="text-lg leading-none">📦</span>
-            <span>Out for Delivery</span>
-          </span>
-        );
-      }
+    return (
+      <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-(--theme-border) bg-(--theme-soft) text-(--theme-text) text-sm font-medium">
+        <span className="text-base leading-none">{symbol}</span>
+        <span>{label}</span>
+      </span>
+    );
+  };
 
-      if (s === "processing") {
-        return (
-          <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-sm font-medium">
-            <span className="text-lg leading-none">⏳</span>
-            <span>Processing</span>
-          </span>
-        );
-      }
-
-      if (s === "payment awaiting") {
-        return (
-          <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gray-200 text-gray-700 text-sm font-medium">
-            <span className="text-lg leading-none">💳</span>
-            <span>Payment Awaiting</span>
-          </span>
-        );
-      }
-
-      if (s === "cancelled" || s === "failed") {
-        return (
-          <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-100 text-red-700 text-sm font-medium">
-            <span className="text-lg leading-none">✕</span>
-            <span>Cancelled</span>
-          </span>
-        );
-      }
-
-      return (
-        <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-sm font-medium">
-          <span className="text-lg leading-none">⏳</span>
-          <span>Processing</span>
-        </span>
-      );
-    };
 
 
   return (
@@ -118,11 +95,11 @@ export default function OrdersList() {
         return (
           <div
             key={order._id}
-            className="bg-white rounded-xlh border border-[#e7e1cf] shadow-sm flex flex-col sm:flex-row overflow-hidden"
+            className="bg-(--theme-bg) rounded-xl border border-(--theme-border) shadow-sm flex flex-col sm:flex-row overflow-hidden transition-colors duration-300"
           >
             {/* DESKTOP IMAGE */}
             <div className="hidden sm:flex items-center justify-center w-40 p-4">
-              <div className="w-24 h-24 rounded-lg overflow-hidden shadow border border-[#f0ece0]">
+              <div className="w-24 h-24 rounded-lg overflow-hidden shadow border border-(--theme-border)">
                 <img
                   src={firstImage}
                   className="w-full h-full object-cover"
@@ -145,15 +122,15 @@ export default function OrdersList() {
             {/* DETAILS */}
             <div className="flex-1 px-6 py-4 flex flex-col gap-3">
               <div className="flex justify-between items-start">
-                <h3 className="text-lg font-bold text-[#1b180d] leading-tight">
+                <h3 className={`${crimson.className} text-lg font-bold text-[var(--theme-text)]`}>
                   Order #{orderId}
                 </h3>
                 <div>{statusBadge(order.order_status || order.status)}</div>
               </div>
 
               <div className="grid grid-cols-2 gap-y-1 text-sm">
-                <p className="text-[#6b6654]">Order Date</p>
-                <p className="text-[#1b180d] font-medium">
+                <p className="text-(--theme-muted)">Order Date</p>
+                <p className="text-(--theme-text) font-medium">
                   {created.toLocaleDateString("en-IN", {
                     day: "2-digit",
                     month: "short",
@@ -161,18 +138,18 @@ export default function OrdersList() {
                   })}
                 </p>
 
-                <p className="text-[#6b6654]">Total Amount</p>
-                <p className="text-[#1b180d] font-bold">
+                <p className="text-(--theme-muted)">Total Amount</p>
+                <p className="text-(--theme-text) font-bold">
                   ₹{order.totalAmount?.toFixed(2)}
                 </p>
               </div>
             </div>
 
             {/* RIGHT BUTTON (DESKTOP) + FULL WIDTH (MOBILE) */}
-            <div className="bg-[#fff8e1] sm:w-48 flex items-center justify-center px-5 py-4">
+            <div className="bg-(--theme-soft) sm:w-48 flex items-center justify-center px-5 py-4 border-t sm:border-t-0 sm:border-l border-(--theme-border)">
               <button
                 onClick={() => router.push(`/my-account?tab=Orders&orderId=${order._id}`)}
-                className="w-full text-center py-3 rounded-lg bg-[#eebd2b] text-[#1b180d] font-semibold text-sm hover:brightness-95 transition-all"
+                className="w-full text-center py-3 rounded-lg bg-(--theme-text) text-(--theme-bg) font-semibold text-sm hover:opacity-90 transition-all"
               >
                 View Details
               </button>

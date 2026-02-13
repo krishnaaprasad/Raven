@@ -6,7 +6,13 @@ import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import OrdersList from "@/components/OrdersList";
 import OrderDetails from "@/components/OrderDetails";
+import { Crimson_Text } from "next/font/google";
 
+const crimson = Crimson_Text({
+  subsets: ["latin"],
+  weight: ["400", "600", "700"],
+  display: "swap",
+});
 /* ============================================================
    WRAPPER COMPONENT (Suspense-safe)
 ============================================================ */
@@ -118,16 +124,16 @@ function AccountPage() {
   /* ====================== UI ======================= */
   return (
     <div
-      className="min-h-screen w-full bg-[#fcfbf8] flex flex-col items-center py-10"
-      style={{ fontFamily: 'Manrope, "Noto Sans", sans-serif' }}
+      className="min-h-screen w-full bg-(--theme-bg) text-(--theme-text) flex flex-col items-center py-10 transition-colors duration-300"
+      style={{ fontFamily: 'system-ui, -apple-system, sans-serif' }}
     >
       <div className="w-full max-w-5xl px-6 lg:px-10">
-        <h1 className="text-3xl font-bold text-[#1b180d] tracking-tight mb-6">
+        <h1 className={`${crimson.className} text-3xl font-bold text-(--theme-text) tracking-tight mb-6`}>
           My Account
         </h1>
 
         {/* Tabs */}
-        <div className="flex border-b border-[#e7e1cf] mb-6 space-x-6">
+        <div className="flex border-b border-(--theme-border) mb-6 space-x-6">
           {["Account Info", "Orders", "Change Password", "Logout"].map(
             (tab) => (
               <button
@@ -137,8 +143,8 @@ function AccountPage() {
                 }
                 className={`pb-3 pt-4 text-sm font-bold ${
                   activeTab === tab
-                    ? "border-b-[3px] border-[#f0c542] text-[#1b180d]"
-                    : "border-b-[3px] border-transparent text-[#9a864c] hover:text-[#1b180d]"
+                    ? "border-b-[3px] border-(--theme-text) text-(--theme-text)"
+                    : "border-b-[3px] border-transparent text-(--theme-muted) hover:text-(--theme-text)"
                 }`}
               >
                 {tab}
@@ -152,14 +158,14 @@ function AccountPage() {
           {/* ACCOUNT INFO TAB */}
           {activeTab === "Account Info" && (
             <form className="max-w-lg">
-              <h3 className="text-lg font-bold text-[#1b180d] px-2 pb-2">
+              <h3 className={`${crimson.className} text-lg font-bold text-(--theme-text) px-2 pb-2`}>
                 Account Information
               </h3>
 
               <div className="flex flex-col gap-4 px-2 py-3">
                 {/* Name */}
                 <label className="flex flex-col">
-                  <span className="text-base font-medium text-[#1b180d] pb-1">
+                  <span className="text-base font-medium text-(--theme-muted) pb-1">
                     Name
                   </span>
                   <input
@@ -168,13 +174,14 @@ function AccountPage() {
                     value={formData.name}
                     onChange={handleChange}
                     placeholder="Full name"
-                    className="rounded-xl border border-[#e7e1cf] bg-[#fcfbf8] h-14 px-4 text-base focus:outline-none focus:border-[#f0c542]"
+                    className="rounded-xl border border-(--theme-border) bg-(--theme-bg) h-14 px-4 text-base focus:outline-none focus:border-(--theme-text)
+focus:ring-1 focus:ring-(--theme-text)"
                   />
                 </label>
 
                 {/* Email */}
                 <label className="flex flex-col">
-                  <span className="text-base font-medium text-[#1b180d] pb-1">
+                  <span className="text-base font-medium text-(--theme-muted) pb-1">
                     Email
                   </span>
                   <input
@@ -182,13 +189,13 @@ function AccountPage() {
                     name="email"
                     disabled
                     value={formData.email}
-                    className="rounded-xl border border-[#e7e1cf] bg-[#f7f6f2] h-14 px-4 text-base text-[#9a864c] cursor-not-allowed"
+                    className="rounded-xl border border-(--theme-border) bg-(--theme-soft) h-14 px-4 text-base text-(--theme-muted) cursor-not-allowed"
                   />
                 </label>
 
                 {/* Phone */}
                 <label className="flex flex-col">
-                  <span className="text-base font-medium text-[#1b180d] pb-1">
+                  <span className="text-base font-medium text-(--theme-muted) pb-1">
                     Phone Number
                   </span>
                   <input
@@ -198,13 +205,14 @@ function AccountPage() {
                     onChange={handleChange}
                     placeholder="Phone number"
                     maxLength={10}
-                    className="rounded-xl border border-[#e7e1cf] bg-[#fcfbf8] h-14 px-4 text-base focus:outline-none focus:border-[#f0c542]"
+                    className="rounded-xl border border-(--theme-border) bg-(--theme-bg) h-14 px-4 text-base focus:outline-none focus:border-(--theme-text)
+focus:ring-1 focus:ring-(--theme-text)"
                   />
                 </label>
 
                 {/* Address */}
                 <label className="flex flex-col">
-                  <span className="text-base font-medium text-[#1b180d] pb-1">
+                  <span className="text-base font-medium text-(--theme-muted) pb-1">
                     Full Address (include pincode){" "}
                     <span className="text-red-500">*</span>
                   </span>
@@ -214,7 +222,8 @@ function AccountPage() {
                     onChange={handleChange}
                     placeholder="House No, Street, Area, City, Pincode"
                     rows={3}
-                    className="rounded-xl border border-[#e7e1cf] bg-[#fcfbf8] px-4 py-3 text-base focus:outline-none focus:border-[#f0c542] resize-none"
+                    className="rounded-xl border border-(--theme-border) bg-(--theme-bg) px-4 py-3 text-base focus:outline-none focus:border-(--theme-text)
+focus:ring-1 focus:ring-(--theme-text) resize-none"
                   />
                 </label>
               </div>
@@ -223,7 +232,7 @@ function AccountPage() {
                 <button
                   type="button"
                   onClick={handleUpdateAccount}
-                  className="bg-[#f0c542] hover:bg-[#e4b92e] text-[#1b180d] font-bold rounded-xl h-10 px-6 text-sm tracking-wide transition-all"
+                  className="bg-(--theme-text) text-(--theme-bg) hover:opacity-90 font-bold rounded-xl h-10 px-6 text-sm tracking-wide transition-all"
                 >
                   Update Details
                 </button>
@@ -233,7 +242,7 @@ function AccountPage() {
 
           {/* ================= ORDER DETAILS TAB (in-tab) ================= */}
           {activeTab === "Orders" && (
-            <div className="text-[#1b180d] px-2 py-1">
+            <div className="text-(--theme-text) px-2 py-1">
               {!searchParams.get("orderId") && (
                 <>
                   <h3 className="text-lg font-bold pb-2">Your Orders</h3>
@@ -251,7 +260,7 @@ function AccountPage() {
           {/* ================= CHANGE PASSWORD TAB ================= */}
           {activeTab === "Change Password" && (
             <div className="max-w-lg px-2 py-3">
-              <h3 className="text-lg font-bold text-[#1b180d] pb-3">
+              <h3 className="text-lg font-bold text-(--theme-muted) pb-3">
                 Change Password
               </h3>
 
@@ -266,7 +275,8 @@ function AccountPage() {
                       currentPassword: e.target.value,
                     })
                   }
-                  className="rounded-xl border border-[#e7e1cf] bg-[#fcfbf8] h-14 px-4 text-base focus:outline-none focus:border-[#f0c542]"
+                  className="rounded-xl border border-(--theme-border) bg-(--theme-bg) h-14 px-4 text-base focus:outline-none focus:border-(--theme-text)
+focus:ring-1 focus:ring-(--theme-text)"
                 />
 
                 <input
@@ -279,7 +289,8 @@ function AccountPage() {
                       newPassword: e.target.value,
                     })
                   }
-                  className="rounded-xl border border-[#e7e1cf] bg-[#fcfbf8] h-14 px-4 text-base focus:outline-none focus:border-[#f0c542]"
+                  className="rounded-xl border border-(--theme-border) bg-(--theme-bg) h-14 px-4 text-base focus:outline-none focus:border-(--theme-text)
+focus:ring-1 focus:ring-(--theme-text)"
                 />
 
                 <input
@@ -292,13 +303,14 @@ function AccountPage() {
                       confirmNewPassword: e.target.value,
                     })
                   }
-                  className="rounded-xl border border-[#e7e1cf] bg-[#fcfbf8] h-14 px-4 text-base focus:outline-none focus:border-[#f0c542]"
+                  className="rounded-xl border border-(--theme-border) bg-(--theme-bg) h-14 px-4 text-base focus:outline-none focus:border-(--theme-text)
+focus:ring-1 focus:ring-(--theme-text)"
                 />
 
                 <button
                   type="button"
                   onClick={handlePasswordChange}
-                  className="bg-[#f0c542] hover:bg-[#e4b92e] text-[#1b180d] font-bold rounded-xl h-10 px-6 text-sm tracking-wide transition-all"
+                  className="bg-(--theme-text) text-(--theme-bg) hover:opacity-90 font-bold rounded-xl h-10 px-6 text-sm tracking-wide transition-all"
                 >
                   Update Password
                 </button>
