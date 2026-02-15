@@ -67,12 +67,11 @@ export default function TrustBadges() {
               </div>
 
               {/* Title */}
-              <h4 className="mt-5 font-[Crimson_Text] text-sm sm:text-base tracking-wide text-(--theme-text)">
+              <h4 className="mt-2 font-[Crimson_Text] text-sm sm:text-base tracking-wide text-(--theme-text)">
                 {badge.title}
               </h4>
 
-              {/* Elegant Divider Line */}
-              <div className="w-6 h-px mt-0 bg-slate-400 group-hover:w-10 transition-all duration-300" />
+             
             </div>
           ))}
         </div>
