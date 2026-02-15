@@ -53,7 +53,7 @@ export default function TrustBadges() {
               className="flex flex-col items-center text-center mx-6 min-w-[200px] group"
             >
               {/* Perfect Circular Frame */}
-              <div className="relative w-24 h-24 sm:w-25 sm:h-25 rounded-full">
+              <div className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-full">
                 <div className="absolute inset-0 rounded-full border border-(--theme-border) bg-(--theme-bg)" />
 
                 <div className="absolute inset-0 rounded-full overflow-hidden">
@@ -72,7 +72,7 @@ export default function TrustBadges() {
               </h4>
 
               {/* Elegant Divider Line */}
-              <div className="w-10 h-[1px] mt-0 opacity-60 group-hover:w-10 transition-all duration-300" />
+              <div className="w-6 h-px mt-0 bg-slate-400 group-hover:w-10 transition-all duration-300" />
             </div>
           ))}
         </div>
