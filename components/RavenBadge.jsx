@@ -29,7 +29,7 @@ export default function TrustBadges() {
     },
     {
       title: "No Harsh Additives",
-      image: "/badges/no-harsh-additives.png",
+      image: "/badges/No-harsh-additives.png",
     },
   ];
 
