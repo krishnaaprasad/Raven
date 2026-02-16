@@ -12,13 +12,16 @@ export default function ProductCarousel({ products = [] }) {
 
   const selectedSlugs = ["lucifer", "oud-intense", "mystique"];
 
+  const filteredProducts = products.filter((p) =>
+    selectedSlugs.includes(p.slug)
+  );
+
   return (
-    <section className="py-8 sm:py-12 md:py-16 bg-(--theme-soft) transition-colors duration-500">
-      <div className="mx-auto px-4 sm:px-6 ">
+    <section className="py-8 sm:py-12 md:py-14 bg-(--theme-soft) transition-colors duration-500">
+      <div className="mx-auto px-4 sm:px-6">
 
         {/* HEADER */}
-        <div className="flex flex-col justify-center items-center mb-6 gap-3 text-center">
-
+        <div className="flex flex-col justify-center items-center mb-8 gap-3 text-center">
           <h2 className="text-4xl sm:text-5xl lg:text-6xl font-light text-(--theme-text) font-[Crimson_Text] tracking-tight">
             The Collection
           </h2>
@@ -34,37 +37,9 @@ export default function ProductCarousel({ products = [] }) {
           </span>
         </div>
 
-        {/* Shop All button */}
-        <div className="mb-4 sm:mb-6">
-          <div className="flex justify-center sm:justify-end">
-            <Link
-              href="/collection"
-              className="
-                group inline-flex items-center gap-2
-                text-xs sm:text-sm uppercase tracking-widest
-                text-(--theme-text)
-                border border-(--theme-border)
-                px-6 py-3
-                transition-all duration-300
-                hover:bg-(--theme-bg)
-                hover:shadow-sm
-              "
-            >
-              Shop All
-              <ArrowRight
-                size={16}
-                className="transition-transform duration-300 group-hover:translate-x-1"
-              />
-            </Link>
-          </div>
-</div>
-        {/* ----------------------------- */}
-        {/* MOBILE GRID VERSION */}
-        {/* ----------------------------- */}
+        {/* MOBILE GRID */}
         <div className="grid grid-cols-2 gap-4 px-1 sm:hidden">
-          {products
-            .filter((p) => selectedSlugs.includes(p.slug))
-            .map((p) => (
+          {filteredProducts.map((p) => (
             <ProductCard
               key={p._id}
               product={p}
@@ -73,9 +48,7 @@ export default function ProductCarousel({ products = [] }) {
           ))}
         </div>
 
-        {/* ----------------------------- */}
-        {/* DESKTOP SLIDER VERSION */}
-        {/* ----------------------------- */}
+        {/* DESKTOP SLIDER */}
         <div
           ref={scrollRef}
           className="
@@ -83,25 +56,43 @@ export default function ProductCarousel({ products = [] }) {
             gap-4 sm:gap-5 lg:gap-6 
             overflow-x-auto 
             scrollbar-hide 
-            px-2 pb-4 
+            px-2 pb-6 
             snap-x snap-mandatory 
             justify-center
           "
         >
-          {products
-            .filter((p) => selectedSlugs.includes(p.slug))
-            .map((p) => (
-              <div
-                key={p._id}
-                className="w-full sm:w-[260px] lg:w-[375px]"
-              >
-                <ProductCard
-                  product={p}
-                  onQuickView={openQuickView}
-                />
-              </div>
-            ))}
+          {filteredProducts.map((p) => (
+            <div
+              key={p._id}
+              className="w-full sm:w-[260px] lg:w-[375px]"
+            >
+              <ProductCard
+                product={p}
+                onQuickView={openQuickView}
+              />
+            </div>
+          ))}
         </div>
+
+        {/* ✅ VIEW ALL PRODUCTS BUTTON */}
+        <div className="mt-6 sm:mt-6 flex justify-center">
+          <Link
+            href="/collection"
+            className="
+              group inline-flex bg-(--theme-bg) (items-center gap-2
+              text-xs sm:text-sm uppercase tracking-widest
+              text-(--theme-text)
+              border border-(--theme-border)
+              px-10 py-3
+              transition-all duration-300
+              hover:bg-(--theme-soft)
+              hover:shadow-sm
+            "
+          >
+            View All Products
+          </Link>
+        </div>
+
       </div>
     </section>
   );
