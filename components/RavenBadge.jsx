@@ -53,7 +53,7 @@ export default function TrustBadges() {
               className="flex flex-col items-center text-center mx-0 sm:mx-6 min-w-[150px] sm:min-w-[200px] group"
             >
               {/* Perfect Circular Frame */}
-              <div className="relative w-18 h-18 sm:w-26 sm:h-26 rounded-full">
+              <div className="relative w-[4.5rem] h-[4.5rem] sm:w-[6.5rem] sm:h-[6.5rem] rounded-full">
                 <div className="absolute inset-0 rounded-full border border-(--theme-border) bg-(--theme-bg)" />
 
                 <div className="absolute inset-0 rounded-full overflow-hidden">

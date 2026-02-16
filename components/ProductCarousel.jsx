@@ -79,7 +79,7 @@ export default function ProductCarousel({ products = [] }) {
           <Link
             href="/collection"
             className="
-              group inline-flex bg-(--theme-bg) (items-center gap-2
+              group inline-flex bg-(--theme-bg) items-center gap-2
               text-xs sm:text-sm uppercase tracking-widest
               text-(--theme-text)
               border border-(--theme-border)
@@ -90,6 +90,7 @@ export default function ProductCarousel({ products = [] }) {
             "
           >
             View All Products
+            
           </Link>
         </div>
 
