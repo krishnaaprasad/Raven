@@ -12,9 +12,14 @@ export default function ProductCarousel({ products = [] }) {
 
   const selectedSlugs = ["lucifer", "oud-intense", "mystique"];
 
-  const filteredProducts = products.filter((p) =>
-    selectedSlugs.includes(p.slug)
-  );
+// Desktop: only 3 selected products
+const desktopProducts = products.filter((p) =>
+  selectedSlugs.includes(p.slug)
+);
+
+// Mobile: first 4 products
+const mobileProducts = products.slice(0, 4);
+
 
   return (
     <section className="py-8 sm:py-12 md:py-14 bg-(--theme-soft) transition-colors duration-500">
@@ -38,8 +43,8 @@ export default function ProductCarousel({ products = [] }) {
         </div>
 
         {/* MOBILE GRID */}
-        <div className="grid grid-cols-2 gap-4 px-1 sm:hidden">
-          {filteredProducts.map((p) => (
+        <div className="grid grid-cols-2 gap-3 px-2 sm:hidden">
+          {mobileProducts.map((p) => (
             <ProductCard
               key={p._id}
               product={p}
@@ -61,7 +66,7 @@ export default function ProductCarousel({ products = [] }) {
             justify-center
           "
         >
-          {filteredProducts.map((p) => (
+          {desktopProducts.map((p) => (
             <div
               key={p._id}
               className="w-full sm:w-[260px] lg:w-[375px]"
