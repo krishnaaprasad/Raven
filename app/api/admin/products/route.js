@@ -27,7 +27,7 @@ export async function GET(req) {
     };
 
     const total = await Product.countDocuments(query);
-    const products = await Product.find()
+    const products = await Product.find(query)
       .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
       .limit(limit)
@@ -75,6 +75,7 @@ export async function POST(req) {
       heartNotes = [],
       baseNotes = [],
       ingredients = [],
+      accords = [],
     } = body;
 
     // Basic validation
@@ -127,6 +128,7 @@ export async function POST(req) {
       heartNotes,
       baseNotes,
       ingredients,
+      accords,
       deleted: false, // SOFT DELETE
     });
 

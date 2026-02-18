@@ -82,6 +82,7 @@ export async function PATCH(req, { params }) {
       heartNotes,
       baseNotes,
       ingredients,
+      accords = [],
     } = body;
 
     if (!name || !slug || !variants || variants.length === 0) {
@@ -130,7 +131,9 @@ export async function PATCH(req, { params }) {
     product.heartNotes = heartNotes || [];
     product.baseNotes = baseNotes || [];
     product.ingredients = ingredients || [];
+    product.accords = accords || [];
     // keep product.deleted as-is
+    
 
     const updated = await product.save();
 

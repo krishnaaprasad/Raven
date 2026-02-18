@@ -43,6 +43,8 @@ import Underline from "@tiptap/extension-underline";
 const CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
 const UPLOAD_PRESET = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
 
+
+
 // ---------- Helpers ----------
 function slugify(value) {
   return value
@@ -167,6 +169,9 @@ export default function EditProductClient({ productId }) {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
+  const [accordInput, setAccordInput] = useState("");
+  const [accords, setAccords] = useState([]);
+
   // DnD sensors
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -219,6 +224,7 @@ export default function EditProductClient({ productId }) {
 
         setBenefits(p.benefits || []);
         setIngredients(p.ingredients || []);
+        setAccords(p.accords || []);
 
         setVariants(
           (p.variants || []).length
@@ -451,6 +457,7 @@ export default function EditProductClient({ productId }) {
       heartNotes: splitCsv(heartNotesInput),
       baseNotes: splitCsv(baseNotesInput),
       ingredients,
+      accords,
     };
 
     setSaving(true);
@@ -871,6 +878,57 @@ export default function EditProductClient({ productId }) {
                 />
               </div>
             </div>
+
+            {/* Accords */}
+<div className="md:col-span-3">
+  <label className="block text-sm font-medium mb-1.5 text-[#6b6654]">
+    Fragrance Accords
+  </label>
+
+  <div className="flex gap-2">
+    <input
+      value={accordInput}
+      onChange={(e) => setAccordInput(e.target.value)}
+      className="flex-1 h-11 rounded-lg border border-[#e7e1cf] bg-white px-4 text-sm text-[#1b180d] focus:outline-none focus:ring-2 focus:ring-[#b28c34]/60"
+      placeholder="e.g., Woody"
+    />
+
+    <button
+      type="button"
+      onClick={() => {
+        if (!accordInput.trim()) return;
+        setAccords((prev) => [...prev, accordInput.trim()]);
+        setAccordInput("");
+      }}
+      className="h-11 px-3 rounded-lg bg-[#fff3cd] text-[#b28c34] text-sm font-semibold hover:bg-[#ffe08a]"
+    >
+      Add
+    </button>
+  </div>
+
+  {accords.length > 0 && (
+    <div className="mt-3 flex flex-wrap gap-2">
+      {accords.map((a, idx) => (
+        <span
+          key={idx}
+          className="flex items-center gap-2 text-xs bg-white border border-[#e7e1cf] rounded-full px-3 py-1 text-[#1b180d]"
+        >
+          {a}
+          <button
+            type="button"
+            onClick={() =>
+              setAccords((prev) => prev.filter((_, i) => i !== idx))
+            }
+            className="text-red-500 hover:text-red-600"
+          >
+            ×
+          </button>
+        </span>
+      ))}
+    </div>
+  )}
+</div>
+
           </section>
         </div>
 

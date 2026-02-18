@@ -384,10 +384,13 @@ event({
             {product.name}
           </h1>
 
-          {/* Tagline */}
-          <p className="text-[#755B00] text-base md:text-base font-medium">
-            Long lasting | Premium scent | Fragrance
-          </p>
+          {/* Dynamic Accords Tagline */}
+{product.accords?.length > 0 && (
+  <p className="text-[#755B00] text-base md:text-base font-medium tracking-wide">
+    {product.accords.join(" | ")}
+  </p>
+)}
+
 
           {/* Rating summary - Style A */}
           {hasRatingSummary && (

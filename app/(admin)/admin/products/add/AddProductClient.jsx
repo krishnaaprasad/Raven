@@ -170,6 +170,10 @@ export default function AddProductClient() {
 
   const [saving, setSaving] = useState(false);
 
+  const [accordInput, setAccordInput] = useState("");
+  const [accords, setAccords] = useState([]);
+
+
   // DnD sensors
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
@@ -378,6 +382,7 @@ export default function AddProductClient() {
       heartNotes: splitCsv(heartNotesInput),
       baseNotes: splitCsv(baseNotesInput),
       ingredients, // optional
+      accords,
     };
 
     setSaving(true);

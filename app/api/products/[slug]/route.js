@@ -5,10 +5,13 @@ export async function GET(request, context) {
   try {
     await connectToDatabase();
 
-    // ✅ Await the params object first
+    // ✅ Await params first (IMPORTANT)
     const { slug } = await context.params;
 
-    const product = await Product.findOne({ slug, deleted: { $ne: true } });
+    const product = await Product.findOne({
+      slug,
+      deleted: { $ne: true },
+    }).lean();
 
     if (!product) {
       return new Response(
@@ -24,9 +27,8 @@ export async function GET(request, context) {
   } catch (error) {
     console.error("Error fetching product:", error);
     return new Response(
-      JSON.stringify({ message: "Server error", error: error.message }),
+      JSON.stringify({ message: "Server error" }),
       { status: 500 }
     );
   }
 }
-

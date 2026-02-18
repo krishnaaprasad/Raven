@@ -35,6 +35,12 @@ const ProductSchema = new mongoose.Schema(
     baseNotes: [String],
     ingredients: [String],
 
+    // ⭐ NEW — Fragrance Accords (Premium Feature)
+    accords: {
+      type: [String],
+      default: [],
+    },
+
     // ⭐ NEW — for dynamic rating everywhere
     rating: { type: Number, default: null },
     reviewCount: { type: Number, default: 0 },
