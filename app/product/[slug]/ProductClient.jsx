@@ -635,6 +635,14 @@ event({
             >
               {tab.id === "Description" && (
                 <div
+                  className="
+                    font-[system-ui]
+                    text-sm sm:text-[15px]
+                    leading-[1.9]
+                    text-(--theme-muted)
+                    space-y-4
+                    product-description
+                  "
                   dangerouslySetInnerHTML={{
                     __html: product.description,
                   }}
@@ -734,5 +742,35 @@ event({
   }
   .animate-fadeIn {
     animation: fadeIn .45s ease-in-out;
+  }
+
+  .product-description h2,
+  .product-description h3,
+  .product-description strong {
+    font-family: 'Crimson Text', serif;
+    color: var(--theme-text);
+    font-weight: 600;
+    margin-top: 1.8rem;
+    margin-bottom: 0.6rem;
+    letter-spacing: 0.04em;
+  }
+
+  .product-description p {
+    margin-bottom: 0.8rem;
+  }
+
+  .product-description em {
+    font-style: italic;
+    color: var(--theme-text);
+    opacity: 0.85;
+  }
+
+  .product-description ul {
+    padding-left: 1.2rem;
+    margin: 0.8rem 0;
+  }
+
+  .product-description li {
+    margin-bottom: 0.4rem;
   }
 `}</style>

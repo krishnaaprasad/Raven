@@ -71,7 +71,7 @@ export default function MiniCart() {
   if (!isCartOpen) return null;
 
   return createPortal(
-    <div className="fixed inset-0 z-[9999] font-sans">
+    <div className="fixed inset-0 z-9999 font-sans">
       
       {/* BACKDROP */}
       <div
@@ -138,11 +138,11 @@ export default function MiniCart() {
                   router.push("/collection");
                 }}
                 className="bg-(--theme-text) text-(--theme-bg) 
-                px-3 py-2 rounded-full font-semibold
+                px-5 py-2 rounded-full font-semibold
                 flex items-center gap-2 
                 transition cursor-pointer "
               >
-                <Sparkles className="w-4 h-4" />
+                
                 Explore Collection
               </button>
             </div>
