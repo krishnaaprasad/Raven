@@ -296,7 +296,7 @@ event({
                     key={index}
                     onClick={() => setLightboxIndex(index)}
                     className={`border rounded-lg overflow-hidden cursor-pointer transition ${
-                      lightboxIndex === index ? "border-[#b28c34]" : "border-gray-300"
+                      lightboxIndex === index ? "border-(--theme-muted)" : "border-muted hover:border-(--theme-muted)"
                     }`}
                   >
                     <Image
