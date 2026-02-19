@@ -6,6 +6,8 @@ import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { FaCheck, FaShoppingCart } from 'react-icons/fa';
 import ProductReviews from "@/components/ProductReviews";
+import { Star } from "lucide-react";
+import { Share2, Check } from "lucide-react";
 
 // Swiper (mobile gallery)
 import SwiperCore from 'swiper';
@@ -66,6 +68,30 @@ export default function ProductClient({ slug }) {
   const { addToCart } = useCart();
   const router = useRouter();
 
+  const [copied, setCopied] = useState(false);
+
+const handleShare = async () => {
+  const shareData = {
+    title: product.name,
+    text: `Discover ${product.name} on Raven Fragrance`,
+    url: window.location.href,
+  };
+
+  try {
+    if (navigator.share) {
+      await navigator.share(shareData);
+    } else {
+      await navigator.clipboard.writeText(window.location.href);
+      setCopied(true);
+      toast.success("Link copied to clipboard");
+      setTimeout(() => setCopied(false), 2000);
+    }
+  } catch (err) {
+    console.error("Share failed:", err);
+  }
+};
+
+
   const toggleSection = (tabId) =>
     setOpenSections((prev) => ({ ...prev, [tabId]: !prev[tabId] }));
 
@@ -119,7 +145,7 @@ event({
   // ─────────────────────────
   if (!product || !selected) {
     return (
-      <section className="min-h-screen bg-[#FCF8F3] py-12 flex justify-center">
+      <section className="min-h-screen bg-(--theme-bg) py-12 flex justify-center">
         <div className="w-full max-w-6xl grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-16 animate-pulse" />
       </section>
     );
@@ -244,7 +270,7 @@ event({
   // UI
   // ─────────────────────────
   return (
-    <section className="min-h-screen bg-[#FCF8F3] py-8 px-4 sm:px-8">
+    <section className="min-h-screen bg-(--theme-bg) py-8 px-4 sm:px-8 transition-colors duration-500">
       {/* SEO Structured Data */}
         <script
           type="application/ld+json"
@@ -372,325 +398,289 @@ event({
           </Swiper>
         </div>
 
-        {/* RIGHT: Product Details + Accordion */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="flex flex-col gap-4 w-full max-w-xl mx-auto"
-        >
-          {/* Title */}
-          <h1 className="font-serif font-druzhba text-3xl sm:text-4xl text-[#1E140B] leading-tight">
-            {product.name}
-          </h1>
+        {/* RIGHT: Product Details */}
+<motion.div
+  initial={{ opacity: 0, y: 20 }}
+  animate={{ opacity: 1, y: 0 }}
+  transition={{ duration: 0.6 }}
+  className="flex flex-col gap-4 w-full max-w-xl mx-auto"
+>
+{/* Title + Share */}
+<div className="flex items-start justify-between gap-4">
 
-          {/* Dynamic Accords Tagline */}
-{product.accords?.length > 0 && (
-  <p className="text-[#755B00] text-base md:text-base font-medium tracking-wide">
-    {product.accords.join(" | ")}
-  </p>
+  <h1
+  className="
+    font-[Crimson_Text]
+    text-3xl sm:text-4xl lg:text-5xl
+    leading-tight
+    tracking-tight
+    text-(--theme-text)
+  "
+>
+  {product.name}
+</h1>
+
+  {/* Share Button */}
+<button
+  onClick={handleShare}
+  className="
+    flex items-center gap-2
+    font-[system-ui] font-medium
+    text-xs uppercase tracking-[0.18em]
+    text-(--theme-muted)
+    hover:text-(--theme-text)
+    transition-colors duration-300
+  "
+>
+  {copied ? (
+    <Check className="w-4 h-4" />
+  ) : (
+    <Share2 className="w-4 h-4" />
+  )}
+  {copied ? "Copied" : "Share"}
+</button>
+</div>
+
+
+  {/* ▸ Dynamic Accords */}
+  {product.accords?.length > 0 && (
+    <p className="font-[system-ui] text-xs uppercase font-medium tracking-[0.2em] mt-0 text-(--theme-muted)">
+      {product.accords.slice(0, 3).join(" | ")}
+    </p>
+  )}
+
+{/* ⭐ Average Rating */}
+{product.reviewCount > 0 && typeof product.rating === "number" && (
+  <button
+    onClick={scrollToReviews}
+    className="flex items-center gap-2 group mt-1 cursor-pointer"
+  >
+    <div className="flex items-center gap-1">
+      {[1, 2, 3, 4, 5].map((star) => {
+        const filled = star <= Math.round(product.rating);
+
+        return (
+          <Star
+            key={star}
+            className={`
+              w-4 h-4 transition-all duration-200
+              ${
+                filled
+                  ? "fill-current text-(--theme-text)"
+                  : "text-(--theme-border)"
+              }
+              group-hover:scale-105
+            `}
+          />
+        );
+      })}
+    </div>
+
+    <span className="font-[system-ui] text-xs text-(--theme-muted) group-hover:text-(--theme-text) transition-colors">
+      {product.reviewCount}{" "}
+      {product.reviewCount === 1 ? "review" : "reviews"}
+    </span>
+  </button>
 )}
 
+  
 
-          {/* Rating summary - Style A */}
-          {hasRatingSummary && (
-            <div className="flex items-center gap-2 text-sm text-[#4B423C]">
-              <span className="text-base">
-                ★ {product.averageRating.toFixed(1)}
-              </span>
-              <span className="text-xs text-[#6b6654]">
-                | {product.reviewCount}{" "}
-                {product.reviewCount === 1 ? "review" : "reviews"}
-              </span>
-            </div>
+  {/* ▸ Price Block */}
+  <div className="space-y-1">
+  <div className="flex items-center gap-3">
+    <span className="font-[system-ui] text-2xl font-semibold text-(--theme-text)">
+      ₹{formatAmount(selected.price)}
+    </span>
+
+    {selected.mrp && (
+      <span className="font-[system-ui] text-sm line-through text-(--theme-muted)">
+        ₹{formatAmount(selected.mrp)}
+      </span>
+    )}
+  </div>
+
+  <p className="font-[system-ui] text-sm text-(--theme-muted)">
+    Tax Included.
+  </p>
+</div>
+
+
+  <div className="border-t border-(--theme-border)" />
+
+  {/* ▸ Size Selector */}
+  <div>
+    <p className="font-[system-ui] text-xs uppercase tracking-[0.2em] text-(--theme-muted) mb-3">
+      Volume
+    </p>
+
+    <div className="flex gap-3">
+  {product.variants?.map((v, i) => (
+    <button
+      key={i}
+      onClick={() => setSelected(v)}
+      className={`
+        px-5 py-2
+        font-[system-ui]
+        text-xs uppercase tracking-[0.18em]
+        border
+        transition-all duration-300
+        ${
+          selected.size === v.size
+            ? "border-(--theme-text) text-(--theme-text)"
+            : "border-(--theme-border) text-(--theme-muted) hover:text-(--theme-text)"
+        }
+      `}
+    >
+      {v.size} ML
+    </button>
+  ))}
+</div>
+  </div>
+
+  {/* ▸ Quantity */}
+  <div>
+    <p className="font-[system-ui] text-xs uppercase tracking-[0.2em] text-(--theme-muted) mb-3">
+      Quantity
+    </p>
+
+    <div className="inline-flex items-center border border-(--theme-border)">
+      <button
+        onClick={decrease}
+        className="w-10 h-10 flex items-center justify-center text-(--theme-text) hover:bg-(--theme-soft)"
+      >
+        −
+      </button>
+
+      <span className="w-12 text-center font-[system-ui] text-sm">
+        {quantity}
+      </span>
+
+      <button
+        onClick={increase}
+        className="w-10 h-10 flex items-center justify-center text-(--theme-text) hover:bg-(--theme-soft)"
+      >
+        +
+      </button>
+    </div>
+  </div>
+
+  {/* ▸ CTA Buttons */}
+  <div className="flex flex-col gap-3">
+    <button
+  onClick={handleAddToCart}
+  disabled={isAdding}
+  className="
+    h-12
+    bg-(--theme-text)
+    text-(--theme-bg)
+    font-[system-ui]
+    text-xs uppercase tracking-[0.2em]
+    transition-all duration-300
+    hover:opacity-90
+    disabled:opacity-60
+  "
+>
+  {isAdding ? "Added" : "Add to Cart"}
+</button>
+
+
+    <button
+  onClick={handleBuyNow}
+  className="
+    h-12
+    border border-(--theme-text)
+    text-(--theme-text)
+    font-[system-ui]
+    text-xs uppercase tracking-[0.2em]
+    hover:bg-(--theme-text)
+    hover:text-(--theme-bg)
+    transition-all duration-300
+  "
+>
+  Buy Now
+</button>
+
+  </div>
+
+  <div className="border-t border-(--theme-border) pt-4" />
+
+  {/* ▸ Accordion */}
+  <div className="border border-(--theme-border)">
+    {[
+      { id: "Description", label: "Description" },
+      { id: "ProductDetails", label: "Product Details" },
+      { id: "HowToUse", label: "How To Use" },
+    ].map((tab) => (
+      <div key={tab.id} className="border-b last:border-b-0 border-(--theme-border)">
+        <button
+          onClick={() => toggleSection(tab.id)}
+          className="w-full flex justify-between items-center py-4 px-4 font-[system-ui] text-sm text-(--theme-muted) uppercase tracking-[0.15em] leading-relaxed"
+        >
+          {tab.label}
+          {openSections[tab.id] ? (
+            <ChevronUp size={18} />
+          ) : (
+            <ChevronDown size={18} />
           )}
+        </button>
 
-          {reviewSummary.total > 0 && (
-            <div
-              onClick={scrollToReviews}
-              className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-[#e7e1cf] bg-white hover:bg-[#faf6ed] transition cursor-pointer w-auto max-w-fit"
+        <AnimatePresence initial={false}>
+          {openSections[tab.id] && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              className="px-4 pb-4 font-[system-ui] text-sm text-(--theme-muted) leading-relaxed"
             >
-              <span className="text-[#b28c34] text-[15px]">★</span>
+              {tab.id === "Description" && (
+                <div
+                  dangerouslySetInnerHTML={{
+                    __html: product.description,
+                  }}
+                />
+              )}
 
-              <span className="font-semibold text-[#1b180d] text-[15px]">
-                {reviewSummary.avg}
-              </span>
-
-              <span className="text-[#b28c34]">|</span>
-
-              <span className="text-[#b28c34] text-[15px]">✓</span>
-
-              <span className="text-[#6b6654] text-[14px]">
-                ({reviewSummary.total} reviews)
-              </span>
-            </div>
-          )}
-
-          {/* Price block */}
-          <div>
-            <p className="text-gray-700 text-xs font-semibold mb-1">
-              MRP ₹{formatAmount(selected.mrp)} (Incl. of all taxes)
-            </p>
-            <div className="flex items-center gap-3">
-              <span className="text-2xl font-extrabold text-[#B28C34]">
-                ₹{formatAmount(selected.price)}
-              </span>
-              <span className="text-gray-400 line-through text-lg">
-                ₹{formatAmount(selected.mrp)}
-              </span>
-            </div>
-          </div>
-
-          {/* Size selector */}
-          <div>
-            <p className="text-[#4B423C] font-semibold mb-2">
-              Size: {selected.size}
-            </p>
-            <div className="flex flex-wrap gap-3">
-              {product.variants?.map((v, i) => (
-                <button
-                  key={i}
-                  onClick={() => setSelected(v)}
-                  className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
-                    selected.size === v.size
-                      ? "bg-black text-white shadow"
-                      : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                  }`}
-                >
-                  {v.size.toUpperCase()}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Benefits */}
-          {product.benefits?.length > 0 && (
-            <div>
-              <p className="font-bold mb-2 text-[#231F20] text-sm md:text-base">
-                What makes it great:
-              </p>
-              <ul className="space-y-2 text-[#5F544E] text-sm md:text-base">
-                {product.benefits.map((b, i) => (
-                  <li key={i} className="flex items-center gap-2">
-                    <FaCheck className="text-[#b28c34]" />
-                    {b}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          {/* Quantity + Add to Cart */}
-          <div className="flex items-center gap-3 w-full">
-            <div className="flex items-center border border-[#D0C5A3] rounded-full overflow-hidden bg-white">
-              <button
-                onClick={decrease}
-                className="px-4 py-2 text-lg font-semibold text-[#917B2E]"
-              >
-                −
-              </button>
-              <span className="px-6 py-2 font-semibold">{quantity}</span>
-              <button
-                onClick={increase}
-                className="px-4 py-2 text-lg font-semibold text-[#917B2E]"
-              >
-                +
-              </button>
-            </div>
-
-            <button
-              onClick={handleAddToCart}
-              disabled={isAdding}
-              className="relative group flex-1 h-12 rounded-full overflow-hidden text-sm font-semibold tracking-wide uppercase text-[#1b180d] transition-all shadow-[0_4px_10px_rgba(0,0,0,0.1)] hover:shadow-[0_6px_15px_rgba(0,0,0,0.15)] font-[Manrope,sans-serif] cursor-pointer"
-              style={{
-                background:
-                  "linear-gradient(45deg, #a66d30, #ffe58e 50%, #e0b057)",
-              }}
-            >
-              <span className="relative z-10 flex items-center justify-center gap-2">
-                {isAdding ? "Added!" : "Add to Cart"}
-                <FaShoppingCart size={16} />
-              </span>
-
-              <span className="absolute top-0 left-[-80%] w-[60%] h-full bg-linear-to-tr from-transparent via-white/50 to-transparent rotate-25 opacity-0 group-hover:opacity-100 animate-shine-slow"></span>
-            </button>
-          </div>
-
-          {/* Buy Now Button */}
-          <button
-            onClick={handleBuyNow}
-            className="relative flex-1 h-12 rounded-full bg-black text-white text-sm font-semibold uppercase tracking-wide transition-all hover:bg-[#111] flex flex-col justify-center font-[Manrope,sans-serif] cursor-pointer"
-          >
-            <div className="flex items-center justify-center gap-2">
-              Buy Now
-              <Image
-                src="https://fastrr-boost-ui.pickrr.com/assets/images/boost_button/upi_options.svg"
-                alt="UPI Options"
-                width={50}
-                height={10}
-                className="ml-1 my-0.5"
-              />
-            </div>
-            <p className="text-[7px] mt-1 items-right opacity-70 font-normal text-center">
-              Powered by Cashfree
-            </p>
-          </button>
-
-          {/* Shimmer keyframes for Add to Cart */}
-          <style jsx>{`
-            @keyframes shineSlow {
-              0% {
-                left: -80%;
-                opacity: 0.9;
-              }
-              25% {
-                opacity: 0.9;
-              }
-              50% {
-                left: 120%;
-                opacity: 0.6;
-              }
-              100% {
-                left: 120%;
-                opacity: 0;
-              }
-            }
-            .animate-shine-slow {
-              animation: shineSlow 4s ease-in-out infinite;
-            }
-          `}</style>
-
-          {/* Accordion Section */}
-          <div className="w-full max-w-xl mx-auto mt-5 border border-[#e7e1cf] rounded-lg overflow-hidden">
-            {[
-              { id: "Description", label: "DESCRIPTION" },
-              { id: "ProductDetails", label: "PRODUCT DETAILS" },
-              { id: "HowToUse", label: "HOW TO USE" },
-            ].map((tab) => (
-              <div key={tab.id} className="border-b last:border-b-0 border-[#e7e1cf]">
-                <button
-                  type="button"
-                  onClick={() => toggleSection(tab.id)}
-                  className="w-full flex items-center justify-between py-4 px-4 font-medium tracking-wider text-sm md:text-base text-[#1b180d] uppercase"
-                >
-                  <span className="flex-1 text-center">{tab.label}</span>
-
-                  <span className="text-[#1b180d]">
-                    {openSections[tab.id] ? (
-                      <ChevronUp size={20} strokeWidth={1.6} />
-                    ) : (
-                      <ChevronDown size={20} strokeWidth={1.6} />
-                    )}
-                  </span>
-                </button>
-
-                <AnimatePresence initial={false}>
-                  {openSections[tab.id] && (
-                    <motion.div
-                      key={tab.id}
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: "auto", opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.35, ease: "easeInOut" }}
-                      className="px-4 pb-4 text-[#4b423c] leading-relaxed text-sm md:text-base overflow-hidden"
-                    >
-                      {tab.id === "Description" && (
-                        <div
-                          dangerouslySetInnerHTML={{
-                            __html: product.description,
-                          }}
-                        />
-                      )}
-
-                      {tab.id === "ProductDetails" && (
-                        <ul className="list-disc pl-5 space-y-2 text-sm md:text-base">
-                          {product.fragranceType && (
-                            <li>
-                              <strong>Fragrance Type:</strong>{" "}
-                              {product.fragranceType}
-                            </li>
-                          )}
-                          {selected?.size && (
-                            <li>
-                              <strong>Volume:</strong> {selected.size}
-                            </li>
-                          )}
-                          {product.longevity && (
-                            <li>
-                              <strong>Longevity:</strong>{" "}
-                              {product.longevity}
-                            </li>
-                          )}
-                          {product.sillage && (
-                            <li>
-                              <strong>Sillage:</strong> {product.sillage}
-                            </li>
-                          )}
-                          {product.topNotes?.length > 0 && (
-                            <li>
-                              <strong>Top Notes:</strong>{" "}
-                              {product.topNotes.join(", ")}
-                            </li>
-                          )}
-                          {product.heartNotes?.length > 0 && (
-                            <li>
-                              <strong>Heart Notes:</strong>{" "}
-                              {product.heartNotes.join(", ")}
-                            </li>
-                          )}
-                          {product.baseNotes?.length > 0 && (
-                            <li>
-                              <strong>Base Notes:</strong>{" "}
-                              {product.baseNotes.join(", ")}
-                            </li>
-                          )}
-                          <li>
-                            <strong>Designed In:</strong> United Arab
-                            Emirates (UAE)
-                          </li>
-                        </ul>
-                      )}
-
-                      {tab.id === "HowToUse" && (
-                        <div className=" space-y-3 text-[#4b423c] font-[Manrope,sans-serif] leading-relaxed text-sm md:text-base">
-                          <p>
-                            For the best scent projection and longevity, follow these steps:
-                          </p>
-
-                          <ul className="space-y-2 list-disc pl-5">
-                            <li>
-                              <strong>The Perfect Distance:</strong> Hold the bottle
-                              <strong> 3–6 inches</strong> away from your body to create a fine, even mist.
-                            </li>
-
-                            <li>
-                              <strong>Focus on Pulse Points:</strong> Spray where warmth naturally
-                              enhances diffusion — <strong>neck, wrists, chest, and behind the ears</strong>.
-                            </li>
-
-                            <li>
-                              <strong>Skin Only:</strong> Because of our high concentration of oils,
-                              apply directly on skin. Avoid close spray on clothes to prevent staining.
-                            </li>
-                          </ul>
-                        </div>
-                      )}
-                    </motion.div>
+              {tab.id === "ProductDetails" && (
+                <ul className="space-y-2">
+                  {product.fragranceType && (
+                    <li><strong>Type:</strong> {product.fragranceType}</li>
                   )}
-                </AnimatePresence>
-              </div>
-            ))}
-          </div>
-        </motion.div>
+                  {selected?.size && (
+                    <li><strong>Volume:</strong> {selected.size}</li>
+                  )}
+                  {product.longevity && (
+                    <li><strong>Longevity:</strong> {product.longevity}</li>
+                  )}
+                  {product.sillage && (
+                    <li><strong>Sillage:</strong> {product.sillage}</li>
+                  )}
+                </ul>
+              )}
+
+              {tab.id === "HowToUse" && (
+                <p>
+                  Spray 3–6 inches away on pulse points like neck and wrists
+                  for optimal longevity and projection.
+                </p>
+              )}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    ))}
+  </div>
+</motion.div>
+      
       </div>
 
       {/* FULL-WIDTH REVIEWS SECTION */}
       <div className="max-w-7xl md:max-w-9x1 mx-auto mt-20 px-2">
         <div
           id="reviews-section"
-          className="bg-white border border-[#e7e1cf] rounded-2xl shadow-sm px-0 sm:px-0 py-0"
+          className="bg-(--theme-soft) border border-(--theme-border) rounded-xl"
         >
-          <h2 className="text-lg md:text-2xl text-center font-semibold text-[#1b180d] px-2 sm:px-4 py-2 sm:py-4 border-b border-[#e7e1cf]">
+          <h2 className="text-lg md:text-2xl text-center text-(--theme-text) font-semibold  px-2 sm:px-4 py-2 sm:py-4 border-b border-(--theme-border)">
             Customer Reviews for {product.name}
           </h2>
           <ProductReviews
