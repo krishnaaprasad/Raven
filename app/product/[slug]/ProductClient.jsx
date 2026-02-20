@@ -433,7 +433,7 @@ event({
   <h1
   className="
     font-[Crimson_Text]
-    text-3xl sm:text-4xl lg:text-5xl
+    text-3xl sm:text-3xl lg:text-4xl
     leading-tight
     tracking-tight
     text-(--theme-text)
@@ -708,9 +708,9 @@ event({
       <div className="max-w-7xl md:max-w-9x1 mx-auto mt-20 px-2">
         <div
           id="reviews-section"
-          className="bg-(--theme-soft) border border-(--theme-border) rounded-xl"
+          className="bg-(--theme-bg) "
         >
-          <h2 className="text-xl sm:text-2xl text-center text-(--theme-text) font-semibold  px-2 sm:px-4 py-2 sm:py-4 border-b border-(--theme-border)">
+          <h2 className="text-xl sm:text-3xl text-center text-(--theme-text) font-semibold  px-2 sm:px-4 py-2 sm:py-4 ">
             Customer Reviews for {product.name}
           </h2>
           <ProductReviews
@@ -724,7 +724,7 @@ event({
     YOU MIGHT ALSO LIKE
 ──────────────── */}
 {relatedProducts.length > 0 && (
-  <div className="max-w-7xl mx-auto mt-10 px-4">
+  <div className="max-w-7xl mx-auto mt-5 px-4">
     
     <h2
       className="
