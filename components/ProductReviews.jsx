@@ -1,344 +1,571 @@
 "use client";
-import { useState, useEffect } from "react";
-import { Star, CheckCircle2 } from "lucide-react";
+
+import { useState, useEffect, useMemo } from "react";
+import { Star, ChevronDown, ChevronRight, Upload, User } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useSession } from "next-auth/react";
-import { Crimson_Text } from "next/font/google";
-const crimson = Crimson_Text({
-  subsets: ["latin"],
-  weight: ["400", "600", "700"],
-  display: "swap",
-});
 
-function Stars({ count, className = "" }) {
-  return (
-    <span className={`flex items-center gap-0.5 ${className}`}>
-      {[1, 2, 3, 4, 5].map((i) => (
-        <Star
-          key={i}
-          size={17}
-          className={
-            i <= count
-              ? "fill-current text-(--theme-text)"
-              : "text-(--theme-border)"
-          }
-        />
-      ))}
-    </span>
-  );
-}
+const REVIEWS_PER_PAGE = 4;
 
-// 🕒 Helper: Time ago display
-function timeAgo(dateString) {
-  const diff = (Date.now() - new Date(dateString)) / 1000;
-  if (diff < 60) return "Just now";
-  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
-  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
-  if (diff < 2592000) return `${Math.floor(diff / 86400)}d ago`;
-  return new Date(dateString).toLocaleDateString();
-}
+/* ───────────────────────── */
+/* ⭐ Star Rating Component */
+/* ───────────────────────── */
 
-export default function ProductReviews({ productId, onSummary }) {
+const StarRating = ({ rating, size = 16 }) => (
+  <div className="flex gap-0.5">
+    {[1, 2, 3, 4, 5].map((s) => (
+      <Star
+        key={s}
+        style={{ width: size, height: size }}
+        className={
+          s <= rating
+            ? "fill-(--theme-text) text-(--theme-text)"
+            : "fill-transparent  text-(--theme-border)"
+        }
+      />
+    ))}
+  </div>
+);
+
+/* ───────────────────────── */
+/* Main Component */
+/* ───────────────────────── */
+
+export default function ProductReviews({ productId }) {
   const { data: session } = useSession();
 
   const [reviews, setReviews] = useState([]);
+  const [sortBy, setSortBy] = useState("recent");
+  const [currentPage, setCurrentPage] = useState(1);
   const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState({ name: "", rating: 0, comment: "" });
-  const [loading, setLoading] = useState(false);
-  const [page, setPage] = useState(1);
-  const [sortOption, setSortOption] = useState("newest");
 
-  const reviewsPerPage = 3;
-  const pagedReviews = reviews.slice(
-    (page - 1) * reviewsPerPage,
-    page * reviewsPerPage
-  );
+  const [form, setForm] = useState({
+    rating: 0,
+    title: "",
+    body: "",
+    name: "",
+    images: [],
+  });
 
-  const total = reviews.length;
-  const countArr = [5, 4, 3, 2, 1].map(
-    (star) => reviews.filter((r) => r.rating === star).length
-  );
-  const avg =
-    total === 0
-      ? 0
-      : (reviews.reduce((sum, r) => sum + r.rating, 0) / total).toFixed(1);
-
-  useEffect(() => {
-    if (session?.user?.name) {
-      setForm((f) => ({ ...f, name: session.user.name }));
-    }
-  }, [session]);
+  /* ───────────────────────── */
+  /* Fetch Reviews */
+  /* ───────────────────────── */
 
   useEffect(() => {
     if (!productId) return;
     fetch(`/api/reviews?productId=${productId}`)
       .then((res) => res.json())
-      .then((data) => {
-        const sorted = sortReviews(data, sortOption);
-        setReviews(sorted);
-      });
+      .then((data) => setReviews(data));
   }, [productId]);
 
   useEffect(() => {
-  if (onSummary) {
-    onSummary({ avg, total });
-  }
-}, [avg, total]);
-
-
-
-  function sortReviews(list, option) {
-    const sorted = [...list];
-    if (option === "newest") {
-      sorted.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-    } else if (option === "oldest") {
-      sorted.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
-    } else if (option === "highest") {
-      sorted.sort((a, b) => b.rating - a.rating);
-    } else if (option === "lowest") {
-      sorted.sort((a, b) => a.rating - b.rating);
+    if (session?.user?.name) {
+      setForm((prev) => ({
+        ...prev,
+        name: session.user.name,
+      }));
     }
-    return sorted;
-  }
+  }, [session]);
 
-  function handleSortChange(option) {
-    setSortOption(option);
-    setReviews((prev) => sortReviews(prev, option));
-    setPage(1);
-  }
+  /* ───────────────────────── */
+  /* Sorting */
+  /* ───────────────────────── */
 
-  async function handleSubmit(e) {
-    e.preventDefault();
-    if (!form.name || !form.rating || !form.comment) {
-      alert("Please fill all fields");
-      return;
-    }
-    setLoading(true);
-    const res = await fetch("/api/reviews", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ productId, ...form }),
-    });
+  const sortedReviews = useMemo(() => {
+    const copy = [...reviews];
+
+    if (sortBy === "recent")
+      copy.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+    if (sortBy === "highest") copy.sort((a, b) => b.rating - a.rating);
+
+    if (sortBy === "lowest") copy.sort((a, b) => a.rating - b.rating);
+
+    return copy;
+  }, [reviews, sortBy]);
+
+  const totalPages = Math.ceil(sortedReviews.length / REVIEWS_PER_PAGE);
+
+  const paginatedReviews = sortedReviews.slice(
+    (currentPage - 1) * REVIEWS_PER_PAGE,
+    currentPage * REVIEWS_PER_PAGE
+  );
+
+  /* ───────────────────────── */
+  /* Rating Breakdown */
+  /* ───────────────────────── */
+
+  const breakdown = useMemo(() => {
+    const counts = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
+    reviews.forEach((r) => counts[r.rating]++);
+    return counts;
+  }, [reviews]);
+
+  const avg =
+    reviews.length > 0
+      ? (
+          reviews.reduce((s, r) => s + r.rating, 0) / reviews.length
+        ).toFixed(2)
+      : "0.00";
+
+  /* ───────────────────────── */
+  /* Cloudinary Upload */
+  /* ───────────────────────── */
+
+  const uploadToCloudinary = async (file) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append(
+      "upload_preset",
+      process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET
+    );
+
+    const res = await fetch(
+      `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload`,
+      { method: "POST", body: formData }
+    );
+
     const data = await res.json();
-    if (res.ok) {
-      setReviews((prev) => sortReviews([data, ...prev], sortOption));
-      setForm({ name: session?.user?.name || "", rating: 0, comment: "" });
-      setShowForm(false);
-      setPage(1);
-    } else alert(data.message || "Failed to submit review");
-    setLoading(false);
+    return data.secure_url;
+  };
+
+  const handleImageUpload = async (e) => {
+    const files = Array.from(e.target.files);
+    const urls = await Promise.all(files.map(uploadToCloudinary));
+
+
+    setForm((prev) => ({
+      ...prev,
+      images: [...prev.images, ...urls],
+    }));
+  };
+
+  const [submitting, setSubmitting] = useState(false);
+
+  /* ───────────────────────── */
+  /* Submit Review */
+  /* ───────────────────────── */
+
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  
+
+  const res = await fetch("/api/reviews", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      productId,
+      name: form.name,
+      rating: form.rating,
+      comment: form.body,
+      title: form.title,
+      images: form.images,
+      isVerified: !!session?.user,
+    }),
+  });
+
+  const data = await res.json();
+
+  if (res.ok) {
+    // Re-fetch from DB to ensure fresh data
+    const fresh = await fetch(`/api/reviews?productId=${productId}`);
+    const updated = await fresh.json();
+    setReviews((prev) => [data, ...prev]);
+
+    setShowForm(false);
+    setForm({ rating: 0, title: "", body: "", name: "", images: [] });
   }
+};
+
+
+  /* ───────────────────────── */
+  /* UI */
+  /* ───────────────────────── */
 
   return (
-    <div className="flex flex-col md:flex-row bg-(--theme-bg)  px-0 md:px-6 py-6 transition-colors duration-300">      {/* LEFT: Summary Sidebar */}
-      <div className="md:w-[290px] w-full shrink-0 px-4 mb-10 md:mb-0">
-        {total === 0 ? (
-          <p className="text-sm text-(--theme-muted)">No reviews yet. Be the first to review this product.</p>
-        ) : (
-          <>
-            <div
-  className={`${crimson.className} text-4xl leading-none font-semibold text-(--theme-text) flex items-center mb-2 `}
->
+    <section className="max-w-6xl mx-auto px-4 py-10">
 
-              {avg}
-              <span className="ml-2">
-                <Stars count={Math.round(avg)} />
-              </span>
-            </div>
-            <div className="text-[13px] text-(--theme-muted) mb-5">
-              Based on {total} review{total !== 1 ? "s" : ""}
-            </div>
-          </>
-        )}
-        <div className="space-y-2 mb-8 mt-2">
-          {countArr.map((c, i) => (
-            <div className="flex items-center gap-2" key={i}>
-              <span className="w-7 text-xs text-(--theme-text)">{5 - i}★</span>
-              <div className="flex-1 h-2 bg-(--theme-border) rounded">
-                <div
-                  className="h-2 rounded bg-(--theme-text)"
-                  style={{ width: total ? `${(c / total) * 100}%` : 0 }}
-                />
-              </div>
-              <span className="w-6 text-xs text-right text-(--theme-text)">{c}</span>
-            </div>
-          ))}
+      {/* ── Summary Layout (3 column) ── */}
+
+      <div className="grid grid-cols-1 md:grid-cols-[1fr_1.5fr_1fr] gap-8 items-center pb-5">
+
+        {/* Left */}
+        <div className="flex flex-col gap-1.5 items-center ">
+          <div className="flex items-center gap-2">
+            <StarRating rating={Math.round(avg)} />
+            <span className="text-sm font-semibold text-(--theme-text)">
+              {avg} out of 5
+            </span>
+          </div>
+          <p className="text-sm text-(--theme-muted)">
+            Based on {reviews.length} reviews
+          </p>
         </div>
-        {!showForm && (
-          <button
-            onClick={() => setShowForm(true)}
-            className="w-full text-sm bg-(--theme-text) text-(--theme-bg) font-[system-ui] uppercase tracking-wider py-2 rounded-full hover:opacity-90 transition cursor-pointer"
-          >
-            Write a Review
-          </button>
-        )}
-        {showForm && (
-          <form
-            onSubmit={handleSubmit}
-            className="mt-7 p-4 rounded border border-(--theme-border) bg-(--theme-bg) flex flex-col gap-3"
-            style={{ maxWidth: 350 }}
-          >
-            <input
-              type="text"
-              placeholder="Your name"
-              value={form.name}
-              onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-              className="w-full border border-(--theme-border) rounded px-2 py-1 text-sm focus:border-(--theme-text) focus:ring-0 outline-none"
-              required
-              disabled={!!session?.user?.name}
-            />
 
-            <div>
-              <label className="text-xs font-medium text-(--theme-muted) mb-1 block">
-                Rating
-              </label>
-              <div className="flex gap-1">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <Star
-                    key={star}
-                    size={18}
-                    className={
-                      star <= form.rating
-                        ? "fill-current text-(--theme-text) cursor-pointer"
-                        : "text-(--theme-muted) cursor-pointer"
-                    }
-                    onClick={() => setForm((f) => ({ ...f, rating: star }))}
-                  />
-                ))}
-              </div>
-            </div>
+        {/* Center - Rating bars */}
+<div className="space-y-2">
+  {[5, 4, 3, 2, 1].map((s) => {
+    const count = breakdown[s] || 0;
+    const pct =
+      reviews.length > 0
+        ? (count / reviews.length) * 100
+        : 0;
 
-            <textarea
-              placeholder="Share your thoughts..."
-              value={form.comment}
-              onChange={(e) =>
-                setForm((f) => ({ ...f, comment: e.target.value }))
-              }
-              className="w-full border border-(--theme-border) rounded px-2 py-1 text-sm focus:border-(--theme-text) focus:ring-0 outline-none"
-              rows={3}
-              required
-            />
+    return (
+      <div key={s} className="flex items-center gap-2">
 
-            <div className="flex gap-2 mt-1">
-              <button
-                type="submit"
-                disabled={loading}
-                className="bg-(--theme-text) text-(--theme-bg) rounded px-4 py-1.5 text-sm font-semibold hover:bg-(--theme-muted) transition disabled:opacity-50 cursor-pointer"
-              >
-                {loading ? "..." : "Submit"}
-              </button>
-              <button
-                type="button"
-                onClick={() => setShowForm(false)}
-                className="border border-(--theme-text) text-(--theme-text) rounded px-4 py-1.5 text-sm font-semibold bg-(--theme-bg) hover:bg-(--theme-soft) transition cursor-pointer"
-              >
-                Cancel
-              </button>
-            </div>
-          </form>
-        )}
+        {/* Stars */}
+        <div className="w-[110px]">
+          <StarRating rating={s} size={16} />
+        </div>
+
+        {/* Bar */}
+        <div className="flex-1 h-3.5 bg-(--theme-border)/40">
+          <div
+            className="h-full bg-(--theme-text)"
+            style={{ width: `${pct}%` }}
+          />
+        </div>
+
+        {/* Count */}
+        <div className="w-6 text-right text-sm text-(--theme-text)">
+          {count}
+        </div>
+
       </div>
-
-      {/* RIGHT: Reviews List */}
-      <div className="flex-1 flex flex-col px-1 md:px-6">
-        <div className="flex items-center justify-between mb-3">
-          <h3 className={`${crimson.className} text-lg font-bold text-(--theme-text)`}></h3>
-          <select
-            value={sortOption}
-            onChange={(e) => handleSortChange(e.target.value)}
-            className="border border-(--theme-border) rounded-md text-sm px-2 py-1 text-(--theme-text) bg-(--theme-bg) cursor-pointer"
-          >
-            <option value="newest">Newest</option>
-            <option value="oldest">Oldest</option>
-            <option value="highest">Highest Rated</option>
-            <option value="lowest">Lowest Rated</option>
-          </select>
-        </div>
-
-        {pagedReviews.length === 0 ? (
-          <p className="text-(--theme-muted)">No reviews yet. Be the first to review!</p>
-        ) : (
-          pagedReviews.map((r, i) => (
-            <div
-              key={i}
-              className="mb-8 pb-8 border-b border-(--theme-border) flex gap-4 items-start transition-all duration-300 hover:translate-x-0.5"          >
-              <div className="rounded-full w-11 h-11 bg-(--theme-soft) flex items-center justify-center uppercase font-bold text-(--theme-text) tracking-wide text-[15px]">
-                {r.name
-                  .split(" ")
-                  .map((n) => n[0])
-                  .join("")
-                  .substring(0, 2)}
-              </div>
-              <div className="flex-1">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-  <span className="font-semibold text-(--theme-text) font-[system-ui]">
-    {r.name}
-  </span>
-
-  <div className="flex items-center gap-1">
-    <CheckCircle2
-      size={14}
-      className="text-(--theme-text)"
-    />
-    <span
-      className="
-        text-[10px]
-        bg-(--theme-text)
-        uppercase
-        font-medium
-        tracking-[0.15em]
-        font-[system-ui]
-        text-(--theme-bg)
-        px-1
-      "
-    >
-       Verified 
-    </span>
-  </div>
+    );
+  })}
 </div>
 
-                  
-                  <Stars count={r.rating} />
-                </div>
-                <div className="text-xs text-(--theme-muted) font-[system-ui] mb-1">{timeAgo(r.createdAt)}</div>
-                <div className="text-(--theme-text) mb-2 font-[system-ui]">{r.comment}</div>
-                {r.reply && (
-                  <div className="mt-3 ml-10 border-l-2 border-(--theme-text) pl-3 bg-(--theme-soft) rounded-md py-2">
-                    <p className="text-[13px] text-(--theme-text) font-semibold">Raven Support</p>
-                    <p className="text-sm text-(--theme-muted) font-[system-ui]">{r.reply}</p>
-                    <span className="text-[11px] text-(--theme-muted)">{timeAgo(r.replyAt)}</span>
-                  </div>
-                )}
+
+        {/* Right */}
+        <div className="flex justify-center">
+          <button
+            onClick={() => setShowForm(!showForm)}
+            className="px-8 py-3 bg-(--theme-text) text-(--theme-bg) text-sm sm:text-base font-semibold hover:opacity-90 transition cursor-pointer"
+          >
+            {showForm ? "Cancel review" : "Write a review"}
+          </button>
+        </div>
+      </div>
+
+      <AnimatePresence>
+  {showForm && (
+    <motion.div
+      initial={{ height: 0, opacity: 0 }}
+      animate={{ height: "auto", opacity: 1 }}
+      exit={{ height: 0, opacity: 0 }}
+      transition={{ duration: 0.3 }}
+      className="overflow-hidden"
+    >
+      <div className="max-w-2xl mx-auto mt-5">
+
+  <div className="bg-(--theme-soft)/30 backdrop-blur-sm border border-(--theme-border)/60 px-10 py-8 rounded-sm">
+
+    <h3 className="font-[system-ui] text-[24px] text-center text-(--theme-text) mb-10 tracking-wide">
+      Write a Review
+    </h3>
+
+    <form onSubmit={handleSubmit} className="space-y-10">
+
+      {/* Rating */}
+      <div className="text-center">
+        <label className="text-[13px] uppercase tracking-[0.2em] text-(--theme-muted) block mb-5">
+          Your Rating
+        </label>
+
+        <div className="flex justify-center gap-3">
+          {[1,2,3,4,5].map((star)=>(
+            <button
+              key={star}
+              type="button"
+              onClick={() => setForm(prev => ({...prev, rating: star}))}
+              className="transition-transform duration-200 hover:scale-110 cursor-pointer"
+            >
+              <Star
+                className={`w-8 h-8 transition-colors duration-200 ${
+                  star <= form.rating
+                    ? "fill-(--theme-text) text-(--theme-text)"
+                    : "fill-transparent text-(--theme-border)"
+                }`}
+              />
+            </button>
+          ))}
+        </div>
+      </div>
+
+
+      {/* Title */}
+      <div>
+        <label className="text-[12px] uppercase tracking-[0.18em] text-(--theme-text) block mb-3">
+          Review Title
+        </label>
+
+        <input
+          type="text"
+          required
+          value={form.title}
+          onChange={(e)=>setForm(prev=>({...prev,title:e.target.value}))}
+          placeholder="Summarize your experience"
+          className="w-full h-12 px-4 bg-transparent border-b border-(--theme-border) focus:border-(--theme-text) outline-none text-(--theme-text) text-[15px] transition-colors"
+        />
+      </div>
+
+
+      {/* Review Body */}
+      <div>
+        <label className="text-[12px] uppercase tracking-[0.18em] text-(--theme-text) block mb-3">
+          Your Review
+        </label>
+
+        <textarea
+          required
+          rows={5}
+          value={form.body}
+          onChange={(e)=>setForm(prev=>({...prev,body:e.target.value}))}
+          placeholder="Share details of your experience..."
+          className="w-full px-4 py-4 bg-transparent border border-(--theme-border) focus:border-(--theme-text) outline-none text-(--theme-text) text-[14px] leading-relaxed resize-none transition-colors"
+        />
+      </div>
+
+
+      {/* Image Upload */}
+      <div>
+        <label className="text-[12px] uppercase tracking-[0.18em] text-(--theme-text) block mb-4 text-center">
+          Add Photos (Optional)
+        </label>
+
+        <div className="flex justify-center">
+
+          <label className="w-28 h-28 border border-dashed border-(--theme-border) flex items-center justify-center cursor-pointer hover:border-(--theme-text) transition-all duration-300">
+            <Upload className="w-7 h-7 text-(--theme-muted)" />
+            <input
+              type="file"
+              multiple
+              onChange={handleImageUpload}
+              className="hidden"
+            />
+          </label>
+
+        </div>
+
+        {form.images.length > 0 && (
+          <div className="flex gap-4 mt-6 justify-center flex-wrap">
+            {form.images.map((img,i)=>(
+              <div key={i} className="relative group">
+                <img
+                  src={img}
+                  className="w-20 h-20 object-cover border border-(--theme-border)"
+                />
+                <button
+                  type="button"
+                  onClick={() =>
+                    setForm(prev=>({
+                      ...prev,
+                      images: prev.images.filter((_,index)=>index!==i)
+                    }))
+                  }
+                  className="absolute -top-2 -right-2 w-6 h-6 bg-(--theme-text) text-(--theme-bg) text-xs flex items-center justify-center rounded-full opacity-0 group-hover:opacity-100 transition cursor-pointer"
+                >
+                  ×
+                </button>
               </div>
-            </div>
-          ))
-        )}
-
-
-        {/* Pagination */}
-        {total > reviewsPerPage && (
-          <div className="flex gap-3 mt-3 items-center justify-start text-sm">
-            <button
-              className="bg-(--theme-soft) text-(--theme-text) px-3 py-1 rounded disabled:opacity-40"
-              disabled={page <= 1}
-              onClick={() => setPage((p) => p - 1)}
-            >
-              Previous
-            </button>
-            <span className="text-(--theme-muted)">
-              Showing {(page - 1) * reviewsPerPage + 1}-
-              {Math.min(page * reviewsPerPage, total)} of {total}
-            </span>
-            <button
-              className="bg-(--theme-soft) text-(--theme-text) px-3 py-1 rounded disabled:opacity-40"
-              disabled={page >= Math.ceil(total / reviewsPerPage)}
-              onClick={() => setPage((p) => p + 1)}
-            >
-              Next
-            </button>
+            ))}
           </div>
         )}
       </div>
+
+
+      {/* Display Name */}
+      <div>
+        <label className="text-[12px] uppercase tracking-[0.18em] text-(--theme-text) block mb-3">
+          Display Name
+        </label>
+
+        <input
+          type="text"
+          required
+          disabled={!!session?.user}
+          value={form.name}
+          onChange={(e)=>setForm(prev=>({...prev,name:e.target.value}))}
+          placeholder="Your name"
+          className="w-full h-12 px-4 bg-transparent border-b border-(--theme-border) focus:border-(--theme-text) outline-none text-(--theme-text) text-[15px] transition-colors disabled:opacity-60"
+        />
+      </div>
+
+
+      {/* Buttons */}
+      <div className="flex justify-center gap-6 pt-4">
+
+        <button
+          type="button"
+          onClick={()=>setShowForm(false)}
+          className="px-8 py-3 border border-(--theme-text) text-(--theme-text) text-[13px] uppercase tracking-wide hover:bg-(--theme-soft) transition cursor-pointer"
+        >
+          Cancel
+        </button>
+
+        <button
+          type="submit"
+          disabled={submitting || !form.rating || !form.title || !form.body || !form.name}
+          className="px-10 py-3 bg-(--theme-text) text-(--theme-bg) text-[13px] uppercase tracking-wide disabled:opacity-40 hover:opacity-90 transition cursor-pointer"
+        >
+          {submitting ? "Submitting..." : "Submit Review"}
+        </button>
+
+      </div>
+
+    </form>
+  </div>
+</div>
+
+    </motion.div>
+  )}
+</AnimatePresence>
+
+<div className="max-w-6xl mx-auto mt-8 flex items-center justify-start gap-4">
+  <div className="relative inline-block">
+
+    <select
+      value={sortBy}
+      onChange={(e) => {
+        setSortBy(e.target.value);
+        setCurrentPage(1);
+      }}
+      className="
+        appearance-none
+        bg-(--theme-bg)
+        
+        pb-1 pr-6 px-1.5
+        text-sm
+        text-(--theme-text)
+        focus:outline-none
+        focus:border-(--theme-text)
+        cursor-pointer
+      "
+    >
+      <option value="recent">Most Recent</option>
+      <option value="highest">Highest Rating</option>
+      <option value="lowest">Lowest Rating</option>
+    </select>
+
+    <ChevronDown
+      className="
+        absolute right-0 top-1/2 -translate-y-1/2
+        w-4 h-4
+        text-(--theme-muted)
+        pointer-events-none
+      "
+    />
+  </div>
+</div>
+
+
+      {/* ── Review Cards ── */}
+
+      <div className="mt-12 space-y-10">
+        {paginatedReviews.map((r, idx) => (
+          <motion.div
+            key={r._id}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: idx * 0.05 }}
+            className=" transition-all duration-300 hover:translate-x-0.5"
+          >
+            <div className="flex justify-between mb-2">
+              <StarRating rating={r.rating} size={17} />
+              <span className="text-xs text-(--theme-muted)">
+                {new Date(r.createdAt).toLocaleDateString()}
+              </span>
+            </div>
+
+            <div className="flex items-center gap-2 mb-2">
+              <div className="w-7 h-7 border border-(--theme-border) flex items-center justify-center">
+                <User size={19} />
+              </div>
+
+              <span className="text-sm sm:text-base text-(--theme-text)">
+                {r.name}
+              </span>
+
+              {r.isVerified && (
+                <span className="text-xs font-semibold text-(--theme-bg) bg-(--theme-text) px-2 py-0.5">
+                  Verified
+                </span>
+              )}
+            </div>
+
+            {r.title && (
+              <p className=" text-[14.5px] sm:text-[16.2px]  font-semibold text text-(--theme-text) font-[system-ui]">
+                {r.title}
+              </p>
+            )}
+
+            <p className="text-sm sm:text-base text-(--theme-muted) mb-1 whitespace-pre-line font-[system-ui]">
+              {r.comment}
+            </p>
+
+            {r.reply && (
+  <div className="mt-6 ml-10 border-l border-(--theme-border) pl-6 py-4 bg-(--theme-soft)/40 rounded-sm">
+
+    <div className="flex items-center gap-2 mb-1">
+      <span className="text-sm font-semibold text-(--theme-text)">
+        Raven Fragrance
+      </span>
+      <span className="text-[10px] uppercase tracking-[0.2em] text-(--theme-muted)">
+        Staff
+      </span>
     </div>
+
+    <p className="text-sm text-(--theme-muted) leading-relaxed">
+      {r.reply}
+    </p>
+
+    {r.replyAt && (
+      <p className="text-xs text-(--theme-muted) mt-2">
+        {new Date(r.replyAt).toLocaleDateString()}
+      </p>
+    )}
+  </div>
+)}
+
+
+            {r.images?.length > 0 && (
+              <div className="flex gap-3 mt-4">
+                {r.images.map((img, i) => (
+                  <div key={i} className="w-20 h-20 border border-(--theme-border)">
+                    <img
+                      src={img}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
+          </motion.div>
+        ))}
+      </div>
+      
+
+      {/* ── Pagination ── */}
+
+      {totalPages > 1 && (
+        <div className="flex justify-center gap-2 mt-12">
+          {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+            <button
+              key={page}
+              onClick={() => setCurrentPage(page)}
+              className={`w-9 h-9 border ${
+                page === currentPage
+                  ? "bg-(--theme-text) text-(--theme-bg)"
+                  : "border-(--theme-border)"
+              }`}
+            >
+              {page}
+            </button>
+          ))}
+        </div>
+      )}
+    </section>
   );
 }

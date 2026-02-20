@@ -705,12 +705,12 @@ event({
       </div>
 
       {/* FULL-WIDTH REVIEWS SECTION */}
-      <div className="max-w-7xl md:max-w-9x1 mx-auto mt-20 px-2">
+      <div className="max-w-7xl md:max-w-15xl mx-auto mt-14 sm:mt-20 px-2">
         <div
           id="reviews-section"
           className="bg-(--theme-bg) "
         >
-          <h2 className="text-xl sm:text-3xl text-center text-(--theme-text) font-semibold  px-2 sm:px-4 py-2 sm:py-4 ">
+          <h2 className="text-2xl sm:text-3xl text-center text-(--theme-text) font-semibold  px-2 sm:px-4 py-2 sm:py-4 ">
             Customer Reviews for {product.name}
           </h2>
           <ProductReviews
