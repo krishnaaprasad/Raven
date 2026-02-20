@@ -53,12 +53,12 @@ const ProductCard = ({ product }) => {
       </div>
 
       {/* INFO */}
-      <div className="px-4 pt-4 pb-5 space-y-3">
+      <div className="px-4 pt-4 pb-5 space-y-2">
         <h3
           onClick={() => router.push(`/product/${product.slug}`)}
           className="
             font-[Crimson_Text]
-            text-[15px]
+            text-[16px]
             font-semibold
             text-(--theme-text)
             line-clamp-2
@@ -70,7 +70,26 @@ const ProductCard = ({ product }) => {
           {product.name}
         </h3>
 
-        {/* Rating */}
+{/* ▸ Accords */}
+{product?.accords?.length > 0 && (
+  <p
+    className="
+      text-[9px] sm:text-[10px]
+      font-normal
+      uppercase
+      tracking-[0.18em] sm:tracking-[0.25em]
+      font-[system-ui]
+      text-(--theme-muted)
+      break-words
+      leading-relaxed
+    "
+  >
+    {product.accords.slice(0, 3).join(" | ")}
+  </p>
+)}
+
+
+     
         {/* Rating (reserve space even if no reviews) */}
 <div className="flex items-center gap-2 min-h-[18px]">
   {product?.reviewCount > 0 && product?.rating != null ? (
