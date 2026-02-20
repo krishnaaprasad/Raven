@@ -136,7 +136,7 @@ export default function ProductReviews({ productId, onSummary }) {
         ) : (
           <>
             <div
-  className={`${crimson.className} text-[2.5rem] leading-none font-semibold text-(--theme-text) flex items-center mb-2`}
+  className={`${crimson.className} text-[2.5rem] leading-none font-semibold text-(--theme-text) flex items-center mb-2 `}
 >
 
               {avg}
@@ -149,7 +149,7 @@ export default function ProductReviews({ productId, onSummary }) {
             </div>
           </>
         )}
-        <div className="space-y-2 mb-8">
+        <div className="space-y-2 mb-8 mt-2">
           {countArr.map((c, i) => (
             <div className="flex items-center gap-2" key={i}>
               <span className="w-7 text-xs text-(--theme-text)">{5 - i}★</span>

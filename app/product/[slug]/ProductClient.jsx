@@ -67,6 +67,7 @@ export default function ProductClient({ slug }) {
 
   const { addToCart } = useCart();
   const router = useRouter();
+  const [relatedProducts, setRelatedProducts] = useState([]);
 
   const [copied, setCopied] = useState(false);
 
@@ -139,6 +140,27 @@ event({
 
     if (slug) fetchProduct();
   }, [slug, router]);
+
+  useEffect(() => {
+  async function fetchRelated() {
+    if (!product?._id) return;
+
+    try {
+      const res = await fetch(`/api/products?limit=8`);
+      const data = await res.json();
+
+      if (Array.isArray(data)) {
+        const filtered = data.filter(p => p._id !== product._id);
+        setRelatedProducts(filtered.slice(0, 4));
+      }
+    } catch (err) {
+      console.error("Related fetch error:", err);
+    }
+  }
+
+  fetchRelated();
+}, [product]);
+
 
   // ─────────────────────────
   // Skeleton while loading / missing
@@ -697,6 +719,72 @@ event({
           />
         </div>
       </div>
+
+      {/* ───────────────
+    YOU MIGHT ALSO LIKE
+──────────────── */}
+{relatedProducts.length > 0 && (
+  <div className="max-w-7xl mx-auto mt-10 px-4">
+    
+    <h2
+      className="
+        font-[system-ui]
+        text-xl sm:text-2xl
+        text-(--theme-text)
+        text-left
+        mb-10
+      "
+    >
+      You May Also Like
+    </h2>
+
+    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
+      {relatedProducts.map((item) => (
+        <div
+          key={item._id}
+          onClick={() => router.push(`/product/${item.slug}`)}
+          className="
+            group
+            cursor-pointer
+            border border-(--theme-border)
+            bg-(--theme-bg)
+            transition
+            hover:border-(--theme-text)
+          "
+        >
+          <div className="relative aspect-4/5 overflow-hidden bg-(--theme-soft)">
+            <Image
+              src={
+                typeof item.images?.[0] === "string"
+                  ? item.images[0]
+                  : item.images?.[0]?.original
+              }
+              alt={item.name}
+              fill
+              className="object-cover transition-transform duration-700 group-hover:scale-105"
+            />
+          </div>
+
+          <div className="p-4 space-y-2">
+            <p className="font-[Crimson_Text] text-base text-(--theme-text) line-clamp-1">
+              {item.name}
+            </p>
+
+            {item.accords?.length > 0 && (
+              <p className="text-[10.5px] uppercase tracking-[0.18em] text-(--theme-muted)">
+                {item.accords.slice(0, 2).join(" | ")}
+              </p>
+            )}
+
+            <p className="font-[system-ui] text-sm font-semibold text-(--theme-text)">
+              ₹{item.variants?.[0]?.price?.toFixed(0)}
+            </p>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+)}
 
       {/* FULLSCREEN LIGHTBOX (DESKTOP + MOBILE) */}
       {lightboxOpen && (

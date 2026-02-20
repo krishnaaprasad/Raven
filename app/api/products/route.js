@@ -13,7 +13,7 @@ export async function GET(req) {
     const products = await Product.find({ deleted: { $ne: true } })
       .sort({ createdAt: -1 }) // latest first
       .limit(limit)
-      .select("slug name images rating reviewCount variants")
+      .select("slug name images rating reviewCount variants accords")
       .lean();
 
     return Response.json(products);
