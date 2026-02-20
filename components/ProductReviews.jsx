@@ -270,14 +270,34 @@ export default function ProductReviews({ productId, onSummary }) {
               </div>
               <div className="flex-1">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-1">
-                    <span className="font-semibold text-(--theme-text) font-[system-ui]">{r.name}</span>
-                    <CheckCircle2
-                      size={14}
-                      className="text-(--theme-text) mt-px"
-                      title="Verified user"
-                    />
-                  </div>
+                  <div className="flex items-center gap-2">
+  <span className="font-semibold text-(--theme-text) font-[system-ui]">
+    {r.name}
+  </span>
+
+  <div className="flex items-center gap-1">
+    <CheckCircle2
+      size={14}
+      className="text-(--theme-text)"
+    />
+    <span
+      className="
+        text-[10px]
+        bg-(--theme-text)
+        uppercase
+        font-medium
+        tracking-[0.15em]
+        font-[system-ui]
+        text-(--theme-bg)
+        px-1
+      "
+    >
+       Verified 
+    </span>
+  </div>
+</div>
+
+                  
                   <Stars count={r.rating} />
                 </div>
                 <div className="text-xs text-(--theme-muted) font-[system-ui] mb-1">{timeAgo(r.createdAt)}</div>
