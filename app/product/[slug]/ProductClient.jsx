@@ -729,13 +729,13 @@ event({
     <h2
       className="
         font-[system-ui]
-        text-xl sm:text-2xl
+        text-2xl sm:text-3xl
         text-(--theme-text)
-        text-left
+        text-center
         mb-10
       "
     >
-      You May Also Like
+      You Might Also Like
     </h2>
 
     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
@@ -749,7 +749,7 @@ event({
             border border-(--theme-border)
             bg-(--theme-bg)
             transition
-            hover:border-(--theme-text)
+            
           "
         >
           <div className="relative aspect-4/5 overflow-hidden bg-(--theme-soft)">
