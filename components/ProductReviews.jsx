@@ -38,6 +38,7 @@ export default function ProductReviews({ productId }) {
   const [sortBy, setSortBy] = useState("recent");
   const [currentPage, setCurrentPage] = useState(1);
   const [showForm, setShowForm] = useState(false);
+  const [error, setError] = useState(null);
 
   const [form, setForm] = useState({
     rating: 0,
@@ -54,8 +55,18 @@ export default function ProductReviews({ productId }) {
   useEffect(() => {
     if (!productId) return;
     fetch(`/api/reviews?productId=${productId}`)
-      .then((res) => res.json())
-      .then((data) => setReviews(data));
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to fetch reviews");
+        return res.json();
+      })
+      .then((data) => {
+        setReviews(data);
+        setError(null);
+      })
+      .catch((err) => {
+        console.error("Error fetching reviews:", err);
+        setError("Unable to load reviews. Please try again later.");
+      });
   }, [productId]);
 
   useEffect(() => {
@@ -125,19 +136,47 @@ export default function ProductReviews({ productId }) {
       { method: "POST", body: formData }
     );
 
-    const data = await res.json();
-    return data.secure_url;
+    if (!res.ok) {
+      throw new Error(`Upload failed with status ${res.status}`);
+    }
+
+    try {
+      const data = await res.json();
+      if (!data.secure_url) {
+        throw new Error("No secure_url in upload response");
+      }
+      return data.secure_url;
+    } catch (err) {
+      throw new Error(`Failed to parse upload response: ${err.message}`);
+    }
   };
 
   const handleImageUpload = async (e) => {
     const files = Array.from(e.target.files);
-    const urls = await Promise.all(files.map(uploadToCloudinary));
+    try {
+      const results = await Promise.allSettled(
+        files.map(uploadToCloudinary)
+      );
 
+      const urls = results
+        .filter((result) => result.status === "fulfilled")
+        .map((result) => result.value);
 
-    setForm((prev) => ({
-      ...prev,
-      images: [...prev.images, ...urls],
-    }));
+      if (urls.length > 0) {
+        setForm((prev) => ({
+          ...prev,
+          images: [...prev.images, ...urls],
+        }));
+      }
+
+      if (results.some((result) => result.status === "rejected")) {
+        console.error("Some image uploads failed");
+        setError("Some images failed to upload. Please try again.");
+      }
+    } catch (err) {
+      console.error("Image upload error:", err);
+      setError("Failed to upload images. Please try again.");
+    }
   };
 
   const [submitting, setSubmitting] = useState(false);
@@ -148,32 +187,46 @@ export default function ProductReviews({ productId }) {
 
 const handleSubmit = async (e) => {
   e.preventDefault();
-  
+  setSubmitting(true);
 
-  const res = await fetch("/api/reviews", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      productId,
-      name: form.name,
-      rating: form.rating,
-      comment: form.body,
-      title: form.title,
-      images: form.images,
-      isVerified: !!session?.user,
-    }),
-  });
+  try {
+    const res = await fetch("/api/reviews", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        productId,
+        name: form.name,
+        rating: form.rating,
+        comment: form.body,
+        title: form.title,
+        images: form.images,
+      }),
+    });
 
-  const data = await res.json();
+    if (!res.ok) {
+      const errorData = await res.json();
+      setError(errorData.message || "Failed to submit review");
+      setSubmitting(false);
+      return;
+    }
 
-  if (res.ok) {
+    const data = await res.json();
+
     // Re-fetch from DB to ensure fresh data
     const fresh = await fetch(`/api/reviews?productId=${productId}`);
-    const updated = await fresh.json();
-    setReviews((prev) => [data, ...prev]);
+    if (fresh.ok) {
+      const updated = await fresh.json();
+      setReviews(updated);
+    }
 
     setShowForm(false);
     setForm({ rating: 0, title: "", body: "", name: "", images: [] });
+    setError(null);
+  } catch (err) {
+    console.error("Submit error:", err);
+    setError("An error occurred while submitting your review. Please try again.");
+  } finally {
+    setSubmitting(false);
   }
 };
 
@@ -184,13 +237,41 @@ const handleSubmit = async (e) => {
 
   return (
     <section className="max-w-6xl mx-auto px-4 py-10">
-
       {/* ── Summary Layout (3 column) ── */}
 
-      <div className="grid grid-cols-1 md:grid-cols-[1fr_1.5fr_1fr] gap-8 items-center pb-5">
+      {reviews.length === 0 ? (
+
+  <div className="py-2 text-center">
+
+    <div className="flex flex-col md:flex-row items-center justify-center max-w-2xl mx-auto gap-8">
+
+      <div className="flex flex-col items-start md:items-start gap-1">
+        <StarRating rating={0} size={22} />
+        <p className="text-sm text-(--theme-muted)">
+          Be the first to write a review
+        </p>
+      </div>
+
+      <button
+        onClick={() => setShowForm(true)}
+        className="px-10 py-3 bg-(--theme-text) items-start  text-(--theme-bg) text-sm sm:text-base font-semibold tracking-wide hover:opacity-90 transition"
+      >
+        Write a review
+      </button>
+
+    </div>
+
+  </div>
+
+) : (
+
+  <>
+  <div className="grid grid-cols-1 md:grid-cols-[1fr_1.5fr_1fr] gap-10 items-center pb-8 ">
+
 
         {/* Left */}
-        <div className="flex flex-col gap-1.5 items-center ">
+        <div className="flex flex-col gap-3 md:items-start items-center">
+
           <div className="flex items-center gap-2">
             <StarRating rating={Math.round(avg)} />
             <span className="text-sm font-semibold text-(--theme-text)">
@@ -355,6 +436,7 @@ const handleSubmit = async (e) => {
               <div key={i} className="relative group">
                 <img
                   src={img}
+                  alt={`Review image ${i + 1}`}
                   className="w-20 h-20 object-cover border border-(--theme-border)"
                 />
                 <button
@@ -393,6 +475,12 @@ const handleSubmit = async (e) => {
         />
       </div>
 
+      {/* Error Message */}
+      {error && (
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded text-sm">
+          {error}
+        </div>
+      )}
 
       {/* Buttons */}
       <div className="flex justify-center gap-6 pt-4">
@@ -420,57 +508,60 @@ const handleSubmit = async (e) => {
 </div>
 
     </motion.div>
-  )}
+      )}
 </AnimatePresence>
 
-<div className="max-w-6xl mx-auto mt-8 flex items-center justify-start gap-4">
-  <div className="relative inline-block">
+      <div className="max-w-6xl mx-auto mt-8 flex items-center justify-start gap-4">
+        <div className="relative inline-block">
 
-    <select
-      value={sortBy}
-      onChange={(e) => {
-        setSortBy(e.target.value);
-        setCurrentPage(1);
-      }}
-      className="
-        appearance-none
-        bg-(--theme-bg)
-        
-        pb-1 pr-6 px-1.5
-        text-sm
-        text-(--theme-text)
-        focus:outline-none
-        focus:border-(--theme-text)
-        cursor-pointer
-      "
-    >
-      <option value="recent">Most Recent</option>
-      <option value="highest">Highest Rating</option>
-      <option value="lowest">Lowest Rating</option>
-    </select>
+          <select
+            value={sortBy}
+            onChange={(e) => {
+              setSortBy(e.target.value);
+              setCurrentPage(1);
+            }}
+            className="
+              appearance-none
+              bg-(--theme-bg)
+              
+              pb-1 pr-6 px-1.5
+              text-sm
+              text-(--theme-text)
+              focus:outline-none
+              focus:border-(--theme-text)
+              cursor-pointer
+            "
+          >
+            <option value="recent">Most Recent</option>
+            <option value="highest">Highest Rating</option>
+            <option value="lowest">Lowest Rating</option>
+          </select>
 
-    <ChevronDown
-      className="
-        absolute right-0 top-1/2 -translate-y-1/2
-        w-4 h-4
-        text-(--theme-muted)
-        pointer-events-none
-      "
-    />
-  </div>
-</div>
+          <ChevronDown
+            className="
+              absolute right-0 top-1/2 -translate-y-1/2
+              w-4 h-4
+              text-(--theme-muted)
+              pointer-events-none
+            "
+          />
+        </div>
+      </div>
+      </>
+)}
 
 
       {/* ── Review Cards ── */}
 
-      <div className="mt-12 space-y-10">
+      <div className="mt-12 space-y-6">
         {paginatedReviews.map((r, idx) => (
           <motion.div
             key={r._id}
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: idx * 0.05 }}
-            className=" transition-all duration-300 hover:translate-x-0.5"
+            className="pb-5 border-b border-(--theme-border)/60"
+
           >
             <div className="flex justify-between mb-2">
               <StarRating rating={r.rating} size={17} />
@@ -496,7 +587,7 @@ const handleSubmit = async (e) => {
             </div>
 
             {r.title && (
-              <p className=" text-[14.5px] sm:text-[16.2px]  font-semibold text text-(--theme-text) font-[system-ui]">
+              <p className=" text-[14.5px] sm:text-[16.2px]  font-semibold text-(--theme-text) font-[system-ui]">
                 {r.title}
               </p>
             )}
@@ -536,6 +627,7 @@ const handleSubmit = async (e) => {
                   <div key={i} className="w-20 h-20 border border-(--theme-border)">
                     <img
                       src={img}
+                      alt={r?.title || `Review image by ${r?.name || 'customer'}`}
                       className="w-full h-full object-cover"
                     />
                   </div>

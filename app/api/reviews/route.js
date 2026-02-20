@@ -39,9 +39,23 @@ export async function POST(req) {
     const body = await req.json();
     const { productId, name, rating, title, comment, images } = body;
 
-    if (!productId || !name || !rating || !title || !comment) {
+    if (!productId || !name || !title || !comment) {
       return Response.json(
         { message: "Missing required fields" },
+        { status: 400 }
+      );
+    }
+
+    // Validate rating
+    const numericRating = Number(rating);
+    if (
+      !Number.isFinite(numericRating) ||
+      !Number.isInteger(numericRating) ||
+      numericRating < 1 ||
+      numericRating > 5
+    ) {
+      return Response.json(
+        { message: "Invalid rating" },
         { status: 400 }
       );
     }
@@ -53,19 +67,32 @@ export async function POST(req) {
       );
     }
 
+    // Check if product exists
+    const productExists = await Product.exists({ _id: productId });
+    if (!productExists) {
+      return Response.json(
+        { message: "Product not found" },
+        { status: 404 }
+      );
+    }
+
     // ✅ Secure Verified Logic (Server Side)
     const session = await getServerSession(authOptions);
+
+    // Validate images array
+    const validImages = Array.isArray(images)
+      ? images.filter((img) => typeof img === "string")
+      : [];
 
     const review = await Review.create({
       productId,
       name,
-      rating,
+      rating: numericRating,
       title,
       comment,
-      images: images || [],
+      images: validImages,
       isVerified: !!session, // Verified if logged in
     });
-
     // Recalculate rating
     const reviews = await Review.find({
       productId,
@@ -114,6 +141,12 @@ export async function PATCH(req) {
       { new: true }
     );
 
+    if (!review) {
+      return Response.json(
+        { message: 'Review not found' },
+        { status: 404 }
+      );
+    }
     return Response.json(review, { status: 200 });
   } catch (error) {
     console.error("PATCH /reviews error:", error);
