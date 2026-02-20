@@ -80,7 +80,7 @@ const ProductCard = ({ product }) => {
       tracking-[0.18em] sm:tracking-[0.25em]
       font-[system-ui]
       text-(--theme-muted)
-      wrap-break-word
+      break-words
       leading-relaxed
     "
   >

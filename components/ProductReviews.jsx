@@ -136,7 +136,7 @@ export default function ProductReviews({ productId, onSummary }) {
         ) : (
           <>
             <div
-  className={`${crimson.className} text-[2.5rem] leading-none font-semibold text-(--theme-text) flex items-center mb-2 `}
+  className={`${crimson.className} text-4xl leading-none font-semibold text-(--theme-text) flex items-center mb-2 `}
 >
 
               {avg}
@@ -166,7 +166,7 @@ export default function ProductReviews({ productId, onSummary }) {
         {!showForm && (
           <button
             onClick={() => setShowForm(true)}
-            className="w-full bg-(--theme-text) text-(--theme-bg) font-[system-ui] uppercase tracking-wider py-2 rounded-full hover:opacity-90 transition"
+            className="w-full text-sm bg-(--theme-text) text-(--theme-bg) font-[system-ui] uppercase tracking-wider py-2 rounded-full hover:opacity-90 transition"
           >
             Write a Review
           </button>

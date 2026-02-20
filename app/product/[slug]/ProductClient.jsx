@@ -710,7 +710,7 @@ event({
           id="reviews-section"
           className="bg-(--theme-soft) border border-(--theme-border) rounded-xl"
         >
-          <h2 className="text-lg md:text-2xl text-center text-(--theme-text) font-semibold  px-2 sm:px-4 py-2 sm:py-4 border-b border-(--theme-border)">
+          <h2 className="text-xl sm:text-2xl text-center text-(--theme-text) font-semibold  px-2 sm:px-4 py-2 sm:py-4 border-b border-(--theme-border)">
             Customer Reviews for {product.name}
           </h2>
           <ProductReviews
@@ -755,15 +755,14 @@ event({
           <div className="relative aspect-4/5 overflow-hidden bg-(--theme-soft)">
             <Image
               src={
-                typeof item.images?.[0] === "string"
+                (typeof item.images?.[0] === "string"
                   ? item.images[0]
-                  : item.images?.[0]?.original
+                  : item.images?.[0]?.original) || "/placeholder-product.jpg"
               }
               alt={item.name}
               fill
               className="object-cover transition-transform duration-700 group-hover:scale-105"
-            />
-          </div>
+            />          </div>
 
           <div className="p-4 space-y-2">
             <p className="font-[Crimson_Text] text-base text-(--theme-text) line-clamp-1">
@@ -777,9 +776,8 @@ event({
             )}
 
             <p className="font-[system-ui] text-sm font-semibold text-(--theme-text)">
-              ₹{item.variants?.[0]?.price?.toFixed(0)}
-            </p>
-          </div>
+              ₹{item.variants?.[0]?.price?.toFixed(0) ?? "N/A"}
+            </p>          </div>
         </div>
       ))}
     </div>
