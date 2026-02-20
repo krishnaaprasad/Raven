@@ -166,7 +166,7 @@ export default function ProductReviews({ productId, onSummary }) {
         {!showForm && (
           <button
             onClick={() => setShowForm(true)}
-            className="w-full text-sm bg-(--theme-text) text-(--theme-bg) font-[system-ui] uppercase tracking-wider py-2 rounded-full hover:opacity-90 transition"
+            className="w-full text-sm bg-(--theme-text) text-(--theme-bg) font-[system-ui] uppercase tracking-wider py-2 rounded-full hover:opacity-90 transition cursor-pointer"
           >
             Write a Review
           </button>
@@ -222,14 +222,14 @@ export default function ProductReviews({ productId, onSummary }) {
               <button
                 type="submit"
                 disabled={loading}
-                className="bg-(--theme-text) text-(--theme-bg) rounded px-4 py-1.5 text-sm font-semibold hover:bg-(--theme-soft) transition disabled:opacity-50"
+                className="bg-(--theme-text) text-(--theme-bg) rounded px-4 py-1.5 text-sm font-semibold hover:bg-(--theme-muted) transition disabled:opacity-50 cursor-pointer"
               >
                 {loading ? "..." : "Submit"}
               </button>
               <button
                 type="button"
                 onClick={() => setShowForm(false)}
-                className="border border-(--theme-text) text-(--theme-text) rounded px-4 py-1.5 text-sm font-semibold bg-(--theme-bg) hover:bg-(--theme-soft) transition"
+                className="border border-(--theme-text) text-(--theme-text) rounded px-4 py-1.5 text-sm font-semibold bg-(--theme-bg) hover:bg-(--theme-soft) transition cursor-pointer"
               >
                 Cancel
               </button>
@@ -245,7 +245,7 @@ export default function ProductReviews({ productId, onSummary }) {
           <select
             value={sortOption}
             onChange={(e) => handleSortChange(e.target.value)}
-            className="border border-(--theme-border) rounded-md text-sm px-2 py-1 text-(--theme-text) bg-(--theme-bg)"
+            className="border border-(--theme-border) rounded-md text-sm px-2 py-1 text-(--theme-text) bg-(--theme-bg) cursor-pointer"
           >
             <option value="newest">Newest</option>
             <option value="oldest">Oldest</option>

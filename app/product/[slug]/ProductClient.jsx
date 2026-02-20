@@ -451,7 +451,7 @@ event({
     text-xs uppercase tracking-[0.18em]
     text-(--theme-muted)
     hover:text-(--theme-text)
-    transition-colors duration-300
+    transition-colors duration-300 cursor-pointer
   "
 >
   {copied ? (
@@ -545,7 +545,7 @@ event({
         font-[system-ui]
         text-xs uppercase tracking-[0.18em]
         border
-        transition-all duration-300
+        transition-all duration-300 cursor-pointer
         ${
           selected.size === v.size
             ? "border-(--theme-text) text-(--theme-text)"
@@ -568,7 +568,7 @@ event({
     <div className="inline-flex items-center border border-(--theme-border)">
       <button
         onClick={decrease}
-        className="w-10 h-10 flex items-center justify-center text-(--theme-text) hover:bg-(--theme-soft)"
+        className="w-10 h-10 flex items-center justify-center text-(--theme-text) hover:bg-(--theme-soft) cursor-pointer"
       >
         −
       </button>
@@ -579,7 +579,7 @@ event({
 
       <button
         onClick={increase}
-        className="w-10 h-10 flex items-center justify-center text-(--theme-text) hover:bg-(--theme-soft)"
+        className="w-10 h-10 flex items-center justify-center text-(--theme-text) hover:bg-(--theme-soft) cursor-pointer"
       >
         +
       </button>
@@ -587,7 +587,7 @@ event({
   </div>
 
   {/* ▸ CTA Buttons */}
-  <div className="flex flex-col gap-3">
+  <div className="flex flex-col gap-3 ">
     <button
   onClick={handleAddToCart}
   disabled={isAdding}
@@ -599,7 +599,7 @@ event({
     text-xs uppercase tracking-[0.2em]
     transition-all duration-300
     hover:opacity-90
-    disabled:opacity-60
+    disabled:opacity-60 cursor-pointer
   "
 >
   {isAdding ? "Added" : "Add to Cart"}
@@ -616,7 +616,7 @@ event({
     text-xs uppercase tracking-[0.2em]
     hover:bg-(--theme-text)
     hover:text-(--theme-bg)
-    transition-all duration-300
+    transition-all duration-300 cursor-pointer
   "
 >
   Buy Now
@@ -636,7 +636,7 @@ event({
       <div key={tab.id} className="border-b last:border-b-0 border-(--theme-border)">
         <button
           onClick={() => toggleSection(tab.id)}
-          className="w-full flex justify-between items-center py-4 px-4 font-[system-ui] text-sm text-(--theme-muted) uppercase tracking-[0.15em] leading-relaxed"
+          className="w-full flex justify-between items-center py-4 px-4 font-[system-ui] text-sm text-(--theme-muted) uppercase tracking-[0.15em] leading-relaxed cursor-pointer"
         >
           {tab.label}
           {openSections[tab.id] ? (
