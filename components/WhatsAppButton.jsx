@@ -32,12 +32,12 @@ export default function WhatsAppButton() {
           shadow-lg
           transition-all duration-300
           group-hover:scale-105
-          ${isLight ? "bg-black text-white" : "bg-white text-black"}
+          ${isLight ? "bg-black text-green-500" : "bg-white text-green-500"}
         `}
       >
         <FaWhatsapp
           size={30}
-          className="transition-transform duration-300 group-hover:scale-110"
+          className="transition-transform duration-300 group-hover:scale-110 "
         />
       </div>
     </a>
