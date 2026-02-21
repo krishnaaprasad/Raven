@@ -11,21 +11,27 @@ const REVIEWS_PER_PAGE = 4;
 /* ⭐ Star Rating Component */
 /* ───────────────────────── */
 
-const StarRating = ({ rating, size = 16 }) => (
-  <div className="flex gap-0.5">
+const StarRating = ({ rating, size = 18 }) => (
+  <div className="flex items-center gap-1">
     {[1, 2, 3, 4, 5].map((s) => (
       <Star
         key={s}
-        style={{ width: size, height: size }}
-        className={
-          s <= rating
-            ? "fill-(--theme-text) text-(--theme-text)"
-            : "fill-transparent  text-(--theme-border)"
-        }
+        size={size}
+        strokeWidth={2}
+        stroke="currentColor"
+        fill={s <= rating ? "currentColor" : "transparent"}
+        className={`
+          transition-all duration-200
+          ${s <= rating 
+            ? "text-(--theme-text)" 
+            : "text-(--theme-text)"
+          }
+        `}
       />
     ))}
   </div>
 );
+
 
 /* ───────────────────────── */
 /* Main Component */
@@ -239,24 +245,29 @@ const handleSubmit = async (e) => {
     <section className="max-w-6xl mx-auto px-4 py-10">
       {/* ── Summary Layout (3 column) ── */}
 
-      {reviews.length === 0 ? (
+      {/* ── Summary Layout ── */}
 
-  <div className="py-2 text-center">
+{reviews.length === 0 ? (
 
-    <div className="flex flex-col md:flex-row items-center justify-center max-w-2xl mx-auto gap-8">
+  <div className="py-0 text-center">
 
-      <div className="flex flex-col items-start md:items-start gap-1">
-        <StarRating rating={0} size={22} />
-        <p className="text-sm text-(--theme-muted)">
+    <div className="flex flex-col md:flex-row  justify-center max-w-4xl mx-auto gap-12 items-center">
+
+      {/* Left */}
+      <div className="flex flex-col items-center  gap-3">
+        <StarRating rating={0} size={22}  />
+        <p className="text-sm text-(--theme-text) font-medium">
           Be the first to write a review
         </p>
       </div>
 
+      {/* SAME BUTTON LOGIC */}
       <button
-        onClick={() => setShowForm(true)}
-        className="px-10 py-3 bg-(--theme-text) items-start  text-(--theme-bg) text-sm sm:text-base font-semibold tracking-wide hover:opacity-90 transition"
+        type="button"
+        onClick={() => setShowForm(!showForm)}
+        className="px-8 py-3 bg-(--theme-text) text-(--theme-bg) text-sm sm:text-base font-semibold hover:opacity-90 transition cursor-pointer"
       >
-        Write a review
+        {showForm ? "Cancel review" : "Write a review"}
       </button>
 
     </div>
@@ -265,70 +276,68 @@ const handleSubmit = async (e) => {
 
 ) : (
 
-  <>
-  <div className="grid grid-cols-1 md:grid-cols-[1fr_1.5fr_1fr] gap-10 items-center pb-8 ">
+  <div className="grid grid-cols-1 md:grid-cols-[1fr_1.5fr_1fr] gap-8 items-center pb-5">
 
+    {/* Left */}
+    <div className="flex flex-col gap-1.5 items-center">
+      <div className="flex items-center gap-2">
+        <StarRating rating={Math.round(avg)} />
+        <span className="text-sm font-semibold text-(--theme-text)">
+          {avg} out of 5
+        </span>
+      </div>
+      <p className="text-sm text-(--theme-muted)">
+        Based on {reviews.length} reviews
+      </p>
+    </div>
 
-        {/* Left */}
-        <div className="flex flex-col gap-3 md:items-start items-center">
+    {/* Center */}
+    <div className="space-y-2">
+      {[5, 4, 3, 2, 1].map((s) => {
+        const count = breakdown[s] || 0;
+        const pct =
+          reviews.length > 0
+            ? (count / reviews.length) * 100
+            : 0;
 
-          <div className="flex items-center gap-2">
-            <StarRating rating={Math.round(avg)} />
-            <span className="text-sm font-semibold text-(--theme-text)">
-              {avg} out of 5
-            </span>
+        return (
+          <div key={s} className="flex items-center gap-2">
+
+            <div className="w-[110px]">
+              <StarRating rating={s} size={16} />
+            </div>
+
+            <div className="flex-1 h-3.5 bg-(--theme-border)/40">
+              <div
+                className="h-full bg-(--theme-text)"
+                style={{ width: `${pct}%` }}
+              />
+            </div>
+
+            <div className="w-6 text-right text-sm text-(--theme-text)">
+              {count}
+            </div>
+
           </div>
-          <p className="text-sm text-(--theme-muted)">
-            Based on {reviews.length} reviews
-          </p>
-        </div>
+        );
+      })}
+    </div>
 
-        {/* Center - Rating bars */}
-<div className="space-y-2">
-  {[5, 4, 3, 2, 1].map((s) => {
-    const count = breakdown[s] || 0;
-    const pct =
-      reviews.length > 0
-        ? (count / reviews.length) * 100
-        : 0;
+    {/* SAME BUTTON LOGIC */}
+    <div className="flex justify-center">
+      <button
+        type="button"
+        onClick={() => setShowForm(!showForm)}
+        className="px-8 py-3 bg-(--theme-text) text-(--theme-bg) text-sm sm:text-base font-semibold hover:opacity-90 transition cursor-pointer"
+      >
+        {showForm ? "Cancel review" : "Write a review"}
+      </button>
+    </div>
 
-    return (
-      <div key={s} className="flex items-center gap-2">
+  </div>
 
-        {/* Stars */}
-        <div className="w-[110px]">
-          <StarRating rating={s} size={16} />
-        </div>
+)}
 
-        {/* Bar */}
-        <div className="flex-1 h-3.5 bg-(--theme-border)/40">
-          <div
-            className="h-full bg-(--theme-text)"
-            style={{ width: `${pct}%` }}
-          />
-        </div>
-
-        {/* Count */}
-        <div className="w-6 text-right text-sm text-(--theme-text)">
-          {count}
-        </div>
-
-      </div>
-    );
-  })}
-</div>
-
-
-        {/* Right */}
-        <div className="flex justify-center">
-          <button
-            onClick={() => setShowForm(!showForm)}
-            className="px-8 py-3 bg-(--theme-text) text-(--theme-bg) text-sm sm:text-base font-semibold hover:opacity-90 transition cursor-pointer"
-          >
-            {showForm ? "Cancel review" : "Write a review"}
-          </button>
-        </div>
-      </div>
 
       <AnimatePresence>
   {showForm && (
@@ -364,12 +373,12 @@ const handleSubmit = async (e) => {
               className="transition-transform duration-200 hover:scale-110 cursor-pointer"
             >
               <Star
-                className={`w-8 h-8 transition-colors duration-200 ${
-                  star <= form.rating
-                    ? "fill-(--theme-text) text-(--theme-text)"
-                    : "fill-transparent text-(--theme-border)"
-                }`}
-              />
+  size={32}
+  strokeWidth={2}
+  stroke="currentColor"
+  fill={star <= form.rating ? "currentColor" : "transparent"}
+  className="text-(--theme-text) transition-all duration-200 hover:scale-110"
+/>
             </button>
           ))}
         </div>
@@ -511,7 +520,8 @@ const handleSubmit = async (e) => {
       )}
 </AnimatePresence>
 
-      <div className="max-w-6xl mx-auto mt-8 flex items-center justify-start gap-4">
+      {reviews.length > 0 && (
+  <div className="max-w-6xl mx-auto mt-8 flex items-center justify-start gap-4">
         <div className="relative inline-block">
 
           <select
@@ -546,14 +556,14 @@ const handleSubmit = async (e) => {
             "
           />
         </div>
-      </div>
-      </>
-)}
+</div>
 
+)}
 
       {/* ── Review Cards ── */}
 
-      <div className="mt-12 space-y-6">
+      {reviews.length > 0 && (
+  <div className="mt-12 space-y-6">
         {paginatedReviews.map((r, idx) => (
           <motion.div
             key={r._id}
@@ -563,6 +573,7 @@ const handleSubmit = async (e) => {
             className="pb-5 border-b border-(--theme-border)/60"
 
           >
+          
             <div className="flex justify-between mb-2">
               <StarRating rating={r.rating} size={17} />
               <span className="text-xs text-(--theme-muted)">
@@ -637,11 +648,11 @@ const handleSubmit = async (e) => {
           </motion.div>
         ))}
       </div>
-      
+      )}
 
       {/* ── Pagination ── */}
 
-      {totalPages > 1 && (
+      {reviews.length > 0 && totalPages > 1 && (
         <div className="flex justify-center gap-2 mt-12">
           {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
             <button

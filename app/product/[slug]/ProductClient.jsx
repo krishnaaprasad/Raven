@@ -724,7 +724,7 @@ event({
     YOU MIGHT ALSO LIKE
 ──────────────── */}
 {relatedProducts.length > 0 && (
-  <div className="max-w-7xl mx-auto mt-5 px-4">
+  <div className="max-w-7xl mx-auto mt-14 sm:mt-16 px-5">
     
     <h2
       className="
@@ -732,7 +732,7 @@ event({
         text-2xl sm:text-3xl
         text-(--theme-text)
         text-center
-        mb-10
+        mb-15
       "
     >
       You Might Also Like
