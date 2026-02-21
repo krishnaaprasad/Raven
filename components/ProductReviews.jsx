@@ -33,6 +33,7 @@ const StarRating = ({ rating, size = 18 }) => (
 );
 
 
+
 /* ───────────────────────── */
 /* Main Component */
 /* ───────────────────────── */
@@ -124,7 +125,7 @@ export default function ProductReviews({ productId }) {
           reviews.reduce((s, r) => s + r.rating, 0) / reviews.length
         ).toFixed(2)
       : "0.00";
-
+  const [hoverRating, setHoverRating] = useState(0);
   /* ───────────────────────── */
   /* Cloudinary Upload */
   /* ───────────────────────── */
@@ -217,7 +218,7 @@ const handleSubmit = async (e) => {
     }
 
     const data = await res.json();
-
+    
     // Re-fetch from DB to ensure fresh data
     const fresh = await fetch(`/api/reviews?productId=${productId}`);
     if (fresh.ok) {
@@ -365,23 +366,36 @@ const handleSubmit = async (e) => {
         </label>
 
         <div className="flex justify-center gap-3">
-          {[1,2,3,4,5].map((star)=>(
-            <button
-              key={star}
-              type="button"
-              onClick={() => setForm(prev => ({...prev, rating: star}))}
-              className="transition-transform duration-200 hover:scale-110 cursor-pointer"
-            >
-              <Star
-  size={32}
-  strokeWidth={2}
-  stroke="currentColor"
-  fill={star <= form.rating ? "currentColor" : "transparent"}
-  className="text-(--theme-text) transition-all duration-200 hover:scale-110"
-/>
-            </button>
-          ))}
-        </div>
+  {[1, 2, 3, 4, 5].map((star) => {
+    const isActive = star <= (hoverRating || form.rating);
+    const isHoveredStar = star === hoverRating;
+    
+    return (
+      <button
+        key={star}
+        type="button"
+        onClick={() => setForm(prev => ({ ...prev, rating: star }))}
+        onMouseEnter={() => setHoverRating(star)}
+        onMouseLeave={() => setHoverRating(0)}
+        className="transition-transform duration-200 hover:scale-110"
+      >
+        <Star
+          size={30}
+          strokeWidth={2}
+          stroke="currentColor"
+          fill={
+            isActive
+              ? isHoveredStar
+                ? "var(--theme-muted)"   // grey preview
+                : "currentColor" // black/theme filled
+              : "transparent"
+          }
+          className="text-(--theme-text) transition-all duration-200"
+        />
+      </button>
+    );
+  })}
+</div>
       </div>
 
 
@@ -438,7 +452,7 @@ const handleSubmit = async (e) => {
           </label>
 
         </div>
-
+        
         {form.images.length > 0 && (
           <div className="flex gap-4 mt-6 justify-center flex-wrap">
             {form.images.map((img,i)=>(
@@ -476,7 +490,7 @@ const handleSubmit = async (e) => {
         <input
           type="text"
           required
-          disabled={!!session?.user}
+          
           value={form.name}
           onChange={(e)=>setForm(prev=>({...prev,name:e.target.value}))}
           placeholder="Your name"

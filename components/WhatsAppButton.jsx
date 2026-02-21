@@ -32,7 +32,7 @@ export default function WhatsAppButton() {
           shadow-lg
           transition-all duration-300
           group-hover:scale-105
-          ${isLight ? "bg-black text-green-500" : "bg-white text-green-500"}
+          ${isLight ? "bg-black/80 text-green-500" : "bg-white/90 text-green-500"}
         `}
       >
         <FaWhatsapp
