@@ -35,8 +35,7 @@ const testimonials = [
     name: "Anand Pandey",
     location: "Delhi",
     product: "REBEL",
-    text: "Finally found a brand that understands what premium fragrance should be. The longevity is incredible, I can still smell it after 8 hours!",
-  },
+    text: "Finally found a brand that understands what premium fragrance should be. The longevity is incredible—I can still smell it after 8 hours!",  },
 ];
 
 export default function TestimonialsMarquee() {
