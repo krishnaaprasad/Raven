@@ -44,16 +44,8 @@ export default function NavBar() {
 
   const isHome = pathname === "/";
   const MARQUEE_HEIGHT = 40;
-  const showSolid = !isHome || isScrolled;
+  const showSolid = !isHome || isScrolled || mobileMenuOpen;
 
-  const handleClick = () => {
-    if (window.location.pathname !== "/") {
-      router.push("/#why-choose-raven");
-    } else {
-      document.getElementById("why-choose-raven")
-        ?.scrollIntoView({ behavior: "smooth" });
-    }
-  };
 
   useEffect(() => {
     if (cartCount > 0) {
@@ -119,15 +111,15 @@ const sidebarTop = pastMarquee
     <>
       <nav
         className={`
-          fixed left-0 right-0 z-1000 transition-all duration-500
-          ${isHome && !pastMarquee ? "top-10" : "top-0"}
+          fixed left-0 right-0 z-1000 transition-colors duration-300 ease-in-out
+          ${isHome && !pastMarquee ? "top-8.5" : "top-0"}
           ${showSolid
             ? "bg-(--theme-bg) border-b border-(--theme-border) backdrop-blur-md"
             : "bg-transparent"}
         `}
       >
         <div className="max-w-8xl mx-auto px-6">
-          <div className="relative flex h-12 items-center justify-between ">
+          <div className="relative flex h-13.5 items-center justify-between ">
 
             {/* Mobile hamburger */}
             {/* Hamburger (mobile + desktop) */}

@@ -107,16 +107,19 @@ const ProductCard = ({ product }) => {
           />
         ))}
       </div>
-
-      <span className="text-xs text-(--theme-muted)">
-        {Number(product.rating).toFixed(1)}
-      </span>
+      
+      <span className="font-[system-ui] text-xs text-(--theme-muted) group-hover:text-(--theme-text) transition-colors">
+      {product.reviewCount}{" "}
+      {product.reviewCount === 1 ? "review" : "reviews"}
+    </span>
     </>
   ) : (
     // 👇 invisible placeholder to preserve height
     <span className="text-xs opacity-0">0.0</span>
+    
   )}
 </div>
+
 
 
         {/* Price */}
