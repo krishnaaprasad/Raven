@@ -26,18 +26,32 @@ export async function GET(req) {
       );
     }
 
+    const subtotal = order.cartItems.reduce(
+      (s, i) => s + i.price * i.quantity,
+      0
+    );
+
     const invoiceData = {
       orderId: order.customOrderId || order._id.toString(),
-      transactionDate: order.transactionDate,
+      transactionDate: order.transactionDate || order.createdAt,
+
       customer: {
         name: order.userName,
         email: order.email,
         phone: order.phone,
       },
+
       items: order.cartItems,
-      subtotal: order.cartItems.reduce((s, i) => s + i.price * i.quantity, 0),
+
+      subtotal,
       shipping: order.shippingCharge,
+
+      // ✅ ADD THESE TWO
+      discount: order.discount || 0,
+      couponCode: order.couponCode || null,
+
       total: order.totalAmount,
+
       paymentMethod: order.paymentMethod,
       address: order.addressDetails,
     };

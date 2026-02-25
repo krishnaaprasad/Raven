@@ -114,6 +114,10 @@ export default function CheckoutClient() {
   const fieldRefs = useRef({});
   const [saveAddress, setSaveAddress] = useState(true);
   const [hasUserEdited, setHasUserEdited] = useState(false);
+  const [couponCode, setCouponCode] = useState("");
+  const [couponData, setCouponData] = useState(null);
+  const [couponError, setCouponError] = useState("");
+  const [applyingCoupon, setApplyingCoupon] = useState(false);
 
   const {
     handleSubmit,
@@ -155,7 +159,18 @@ export default function CheckoutClient() {
 
   const shippingCharges = { standard: 50, express: 120, pickup: 0 };
   const subtotal = checkoutItems.reduce((sum, i) => sum + i.price * i.quantity, 0);
-  const total = subtotal + (shippingCharges[shipping] || 0);
+  const shippingAmount = shippingCharges[shipping] || 0;
+  const discountAmount = couponData?.discount || 0;
+
+  const total = Math.max(
+    subtotal + shippingAmount - discountAmount,
+    0
+  );
+  const handleRemoveCoupon = () => {
+    setCouponData(null);
+    setCouponCode("");
+    setCouponError("");
+  };
 
   const indianStates = [
     'Andhra Pradesh',
@@ -195,6 +210,12 @@ export default function CheckoutClient() {
     'Lakshadweep',
     'Puducherry',
   ];
+
+  useEffect(() => {
+    if (couponData) {
+      handleApplyCoupon();
+    }
+  }, [subtotal]);
 
   // ✅ Fixed Prefill Logic (stops overwriting mid-typing)
   useEffect(() => {
@@ -266,6 +287,8 @@ export default function CheckoutClient() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+
+
   const scrollToError = () => {
     const firstError = Object.keys(errors)[0];
     if (firstError && fieldRefs.current[firstError]) {
@@ -273,6 +296,44 @@ export default function CheckoutClient() {
       fieldRefs.current[firstError].focus();
     }
   };
+
+  const handleApplyCoupon = async () => {
+  if (!couponCode.trim()) {
+    setCouponError("Please enter a coupon code");
+    return;
+  }
+
+  setApplyingCoupon(true);
+  setCouponError("");
+
+  try {
+    const res = await fetch("/api/coupon/validate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        code: couponCode,
+        cartTotal: subtotal,
+      }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      setCouponError(data.message);
+      setCouponData(null);
+    } else {
+        setCouponData({
+          ...data,
+          code: couponCode.toUpperCase()
+        });
+        setCouponError("");
+      }
+  } catch (err) {
+    setCouponError("Something went wrong");
+  } finally {
+    setApplyingCoupon(false);
+  }
+};
 
   // ✅ Payment handler
   const handlePayment = async (formData) => {
@@ -313,6 +374,8 @@ export default function CheckoutClient() {
           shipping,
           shippingCharge: shippingCharges[shipping],
           totalAmount: total,
+          couponCode: couponData?.code || null,
+          discount: discountAmount,
         }),
       });
 
@@ -427,6 +490,8 @@ export default function CheckoutClient() {
         <h1 className="text-lg font-semibold text-(--theme-muted)">Your cart is empty</h1>
       </div>
     );
+
+    
 
   return (
     <>
@@ -639,12 +704,69 @@ export default function CheckoutClient() {
               ))}
             </div>
 
+
+        {/* COUPON SECTION */}
+        <div className="mt-6">
+
+          {!couponData ? (
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={couponCode}
+                onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                placeholder="Discount code"
+                className="flex-1 h-10 px-3 border border-(--theme-border) rounded-md text-sm bg-(--theme-bg) focus:border-(--theme-text) outline-none"
+              />
+
+              <button
+                type="button"
+                onClick={handleApplyCoupon}
+                disabled={applyingCoupon}
+                className="px-4 text-sm font-medium bg-(--theme-text) text-(--theme-bg) rounded-md hover:opacity-90 disabled:opacity-60"
+              >
+                {applyingCoupon ? "Applying..." : "Apply"}
+              </button>
+            </div>
+          ) : (
+            <div className="flex justify-between items-center bg-green-50 border border-green-200 px-3 py-2 rounded-md">
+              <div>
+                <p className="text-sm font-medium text-green-700">
+                  {couponData.code} Applied
+                </p>
+                <p className="text-xs text-green-600">
+                  You saved ₹{formatAmount(couponData.discount)}
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleRemoveCoupon}
+                className="text-xs text-red-500 underline cursor-pointer hover:text-red-700 transition"
+              >
+                Remove
+              </button>
+            </div>
+          )}
+
+          {couponError && (
+            <p className="text-red-600 text-xs mt-2">{couponError}</p>
+          )}
+        </div>
+
             <div className="my-4 border-t border-(--theme-border)" />
             <div className="text-[15px] space-y-1">
               <div className="flex justify-between">
                 <span className="text-(--theme-muted)">Subtotal</span>
                 <span>₹{formatAmount(subtotal)}</span>
               </div>
+
+              {discountAmount > 0 && (
+                <div className="flex text-[15px] justify-between">
+                  <span className="text-(--theme-muted)">Discount ({couponData?.code})</span>
+                  <span>- ₹{formatAmount(discountAmount)}</span>
+                </div>
+              )}
+
               <div className="flex justify-between">
                 <span className="text-(--theme-muted)">Shipping</span>
                 <span>₹{formatAmount(shippingCharges[shipping])}</span>

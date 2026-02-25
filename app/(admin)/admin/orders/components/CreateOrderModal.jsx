@@ -28,6 +28,9 @@ export default function CreateOrderModal({ onClose, onCreated }) {
     variantSize: "",
     quantity: 1,
     shippingCharge: "",
+      // ✅ ADD THESE
+    discount: "",
+    couponCode: "",
     paymentMethod: "Cash",
     price: "",
     remark: "",
@@ -57,11 +60,22 @@ export default function CreateOrderModal({ onClose, onCreated }) {
     const qty = Number(form.quantity || 1);
     const price = Number(form.price || 0);
     const ship = Number(form.shippingCharge || 0);
-    return qty * price + ship;
+    const discount = Number(form.discount || 0);
+
+    const sub = qty * price;
+    const calculated = sub + ship - discount;
+
+    return calculated < 0 ? 0 : calculated;
   }, [form]);
 
   const handleSave = async () => {
     try {
+      const sub = Number(form.quantity || 1) * Number(form.price || 0);
+      if (Number(form.discount || 0) > sub) {
+        toast.error("Discount cannot exceed subtotal");
+        return;
+      }
+      
       const res = await fetch("/api/admin/orders/create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -147,7 +161,7 @@ export default function CreateOrderModal({ onClose, onCreated }) {
             </Select>
           )}
 
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-2 gap-2">
             <Input type="number" label="Qty" value={form.quantity}
               onChange={e => update("quantity", e.target.value)} />
             <Input type="number" label="Shipping"
@@ -158,6 +172,20 @@ export default function CreateOrderModal({ onClose, onCreated }) {
               value={form.price}
               onChange={e => update("price", e.target.value)}
             />
+            <div className="grid grid-cols-2 gap-2">
+            <Input
+              type="number"
+              label="Discount"
+              value={form.discount}
+              onChange={e => update("discount", e.target.value)}
+            />
+
+            <Input
+              label="Coupon Code"
+              value={form.couponCode}
+              onChange={e => update("couponCode", e.target.value.toUpperCase())}
+            />
+          </div>
           </div>
 
           <Select
@@ -182,9 +210,35 @@ export default function CreateOrderModal({ onClose, onCreated }) {
             />
           </div>
 
-          <div className="flex justify-between font-semibold pt-2">
-            <span>Total</span>
-            <span>₹{total.toFixed(2)}</span>
+          <div className="pt-3 border-t space-y-1 text-sm">
+            <div className="flex justify-between">
+              <span>Subtotal</span>
+              <span>
+                ₹{(
+                  Number(form.quantity || 1) *
+                  Number(form.price || 0)
+                ).toFixed(2)}
+              </span>
+            </div>
+
+            <div className="flex justify-between">
+              <span>Shipping</span>
+              <span>₹{Number(form.shippingCharge || 0).toFixed(2)}</span>
+            </div>
+
+            {Number(form.discount || 0) > 0 && (
+              <div className="flex justify-between text-green-600">
+                <span>
+                  Discount {form.couponCode ? `(${form.couponCode})` : ""}
+                </span>
+                <span>- ₹{Number(form.discount).toFixed(2)}</span>
+              </div>
+            )}
+
+            <div className="flex justify-between font-semibold text-base pt-2 border-t">
+              <span>Total</span>
+              <span>₹{total.toFixed(2)}</span>
+            </div>
           </div>
         </div>
 

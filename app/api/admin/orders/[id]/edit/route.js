@@ -53,6 +53,10 @@ export async function PUT(req, { params }) {
       price,
       remark,
       variantSize,
+
+      // ✅ ADD THESE
+      discount,
+      couponCode,
     } = body;
 
     const cartItem = order.cartItems[0];
@@ -61,6 +65,8 @@ export async function PUT(req, { params }) {
       quantity: order.cartItems[0].quantity,
       price: order.cartItems[0].price,
       shipping: order.shippingCharge,
+      discount: order.discount || 0,     // ✅ ADD
+      couponCode: order.couponCode || "",// ✅ ADD
     };
 
 
@@ -85,8 +91,16 @@ export async function PUT(req, { params }) {
     // 🔢 Recalculate total
     const ship = Number(shippingCharge || 0);
     order.shippingCharge = ship;
-    order.totalAmount =
-      cartItem.quantity * cartItem.price + ship;
+    const subTotal = cartItem.quantity * cartItem.price;
+    const shipAmount = Number(shippingCharge || 0);
+    const discountAmount = Number(discount || 0);
+
+    order.shippingCharge = shipAmount;
+    order.discount = discountAmount;
+    order.couponCode = couponCode || null;
+
+    // ✅ NEW TOTAL LOGIC
+    order.totalAmount = subTotal + shipAmount - discountAmount;
 
     trackChange(changes, "Customer Name", order.userName, userName);
     trackChange(changes, "Phone", order.phone, phone);
@@ -118,6 +132,19 @@ trackChange(
   order.shippingCharge
 );
 
+trackChange(
+  changes,
+  "Discount",
+  oldValues.discount,
+  order.discount
+);
+
+trackChange(
+  changes,
+  "Coupon Code",
+  oldValues.couponCode,
+  order.couponCode
+);
     trackChange(changes, "Payment Method", order.paymentMethod, paymentMethod);
 
 

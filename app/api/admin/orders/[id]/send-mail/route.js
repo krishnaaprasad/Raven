@@ -17,26 +17,47 @@ export async function POST(req, context) {
       );
     }
 
-    const emailPayload = {
-      email: order.email,
-      name: order.userName,
-      orderId: order.customOrderId || order._id.toString(),
-      paymentMethod: order.paymentMethod || "Online Payment (Cashfree)",
-      subtotal: order.cartItems.reduce(
-        (acc, item) => acc + item.price * item.quantity,
-        0
-      ),
-      shippingCost: order.shippingCharge,
-      totalAmount: order.totalAmount,
-      items: order.cartItems,
-      shipping: order.deliveryType,
-      address: {
-        ...order.addressDetails,
-        phone: order.phone,
-      },
-    };
+    const subtotal = order.cartItems.reduce(
+  (acc, item) => acc + item.price * item.quantity,
+  0
+);
 
-    await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/send-confirmation-mail`, {
+const emailPayload = {
+  email: order.email,
+  name: order.userName,
+  orderId: order.customOrderId || order._id.toString(),
+
+  paymentMethod: order.paymentMethod || "Online Payment (Cashfree)",
+
+  subtotal,
+  shippingCost: order.shippingCharge,
+
+  // ✅ ADD THESE TWO
+  discount: order.discount || 0,
+  couponCode: order.couponCode || null,
+
+  totalAmount: order.totalAmount,
+
+  items: order.cartItems,
+  shipping: order.deliveryType,
+
+  address: {
+    ...order.addressDetails,
+    phone: order.phone,
+  },
+
+  date: new Date(order.transactionDate || order.createdAt)
+    .toLocaleString("en-IN", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    }),
+};
+    const baseURL =
+    process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+    await fetch(`${baseURL}/api/send-confirmation-mail`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(emailPayload),

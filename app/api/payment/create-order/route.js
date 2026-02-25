@@ -6,6 +6,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import User from "@/models/User";
 import { generateSequentialOrderIdFromItems } from "@/lib/generateOrderId";
+import Coupon from "@/models/Coupon";
 
 // =============================
 // Helper → Generate Sequential Custom Order ID
@@ -95,6 +96,7 @@ export async function POST(req) {
       shippingCharge,
       totalAmount,
       cartItems,
+      couponCode,
     } = body;
 
     // Basic required field validation
@@ -115,6 +117,74 @@ export async function POST(req) {
         { status: 400 }
       );
     }
+
+    // =============================
+    // SECURE PRICE RE-CALCULATION
+    // =============================
+
+    // 1️⃣ Calculate subtotal from cart items
+    const subtotal = cartItems.reduce(
+      (sum, item) => sum + item.price * item.quantity,
+      0
+    );
+
+    // 2️⃣ Calculate shipping safely
+    const safeShippingCharge = Number(shippingCharge) || 0;
+
+    // 3️⃣ Validate coupon if provided
+    let discountAmount = 0;
+    let appliedCoupon = null;
+
+    if (couponCode) {
+      const coupon = await Coupon.findOne({
+        code: couponCode.toUpperCase(),
+        isActive: true,
+      });
+
+      if (!coupon) {
+        return NextResponse.json(
+          { error: "Invalid coupon code" },
+          { status: 400 }
+        );
+      }
+
+      if (new Date() > coupon.expiryDate) {
+        return NextResponse.json(
+          { error: "Coupon expired" },
+          { status: 400 }
+        );
+      }
+
+      if (coupon.usageLimit && coupon.usedCount >= coupon.usageLimit) {
+        return NextResponse.json(
+          { error: "Coupon usage limit reached" },
+          { status: 400 }
+        );
+      }
+
+      if (subtotal < coupon.minOrderAmount) {
+        return NextResponse.json(
+          { error: `Minimum order ₹${coupon.minOrderAmount} required` },
+          { status: 400 }
+        );
+      }
+
+      // Calculate discount
+      if (coupon.type === "PERCENT") {
+        discountAmount = (subtotal * coupon.value) / 100;
+
+        if (coupon.maxDiscount) {
+          discountAmount = Math.min(discountAmount, coupon.maxDiscount);
+        }
+      } else {
+        discountAmount = coupon.value;
+      }
+
+      appliedCoupon = coupon;
+    }
+
+    // 4️⃣ Final secure total
+    const finalTotalAmount = subtotal + safeShippingCharge - discountAmount;
 
     // ✅ Generate custom order ID
     const customOrderId = await generateSequentialOrderIdFromItems(cartItems);
@@ -156,7 +226,9 @@ export async function POST(req) {
         slug: item.slug,
       })),
       shippingCharge,
-      totalAmount,
+      totalAmount: finalTotalAmount,
+      discount: discountAmount,
+      couponCode: appliedCoupon?.code || null,
       status: "PENDING",
     });
 
@@ -170,7 +242,7 @@ export async function POST(req) {
 
     const cashfreePayload = {
       order_id: customOrderId,
-      order_amount: totalAmount,
+      order_amount: finalTotalAmount,
       order_currency: "INR",
       customer_details: {
         customer_id: customOrderId,
@@ -215,6 +287,12 @@ export async function POST(req) {
       payment_session_id: cfData.payment_session_id,
       cashfreeResponse: cfData,
     });
+
+    if (appliedCoupon) {
+      await Coupon.findByIdAndUpdate(appliedCoupon._id, {
+        $inc: { usedCount: 1 },
+      });
+    }
 
     // ✅ Return customOrderId to frontend
     return NextResponse.json(

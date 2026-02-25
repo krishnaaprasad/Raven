@@ -18,6 +18,9 @@ export default function EditOrderModal({ order, onClose, onUpdated }) {
     quantity: item.quantity,
     price: item.price,
     shippingCharge: order.shippingCharge || 0,
+    // ✅ ADD THESE
+    discount: order.discount || 0,
+    couponCode: order.couponCode || "",
     paymentMethod: order.paymentMethod || "Cash",
     remark: "",
   });
@@ -71,11 +74,14 @@ export default function EditOrderModal({ order, onClose, onUpdated }) {
 ];
 
   const total = useMemo(() => {
-    return (
+    const sub =
       Number(form.quantity || 1) *
-        Number(form.price || 0) +
-      Number(form.shippingCharge || 0)
-    );
+      Number(form.price || 0);
+
+    const ship = Number(form.shippingCharge || 0);
+    const discount = Number(form.discount || 0);
+
+    return sub + ship - discount;
   }, [form]);
 
   const handleUpdate = async () => {
@@ -168,7 +174,7 @@ export default function EditOrderModal({ order, onClose, onUpdated }) {
           />
 
           {/* NUMBERS – scroll disabled */}
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-2 gap-2">
             <NumberInput
               label="Qty"
               value={form.quantity}
@@ -184,6 +190,11 @@ export default function EditOrderModal({ order, onClose, onUpdated }) {
               value={form.shippingCharge}
               onChange={v => update("shippingCharge", v)}
             />
+            <NumberInput
+              label="Discount"
+              value={form.discount}
+              onChange={v => update("discount", v)}
+            />
             
           </div>
           <div>
@@ -198,7 +209,14 @@ export default function EditOrderModal({ order, onClose, onUpdated }) {
         {method}
       </option>
     ))}
+
+    
   </select>
+  <Input
+      label="Coupon Code (Optional)"
+      value={form.couponCode}
+      onChange={e => update("couponCode", e.target.value.toUpperCase())}
+    />
 </div>
 
 
@@ -212,10 +230,36 @@ export default function EditOrderModal({ order, onClose, onUpdated }) {
             />
           </div>
 
-          <div className="flex justify-between font-semibold pt-2">
-            <span>Total</span>
-            <span>₹{total.toFixed(2)}</span>
-          </div>
+          <div className="pt-3 border-t space-y-1 text-sm">
+  <div className="flex justify-between">
+    <span>Subtotal</span>
+    <span>
+      ₹{(
+        Number(form.quantity || 1) *
+        Number(form.price || 0)
+      ).toFixed(2)}
+    </span>
+  </div>
+
+  <div className="flex justify-between">
+    <span>Shipping</span>
+    <span>₹{Number(form.shippingCharge || 0).toFixed(2)}</span>
+  </div>
+
+  {Number(form.discount || 0) > 0 && (
+    <div className="flex justify-between text-green-600">
+      <span>
+        Discount {form.couponCode ? `(${form.couponCode})` : ""}
+      </span>
+      <span>- ₹{Number(form.discount).toFixed(2)}</span>
+    </div>
+  )}
+
+  <div className="flex justify-between font-semibold text-base pt-2 border-t">
+    <span>Total</span>
+    <span>₹{total.toFixed(2)}</span>
+  </div>
+</div>
         </div>
 
         {/* FOOTER */}

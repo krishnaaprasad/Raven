@@ -25,7 +25,9 @@ export async function POST(req) {
   paymentMethod,
   orderDate,
   price,
-  remark
+  remark,
+  discount,
+  couponCode,
 } = body;
 
 if (!userName || !phone || !productId || !variantSize) {
@@ -69,7 +71,17 @@ if (Number.isNaN(unitPrice)) {
   );
 }
 
-const totalAmount = qty * unitPrice + ship;
+const subTotal = qty * unitPrice;
+const discountAmount = Number(discount || 0);
+
+if (discountAmount > subTotal) {
+  return NextResponse.json(
+    { success: false, error: "Discount cannot exceed subtotal" },
+    { status: 400 }
+  );
+}
+
+const totalAmount = subTotal + ship - discountAmount;
 
 
 
@@ -121,8 +133,12 @@ const customOrderId = await generateSequentialOrderIdFromItems([
         },
       ],
 
-
       shippingCharge: ship,
+
+      // ✅ ADD THESE
+      discount: discountAmount,
+      couponCode: couponCode || null,
+
       totalAmount,
 
       payment_status: "PAID",
@@ -140,6 +156,18 @@ const customOrderId = await generateSequentialOrderIdFromItems([
           to: "Processing",
           by: "admin",
           note: remark || "Manual order entry",
+          changes: [
+            {
+              field: "Discount",
+              from: "--",
+              to: discountAmount,
+            },
+            {
+              field: "Coupon Code",
+              from: "--",
+              to: couponCode || "--",
+            },
+          ],
         },
       ],
     });

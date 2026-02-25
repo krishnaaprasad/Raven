@@ -13,6 +13,8 @@ export async function POST(req) {
       paymentMethod,
       subtotal,
       shippingCost,
+      discount = 0,
+      couponCode = null,
       totalAmount,
       items,
       shipping,
@@ -30,15 +32,24 @@ export async function POST(req) {
     const pdfBuffer = await generateInvoice({
       orderId,
       transactionDate: new Date(),
+
       customer: {
         name,
         email,
         phone: address.phone,
       },
+
       items,
+
       subtotal,
       shipping: shippingCost,
+
+      // ✅ ADD THESE
+      discount,
+      couponCode,
+
       total: totalAmount,
+
       address,
       paymentMethod,
     });
@@ -65,6 +76,8 @@ export async function POST(req) {
         paymentMethod,
         subtotal,
         shippingCost,
+        discount,   
+        couponCode,
         totalAmount,
         items,
         shipping,
@@ -98,6 +111,13 @@ export async function POST(req) {
         <p><strong>Order ID:</strong> ${orderId}</p>
         <p><strong>Email:</strong> ${email}</p>
         <p><strong>Phone:</strong> ${address.phone}</p>
+        <p><strong>Subtotal:</strong> ₹${subtotal}</p>
+        <p><strong>Shipping:</strong> ₹${shippingCost}</p>
+        ${
+          discount > 0
+            ? `<p><strong>Discount (${couponCode}):</strong> - ₹${discount}</p>`
+            : ""
+        }
         <p><strong>Total Amount:</strong> ₹${totalAmount}</p>
         <br/>
         <p>Please login to Admin Panel for details.</p>

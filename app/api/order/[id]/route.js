@@ -21,15 +21,22 @@ export async function GET(request, context) {
       success: true,
       order: {
         _id: order._id,
-        customOrderId: order.customOrderId, // ✅ This is now included
+        customOrderId: order.customOrderId,
         userName: order.userName,
         email: order.email,
         phone: order.phone,
         address: order.address,
         addressDetails: order.addressDetails,
         cartItems: order.cartItems,
+
         shippingCharge: order.shippingCharge,
+
+        // ✅ ADD THESE TWO
+        discount: order.discount || 0,
+        couponCode: order.couponCode || null,
+
         totalAmount: order.totalAmount,
+
         paymentMethod: order.paymentMethod,
         referenceId: order.referenceId,
         status: order.status,

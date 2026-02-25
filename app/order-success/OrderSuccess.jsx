@@ -70,7 +70,9 @@ export default function OrderSuccess() {
                 (mergedOrder.cartItems || []).reduce(
                   (sum, i) => sum + i.price * i.quantity,
                   0
-                ) + (mergedOrder.shippingCharge || 0),
+                ) +
+                (mergedOrder.shippingCharge || 0) -
+                (mergedOrder.discount || 0),
 
               shipping: mergedOrder.shippingCharge || 0,
 
@@ -138,7 +140,8 @@ export default function OrderSuccess() {
   const items = orderData?.cartItems || [];
   const subtotal = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
   const shipping = orderData?.shippingCharge || 0;
-  const total = subtotal + shipping;
+  const discount = orderData?.discount || 0;
+  const total = subtotal + shipping - discount;
 
   return (
     <section className="bg-(--theme-bg) min-h-screen font-sans text-(--theme-text) transition-colors duration-300">
@@ -175,6 +178,11 @@ export default function OrderSuccess() {
             <div className="p-6 md:p-8">
               <h2 className="text-[22px] font-bold leading-tight tracking-tight">
                 Order #{orderData.customOrderId || orderData._id}
+                {orderData?.couponCode && (
+                  <p className="mt-2 text-sm text-(--theme-muted)">
+                    Coupon Applied: {orderData.couponCode}
+                  </p>
+                )}
               </h2>
             </div>
 
@@ -209,20 +217,39 @@ export default function OrderSuccess() {
               {/* Totals */}
               <div className="mt-8 border-t border-(--theme-border) pt-6 flex justify-end">
                 <div className="w-full max-w-xs space-y-3 text-sm">
+
+                  {/* Subtotal */}
                   <div className="flex justify-between text-(--theme-muted)">
                     <span>Subtotal</span>
-                    <span className="text-(--theme-text)">₹{formatAmount(subtotal)}</span>
+                    <span className="text-(--theme-text)">
+                      ₹{formatAmount(subtotal)}
+                    </span>
                   </div>
+
+                  {/* Shipping */}
                   <div className="flex justify-between text-(--theme-muted)">
-                    <span>Shipping ({orderData.deliveryType})</span>
+                    <span>Shipping {orderData.deliveryType}</span>
                     <span className="text-(--theme-text)">
                       {shipping ? `₹${formatAmount(shipping)}` : 'Free'}
                     </span>
                   </div>
+
+                  {/* ✅ Discount (SEPARATE ROW) */}
+                  {discount > 0 && (
+                    <div className="flex justify-between ">
+                      <span className='text-(--theme-muted)'>
+                        Discount {orderData?.couponCode ? `(${orderData.couponCode})` : ""}
+                      </span>
+                      <span>- ₹{formatAmount(discount)}</span>
+                    </div>
+                  )}
+
+                  {/* Total */}
                   <div className="flex justify-between text-(--theme-text) text-base font-bold border-t border-(--theme-border) pt-3 mt-2">
                     <span>Total</span>
                     <span>₹{formatAmount(total)}</span>
                   </div>
+
                 </div>
               </div>
             </div>
@@ -359,7 +386,7 @@ export default function OrderSuccess() {
                   </Link>
                   <Link
                     href="/"
-                    className="bg-(--theme-text) text-(--theme-text) font-medium py-2 px-6 rounded-md hover:opacity-90 transition-all duration-200 text-sm sm:text-base"
+                    className="bg-(--theme-text) text-(--theme-bg) font-medium py-2 px-6 rounded-md hover:opacity-90 transition-all duration-200 text-sm sm:text-base"
                   >
                     Continue Shopping
                   </Link>

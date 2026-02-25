@@ -162,7 +162,7 @@ export default function CartPage() {
           </div>
 
           {/* Discount */}
-          <div>
+          {/* <div>
             <label
               htmlFor="discount-code"
               className="block text-sm font-semibold mb-2"
@@ -187,7 +187,7 @@ export default function CartPage() {
                 Apply
               </button>
             </div>
-          </div>
+          </div> */}
 
           {/* Total */}
           <div className="border-t border-(--theme-border) pt-4">

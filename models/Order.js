@@ -65,6 +65,10 @@ const orderSchema = new mongoose.Schema(
     shippingCharge: { type: Number, required: true },
     totalAmount: { type: Number, required: true },
 
+    // ---------- Coupon / Discount ----------
+    discount: { type: Number, default: 0 },
+    couponCode: { type: String, default: null },
+
     // ---------- Payment raw from gateway ----------
     payment_state: {
       type: String,

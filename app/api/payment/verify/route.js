@@ -224,6 +224,8 @@ export async function GET(req) {
               0
             ),
             shippingCost: updatedOrder.shippingCharge,
+            discount: updatedOrder.discount || 0,        
+            couponCode: updatedOrder.couponCode || null, 
             totalAmount: updatedOrder.totalAmount,
             items: updatedOrder.cartItems,
             shipping: updatedOrder.deliveryType,
