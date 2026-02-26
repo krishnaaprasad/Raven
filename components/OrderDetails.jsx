@@ -130,7 +130,7 @@ useEffect(() => {
             </p>
 
            <p className="text-(--theme-muted) text-sm">Order Status</p>
-              <div className="flex flex-col">
+              <div className="flex ">
                 <span className="px-3 py-1 rounded-full text-xs font-semibold border border-(--theme-border) bg-(--theme-soft) text-(--theme-text)">
                   {order.order_status || "Processing"}
                 </span>
