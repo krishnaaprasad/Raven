@@ -7,6 +7,7 @@ export default function CreateCoupon() {
   const router = useRouter();
 
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   const [form, setForm] = useState({
     code: "",
@@ -19,18 +20,55 @@ export default function CreateCoupon() {
     isActive: true,
   });
 
+  // Compute today's date in YYYY-MM-DD format
+  const getTodayDate = () => {
+    const today = new Date();
+    return today.toISOString().split('T')[0];
+  };
+
+  // Format ISO date string (YYYY-MM-DD) to locale-friendly date
+  const formatDate = (dateString) => {
+    if (!dateString) return "";
+    const [year, month, day] = dateString.split('-');
+    const date = new Date(Number(year), Number(month) - 1, Number(day));
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setError(null);
 
-    await fetch("/api/admin/coupons", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
-    });
+    try {
+      const res = await fetch("/api/admin/coupons", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...form,
+          value: Number(form.value),
+          minOrderAmount: form.minOrderAmount ? Number(form.minOrderAmount) : undefined,
+          maxDiscount: form.maxDiscount ? Number(form.maxDiscount) : undefined,
+          usageLimit: form.usageLimit ? Number(form.usageLimit) : undefined,
+        }),
+      });
 
-    setLoading(false);
-    router.push("/admin/coupons");
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.message || `Failed to create coupon: ${res.status}`);
+      }
+
+      setError(null);
+      router.push("/admin/coupons");
+    } catch (err) {
+      console.error('Error creating coupon:', err);
+      setError(err.message || 'Failed to create coupon');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -39,18 +77,19 @@ export default function CreateCoupon() {
 
         {/* Header */}
         <div className="mb-10">
-          <h1 className="text-3xl font-semibold text-[#1b180d]">
-            Create New Coupon
-          </h1>
-          <p className="text-sm text-[#9a864c] mt-2">
-            Configure discount rules and usage conditions
-          </p>
+          <h1 className="text-3xl font-semibold text-[#1b180d]">Create New Coupon</h1>
+          {error && (
+            <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+              <p className="text-sm text-red-700">{error}</p>
+            </div>
+          )}
         </div>
 
-        <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="grid lg:grid-cols-3 gap-6">
 
           {/* LEFT FORM SECTION */}
-          <div className="lg:col-span-2 space-y-8">
+          <fieldset disabled={loading} className="lg:col-span-2 space-y-8">
 
             {/* Basic Info */}
             <div className="bg-white border border-[#e7e1cf] rounded-xl p-6 space-y-5">
@@ -75,9 +114,14 @@ export default function CreateCoupon() {
                 <label className="text-sm text-[#9a864c]">Discount Type</label>
                 <select
                   value={form.type}
-                  onChange={(e) =>
-                    setForm({ ...form, type: e.target.value })
-                  }
+                  onChange={(e) => {
+                    const newType = e.target.value;
+                    setForm({
+                      ...form,
+                      type: newType,
+                      ...(newType === "FLAT" && { maxDiscount: "" })
+                    });
+                  }}
                   className="w-full mt-1 border border-[#e7e1cf] p-3 rounded-lg focus:outline-none focus:border-[#9a864c]"
                 >
                   <option value="PERCENT">Percentage (%)</option>
@@ -94,10 +138,18 @@ export default function CreateCoupon() {
                 <input
                   type="number"
                   required
+                  min="0"
+                  max={form.type === "PERCENT" ? "100" : undefined}
                   value={form.value}
-                  onChange={(e) =>
-                    setForm({ ...form, value: e.target.value })
-                  }
+                  onChange={(e) => {
+                    let val = e.target.value ? Number(e.target.value) : "";
+                    if (val !== "" && form.type === "PERCENT") {
+                      val = Math.max(0, Math.min(100, val));
+                    } else if (val !== "") {
+                      val = Math.max(0, val);
+                    }
+                    setForm({ ...form, value: val });
+                  }}
                   className="w-full mt-1 border border-[#e7e1cf] p-3 rounded-lg focus:outline-none focus:border-[#9a864c]"
                 />
               </div>
@@ -109,10 +161,15 @@ export default function CreateCoupon() {
                   </label>
                   <input
                     type="number"
-                    value={form.maxDiscount}
-                    onChange={(e) =>
-                      setForm({ ...form, maxDiscount: e.target.value })
-                    }
+                    min="0"
+                    value={form.maxDiscount || ""}
+                    onChange={(e) => {
+                      let val = e.target.value ? Number(e.target.value) : "";
+                      if (val !== "") {
+                        val = Math.max(0, val);
+                      }
+                      setForm({ ...form, maxDiscount: val });
+                    }}
                     className="w-full mt-1 border border-[#e7e1cf] p-3 rounded-lg focus:outline-none focus:border-[#9a864c]"
                   />
                 </div>
@@ -131,10 +188,15 @@ export default function CreateCoupon() {
                 </label>
                 <input
                   type="number"
-                  value={form.minOrderAmount}
-                  onChange={(e) =>
-                    setForm({ ...form, minOrderAmount: e.target.value })
-                  }
+                  min="0"
+                  value={form.minOrderAmount || ""}
+                  onChange={(e) => {
+                    let val = e.target.value ? Number(e.target.value) : "";
+                    if (val !== "") {
+                      val = Math.max(0, val);
+                    }
+                    setForm({ ...form, minOrderAmount: val });
+                  }}
                   className="w-full mt-1 border border-[#e7e1cf] p-3 rounded-lg focus:outline-none focus:border-[#9a864c]"
                 />
               </div>
@@ -145,10 +207,15 @@ export default function CreateCoupon() {
                 </label>
                 <input
                   type="number"
-                  value={form.usageLimit}
-                  onChange={(e) =>
-                    setForm({ ...form, usageLimit: e.target.value })
-                  }
+                  min="0"
+                  value={form.usageLimit || ""}
+                  onChange={(e) => {
+                    let val = e.target.value ? Number(e.target.value) : "";
+                    if (val !== "") {
+                      val = Math.max(0, val);
+                    }
+                    setForm({ ...form, usageLimit: val });
+                  }}
                   className="w-full mt-1 border border-[#e7e1cf] p-3 rounded-lg focus:outline-none focus:border-[#9a864c]"
                 />
               </div>
@@ -160,6 +227,7 @@ export default function CreateCoupon() {
                 <input
                   type="date"
                   required
+                  min={getTodayDate()}
                   value={form.expiryDate}
                   onChange={(e) =>
                     setForm({ ...form, expiryDate: e.target.value })
@@ -196,12 +264,13 @@ export default function CreateCoupon() {
               <button
                 type="button"
                 onClick={() => router.push("/admin/coupons")}
-                className="px-8 py-3 border border-[#e7e1cf] rounded-lg hover:bg-[#f3efe6] transition"
+                disabled={loading}
+                className="px-8 py-3 border border-[#e7e1cf] rounded-lg hover:bg-[#f3efe6] transition disabled:opacity-50"
               >
                 Cancel
               </button>
             </div>
-          </div>
+          </fieldset>
 
           {/* RIGHT PREVIEW PANEL */}
           <div className="bg-white border border-[#e7e1cf] rounded-xl p-6 h-fit">
@@ -228,10 +297,11 @@ export default function CreateCoupon() {
 
               {form.expiryDate && (
                 <p className="text-xs text-red-500 mt-2">
-                  Expires on {form.expiryDate}
+                  Expires on {formatDate(form.expiryDate)}
                 </p>
               )}
             </div>
+          </div>
           </div>
 
         </form>

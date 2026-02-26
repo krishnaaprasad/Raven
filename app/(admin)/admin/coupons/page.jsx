@@ -1,38 +1,84 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import { Pencil, Power, Trash2 } from "lucide-react";
 
 export default function AdminCouponsPage() {
   const [coupons, setCoupons] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const fetchCoupons = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const res = await fetch("/api/admin/coupons");
+
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.message || `Failed to fetch coupons: ${res.status}`);
+      }
+
+      const data = await res.json();
+      setCoupons(data);
+      setError(null);
+    } catch (err) {
+      console.error('Error fetching coupons:', err);
+      setError(err.message || 'Failed to load coupons');
+      setCoupons([]);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
     fetchCoupons();
-  }, []);
-
-  const fetchCoupons = async () => {
-    const res = await fetch("/api/admin/coupons");
-    const data = await res.json();
-    setCoupons(data);
-  };
+  }, [fetchCoupons]);
 
   const toggleCoupon = async (id, currentStatus) => {
-    await fetch(`/api/admin/coupons/${id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ isActive: !currentStatus }),
-    });
-    fetchCoupons();
+    try {
+      const res = await fetch(`/api/admin/coupons/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ isActive: !currentStatus }),
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.message || `Failed to update coupon: ${res.status}`);
+      }
+
+      await fetchCoupons();
+    } catch (err) {
+      console.error('Error toggling coupon:', err);
+      alert(`Error: ${err.message || 'Failed to update coupon'}`);
+    }
   };
 
   const deleteCoupon = async (id) => {
-    await fetch(`/api/admin/coupons/${id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ deleted: true }),
-    });
-    fetchCoupons();
+    if (!window.confirm('Are you sure you want to delete this coupon? This action cannot be undone.')) {
+      return;
+    }
+
+    try {
+      const res = await fetch(`/api/admin/coupons/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ deleted: true }),
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.message || `Failed to delete coupon: ${res.status}`);
+      }
+
+      await fetchCoupons();
+    } catch (err) {
+      console.error('Error deleting coupon:', err);
+      alert(`Error: ${err.message || 'Failed to delete coupon'}`);
+    }
   };
 
   return (
@@ -59,7 +105,28 @@ export default function AdminCouponsPage() {
         </div>
 
         {/* Coupon Cards */}
-        {coupons.length === 0 ? (
+        {loading ? (
+          <div className="bg-white border border-[#e7e1cf] rounded-xl p-16 text-center">
+            <p className="text-[#9a864c] text-lg">
+              Loading coupons...
+            </p>
+          </div>
+        ) : error ? (
+          <div className="bg-red-50 border border-red-200 rounded-xl p-8 text-center">
+            <p className="text-red-700 font-semibold">
+              Error
+            </p>
+            <p className="text-red-600 mt-2">
+              {error}
+            </p>
+            <button
+              onClick={() => fetchCoupons()}
+              className="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
+            >
+              Retry
+            </button>
+          </div>
+        ) : coupons.length === 0 ? (
           <div className="bg-white border border-[#e7e1cf] rounded-xl p-16 text-center">
             <p className="text-[#9a864c] text-lg">
               No coupons created yet
@@ -70,8 +137,8 @@ export default function AdminCouponsPage() {
             {coupons
               .filter((c) => !c.deleted)
               .map((c) => {
-                const isExpired =
-                  new Date(c.expiryDate) < new Date();
+                const isValidExpiryDate = c.expiryDate && !isNaN(Date.parse(c.expiryDate));
+                const isExpired = isValidExpiryDate && new Date(c.expiryDate) < new Date();
 
                 const usagePercent = c.usageLimit
                   ? (c.usedCount / c.usageLimit) * 100
@@ -99,7 +166,7 @@ export default function AdminCouponsPage() {
                             Active
                           </span>
                         )}
-                        {!c.isActive && (
+                        {!isExpired && !c.isActive && (
                           <span className="px-2 py-1 text-xs bg-gray-100 text-gray-600 rounded">
                             Disabled
                           </span>
@@ -143,7 +210,7 @@ export default function AdminCouponsPage() {
                     {/* Expiry */}
                     <p className="text-xs text-[#9a864c] mt-4">
                       Expires:{" "}
-                      {new Date(c.expiryDate).toLocaleDateString()}
+                      {isValidExpiryDate ? new Date(c.expiryDate).toLocaleDateString() : "No expiry"}
                     </p>
 
                     {/* Actions */}

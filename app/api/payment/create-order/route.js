@@ -7,6 +7,7 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import User from "@/models/User";
 import { generateSequentialOrderIdFromItems } from "@/lib/generateOrderId";
 import Coupon from "@/models/Coupon";
+import Product from "@/models/Product";
 
 // =============================
 // Helper → Generate Sequential Custom Order ID
@@ -117,16 +118,46 @@ export async function POST(req) {
         { status: 400 }
       );
     }
-
+    
+    if (!cartItems || cartItems.length === 0) {
+  return NextResponse.json(
+    { error: "Cart is empty" },
+    { status: 400 }
+  );
+}
     // =============================
     // SECURE PRICE RE-CALCULATION
     // =============================
 
     // 1️⃣ Calculate subtotal from cart items
-    const subtotal = cartItems.reduce(
-      (sum, item) => sum + item.price * item.quantity,
-      0
-    );
+    let subtotal = 0;
+
+    for (const item of cartItems) {
+      const product = await Product.findOne({ slug: item.slug });
+
+      if (!product) {
+        return NextResponse.json(
+          { error: "Invalid product in cart" },
+          { status: 400 }
+        );
+      }
+
+      const variant = product.variants.find(
+        (v) => String(v.size) === String(item.size)
+      );
+
+      if (!variant) {
+        return NextResponse.json(
+          { error: "Invalid product variant" },
+          { status: 400 }
+        );
+      }
+
+      subtotal += variant.price * item.quantity;
+
+      // override unsafe frontend price
+      item.price = variant.price;
+    }
 
     // 2️⃣ Calculate shipping safely
     const safeShippingCharge = Number(shippingCharge) || 0;
@@ -148,7 +179,7 @@ export async function POST(req) {
         );
       }
 
-      if (new Date() > coupon.expiryDate) {
+      if (coupon.expiryDate && new Date() > coupon.expiryDate) {
         return NextResponse.json(
           { error: "Coupon expired" },
           { status: 400 }
@@ -184,8 +215,7 @@ export async function POST(req) {
     }
 
     // 4️⃣ Final secure total
-    const finalTotalAmount = subtotal + safeShippingCharge - discountAmount;
-
+    const finalTotalAmount = Math.max(0, subtotal + safeShippingCharge - discountAmount);
     // ✅ Generate custom order ID
     const customOrderId = await generateSequentialOrderIdFromItems(cartItems);
 
@@ -225,12 +255,11 @@ export async function POST(req) {
         image: item.image,
         slug: item.slug,
       })),
-      shippingCharge,
+      
+      shippingCharge: safeShippingCharge,
       totalAmount: finalTotalAmount,
       discount: discountAmount,
-      couponCode: appliedCoupon?.code || null,
-      status: "PENDING",
-    });
+      couponCode: appliedCoupon?.code || null,    });
 
     const isProduction = process.env.NEXT_PUBLIC_CASHFREE_ENV === "production";
     const baseURL = isProduction

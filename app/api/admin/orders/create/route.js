@@ -74,13 +74,19 @@ if (Number.isNaN(unitPrice)) {
 const subTotal = qty * unitPrice;
 const discountAmount = Number(discount || 0);
 
+if (!Number.isFinite(discountAmount) || discountAmount < 0) {
+  return NextResponse.json(
+    { success: false, error: "Invalid discount value" },
+    { status: 400 }
+  );
+}
+
 if (discountAmount > subTotal) {
   return NextResponse.json(
     { success: false, error: "Discount cannot exceed subtotal" },
     { status: 400 }
   );
 }
-
 const totalAmount = subTotal + ship - discountAmount;
 
 

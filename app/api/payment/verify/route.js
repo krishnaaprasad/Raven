@@ -4,6 +4,7 @@ import connectToDatabase from "@/lib/mongodb";
 import { Order } from "@/models/Order";
 import axios from "axios";
 import { generateInvoice } from "@/lib/invoice/generateInvoice"; // ✅ still here
+import Coupon from "@/models/Coupon";
 
 export async function GET(req) {
   try {
@@ -21,6 +22,22 @@ export async function GET(req) {
     await connectToDatabase();
 
     const order = await Order.findById(orderId);
+
+if (!order) {
+  return NextResponse.json(
+    { success: false, message: "Order not found" },
+    { status: 404 }
+  );
+}
+
+// Prevent double verification
+if (order.payment_status === "PAID" && order.verified === true) {
+  return NextResponse.json({
+    success: true,
+    paid: true,
+    message: "Order already verified",
+  });
+}
     if (!order) {
       return NextResponse.json(
         { success: false, message: "Order not found" },
@@ -167,6 +184,7 @@ export async function GET(req) {
     }
 
     let order_status = "Payment Awaiting";
+    
     if (payment_status === "PAID") {
       order_status = "Processing";
     } else if (
@@ -175,6 +193,19 @@ export async function GET(req) {
     ) {
       order_status = "Cancelled";
     }
+    if (payment_status === "PAID" && !order.verified) {
+  if (order.couponCode) {
+    const coupon = await Coupon.findOne({
+      code: order.couponCode,
+    });
+
+    if (coupon) {
+      await Coupon.findByIdAndUpdate(coupon._id, {
+        $inc: { usedCount: 1 },
+      });
+    }
+  }
+}
 
     // Legacy `status` field kept in sync for old code
     const legacyStatusMap = {
@@ -188,17 +219,28 @@ export async function GET(req) {
     // -----------------------------------------
     // 5️⃣ UPDATE ORDER IN DB
     // -----------------------------------------
-    await Order.findByIdAndUpdate(orderId, {
+    const updatePayload = {
       payment_state,
       payment_status,
       order_status,
       status: legacyStatus,
       referenceId,
-      transactionDate: new Date(),
-      paymentMethod: payment_status === "PAID" ? paymentMethod : "Payment Failed",
-      paymentDetails: payment_status === "PAID" ? paymentDetails : {},
+      paymentMethod:
+        payment_status === "PAID"
+          ? paymentMethod
+          : "Payment Failed",
+      paymentDetails:
+        payment_status === "PAID"
+          ? paymentDetails
+          : {},
       verified: payment_status === "PAID",
-    });
+    };
+
+    if (payment_status === "PAID") {
+      updatePayload.transactionDate = new Date();
+    }
+
+    await Order.findByIdAndUpdate(orderId, updatePayload);
 
     // -----------------------------------------
     // 6️⃣ SEND EMAIL ONLY ONCE AFTER SUCCESSFUL PAYMENT

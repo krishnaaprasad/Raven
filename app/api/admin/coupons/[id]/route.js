@@ -1,47 +1,40 @@
 import connectToDatabase from "@/lib/mongodb";
 import Coupon from "@/models/Coupon";
+import { NextResponse } from "next/server";
 
-// 🔹 GET single coupon
-export async function GET(req, { params }) {
+export async function PATCH(req, context) {
   try {
     await connectToDatabase();
 
-    const coupon = await Coupon.findById(params.id);
+    const { id } = context.params;
 
-    if (!coupon) {
-      return Response.json(
+    if (!id) {
+      return NextResponse.json(
+        { error: "Coupon ID is required" },
+        { status: 400 }
+      );
+    }
+
+    const body = await req.json();
+
+    const updatedCoupon = await Coupon.findByIdAndUpdate(
+      id,
+      { $set: body },
+      { new: true, runValidators: true }
+    );
+
+    if (!updatedCoupon) {
+      return NextResponse.json(
         { error: "Coupon not found" },
         { status: 404 }
       );
     }
 
-    return Response.json(coupon);
+    return NextResponse.json(updatedCoupon);
   } catch (error) {
-    console.error("GET coupon error:", error);
-    return Response.json(
-      { error: "Server error" },
-      { status: 500 }
-    );
-  }
-}
-
-// 🔹 PATCH update coupon
-export async function PATCH(req, { params }) {
-  try {
-    await connectToDatabase();
-    const body = await req.json();
-
-    const updated = await Coupon.findByIdAndUpdate(
-      params.id,
-      body,
-      { new: true }
-    );
-
-    return Response.json(updated);
-  } catch (error) {
-    console.error("PATCH coupon error:", error);
-    return Response.json(
-      { error: "Server error" },
+    console.error("PATCH COUPON ERROR:", error);
+    return NextResponse.json(
+      { error: "Something went wrong" },
       { status: 500 }
     );
   }

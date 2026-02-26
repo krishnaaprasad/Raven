@@ -46,15 +46,20 @@ const emailPayload = {
     phone: order.phone,
   },
 
-  date: new Date(order.transactionDate || order.createdAt)
-    .toLocaleString("en-IN", {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    }),
-};
+  date: (() => {
+    const raw = order.transactionDate || order.createdAt;
+    if (!raw) return "N/A";
+    const d = new Date(raw);
+    return isNaN(d.getTime())
+      ? "N/A"
+      : d.toLocaleString("en-IN", {
+          day: "2-digit",
+          month: "short",
+          year: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+  })(),};
     const baseURL =
     process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
     await fetch(`${baseURL}/api/send-confirmation-mail`, {

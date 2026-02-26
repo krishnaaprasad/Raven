@@ -26,8 +26,11 @@ export async function GET(req) {
       );
     }
 
-    const subtotal = order.cartItems.reduce(
-      (s, i) => s + i.price * i.quantity,
+    // Guard against missing or invalid cartItems
+    const cartItemsSafe = Array.isArray(order.cartItems) ? order.cartItems : [];
+
+    const subtotal = cartItemsSafe.reduce(
+      (s, i) => s + (Number(i.price) || 0) * (Number(i.quantity) || 0),
       0
     );
 
@@ -41,7 +44,7 @@ export async function GET(req) {
         phone: order.phone,
       },
 
-      items: order.cartItems,
+      items: cartItemsSafe,
 
       subtotal,
       shipping: order.shippingCharge,

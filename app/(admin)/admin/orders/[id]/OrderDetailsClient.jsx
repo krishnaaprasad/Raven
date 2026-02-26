@@ -53,7 +53,7 @@ export default function OrderDetailsClient({ orderFromServer }) {
   const [selectedStatus, setSelectedStatus] = useState(order.order_status);
   const [sendingMail, setSendingMail] = useState(false);
   const { data: session } = useSession();
-
+  
   const createdAt = order.createdAt ? new Date(order.createdAt) : new Date();
 
   const subtotal = useMemo(
@@ -65,7 +65,11 @@ export default function OrderDetailsClient({ orderFromServer }) {
     [order.cartItems]
   );
   const shipping = order.shippingCharge || 0;
-  const grandTotal = order.totalAmount || subtotal + shipping;
+  const discount = order.discount || 0;
+
+  const grandTotal =
+    order.totalAmount ||
+    subtotal + shipping - discount;
 
   // 👉 DATE FIX HOOKS MUST BE HERE
   const [formattedDate, setFormattedDate] = useState("");
@@ -299,6 +303,21 @@ export default function OrderDetailsClient({ orderFromServer }) {
                     ₹{formatAmount(shipping)}
                   </span>
                 </div>
+                {discount > 0 && (
+  <div className="flex justify-between">
+    <span className="text-[#6b6654]">
+      Discount
+      {order.couponCode && (
+        <span className="ml-1 text-xs text-[#9a864c]">
+          ({order.couponCode})
+        </span>
+      )}
+    </span>
+    <span className="text-green-700 font-semibold">
+      -₹{formatAmount(discount)}
+    </span>
+  </div>
+)}
                 {/* If you add taxes later, compute here */}
                 {/* <div className="flex justify-between">
                   <span className="text-[#6b6654]">Taxes</span>

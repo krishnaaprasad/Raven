@@ -141,8 +141,7 @@ export default function OrderSuccess() {
   const subtotal = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
   const shipping = orderData?.shippingCharge || 0;
   const discount = orderData?.discount || 0;
-  const total = subtotal + shipping - discount;
-
+  const total = Math.max(0, subtotal + shipping - discount);
   return (
     <section className="bg-(--theme-bg) min-h-screen font-sans text-(--theme-text) transition-colors duration-300">
       <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
@@ -355,14 +354,14 @@ export default function OrderSuccess() {
                       <Link
                         href={`/api/invoice?orderId=${orderData._id}`}
                         target="_blank"
-                        className="flex-1 sm:flex-none border border-(--theme-border) text-(--theme-text) font-medium py-2 px-6 rounded-md hover:bg-(--theme-soft) hover:bg-(--theme-soft) transition-all duration-200 text-sm sm:text-[13px] cursor-pointer text-center"
+                        className="flex-1 sm:flex-none border border-(--theme-border) text-(--theme-text) font-medium py-2 px-6 rounded-md hover:bg-(--theme-soft) transition-all duration-200 text-sm sm:text-[13px] cursor-pointer text-center"
                       >
                         View Receipt (PDF)
                       </Link>
                       {session && (
                         <Link
                           href="/my-account?tab=Orders"
-                          className="flex-1 sm:flex-none border border-(--theme-border) text-(--theme-text) font-medium py-2 px-6 rounded-md hover:bg-(--theme-soft) hover:bg-(--theme-soft) transition-all duration-200 text-sm sm:text-[13px] cursor-pointer"
+                          className="flex-1 sm:flex-none border border-(--theme-border) text-(--theme-text) font-medium py-2 px-6 rounded-md hover:bg-(--theme-soft) transition-all duration-200 text-sm sm:text-[13px] cursor-pointer"
                         >
                           View Order History
                         </Link>

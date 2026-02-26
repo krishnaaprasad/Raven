@@ -71,11 +71,15 @@ export default function CreateOrderModal({ onClose, onCreated }) {
   const handleSave = async () => {
     try {
       const sub = Number(form.quantity || 1) * Number(form.price || 0);
-      if (Number(form.discount || 0) > sub) {
-        toast.error("Discount cannot exceed subtotal");
+      const discountVal = Number(form.discount || 0);
+      if (discountVal < 0) {
+        toast.error("Discount cannot be negative");
         return;
       }
-      
+      if (discountVal > sub) {
+        toast.error("Discount cannot exceed subtotal");
+        return;
+      }      
       const res = await fetch("/api/admin/orders/create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },

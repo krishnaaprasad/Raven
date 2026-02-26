@@ -38,6 +38,8 @@ export default function OrdersClient() {
   const [q, setQ] = useState("");
   const [paymentStatus, setPaymentStatus] = useState("");
   const [orderStatus, setOrderStatus] = useState("");
+  const [couponCode, setCouponCode] = useState("");
+  const [hasDiscount, setHasDiscount] = useState("");
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const [showCreateOrder, setShowCreateOrder] = useState(false);
@@ -73,6 +75,8 @@ export default function OrdersClient() {
       if (orderStatus) params.set("orderStatus", orderStatus);
       if (from) params.set("from", from);
       if (to) params.set("to", to);
+      if (couponCode) params.set("couponCode", couponCode);
+      if (hasDiscount) params.set("hasDiscount", hasDiscount);
 
       const res = await fetch(`/api/admin/orders?${params.toString()}`);
       const json = await res.json();
@@ -446,6 +450,25 @@ const exportCSV = async () => {
     </div>
   )}
 </div>
+      
+      {/* COUPON FILTER */}
+<input
+  value={couponCode}
+  onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+  placeholder="Coupon Code"
+  className="h-10 px-3 rounded-lg border border-[#e7e1cf] bg-[#fcfbf8] text-[14px]"
+/>
+
+{/* DISCOUNT FILTER */}
+<select
+  value={hasDiscount}
+  onChange={(e) => setHasDiscount(e.target.value)}
+  className="h-10 px-3 rounded-lg border border-[#e7e1cf] bg-[#fcfbf8] text-[14px]"
+>
+  <option value="">Discount Filter</option>
+  <option value="yes">With Discount</option>
+  <option value="no">No Discount</option>
+</select>
 
       {/* Apply Button */}
       <button
@@ -524,6 +547,8 @@ const exportCSV = async () => {
               <th className="px-6 py-4 text-left min-w-[170px]">Customer</th>
               <th className="px-6 py-4 text-left min-w-[170px]">Date</th>
               <th className="px-6 py-4 text-left min-w-[120px]">Amount</th>
+              <th className="px-6 py-4 text-left min-w-[120px]">Discount</th>
+              <th className="px-6 py-4 text-left min-w-[150px]">Coupon</th>
               <th className="px-6 py-4 text-left min-w-[120px]">Payment</th>
               <th className="px-6 py-4 text-left min-w-40">Status</th>
               {showDeleted && (

@@ -66,8 +66,7 @@ const orderSchema = new mongoose.Schema(
     totalAmount: { type: Number, required: true },
 
     // ---------- Coupon / Discount ----------
-    discount: { type: Number, default: 0 },
-    couponCode: { type: String, default: null },
+    discount: { type: Number, default: 0, min: [0, "Discount cannot be negative"] },    couponCode: { type: String, default: null },
 
     // ---------- Payment raw from gateway ----------
     payment_state: {

@@ -13,21 +13,34 @@ function trackChange(changes, label, oldVal, newVal) {
   }
 }
 
-
-export async function PUT(req, { params }) {
+export async function PUT(req, context) {
   try {
     await connectToDatabase();
-    const { id } = params;
+
+    const { id } = context.params;
+
+    if (!id) {
+      return NextResponse.json(
+        { success: false, error: "Order ID missing" },
+        { status: 400 }
+      );
+    }
+
     const body = await req.json();
 
     const order = await Order.findById(id);
-    const changes = [];
-    const item = order.cartItems[0];
 
     if (!order) {
       return NextResponse.json(
         { success: false, error: "Order not found" },
         { status: 404 }
+      );
+    }
+
+    if (!order.cartItems || order.cartItems.length === 0) {
+      return NextResponse.json(
+        { success: false, error: "Invalid order items" },
+        { status: 400 }
       );
     }
 
@@ -53,55 +66,54 @@ export async function PUT(req, { params }) {
       price,
       remark,
       variantSize,
-
-      // ✅ ADD THESE
       discount,
       couponCode,
     } = body;
 
+    const changes = [];
     const cartItem = order.cartItems[0];
 
     const oldValues = {
-      quantity: order.cartItems[0].quantity,
-      price: order.cartItems[0].price,
+      quantity: cartItem.quantity,
+      price: cartItem.price,
       shipping: order.shippingCharge,
-      discount: order.discount || 0,     // ✅ ADD
-      couponCode: order.couponCode || "",// ✅ ADD
+      discount: order.discount || 0,
+      couponCode: order.couponCode || "",
     };
 
-
-    // 🔁 If size changed, re-validate price
+    // 🔁 Handle variant change
     if (variantSize && variantSize !== cartItem.size) {
       const product = await Product.findOne({ slug: cartItem.slug });
       if (!product) throw new Error("Product missing");
 
       const variant = product.variants.find(
-        v => String(v.size) === String(variantSize)
+        (v) => String(v.size) === String(variantSize)
       );
       if (!variant) throw new Error("Invalid variant");
 
       cartItem.size = variant.size;
-      cartItem.price = Number(price || variant.price);
+      cartItem.price = Number(price ?? variant.price);
     } else {
-      cartItem.price = Number(price || cartItem.price);
+      cartItem.price = Number(price ?? cartItem.price);
     }
 
-    cartItem.quantity = Number(quantity || cartItem.quantity);
+    cartItem.quantity = Number(quantity ?? cartItem.quantity);
 
-    // 🔢 Recalculate total
-    const ship = Number(shippingCharge || 0);
-    order.shippingCharge = ship;
+    // 🔢 Recalculate totals
     const subTotal = cartItem.quantity * cartItem.price;
-    const shipAmount = Number(shippingCharge || 0);
-    const discountAmount = Number(discount || 0);
+    const shipAmount = Number(shippingCharge ?? 0);
+    const discountAmount = Number(discount ?? 0);
 
     order.shippingCharge = shipAmount;
     order.discount = discountAmount;
     order.couponCode = couponCode || null;
 
-    // ✅ NEW TOTAL LOGIC
-    order.totalAmount = subTotal + shipAmount - discountAmount;
+    order.totalAmount = Math.max(
+      0,
+      subTotal + shipAmount - discountAmount
+    );
 
+    // 📊 Track changes
     trackChange(changes, "Customer Name", order.userName, userName);
     trackChange(changes, "Phone", order.phone, phone);
     trackChange(changes, "Email", order.email, email);
@@ -111,44 +123,14 @@ export async function PUT(req, { params }) {
     trackChange(changes, "State", order.addressDetails?.state, state);
     trackChange(changes, "Pincode", order.addressDetails?.pincode, pincode);
 
-    trackChange(
-  changes,
-  "Quantity",
-  oldValues.quantity,
-  cartItem.quantity
-);
-
-trackChange(
-  changes,
-  "Price",
-  oldValues.price,
-  cartItem.price
-);
-
-trackChange(
-  changes,
-  "Shipping",
-  oldValues.shipping,
-  order.shippingCharge
-);
-
-trackChange(
-  changes,
-  "Discount",
-  oldValues.discount,
-  order.discount
-);
-
-trackChange(
-  changes,
-  "Coupon Code",
-  oldValues.couponCode,
-  order.couponCode
-);
+    trackChange(changes, "Quantity", oldValues.quantity, cartItem.quantity);
+    trackChange(changes, "Price", oldValues.price, cartItem.price);
+    trackChange(changes, "Shipping", oldValues.shipping, order.shippingCharge);
+    trackChange(changes, "Discount", oldValues.discount, order.discount);
+    trackChange(changes, "Coupon Code", oldValues.couponCode, order.couponCode);
     trackChange(changes, "Payment Method", order.paymentMethod, paymentMethod);
 
-
-    // ✏️ Editable fields
+    // ✏️ Update editable fields
     order.userName = userName;
     order.email = email;
     order.phone = phone;
@@ -160,7 +142,7 @@ trackChange(
     };
     order.paymentMethod = paymentMethod;
 
-   if (changes.length > 0) {
+    if (changes.length > 0) {
       order.orderHistory.push({
         type: "EDIT",
         at: new Date(),
@@ -168,7 +150,6 @@ trackChange(
         changes,
       });
     }
-
 
     await order.save();
 

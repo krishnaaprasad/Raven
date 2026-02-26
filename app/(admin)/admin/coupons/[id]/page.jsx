@@ -10,18 +10,33 @@ export default function EditCoupon() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState(null);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchCoupon = async () => {
-      const res = await fetch(`/api/admin/coupons/${id}`);
-      const data = await res.json();
+      try {
+        const res = await fetch(`/api/admin/coupons/${id}`);
+        
+        if (!res.ok) {
+          const errorData = await res.json().catch(() => ({}));
+          throw new Error(errorData.message || `Failed to fetch coupon: ${res.status}`);
+        }
+        
+        const data = await res.json();
 
-      setForm({
-        ...data,
-        expiryDate: data.expiryDate?.slice(0, 10),
-      });
-
-      setLoading(false);
+        setForm({
+          ...data,
+          expiryDate: typeof data.expiryDate === 'string' ? data.expiryDate.slice(0, 10) : data.expiryDate,
+        });
+        
+        setError(null);
+      } catch (err) {
+        console.error('Error fetching coupon:', err);
+        setError(err.message || 'Failed to load coupon');
+        setForm(null);
+      } finally {
+        setLoading(false);
+      }
     };
 
     fetchCoupon();
@@ -31,17 +46,58 @@ export default function EditCoupon() {
     e.preventDefault();
     setSaving(true);
 
-    await fetch(`/api/admin/coupons/${id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
-    });
+    try {
+      const res = await fetch(`/api/admin/coupons/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
 
-    setSaving(false);
-    router.push("/admin/coupons");
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.message || `Failed to update coupon: ${res.status}`);
+      }
+
+      setError(null);
+      router.push("/admin/coupons");
+    } catch (err) {
+      console.error('Error updating coupon:', err);
+      setError(err.message || 'Failed to update coupon');
+    } finally {
+      setSaving(false);
+    }
   };
 
-  if (loading || !form) return null;
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#fcfbf8] p-2 flex items-center justify-center">
+        <p className="text-[#9a864c]">Loading coupon...</p>
+      </div>
+    );
+  }
+
+  if (error || !form) {
+    return (
+      <div className="min-h-screen bg-[#fcfbf8] p-2">
+        <div className="max-w-5xl mx-auto">
+          <div className="bg-red-50 border border-red-200 rounded-lg p-6">
+            <h2 className="text-lg font-semibold text-red-700">
+              Error
+            </h2>
+            <p className="text-red-600 mt-2">
+              {error || 'Failed to load coupon'}
+            </p>
+            <button
+              onClick={() => router.push("/admin/coupons")}
+              className="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
+            >
+              Back to Coupons
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#fcfbf8] p-2">
@@ -59,8 +115,16 @@ export default function EditCoupon() {
 
         <form onSubmit={handleUpdate} className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
+          {error && (
+            <div className="lg:col-span-3 bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+              <p className="text-sm text-red-700">{error}</p>
+            </div>
+          )}
+
           {/* LEFT SECTION */}
           <div className="lg:col-span-2 space-y-8">
+
+            <fieldset disabled={saving} className="space-y-8">
 
             {/* Basic Info */}
             <div className="bg-white border border-[#e7e1cf] rounded-xl p-6 space-y-5">
@@ -81,9 +145,14 @@ export default function EditCoupon() {
                 <label className="text-sm text-[#9a864c]">Discount Type</label>
                 <select
                   value={form.type}
-                  onChange={(e) =>
-                    setForm({ ...form, type: e.target.value })
-                  }
+                  onChange={(e) => {
+                    const newType = e.target.value;
+                    setForm({ 
+                      ...form, 
+                      type: newType,
+                      ...(newType === "FLAT" && { maxDiscount: "" })
+                    });
+                  }}
                   className="w-full mt-1 border border-[#e7e1cf] p-3 rounded-lg focus:outline-none focus:border-[#9a864c]"
                 >
                   <option value="PERCENT">Percentage (%)</option>
@@ -101,7 +170,7 @@ export default function EditCoupon() {
                   type="number"
                   value={form.value}
                   onChange={(e) =>
-                    setForm({ ...form, value: e.target.value })
+                    setForm({ ...form, value: e.target.value ? Number(e.target.value) : "" })
                   }
                   className="w-full mt-1 border border-[#e7e1cf] p-3 rounded-lg focus:outline-none focus:border-[#9a864c]"
                 />
@@ -116,7 +185,7 @@ export default function EditCoupon() {
                     type="number"
                     value={form.maxDiscount || ""}
                     onChange={(e) =>
-                      setForm({ ...form, maxDiscount: e.target.value })
+                      setForm({ ...form, maxDiscount: e.target.value ? Number(e.target.value) : "" })
                     }
                     className="w-full mt-1 border border-[#e7e1cf] p-3 rounded-lg focus:outline-none focus:border-[#9a864c]"
                   />
@@ -138,7 +207,7 @@ export default function EditCoupon() {
                   type="number"
                   value={form.minOrderAmount || ""}
                   onChange={(e) =>
-                    setForm({ ...form, minOrderAmount: e.target.value })
+                    setForm({ ...form, minOrderAmount: e.target.value ? Number(e.target.value) : "" })
                   }
                   className="w-full mt-1 border border-[#e7e1cf] p-3 rounded-lg focus:outline-none focus:border-[#9a864c]"
                 />
@@ -152,7 +221,7 @@ export default function EditCoupon() {
                   type="number"
                   value={form.usageLimit || ""}
                   onChange={(e) =>
-                    setForm({ ...form, usageLimit: e.target.value })
+                    setForm({ ...form, usageLimit: e.target.value ? Number(e.target.value) : "" })
                   }
                   className="w-full mt-1 border border-[#e7e1cf] p-3 rounded-lg focus:outline-none focus:border-[#9a864c]"
                 />
@@ -167,7 +236,7 @@ export default function EditCoupon() {
                 </label>
                 <input
                   type="date"
-                  value={form.expiryDate}
+                  value={form.expiryDate || ""}
                   onChange={(e) =>
                     setForm({ ...form, expiryDate: e.target.value })
                   }
@@ -189,6 +258,8 @@ export default function EditCoupon() {
                 </label>
               </div>
             </div>
+
+            </fieldset>
 
             {/* Buttons */}
             <div className="flex gap-4">

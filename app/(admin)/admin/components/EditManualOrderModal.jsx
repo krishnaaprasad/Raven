@@ -81,9 +81,8 @@ export default function EditOrderModal({ order, onClose, onUpdated }) {
     const ship = Number(form.shippingCharge || 0);
     const discount = Number(form.discount || 0);
 
-    return sub + ship - discount;
+    return Math.max(0, sub + ship - discount);
   }, [form]);
-
   const handleUpdate = async () => {
     try {
       const res = await fetch(`/api/admin/orders/${order._id}/edit`, {
@@ -257,7 +256,7 @@ export default function EditOrderModal({ order, onClose, onUpdated }) {
 
   <div className="flex justify-between font-semibold text-base pt-2 border-t">
     <span>Total</span>
-    <span>₹{total.toFixed(2)}</span>
+    <span>₹{Number.isFinite(total) ? total.toFixed(2) : "0.00"}</span>
   </div>
 </div>
         </div>

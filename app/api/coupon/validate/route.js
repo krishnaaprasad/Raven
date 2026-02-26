@@ -1,3 +1,4 @@
+import { NextResponse } from "next/server";
 import connectToDatabase from "@/lib/mongodb";
 import Coupon from "@/models/Coupon";
 
@@ -5,44 +6,59 @@ export async function POST(req) {
   try {
     await connectToDatabase();
 
-    const { code, cartTotal } = await req.json();
+    const body = await req.json();
+    const code = body?.code?.toUpperCase()?.trim();
+    const cartTotal = Number(body?.cartTotal);
 
     if (!code) {
-      return Response.json(
+      return NextResponse.json(
         { message: "Coupon code required" },
         { status: 400 }
       );
     }
 
+    if (!cartTotal || isNaN(cartTotal) || cartTotal <= 0) {
+      return NextResponse.json(
+        { message: "Invalid cart total" },
+        { status: 400 }
+      );
+    }
+
     const coupon = await Coupon.findOne({
-      code: code.toUpperCase(),
+      code,
       isActive: true,
-      deleted: { $ne: true }, // safety if you use soft delete
+      deleted: { $ne: true },
     });
 
     if (!coupon) {
-      return Response.json(
+      return NextResponse.json(
         { message: "Invalid coupon" },
         { status: 400 }
       );
     }
 
-    if (new Date() > coupon.expiryDate) {
-      return Response.json(
+    // Expiry check (safe)
+    if (coupon.expiryDate && new Date() > coupon.expiryDate) {
+      return NextResponse.json(
         { message: "Coupon expired" },
         { status: 400 }
       );
     }
 
-    if (coupon.usageLimit && coupon.usedCount >= coupon.usageLimit) {
-      return Response.json(
+    // Usage limit check
+    if (
+      coupon.usageLimit &&
+      coupon.usedCount >= coupon.usageLimit
+    ) {
+      return NextResponse.json(
         { message: "Coupon usage limit reached" },
         { status: 400 }
       );
     }
 
+    // Minimum order check
     if (cartTotal < (coupon.minOrderAmount || 0)) {
-      return Response.json(
+      return NextResponse.json(
         {
           message: `Minimum order ₹${coupon.minOrderAmount} required`,
         },
@@ -50,7 +66,7 @@ export async function POST(req) {
       );
     }
 
-    // Calculate discount
+    // 🔢 Calculate discount
     let discount = 0;
 
     if (coupon.type === "PERCENT") {
@@ -63,16 +79,19 @@ export async function POST(req) {
       discount = coupon.value;
     }
 
-    return Response.json({
+    // Prevent negative final total
+    const finalTotal = Math.max(0, cartTotal - discount);
+
+    return NextResponse.json({
       success: true,
-      discount,
-      finalTotal: cartTotal - discount,
+      discount: Number(discount.toFixed(2)),
+      finalTotal: Number(finalTotal.toFixed(2)),
       code: coupon.code,
     });
 
   } catch (error) {
     console.error("Coupon validate error:", error);
-    return Response.json(
+    return NextResponse.json(
       { message: "Server error" },
       { status: 500 }
     );
