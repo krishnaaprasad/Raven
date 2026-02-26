@@ -84,13 +84,22 @@ export async function PUT(req, context) {
     // 🔁 Handle variant change
     if (variantSize && variantSize !== cartItem.size) {
       const product = await Product.findOne({ slug: cartItem.slug });
-      if (!product) throw new Error("Product missing");
+      if (!product) {
+        return NextResponse.json(
+          { success: false, error: "Product not found" },
+          { status: 400 }
+        );
+      }
 
       const variant = product.variants.find(
         (v) => String(v.size) === String(variantSize)
       );
-      if (!variant) throw new Error("Invalid variant");
-
+      if (!variant) {
+        return NextResponse.json(
+          { success: false, error: "Invalid variant size" },
+          { status: 400 }
+        );
+      }
       cartItem.size = variant.size;
       cartItem.price = Number(price ?? variant.price);
     } else {
@@ -101,9 +110,8 @@ export async function PUT(req, context) {
 
     // 🔢 Recalculate totals
     const subTotal = cartItem.quantity * cartItem.price;
-    const shipAmount = Number(shippingCharge ?? 0);
-    const discountAmount = Number(discount ?? 0);
-
+    const shipAmount = Number(shippingCharge ?? order.shippingCharge ?? 0);
+    const discountAmount = Number(discount ?? order.discount ?? 0);
     order.shippingCharge = shipAmount;
     order.discount = discountAmount;
     order.couponCode = couponCode || null;

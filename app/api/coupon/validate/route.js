@@ -7,9 +7,8 @@ export async function POST(req) {
     await connectToDatabase();
 
     const body = await req.json();
-    const code = body?.code?.toUpperCase()?.trim();
+    const code = typeof body?.code === "string" ? body.code.toUpperCase().trim() : null;
     const cartTotal = Number(body?.cartTotal);
-
     if (!code) {
       return NextResponse.json(
         { message: "Coupon code required" },
