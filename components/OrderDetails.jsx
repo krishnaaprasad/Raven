@@ -93,9 +93,15 @@ useEffect(() => {
   };
 
   
-  const subtotal = order.cartItems.reduce((sum, i) => sum + (i.price * i.quantity), 0);
-  const shipping = order.shippingCharge || 0;
-  const total = subtotal + shipping;
+  const subtotal = order.cartItems.reduce(
+    (sum, i) => sum + (i.price * i.quantity),
+    0
+  );
+
+  const shipping = Number(order.shippingCharge || 0);
+  const discount = Number(order.discount || 0);
+
+  const total = Math.max(subtotal + shipping - discount, 0);
 
   return (
     <div className="w-full flex flex-col lg:flex-row gap-8">
@@ -163,7 +169,7 @@ useEffect(() => {
                   alt={item.name}
                 />
 
-                <div className="flex-grow">
+                <div className="grow">
                   <p className="text-(--theme-text) font-bold">{item.name}</p>
                   <p className="text-(--theme-muted) text-sm">{item.size}</p>
                   <p className="text-(--theme-muted) text-sm">Qty: {item.quantity}</p>
@@ -323,23 +329,47 @@ useEffect(() => {
           <h3 className="text-lg font-bold mb-4 text-(--theme-text)">Order Summary</h3>
 
           <div className="space-y-3 text-sm">
-            <div className="flex justify-between">
-              <p className="text-(--theme-muted)">Subtotal</p>
-              <p className="text-(--theme-text)">₹{formatAmount(subtotal)}</p>
-            </div>
 
-            <div className="flex justify-between">
-              <p className="text-(--theme-muted)">Shipping</p>
-              <p className="text-(--theme-text)">₹{formatAmount(shipping)}</p>
-            </div>
+  <div className="flex justify-between">
+    <p className="text-(--theme-muted)">Subtotal</p>
+    <p className="text-(--theme-text)">₹{formatAmount(subtotal)}</p>
+  </div>
 
-            <div className="border-t border-(--theme-border) my-3"></div>
+  <div className="flex justify-between">
+    <p className="text-(--theme-muted)">Shipping</p>
+    <p className="text-(--theme-text)">₹{formatAmount(shipping)}</p>
+  </div>
 
-            <div className="flex justify-between text-base font-bold">
-              <p className="text-(--theme-text)">Grand Total</p>
-              <p className="text-(--theme-text) font-bold">₹{formatAmount(total)}</p>
-            </div>
-          </div>
+  {discount > 0 && (
+    <div className="flex justify-between text-green-600 font-medium">
+      <p>
+        Discount
+        {order.couponCode && (
+          <span className="ml-1 text-xs text-(--theme-muted)">
+            ({order.couponCode})
+          </span>
+        )}
+      </p>
+      <p>- ₹{formatAmount(discount)}</p>
+    </div>
+  )}
+
+  <div className="border-t border-(--theme-border) my-3"></div>
+
+  <div className="flex justify-between text-base font-bold">
+    <p className="text-(--theme-text)">Grand Total</p>
+    <p className="text-(--theme-text)">
+      ₹{formatAmount(total)}
+    </p>
+  </div>
+
+  {discount > 0 && (
+    <p className="text-xs text-green-600 mt-1">
+      You saved ₹{formatAmount(discount)} on this order 🎉
+    </p>
+  )}
+
+</div>
         </div>
 
       </div>

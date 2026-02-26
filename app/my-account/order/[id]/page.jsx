@@ -24,7 +24,9 @@ export default function OrderDetailPage() {
 
   useEffect(() => {
     const fetchOrder = async () => {
-      const res = await fetch(`/api/order/${id}`);
+      const res = await fetch(`/api/order/${id}`, {
+        cache: "no-store",
+      });
       const data = await res.json();
 
       if (data.success) setOrder(data.order);
@@ -64,7 +66,8 @@ const total = Number(order.totalAmount || 0);
     });
     window.location.href = "/Cart";
   };
- 
+ console.log("FRONTEND ORDER:", order);
+console.log("DISCOUNT FROM API:", order.discount);
   return (
     <div className="max-w-4xl mx-auto p-6 mt-6 mb-20 bg-(--theme-bg) text-(--theme-text) rounded-2xl border border-(--theme-border) shadow-sm transition-colors duration-300">
       

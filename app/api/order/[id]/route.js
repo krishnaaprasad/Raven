@@ -31,7 +31,8 @@ export async function GET(request, context) {
 
         shippingCharge: order.shippingCharge,
 
-        discount: order.discount || 0,      
+       // 🔥 IMPORTANT
+        discount: Number(order.discount || 0),
         couponCode: order.couponCode || null,
 
         totalAmount: order.totalAmount,
