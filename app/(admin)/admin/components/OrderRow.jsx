@@ -89,7 +89,7 @@ export default function OrderRow({ order, onStatusUpdated, showDeleted }) {
       const data = await res.json();
       if (data.success) {
         setCurrentStatus(selectedStatus);
-        onStatusUpdated?.(selectedStatus);
+        onStatusUpdated?.();
         toast.success(`Status updated to ${selectedStatus}`);
       } else {
         toast.error(data.error || "Update failed");

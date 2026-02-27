@@ -9,11 +9,32 @@ export default function AdminLayout({ children }) {
 
   useEffect(() => {
     document.body.style.overflow = mobileOpen ? "hidden" : "auto";
+
+    const root = document.documentElement;
+    root.classList.remove("dark");
+
+    return () => {
+      // when leaving admin, restore dark if saved
+      const saved = localStorage.getItem("theme");
+      if (saved === "dark") {
+        root.classList.add("dark");
+      }
+    };
   }, [mobileOpen]);
 
   return (
-    <div className="min-h-screen flex bg-[#fcfbf8] text-[#1b180d] font-[Manrope,sans-serif]">
-
+    <div
+      className="min-h-screen flex font-[Manrope,sans-serif]"
+      style={{
+        backgroundColor: "#fcfbf8",
+        color: "#1b180d",
+        "--theme-bg": "#fcfbf8",
+        "--theme-soft": "#f6f6f6",
+        "--theme-border": "#e7e1cf",
+        "--theme-text": "#1b180d",
+        "--theme-muted": "#6b6654",
+      }}
+    >
       {/* Desktop Sidebar */}
       <aside className="hidden md:block w-64 shrink-0 border-r border-[#e7e1cf] bg-[#fcfbf8] h-screen sticky top-0">
         <AdminSidebar />
@@ -35,18 +56,14 @@ export default function AdminLayout({ children }) {
         />
       )}
 
-      {/* MAIN CONTENT FIXED */}
+      {/* MAIN CONTENT */}
       <main className="flex-1 min-h-screen flex flex-col overflow-hidden">
-
-        {/* Sticky Header */}
         <AdminHeader onToggleMobile={() => setMobileOpen(!mobileOpen)} />
 
-        {/* Scrollable content */}
         <div className="flex-1 overflow-y-auto overflow-x-hidden p-6">
           {children}
         </div>
       </main>
-
     </div>
   );
 }

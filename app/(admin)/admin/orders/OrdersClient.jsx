@@ -38,13 +38,14 @@ export default function OrdersClient() {
   const [q, setQ] = useState("");
   const [paymentStatus, setPaymentStatus] = useState("");
   const [orderStatus, setOrderStatus] = useState("");
-  const [couponCode, setCouponCode] = useState("");
+  const [productName, setProductName] = useState("");
   const [hasDiscount, setHasDiscount] = useState("");
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const [showCreateOrder, setShowCreateOrder] = useState(false);
   const [showDeleted, setShowDeleted] = useState(false);
-  
+  const [uniqueProducts, setUniqueProducts] = useState([]);
+  const didInitProducts = useRef(false);
 
   // date range picker state
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -75,8 +76,9 @@ export default function OrdersClient() {
       if (orderStatus) params.set("orderStatus", orderStatus);
       if (from) params.set("from", from);
       if (to) params.set("to", to);
-      if (couponCode) params.set("couponCode", couponCode);
+      if (productName) params.set("productName", productName);
       if (hasDiscount) params.set("hasDiscount", hasDiscount);
+
 
       const res = await fetch(`/api/admin/orders?${params.toString()}`);
       const json = await res.json();
@@ -92,6 +94,27 @@ export default function OrdersClient() {
       setLoading(false);
     }
   };
+  
+  useEffect(() => {
+  if (!didInitProducts.current && orders.length > 0) {
+    const names = new Set();
+
+    orders.forEach((order) => {
+      order.cartItems?.forEach((item) => {
+        if (item.name) names.add(item.name);
+      });
+    });
+
+    setUniqueProducts([...names]);
+    didInitProducts.current = true;
+  }
+}, [orders]);
+
+useEffect(() => {
+  if (productName !== "") {
+    fetchOrders(1);
+  }
+}, [productName]);
 
   // initial load
   useEffect(() => {
@@ -245,8 +268,7 @@ const exportCSV = async () => {
   };
 
   const resetAfterStatusUpdate = () => {
-  setOrderStatus("");
-  fetchOrders(1);
+  fetchOrders(meta.page);
 };
 
 {showCreateOrder && (
@@ -451,13 +473,19 @@ const exportCSV = async () => {
   )}
 </div>
       
-      {/* COUPON FILTER */}
-<input
-  value={couponCode}
-  onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
-  placeholder="Coupon Code"
+    {/* PRODUCT NAME DROPDOWN */}
+<select
+  value={productName}
+  onChange={(e) => setProductName(e.target.value)}
   className="h-10 px-3 rounded-lg border border-[#e7e1cf] bg-[#fcfbf8] text-[14px]"
-/>
+>
+  <option value="">All Products</option>
+  {uniqueProducts.map((p) => (
+    <option key={p} value={p}>
+      {p}
+    </option>
+  ))}
+</select>
 
 {/* DISCOUNT FILTER */}
 <select

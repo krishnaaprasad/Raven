@@ -267,7 +267,7 @@ export default function OrderDetailsClient({ orderFromServer }) {
                             </p>
                             {item.size && (
                               <p className="text-[12px] text-[#9a864c]">
-                                Size: {item.size}
+                                Size: {item.size} ml
                               </p>
                             )}
                           </div>

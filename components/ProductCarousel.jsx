@@ -10,7 +10,7 @@ export default function ProductCarousel({ products = [] }) {
   const scrollRef = useRef(null);
   const { openQuickView } = useQuickView();
 
-  const selectedSlugs = ["lucifer", "oud-intense", "my-tique"];
+  const selectedSlugs = ["lucifer", "oud-intense", "mystique"];
 
 // Desktop: only 3 selected products
 const desktopProducts = products.filter((p) =>

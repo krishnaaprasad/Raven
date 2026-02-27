@@ -20,7 +20,7 @@ export async function GET(request) {
     const from = searchParams.get("from") || null;
     const to = searchParams.get("to") || null;
     const hasDiscount = searchParams.get("hasDiscount") || null;
-    const couponCode = searchParams.get("couponCode") || null;
+    const productName = searchParams.get("productName") || null;
 
     const showDeleted = searchParams.get("deleted") === "true";
 
@@ -62,9 +62,10 @@ if (from || to) {
   if (to) filter.createdAt.$lte = new Date(`${to}T23:59:59`);
 }
 
-// COUPON CODE FILTER
-if (couponCode) {
-  filter.couponCode = couponCode;
+// PRODUCT NAME FILTER (dropdown)
+if (productName) {
+  const re = new RegExp(productName, "i");
+  filter["cartItems.name"] = re;
 }
 
 // DISCOUNT FILTER
