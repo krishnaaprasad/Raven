@@ -58,7 +58,7 @@ export default function OrdersClient() {
   // data + meta
   const [loading, setLoading] = useState(false);
   const [orders, setOrders] = useState([]);
-  const [meta, setMeta] = useState({ page: 1, limit: 10, total: 0, pages: 1 });
+  const [meta, setMeta] = useState({ page: 1, limit: 25, total: 0, pages: 1 });
 
   const pickerRef = useRef(null);
 
