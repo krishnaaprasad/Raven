@@ -8,15 +8,18 @@ export async function GET(req) {
     await connectToDatabase();
 
     const { searchParams } = new URL(req.url);
-    const limit = Number(searchParams.get("limit")) || 5;
 
-    const products = await Product.find({ deleted: { $ne: true } })
-      .sort({ createdAt: -1 }) // latest first
-      .limit(limit)
+    const filter = {
+      deleted: { $ne: true },
+    };
+
+    const products = await Product.find(filter)
+      .sort({ createdAt: -1 })
       .select("slug name images rating reviewCount variants accords")
       .lean();
 
     return Response.json(products);
+
   } catch (error) {
     console.error("Products fetch error:", error);
     return Response.json(

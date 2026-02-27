@@ -3,23 +3,20 @@
 import { useState, useEffect, useCallback } from 'react';
 import ProductGridNavigation from '@/components/shoppage/ProductGridNavigation';
 import ProductGrid from './ProductGrid';
-import LoadingSkeleton from './LoadingSkeleton';
 import { ArrowUp, CheckCircle } from 'lucide-react';
 import { useCart } from '@/app/context/cartcontext';
 import { useQuickView } from "@/app/context/QuickViewContext";
+import { motion, AnimatePresence } from "framer-motion";
 
-const ProductCollectionInteractive = ({ initialProducts }) => {
+const ProductCollectionInteractive = ({ initialProducts, activeFilters }) => {
   const { addToCart, openCart } = useCart();
-  const [products] = useState(initialProducts || []);
   const [filteredProducts, setFilteredProducts] = useState(initialProducts || []);
   const [currentPage, setCurrentPage] = useState(1);
   const [sortBy, setSortBy] = useState('featured');
   const [viewMode, setViewMode] = useState('grid');
   const { openQuickView } = useQuickView();
-  const [isLoading, setIsLoading] = useState(false);
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [cartNotification, setCartNotification] = useState(null);
-
   const productsPerPage = 24;
 
   /* Scroll to top visibility */
@@ -31,49 +28,53 @@ const ProductCollectionInteractive = ({ initialProducts }) => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+
   /* ---------------- SORTING ---------------- */
-  const applySorting = useCallback(
-    (sortValue) => {
-      let sorted = [...filteredProducts];
+  const applySorting = (sortValue, baseProducts = filteredProducts) => {
+  let sorted = [...baseProducts];
 
-      switch (sortValue) {
-        case 'price-low':
-          sorted.sort(
-            (a, b) =>
-              (a?.variants?.[0]?.price || 0) -
-              (b?.variants?.[0]?.price || 0)
-          );
-          break;
-        case 'price-high':
-          sorted.sort(
-            (a, b) =>
-              (b?.variants?.[0]?.price || 0) -
-              (a?.variants?.[0]?.price || 0)
-          );
-          break;
-        case 'name-asc':
-          sorted.sort((a, b) => a.name.localeCompare(b.name));
-          break;
-        case 'name-desc':
-          sorted.sort((a, b) => b.name.localeCompare(a.name));
-          break;
-        case 'rating':
-          sorted.sort((a, b) => (b.rating || 0) - (a.rating || 0));
-          break;
-        case 'newest':
-          sorted.sort(
-            (a, b) =>
-              new Date(b.createdAt) - new Date(a.createdAt)
-          );
-          break;
-        default:
-          break;
-      }
+  switch (sortValue) {
+    case 'price-low':
+      sorted.sort(
+        (a, b) =>
+          (a?.variants?.[0]?.price || 0) -
+          (b?.variants?.[0]?.price || 0)
+      );
+      break;
 
-      setFilteredProducts(sorted);
-    },
-    [filteredProducts]
-  );
+    case 'price-high':
+      sorted.sort(
+        (a, b) =>
+          (b?.variants?.[0]?.price || 0) -
+          (a?.variants?.[0]?.price || 0)
+      );
+      break;
+
+    case 'name-asc':
+      sorted.sort((a, b) => a.name.localeCompare(b.name));
+      break;
+
+    case 'name-desc':
+      sorted.sort((a, b) => b.name.localeCompare(a.name));
+      break;
+
+    case 'rating':
+      sorted.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+      break;
+
+    case 'newest':
+      sorted.sort(
+        (a, b) =>
+          new Date(b.createdAt) - new Date(a.createdAt)
+      );
+      break;
+
+    default:
+      break;
+  }
+
+  setFilteredProducts(sorted);
+};
 
   const handleSortChange = (value) => {
     setSortBy(value);
@@ -120,6 +121,22 @@ const ProductCollectionInteractive = ({ initialProducts }) => {
     currentPage * productsPerPage
   );
 
+  useEffect(() => {
+  let filtered = [...initialProducts];
+
+  if (activeFilters?.accords?.length) {
+    filtered = filtered.filter(product =>
+      product.accords?.some(a =>
+        activeFilters.accords.includes(a.toLowerCase())
+      )
+    );
+  }
+
+  applySorting(sortBy, filtered);
+  setCurrentPage(1);
+
+}, [activeFilters]);
+
   return (
     <div className="min-h-screen bg-[var(--theme-bg)] transition-colors duration-500">
       <div className="max-w-[1400px] mx-auto px-6 lg:px-8 py-3">
@@ -134,20 +151,25 @@ const ProductCollectionInteractive = ({ initialProducts }) => {
               onPageChange={handlePageChange}
               onSortChange={handleSortChange}
               onViewChange={handleViewChange}
-              loading={isLoading}
             />
 
-            {isLoading ? (
-              <LoadingSkeleton />
-            ) : (
-              <ProductGrid
-                products={paginatedProducts}
-                onQuickView={openQuickView}
-                onAddToCart={handleAddToCart}
-                viewMode={viewMode}
-              />
-            )}
-
+            
+              <AnimatePresence mode="wait">
+  <motion.div
+    key={JSON.stringify(activeFilters)}
+    initial={{ opacity: 0 }}
+    animate={{ opacity: 1 }}
+    exit={{ opacity: 0 }}
+    transition={{ duration: 0.3 }}
+  >
+    <ProductGrid
+      products={paginatedProducts}
+      onQuickView={openQuickView}
+      onAddToCart={handleAddToCart}
+      viewMode={viewMode}
+    />
+  </motion.div>
+</AnimatePresence>
             {filteredProducts.length > productsPerPage && (
               <div className="mt-10">
                 <ProductGridNavigation

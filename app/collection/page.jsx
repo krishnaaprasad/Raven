@@ -1,10 +1,9 @@
 export const dynamic = "force-dynamic";
 
 import CraftCredentials from "./components/CraftCredentials";
-import ProductCollectionInteractive from './components/ProductCollectionInteractive';
 import connectToDatabase from '@/lib/mongodb';
 import Product from '@/models/Product';
-import FilterPanel from '@/components/shoppage/FilterPanel';
+import CollectionClientWrapper from './components/CollectionClientWrapper';
 
 // ✅ SEO metadata (optimized)
 export const metadata = {
@@ -78,33 +77,18 @@ export default async function ProductCollectionPage() {
       {/* 🔝 Header */}
       <section className="bg-[var(--theme-bg)]">
         <div className="max-w-[1100px] mx-auto px-6 py-16 sm:py-18 text-center">
-
-          <h1 className="
-            text-3xl sm:text-4xl md:text-5xl 
-            font-semibold 
-            text-[var(--theme-text)] 
-            mb-2 leading-tight
-          ">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-semibold text-[var(--theme-text)] mb-2 leading-tight">
             The Collection
           </h1>
 
-          <p className="
-            font-system-UI 
-            text-base sm:text-lg 
-            text-[var(--theme-muted)] 
-            max-w-2xl mx-auto mb-8
-          ">
+          <p className="text-base sm:text-lg text-[var(--theme-muted)] max-w-2xl mx-auto mb-8">
             Three signature fragrances, each created with intention. Designed to express quiet confidence and a presence that doesn’t ask for attention.
           </p>
-
         </div>
       </section>
 
-      {/* Filters */}
-      <FilterPanel />
-
-      {/* 🛍 Collection */}
-      <ProductCollectionInteractive initialProducts={products} />
+      {/* ✅ CLIENT SIDE FILTER + GRID */}
+      <CollectionClientWrapper initialProducts={products} />
 
       {/* 🧪 Craft Transparency */}
       <CraftCredentials credentials={craftCredentials} />
