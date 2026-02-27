@@ -210,7 +210,7 @@ export default function CartPage() {
           {/* Payment Logos */}
           <div className="flex items-center justify-center gap-4 pt-4 opacity-80">
             {[
-              'https://upload.wikimedia.org/wikipedia/commons/4/41/Visa_Logo.png',
+              'https://upload.wikimedia.org/wikipedia/commons/9/98/Visa_Inc._logo_%282005%E2%80%932014%29.svg',
               'https://upload.wikimedia.org/wikipedia/commons/d/d1/RuPay.svg',
               'https://upload.wikimedia.org/wikipedia/commons/e/e1/UPI-Logo-vector.svg'
             ].map((src, i) => (

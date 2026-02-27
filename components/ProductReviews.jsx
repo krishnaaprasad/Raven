@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo } from "react";
 import { Star, ChevronDown, ChevronRight, Upload, User } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSession } from "next-auth/react";
+import { X } from "lucide-react";
 
 const REVIEWS_PER_PAGE = 4;
 
@@ -46,7 +47,7 @@ export default function ProductReviews({ productId }) {
   const [currentPage, setCurrentPage] = useState(1);
   const [showForm, setShowForm] = useState(false);
   const [error, setError] = useState(null);
-
+  const [previewImage, setPreviewImage] = useState(null);
   const [form, setForm] = useState({
     rating: 0,
     title: "",
@@ -236,6 +237,22 @@ const handleSubmit = async (e) => {
     setSubmitting(false);
   }
 };
+
+useEffect(() => {
+  const handleEsc = (e) => {
+    if (e.key === "Escape") setPreviewImage(null);
+  };
+
+  if (previewImage) {
+    document.addEventListener("keydown", handleEsc);
+    document.body.style.overflow = "hidden"; // prevent scroll
+  }
+
+  return () => {
+    document.removeEventListener("keydown", handleEsc);
+    document.body.style.overflow = "auto";
+  };
+}, [previewImage]);
 
 
   /* ───────────────────────── */
@@ -621,6 +638,24 @@ const handleSubmit = async (e) => {
               {r.comment}
             </p>
 
+           {r.images?.length > 0 && (
+  <div className="flex gap-3 mt-4 flex-wrap">
+    {r.images.map((img, i) => (
+      <button
+        key={i}
+        onClick={() => setPreviewImage(img)}
+        className="w-20 h-20 border border-(--theme-border) overflow-hidden group rounded-sm"
+      >
+        <img
+          src={img}
+          alt="Review image"
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 cursor-pointer"
+        />
+      </button>
+    ))}
+  </div>
+)}
+
             {r.reply && (
   <div className="mt-6 ml-10 border-l border-(--theme-border) pl-6 py-4 bg-(--theme-soft)/40 rounded-sm">
 
@@ -628,14 +663,12 @@ const handleSubmit = async (e) => {
       <span className="text-sm font-semibold text-(--theme-text)">
         Raven Fragrance
       </span>
-      <span className="text-[10px] uppercase tracking-[0.2em] text-(--theme-muted)">
-        Staff
-      </span>
     </div>
 
     <p className="text-sm text-(--theme-muted) leading-relaxed">
       {r.reply}
     </p>
+    
 
     {r.replyAt && (
       <p className="text-xs text-(--theme-muted) mt-2">
@@ -645,20 +678,6 @@ const handleSubmit = async (e) => {
   </div>
 )}
 
-
-            {r.images?.length > 0 && (
-              <div className="flex gap-3 mt-4">
-                {r.images.map((img, i) => (
-                  <div key={i} className="w-20 h-20 border border-(--theme-border)">
-                    <img
-                      src={img}
-                      alt={r?.title || `Review image by ${r?.name || 'customer'}`}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                ))}
-              </div>
-            )}
           </motion.div>
         ))}
       </div>
@@ -683,6 +702,55 @@ const handleSubmit = async (e) => {
           ))}
         </div>
       )}
+      <AnimatePresence>
+  {previewImage && (
+    <motion.div
+  initial={{ opacity: 0 }}
+  animate={{ opacity: 1 }}
+  exit={{ opacity: 0 }}
+  className="fixed inset-0 z-9999 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4"
+  onClick={() => setPreviewImage(null)}
+>
+      {/* Modal Content */}
+      <motion.div
+  initial={{ scale: 0.95, opacity: 0 }}
+  animate={{ scale: 1, opacity: 1 }}
+  exit={{ scale: 0.95, opacity: 0 }}
+  transition={{ duration: 0.25 }}
+  className="relative inline-block"
+  onClick={(e) => e.stopPropagation()}
+>
+  {/* IMAGE */}
+  <img
+    src={previewImage}
+    alt="Review Preview"
+    className="max-h-[85vh] w-auto max-w-[92vw] object-contain rounded-sm shadow-2xl"
+  />
+
+  {/* CLOSE BUTTON */}
+  <button
+    onClick={() => setPreviewImage(null)}
+    aria-label="Close image preview"
+    className="
+      absolute top-3 right-3
+      w-8 h-8
+      flex items-center justify-center
+      rounded-full
+      bg-black/70 backdrop-blur-md
+      text-white
+      hover:bg-black
+      transition-all duration-200
+      hover:scale-105 cursor-pointer
+    "
+  >
+    <X size={20} strokeWidth={2} />
+  </button>
+</motion.div>
+    </motion.div>
+  )}
+</AnimatePresence>
     </section>
   );
 }
+
+
