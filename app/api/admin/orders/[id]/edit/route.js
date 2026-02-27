@@ -17,7 +17,7 @@ export async function PUT(req, context) {
   try {
     await connectToDatabase();
 
-    const { id } = context.params;
+    const { id } = await context.params;
 
     if (!id) {
       return NextResponse.json(

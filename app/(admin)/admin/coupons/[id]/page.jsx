@@ -80,7 +80,7 @@ export default function EditCoupon() {
     return (
       <div className="min-h-screen bg-[#fcfbf8] p-2">
         <div className="max-w-5xl mx-auto">
-          <div className="bg-red-50 border border-red-200 rounded-lg p-6">
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
             <h2 className="text-lg font-semibold text-red-700">
               Error
             </h2>
@@ -113,36 +113,36 @@ export default function EditCoupon() {
           </p>
         </div>
 
-        <form onSubmit={handleUpdate} className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <form onSubmit={handleUpdate} className="grid grid-cols-1 lg:grid-cols-3 gap-4">
 
           {error && (
             <div className="lg:col-span-3 bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
-              <p className="text-sm text-red-700">{error}</p>
+              <p className="text-xs text-red-700">{error}</p>
             </div>
           )}
 
           {/* LEFT SECTION */}
-          <div className="lg:col-span-2 space-y-8">
+          <div className="lg:col-span-2 space-y-5">
 
             <fieldset disabled={saving} className="space-y-8">
 
             {/* Basic Info */}
-            <div className="bg-white border border-[#e7e1cf] rounded-xl p-6 space-y-5">
+            <div className="bg-white border border-[#e7e1cf] rounded-xl p-4 space-y-4">
               <h2 className="text-lg font-semibold text-[#1b180d]">
                 Basic Information
               </h2>
 
               <div>
-                <label className="text-sm text-[#9a864c]">Coupon Code</label>
+                <label className="text-xs text-[#9a864c]">Coupon Code</label>
                 <input
                   value={form.code}
                   disabled
-                  className="w-full mt-1 border border-[#e7e1cf] p-3 rounded-lg bg-gray-50"
+                  className="w-full mt-1 border border-[#e7e1cf] p-2.5 rounded-md text-sm focus:outline-none focus:border-[#9a864c]"
                 />
               </div>
 
               <div>
-                <label className="text-sm text-[#9a864c]">Discount Type</label>
+                <label className="text-xs text-[#9a864c]">Discount Type</label>
                 <select
                   value={form.type}
                   onChange={(e) => {
@@ -153,7 +153,7 @@ export default function EditCoupon() {
                       ...(newType === "FLAT" && { maxDiscount: "" })
                     });
                   }}
-                  className="w-full mt-1 border border-[#e7e1cf] p-3 rounded-lg focus:outline-none focus:border-[#9a864c]"
+                  className="w-full mt-1 text-sm border border-[#e7e1cf] p-3 rounded-lg focus:outline-none focus:border-[#9a864c]"
                 >
                   <option value="PERCENT">Percentage (%)</option>
                   <option value="FLAT">Flat Amount (₹)</option>
@@ -161,7 +161,7 @@ export default function EditCoupon() {
               </div>
 
               <div>
-                <label className="text-sm text-[#9a864c]">
+                <label className="text-xs text-[#9a864c]">
                   {form.type === "PERCENT"
                     ? "Discount Percentage"
                     : "Flat Discount Amount"}
@@ -172,13 +172,13 @@ export default function EditCoupon() {
                   onChange={(e) =>
                     setForm({ ...form, value: e.target.value ? Number(e.target.value) : "" })
                   }
-                  className="w-full mt-1 border border-[#e7e1cf] p-3 rounded-lg focus:outline-none focus:border-[#9a864c]"
+                  className="w-full mt-1 text-sm border border-[#e7e1cf] p-3 rounded-lg focus:outline-none focus:border-[#9a864c]"
                 />
               </div>
 
               {form.type === "PERCENT" && (
                 <div>
-                  <label className="text-sm text-[#9a864c]">
+                  <label className="text-xs text-[#9a864c]">
                     Maximum Discount (Optional)
                   </label>
                   <input
@@ -187,20 +187,20 @@ export default function EditCoupon() {
                     onChange={(e) =>
                       setForm({ ...form, maxDiscount: e.target.value ? Number(e.target.value) : "" })
                     }
-                    className="w-full mt-1 border border-[#e7e1cf] p-3 rounded-lg focus:outline-none focus:border-[#9a864c]"
+                    className="w-full text-sm mt-1 border border-[#e7e1cf] p-3 rounded-lg focus:outline-none focus:border-[#9a864c]"
                   />
                 </div>
               )}
             </div>
 
             {/* Restrictions */}
-            <div className="bg-white border border-[#e7e1cf] rounded-xl p-6 space-y-5">
+            <div className="bg-white border border-[#e7e1cf] rounded-xl p-4 space-y-4">
               <h2 className="text-lg font-semibold text-[#1b180d]">
                 Usage Restrictions
               </h2>
 
               <div>
-                <label className="text-sm text-[#9a864c]">
+                <label className="text-xs text-[#9a864c]">
                   Minimum Order Amount (₹)
                 </label>
                 <input
@@ -209,12 +209,12 @@ export default function EditCoupon() {
                   onChange={(e) =>
                     setForm({ ...form, minOrderAmount: e.target.value ? Number(e.target.value) : "" })
                   }
-                  className="w-full mt-1 border border-[#e7e1cf] p-3 rounded-lg focus:outline-none focus:border-[#9a864c]"
+                  className="w-full text-sm mt-1 border border-[#e7e1cf] p-3 rounded-lg focus:outline-none focus:border-[#9a864c]"
                 />
               </div>
 
               <div>
-                <label className="text-sm text-[#9a864c]">
+                <label className="text-xs text-[#9a864c]">
                   Usage Limit
                 </label>
                 <input
@@ -223,7 +223,7 @@ export default function EditCoupon() {
                   onChange={(e) =>
                     setForm({ ...form, usageLimit: e.target.value ? Number(e.target.value) : "" })
                   }
-                  className="w-full mt-1 border border-[#e7e1cf] p-3 rounded-lg focus:outline-none focus:border-[#9a864c]"
+                  className="w-full text-sm mt-1 border border-[#e7e1cf] p-3 rounded-lg focus:outline-none focus:border-[#9a864c]"
                 />
                 <p className="text-xs text-[#9a864c] mt-1">
                   Used {form.usedCount || 0} times
@@ -231,7 +231,7 @@ export default function EditCoupon() {
               </div>
 
               <div>
-                <label className="text-sm text-[#9a864c]">
+                <label className="text-xs text-[#9a864c]">
                   Expiry Date
                 </label>
                 <input
@@ -240,7 +240,7 @@ export default function EditCoupon() {
                   onChange={(e) =>
                     setForm({ ...form, expiryDate: e.target.value })
                   }
-                  className="w-full mt-1 border border-[#e7e1cf] p-3 rounded-lg focus:outline-none focus:border-[#9a864c]"
+                  className="w-full text-sm mt-1 border border-[#e7e1cf] p-3 rounded-lg focus:outline-none focus:border-[#9a864c]"
                 />
               </div>
 
@@ -262,11 +262,11 @@ export default function EditCoupon() {
             </fieldset>
 
             {/* Buttons */}
-            <div className="flex gap-4">
+            <div className="flex gap-4 px-1">
               <button
                 type="submit"
                 disabled={saving}
-                className="px-8 py-3 bg-[#9a864c] text-white rounded-lg hover:opacity-90 transition disabled:opacity-50"
+                className="px-3 py-2.5 text-sm bg-[#9a864c] text-white rounded-lg hover:opacity-90 transition disabled:opacity-50"
               >
                 {saving ? "Updating..." : "Update Coupon"}
               </button>
@@ -274,7 +274,7 @@ export default function EditCoupon() {
               <button
                 type="button"
                 onClick={() => router.push("/admin/coupons")}
-                className="px-8 py-3 border border-[#e7e1cf] rounded-lg hover:bg-[#f3efe6] transition"
+                className="px-3 py-2 text-sm border border-[#e7e1cf] rounded-lg hover:bg-[#f3efe6] transition"
               >
                 Cancel
               </button>
@@ -282,13 +282,13 @@ export default function EditCoupon() {
           </div>
 
           {/* RIGHT PREVIEW PANEL */}
-          <div className="bg-white border border-[#e7e1cf] rounded-xl p-6 h-fit">
+          <div className="bg-white border border-[#e7e1cf] rounded-xl p-4 h-fit">
             <h2 className="text-lg font-semibold text-[#1b180d] mb-4">
               Preview
             </h2>
 
-            <div className="border border-dashed border-[#9a864c] p-6 text-center rounded-lg">
-              <p className="text-xl font-bold text-[#9a864c]">
+            <div className="border border-dashed border-[#9a864c] p-4 text-center rounded-lg">
+              <p className="text-lg font-bold text-[#9a864c]">
                 {form.code}
               </p>
 

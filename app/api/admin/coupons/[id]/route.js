@@ -2,11 +2,45 @@ import connectToDatabase from "@/lib/mongodb";
 import Coupon from "@/models/Coupon";
 import { NextResponse } from "next/server";
 
+/* ------------------ GET SINGLE COUPON ------------------ */
+export async function GET(req, context) {
+  try {
+    await connectToDatabase();
+
+    const { id } = await context.params;
+
+    if (!id) {
+      return NextResponse.json(
+        { error: "Coupon ID is required" },
+        { status: 400 }
+      );
+    }
+
+    const coupon = await Coupon.findById(id).lean();
+
+    if (!coupon) {
+      return NextResponse.json(
+        { error: "Coupon not found" },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json(coupon);
+  } catch (error) {
+    console.error("GET COUPON ERROR:", error);
+    return NextResponse.json(
+      { error: "Something went wrong" },
+      { status: 500 }
+    );
+  }
+}
+
+/* ------------------ UPDATE COUPON ------------------ */
 export async function PATCH(req, context) {
   try {
     await connectToDatabase();
 
-    const { id } = context.params;
+    const { id } = await context.params;
 
     if (!id) {
       return NextResponse.json(
