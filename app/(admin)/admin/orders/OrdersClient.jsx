@@ -44,7 +44,7 @@ export default function OrdersClient() {
   const [to, setTo] = useState("");
   const [showCreateOrder, setShowCreateOrder] = useState(false);
   const [showDeleted, setShowDeleted] = useState(false);
-
+  
 
   // date range picker state
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -547,21 +547,21 @@ const exportCSV = async () => {
               <th className="px-6 py-4 text-left min-w-[170px]">Customer</th>
               <th className="px-6 py-4 text-left min-w-[170px]">Date</th>
               <th className="px-6 py-4 text-left min-w-[120px]">Amount</th>
-              <th className="px-6 py-4 text-left min-w-[120px]">Discount</th>
-              <th className="px-6 py-4 text-left min-w-[150px]">Coupon</th>
               <th className="px-6 py-4 text-left min-w-[120px]">Payment</th>
               <th className="px-6 py-4 text-left min-w-40">Status</th>
               {showDeleted && (
                 <th className="px-6 py-4 text-left min-w-[200px]">Delete Reason</th>
               )}
               <th className="px-6 py-4 text-left min-w-[120px]">Action</th>
+              <th className="px-6 py-4 text-left min-w-[120px]">Discount</th>
+              <th className="px-6 py-4 text-left min-w-[150px]">Coupon</th>
             </tr>
           </thead>
 
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan={7} className="text-center py-6 text-sm">
+                <td colSpan={showDeleted ? 10 : 9} className="text-center py-6 text-sm">
                   Loading...
                 </td>
               </tr>
@@ -576,7 +576,7 @@ const exportCSV = async () => {
               ))
             ) : (
               <tr>
-                <td colSpan={7} className="text-center py-6 text-sm text-gray-500">
+                <td colSpan={showDeleted ? 10 : 9} className="text-center py-6 text-sm text-gray-500">
                   No orders found
                 </td>
               </tr>

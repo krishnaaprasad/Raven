@@ -19,6 +19,8 @@ export async function GET(request) {
     const orderStatus = searchParams.get("orderStatus") || null;
     const from = searchParams.get("from") || null;
     const to = searchParams.get("to") || null;
+    const hasDiscount = searchParams.get("hasDiscount") || null;
+    const couponCode = searchParams.get("couponCode") || null;
 
     const showDeleted = searchParams.get("deleted") === "true";
 
@@ -54,11 +56,32 @@ export async function GET(request) {
     if (orderStatus) filter.order_status = orderStatus;
 
     // DATE RANGE FILTER
-    if (from || to) {
-      filter.createdAt = {};
-      if (from) filter.createdAt.$gte = new Date(from);
-      if (to) filter.createdAt.$lte = new Date(`${to}T23:59:59`);
-    }
+if (from || to) {
+  filter.createdAt = {};
+  if (from) filter.createdAt.$gte = new Date(from);
+  if (to) filter.createdAt.$lte = new Date(`${to}T23:59:59`);
+}
+
+// COUPON CODE FILTER
+if (couponCode) {
+  filter.couponCode = couponCode;
+}
+
+// DISCOUNT FILTER
+if (hasDiscount === "yes") {
+  filter.discount = { $gt: 0 };
+}
+
+if (hasDiscount === "no") {
+  filter.$and = filter.$and || [];
+  filter.$and.push({
+    $or: [
+      { discount: { $exists: false } },
+      { discount: 0 },
+      { discount: null },
+    ],
+  });
+}
 
     const total = await Order.countDocuments(filter);
 
