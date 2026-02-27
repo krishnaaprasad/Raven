@@ -4,8 +4,6 @@ import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import Marquee from "react-fast-marquee";
-
-// Lucide Icons
 import { Truck, Gift, Sparkles, Info } from "lucide-react";
 
 export default function HomeMarquee() {
@@ -14,23 +12,34 @@ export default function HomeMarquee() {
 
   const [marquee, setMarquee] = useState({
     active: true,
-    lines: [],
+    lines: [
+      {
+        text: "FREE SHIPPING ON ORDERS ABOVE ₹1499!",
+        icon: "Sparkles",
+        link: "",
+      },
+    ],
   });
 
   useEffect(() => {
     async function load() {
       try {
-        const res = await fetch("/api/admin/marquee", { cache: "no-store" });
+        const res = await fetch("/api/admin/marquee");
+        if (!res.ok) return;
+
         const data = await res.json();
+        if (!data?.lines) return;
 
-        const formatted =
-          data.lines?.map((item) =>
-            typeof item === "string"
-              ? { text: item, icon: "Sparkles", link: "" }
-              : item
-          ) || [];
+        const formatted = data.lines.map((item) =>
+          typeof item === "string"
+            ? { text: item, icon: "Sparkles", link: "" }
+            : item
+        );
 
-        setMarquee({ active: data.active, lines: formatted });
+        setMarquee({
+          active: data.active ?? true,
+          lines: formatted.length ? formatted : marquee.lines,
+        });
       } catch (err) {
         console.error("Failed to load marquee:", err);
       }
@@ -39,7 +48,7 @@ export default function HomeMarquee() {
     load();
   }, []);
 
-  if (!isHomePage || !marquee.active || marquee.lines.length === 0) return null;
+  if (!isHomePage || !marquee.active) return null;
 
   const renderIcon = (name) => {
     switch (name) {
@@ -55,32 +64,20 @@ export default function HomeMarquee() {
   };
 
   return (
-    <AnimatePresence mode="wait">
+    <AnimatePresence>
       <motion.div
-        key="homepage-marquee"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.6, ease: "easeInOut" }}
-        className="relative bg-[#000000] text-[#fcfbf8] text-xs font-medium uppercase tracking-wider py-2 z-50 overflow-hidden"
+        transition={{ duration: 0.4 }}
+        className="bg-black text-[#fcfbf8] text-xs font-medium uppercase tracking-wider py-2"
       >
-        <Marquee pauseOnHover pauseOnClick gradient={false} speed={55} className="px-4">
-          {marquee.lines.map((item, i) => {
-            const content = (
-              <span className="flex items-center gap-2 mx-8">
-                {renderIcon(item.icon)}
-                {item.text}
-              </span>
-            );
-
-            return item.link ? (
-              <a key={i} href={item.link} className="hover:text-[#b28c34] transition">
-                {content}
-              </a>
-            ) : (
-              <span key={i}>{content}</span>
-            );
-          })}
+        <Marquee pauseOnHover gradient={false} speed={60}>
+          {marquee.lines.map((item, i) => (
+            <span key={i} className="flex items-center gap-2 mx-8">
+              {renderIcon(item.icon)}
+              {item.text}
+            </span>
+          ))}
         </Marquee>
       </motion.div>
     </AnimatePresence>
