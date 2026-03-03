@@ -30,7 +30,10 @@ export async function GET() {
               <g:id>${product._id}</g:id>
               <g:title><![CDATA[${product.name}]]></g:title>
               <g:description><![CDATA[${
-                product.metaDescription || product.shortDescription || ""
+                product.metaDescription ||
+product.shortDescription ||
+product.description?.replace(/<[^>]*>?/gm, "") ||
+product.name
               }]]></g:description>
               <g:link>${baseUrl}/product/${product.slug}</g:link>
               <g:image_link>${image}</g:image_link>
