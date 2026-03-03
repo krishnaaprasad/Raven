@@ -307,6 +307,31 @@ event({
           : undefined,
     };
 
+    const breadcrumbJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    {
+      "@type": "ListItem",
+      position: 1,
+      name: "Home",
+      item: "https://www.ravenfragrance.in",
+    },
+    {
+      "@type": "ListItem",
+      position: 2,
+      name: "Collection",
+      item: "https://www.ravenfragrance.in/collection",
+    },
+    {
+      "@type": "ListItem",
+      position: 3,
+      name: product.name,
+      item: `https://www.ravenfragrance.in/product/${product.slug}`,
+    },
+  ],
+};
+
   // ─────────────────────────
   // UI
   // ─────────────────────────
@@ -316,6 +341,10 @@ event({
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
         />
       {/* Top 2-column layout */}
       <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-[minmax(0,1.1fr)_minmax(0,1.2fr)] gap-10 md:gap-16 items-start">
