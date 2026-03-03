@@ -101,6 +101,17 @@ export const metadata = {
 
 
 export default function RootLayout({ children }) {
+  const organizationJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: "Raven Fragrance",
+  url: "https://www.ravenfragrance.in",
+  logo: "https://www.ravenfragrance.in/IMG_9377.PNG",
+  sameAs: [
+    "https://www.instagram.com/ravenfragrance.in/",
+    "https://www.facebook.com/Ravenfragrance"
+  ],
+};
   return (
     <html lang="en" >
       <head>
@@ -125,6 +136,12 @@ export default function RootLayout({ children }) {
       </head>
 
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+        <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{
+              __html: JSON.stringify(organizationJsonLd),
+            }}
+          />
       <ThemeProvider>
         <Providers>
           <QuickViewProvider>
