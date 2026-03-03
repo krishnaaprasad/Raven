@@ -33,10 +33,25 @@ const geistMono = Geist_Mono({
 export const metadata = {
   metadataBase: new URL("https://www.ravenfragrance.in"),
 
-  title: "Raven Fragrance",
-  
+  title: {
+    default: "Raven Fragrance — Premium Long-Lasting Perfumes",
+    template: "%s | Raven Fragrance",
+  },
+
   description:
-    "Buy premium long-lasting perfumes online. Luxury fragrances, signature scents, elegant packaging, and fast delivery across India. Shop exclusive perfumes at Raven Fragrance.",
+    "Luxury long-lasting perfumes crafted with high concentration oils. Elegant packaging. Free delivery across India.",
+
+  keywords: [
+    "luxury perfumes India",
+    "long lasting perfumes",
+    "premium fragrance online",
+    "perfume for men and women",
+    "Raven Fragrance",
+  ],
+
+  alternates: {
+    canonical: "https://www.ravenfragrance.in",
+  },
 
   icons: {
     icon: "/favicon.ico",
@@ -44,30 +59,43 @@ export const metadata = {
     apple: "/apple-touch-icon.png",
   },
 
+
   openGraph: {
+    type: "website",
+    url: "https://www.ravenfragrance.in",
     title: "Raven Fragrance — Premium Long-Lasting Perfumes",
     description:
-      "Buy premium long-lasting perfumes online. Luxury fragrances, signature scents, elegant packaging, and fast delivery across India.",
-    url: "https://www.ravenfragrance.in",
+      "Luxury long-lasting perfumes crafted with high concentration oils. Elegant packaging. Free delivery across India.",
     siteName: "Raven Fragrance",
+    locale: "en_IN",
     images: [
       {
-        url: "/IMG_9377.PNG", // ⭐ use the image you uploaded (place in public/)
+        url: "/Ravenfragrance.jpg", // 🔥 Recommended instead of logo
         width: 1200,
         height: 630,
-        alt: "Raven Fragrance Logo",
+        alt: "Raven Fragrance Luxury Perfumes",
       },
     ],
-    locale: "en_IN",
-    type: "website",
   },
 
   twitter: {
     card: "summary_large_image",
     title: "Raven Fragrance — Premium Long-Lasting Perfumes",
     description:
-      "Buy premium long-lasting perfumes online. Luxury fragrances, signature scents, elegant packaging, and fast delivery across India.",
-    images: ["/IMG_9377.PNG"],
+      "Luxury long-lasting perfumes crafted with high concentration oils.",
+    images: ["/Ravenfragrance.jpg"],
+  },
+
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
   },
 };
 
