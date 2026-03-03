@@ -260,12 +260,26 @@ event({
     product.images[lightboxIndex]?.original || product.images[lightboxIndex];
 
     // ----------- JSON-LD SEO Structured Data -----------
+    const productUrl = `https://www.ravenfragrance.in/product/${product.slug}`;
+
+    const mainImage =
+      product.images?.[0]?.original ||
+      product.images?.[0] ||
+      "/Ravenfragrance.jpg";
+
+    const absoluteImage = mainImage.startsWith("http")
+      ? mainImage
+      : `https://www.ravenfragrance.in${mainImage}`;
+
     const productJsonLd = {
-      "@context": "https://schema.org",
+      "@context": "https://schema.org/",
       "@type": "Product",
       name: product.name,
-      description: product.shortDescription || product.metaDescription,
-      image: product.images?.map((i) => i.original || i),
+      image: [absoluteImage],
+      description:
+        product.shortDescription ||
+        product.metaDescription ||
+        "Luxury perfume from Raven Fragrance.",
       sku: product._id,
       brand: {
         "@type": "Brand",
@@ -273,16 +287,21 @@ event({
       },
       offers: {
         "@type": "Offer",
+        url: productUrl,
         priceCurrency: "INR",
         price: selected.price,
-        url: `https://www.ravenfragrance.in/product/${product.slug}`,
-        availability: "https://schema.org/InStock",
+        priceValidUntil: "2027-12-31",
+        availability:
+          selected.stock > 0
+            ? "https://schema.org/InStock"
+            : "https://schema.org/OutOfStock",
+        itemCondition: "https://schema.org/NewCondition",
       },
       aggregateRating:
-        product.averageRating && product.reviewCount > 0
+        product.reviewCount > 0
           ? {
               "@type": "AggregateRating",
-              ratingValue: product.averageRating,
+              ratingValue: product.rating,
               reviewCount: product.reviewCount,
             }
           : undefined,
