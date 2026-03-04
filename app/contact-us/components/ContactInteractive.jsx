@@ -16,7 +16,7 @@ const ContactInteractive = ({ setSubmitted, setError }) => {
       <div className="max-w-[1400px] mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-12 lg:gap-16">
 
-          {/* LEFT — FORM */}
+          {/* LEFT - FORM */}
           <div className="lg:col-span-3">
             <div className="mb-8">
               <h2
@@ -50,7 +50,7 @@ const ContactInteractive = ({ setSubmitted, setError }) => {
             />
           </div>
 
-          {/* RIGHT — DIRECT CONTACT */}
+          {/* RIGHT - DIRECT CONTACT */}
           <div className="lg:col-span-2">
             <DirectContact />
           </div>

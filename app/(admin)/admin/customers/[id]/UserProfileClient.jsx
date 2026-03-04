@@ -167,11 +167,11 @@ export default function UserProfileClient({ userId }) {
 
   const joinedDate = user.createdAt
     ? new Date(user.createdAt).toLocaleDateString()
-    : "—";
+    : "-";
 
   const lastLogin = user.lastLogin
     ? new Date(user.lastLogin).toLocaleString()
-    : "—";
+    : "-";
 
   const showingFrom =
     ordersTotal === 0 ? 0 : (ordersPage - 1) * ORDERS_PAGE_SIZE + 1;
@@ -206,7 +206,7 @@ export default function UserProfileClient({ userId }) {
             <h3 className="text-lg font-bold mb-4">User Details</h3>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4">
-              <DetailRow label="Phone Number" value={user.phone || "—"} />
+              <DetailRow label="Phone Number" value={user.phone || "-"} />
               <DetailRow
                 label="User Status"
                 value={
@@ -226,7 +226,7 @@ export default function UserProfileClient({ userId }) {
                 label="User ID"
                 value={<span className="font-mono text-xs bg-[#f5f1e6] px-2 py-1 rounded break-all">{userId}</span>}
               />
-              <DetailRow label="Shipping Address" full value={user.fullAddress || "—"} />
+              <DetailRow label="Shipping Address" full value={user.fullAddress || "-"} />
 
             </div>
           </div>
@@ -310,11 +310,11 @@ export default function UserProfileClient({ userId }) {
                 ) : (
                   orders.map((o) => (
                     <tr key={o._id} className="hover:bg-[#fcfbf8]">
-                      <td className="p-3">{o.customOrderId || "—"}</td>
+                      <td className="p-3">{o.customOrderId || "-"}</td>
                       <td className="p-3">
                         {o.createdAt
                           ? new Date(o.createdAt).toLocaleDateString()
-                          : "—"}
+                          : "-"}
                       </td>
                       <td className="p-3 text-right">
                         ₹
@@ -322,7 +322,7 @@ export default function UserProfileClient({ userId }) {
                           ? o.totalAmount.toLocaleString("en-IN", {
                               minimumFractionDigits: 2,
                             })
-                          : "—"}
+                          : "-"}
                       </td>
                       <td className="p-3 text-center">
                         <OrderStatusBadge status={o.order_status} />
@@ -381,7 +381,7 @@ export default function UserProfileClient({ userId }) {
         </div>
 
         <p className="text-xs text-[#9a864c] mb-3">
-          Last updated: {cartMeta?.lastUpdated ? new Date(cartMeta.lastUpdated).toLocaleString() : "—"}
+          Last updated: {cartMeta?.lastUpdated ? new Date(cartMeta.lastUpdated).toLocaleString() : "-"}
         </p>
 
           {dbCart && dbCart.length > 0 ? (
@@ -392,7 +392,7 @@ export default function UserProfileClient({ userId }) {
                     className="w-14 h-14 rounded-lg bg-cover bg-center border border-[#e7e1cf]"
                     style={{ backgroundImage: `url(${item.image})` }}
                   ></div>
-                  <div className="flex-grow">
+                  <div className="grow">
                     <p className="font-semibold text-sm">{item.name}</p>
                     <p className="text-xs text-[#9a864c]">Qty: {item.quantity}</p>
                     <p className="text-xs text-[#9a864c]">Size: {item.size}</p>

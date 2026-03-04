@@ -94,7 +94,7 @@ export default function ProductCard({ product, bestsellerIds = [] }) {
 
         </div>
 
-        {/* IMAGE BOX — whole area is clickable */}
+        {/* IMAGE BOX - whole area is clickable */}
         <Link
           href={`/product/${slug}`}
           className="block relative aspect-3/4 overflow-hidden group"
@@ -130,7 +130,7 @@ export default function ProductCard({ product, bestsellerIds = [] }) {
           <div className="absolute inset-0 bg-linear-to-t from-black/25 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
       </Link>
 
-        {/* LIKE BUTTON — keep clickable */}
+        {/* LIKE BUTTON - keep clickable */}
         <button
           onClick={() => setLiked(!liked)}
           className="absolute top-3 right-3 w-9 h-9 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center shadow-sm hover:scale-110 transition pointer-events-auto z-20"
@@ -140,7 +140,7 @@ export default function ProductCard({ product, bestsellerIds = [] }) {
           />
         </button>
 
-        {/* DESKTOP Add to Cart — keep clickable */}
+        {/* DESKTOP Add to Cart - keep clickable */}
         <div className="absolute bottom-3 left-3 right-3 hidden sm:block opacity-0 group-hover:opacity-100 translate-y-3 group-hover:translate-y-0 transition-all duration-500 pointer-events-auto z-20">
           <button
             onClick={() => openQuickView(product)}

@@ -145,7 +145,7 @@ useEffect(() => {
               </div>
           </div>
 
-          {/* TRACK ORDER — hide for FAILED/CANCELLED */}
+          {/* TRACK ORDER - hide for FAILED/CANCELLED */}
           {order.order_status !== "Cancelled" && (
             <div className="w-full md:w-auto mt-4 md:mt-0">
               <button className="w-full sm:w-auto flex cursor-pointer items-center justify-center rounded-lg h-10 px-4 bg-(--theme-text) text-(--theme-bg) gap-2 text-xs font-bold hover:opacity-90">
@@ -213,7 +213,7 @@ useEffect(() => {
             </button>
           </div>
 
-          {/* 🔴 FAILED — RETRY PAYMENT */}
+          {/* 🔴 FAILED - RETRY PAYMENT */}
           {order.order_status === "Cancelled" && (
             <button
               onClick={() => router.push("/Cart")}
@@ -223,7 +223,7 @@ useEffect(() => {
             </button>
           )}
 
-          {/* 🟡 SUCCESS — REORDER */}
+          {/* 🟡 SUCCESS - REORDER */}
           {order.order_status !== "Cancelled" && (
             <button
               onClick={handleReorder}

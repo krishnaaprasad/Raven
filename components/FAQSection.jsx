@@ -43,7 +43,7 @@ const faqs = [
   {
     question: "Why does perfume smell different on different people?",
     answer:
-      "Skin chemistry, pH, temperature, and lifestyle affect how fragrance develops — making each scent unique on every person.",
+      "Skin chemistry, pH, temperature, and lifestyle affect how fragrance develops - making each scent unique on every person.",
   },
   {
     question: "Are Raven Fragrance perfumes unisex?",

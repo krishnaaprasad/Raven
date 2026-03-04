@@ -3,7 +3,7 @@ import OrdersClient from "./OrdersClient";
 
 export const metadata = {
   title: "Orders - Raven Fragrance",
-  description: "Admin — Orders list and management • Raven Fragrance",
+  description: "Admin - Orders list and management • Raven Fragrance",
 };
 
 export default function OrdersPage() {

@@ -251,7 +251,7 @@ if (order.payment_status === "PAID" && order.verified === true) {
         let updatedOrder = await Order.findById(orderId);
 
         if (updatedOrder.emailSent === true) {
-          console.log("📨 Email already sent earlier — skipping.");
+          console.log("📨 Email already sent earlier - skipping.");
         } else {
           console.log("📨 Sending confirmation mail for FIRST time...");
 

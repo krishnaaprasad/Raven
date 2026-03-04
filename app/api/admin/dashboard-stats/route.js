@@ -50,7 +50,7 @@ export async function GET() {
       paidOrders.length > 0 ? Math.round(paidOrders[0].total / paidOrders[0].count) : 0;
 
     // ============================
-    // 4️⃣ LOW STOCK (TEMP STATIC — WE UPDATE LATER)
+    // 4️⃣ LOW STOCK (TEMP STATIC - WE UPDATE LATER)
     // ============================
     const lowStock = 8; // replace once Product model shared
 

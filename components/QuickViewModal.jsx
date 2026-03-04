@@ -366,7 +366,7 @@ const handleAddToCart = () => {
               </div>
             )}
 
-            {/* QUANTITY — only show on DESKTOP */}
+            {/* QUANTITY - only show on DESKTOP */}
             <div className="hidden md:flex items-center gap-4 mb-6">
             <div className="flex items-center border border-[#e7e1cf] rounded-full overflow-hidden">
                 <button onClick={() => setQty((q) => Math.max(1, q - 1))} className="px-4 py-2 cursor-pointer">

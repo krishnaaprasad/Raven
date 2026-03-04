@@ -25,7 +25,7 @@ export default function Page() {
 }
 
 /* ============================================================
-   MAIN ACCOUNT COMPONENT — Your existing logic
+   MAIN ACCOUNT COMPONENT - Your existing logic
 ============================================================ */
 function AccountPage() {
   const { data: session, status } = useSession();

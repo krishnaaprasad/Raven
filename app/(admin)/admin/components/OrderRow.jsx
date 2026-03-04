@@ -234,7 +234,7 @@ const didInitProduct = useRef(false);
 
         <td className="px-6 py-4 min-w-20">
           <div className="flex items-center gap-4">
-            {/* Edit — ONLY manual */}
+            {/* Edit - ONLY manual */}
             {isManualOrder && (
               <button
                 title="Edit Manual Order"
@@ -280,7 +280,7 @@ const didInitProduct = useRef(false);
 </td>
       </tr>
 
-      {/* PORTAL — FIXES HYDRATION ERROR */}
+      {/* PORTAL - FIXES HYDRATION ERROR */}
       {confirmModal &&
         createPortal(
           <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">

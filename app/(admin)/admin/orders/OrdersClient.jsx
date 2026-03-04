@@ -264,7 +264,7 @@ const exportCSV = async () => {
     if (!from || !to) return "Date range";
     const s = format(new Date(from), "dd MMM");
     const e = format(new Date(to), "dd MMM");
-    return `${s} — ${e}`;
+    return `${s} - ${e}`;
   };
 
   const resetAfterStatusUpdate = () => {

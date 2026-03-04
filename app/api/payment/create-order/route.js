@@ -225,10 +225,10 @@ export async function POST(req) {
     let finalUserId = null;
 
     if (session?.user && session.user.email) {
-      // Logged-in user (credentials/Google) — attach real account
+      // Logged-in user (credentials/Google) - attach real account
       finalUserId = session.user.id;
     } else {
-      // Guest checkout — create/find guest user record
+      // Guest checkout - create/find guest user record
       finalUserId = await findOrCreateUser({
         name: `${firstName} ${lastName}`,
         email,

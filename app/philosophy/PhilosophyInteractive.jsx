@@ -30,12 +30,12 @@ export default function PhilosophyInteractive() {
     {
       number: "03",
       title: "Quiet Confidence",
-      description: "True presence doesn't announce itself—it's felt, not performed. Our fragrances embody this philosophy, offering subtle complexity that reveals itself over time. We design for those who understand that strength is most powerful when held back, creating scents that draw people closer rather than overwhelming the room."
+      description: "True presence doesn't announce itself-it's felt, not performed. Our fragrances embody this philosophy, offering subtle complexity that reveals itself over time. We design for those who understand that strength is most powerful when held back, creating scents that draw people closer rather than overwhelming the room."
     },
     {
       number: "04",
       title: "Restraint as Luxury",
-      description: "In a world of excess, restraint becomes the ultimate luxury. We apply this principle to every aspect of our brand—from our minimalist packaging to our curated collection of just three signature scents. This intentional limitation allows us to perfect each fragrance rather than dilute our focus across dozens of offerings."
+      description: "In a world of excess, restraint becomes the ultimate luxury. We apply this principle to every aspect of our brand-from our minimalist packaging to our curated collection of just three signature scents. This intentional limitation allows us to perfect each fragrance rather than dilute our focus across dozens of offerings."
     }
   ];
 
@@ -74,7 +74,7 @@ export default function PhilosophyInteractive() {
     },
     {
       title: "Mood-Based Design",
-      description: "Rather than following traditional fragrance families, we design around emotional states and occasions. Each scent is crafted to support a specific mindset—whether you need quiet confidence for important meetings, rebellious energy for creative work, or balanced presence for everyday life. This approach makes fragrance selection intuitive and personal.",
+      description: "Rather than following traditional fragrance families, we design around emotional states and occasions. Each scent is crafted to support a specific mindset-whether you need quiet confidence for important meetings, rebellious energy for creative work, or balanced presence for everyday life. This approach makes fragrance selection intuitive and personal.",
       image: "https://images.unsplash.com/photo-1725393197042-7b7691ba7446",
       alt: "Serene woman with closed eyes in black turtleneck against dark background, embodying peaceful confidence and intentional presence"
     }
@@ -92,19 +92,19 @@ export default function PhilosophyInteractive() {
   const expandableSections = [
     {
       title: "The Anti-Marketing Approach",
-      content: "Traditional fragrance marketing relies on aspiration, celebrity endorsement, and manufactured desire. We reject this approach entirely. Our marketing is anti-marketing—honest communication about what we create and why. We don't promise transformation or status. We offer well-crafted fragrances for people who appreciate quality without needing external validation. This honesty attracts customers who share our values and creates relationships built on mutual respect rather than manufactured need."
+      content: "Traditional fragrance marketing relies on aspiration, celebrity endorsement, and manufactured desire. We reject this approach entirely. Our marketing is anti-marketing-honest communication about what we create and why. We don't promise transformation or status. We offer well-crafted fragrances for people who appreciate quality without needing external validation. This honesty attracts customers who share our values and creates relationships built on mutual respect rather than manufactured need."
     },
     {
       title: "Why Only Three Fragrances",
-      content: "Our decision to offer just three signature scents is intentional, not limiting. This restraint allows us to perfect each composition, maintain consistent quality, and avoid the dilution that comes with extensive product lines. Each fragrance represents years of development and refinement. By focusing our energy on three exceptional offerings rather than dozens of adequate ones, we deliver the depth and complexity that discerning customers expect. This approach also reflects our philosophy that more isn't always better—sometimes it's just more."
+      content: "Our decision to offer just three signature scents is intentional, not limiting. This restraint allows us to perfect each composition, maintain consistent quality, and avoid the dilution that comes with extensive product lines. Each fragrance represents years of development and refinement. By focusing our energy on three exceptional offerings rather than dozens of adequate ones, we deliver the depth and complexity that discerning customers expect. This approach also reflects our philosophy that more isn't always better-sometimes it's just more."
     },
     {
       title: "The Role of Silence in Fragrance",
-      content: "In perfumery, silence—the absence of unnecessary notes—is as important as the ingredients we include. We design our fragrances with generous space between accords, allowing each element to breathe and evolve naturally on the skin. This restraint creates complexity through subtlety rather than overwhelming the senses with competing notes. The result is fragrances that reveal themselves gradually, rewarding attention and creating intimate experiences rather than making bold statements."
+      content: "In perfumery, silence-the absence of unnecessary notes-is as important as the ingredients we include. We design our fragrances with generous space between accords, allowing each element to breathe and evolve naturally on the skin. This restraint creates complexity through subtlety rather than overwhelming the senses with competing notes. The result is fragrances that reveal themselves gradually, rewarding attention and creating intimate experiences rather than making bold statements."
     },
     {
       title: "Sustainability Through Intention",
-      content: "Our approach to sustainability isn't about marketing claims or certifications—it's embedded in our philosophy of intentional creation. Small-batch production reduces waste. Timeless design eliminates the need for constant reinvention. Quality ingredients and construction mean our products last. We focus on creating fragrances people will treasure and use completely rather than disposable luxury that ends up forgotten. This practical approach to sustainability aligns with our values of restraint and authenticity."
+      content: "Our approach to sustainability isn't about marketing claims or certifications-it's embedded in our philosophy of intentional creation. Small-batch production reduces waste. Timeless design eliminates the need for constant reinvention. Quality ingredients and construction mean our products last. We focus on creating fragrances people will treasure and use completely rather than disposable luxury that ends up forgotten. This practical approach to sustainability aligns with our values of restraint and authenticity."
     }
   ];
 

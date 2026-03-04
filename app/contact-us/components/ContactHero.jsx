@@ -41,7 +41,7 @@ const ContactHero = ({ className = "" }) => {
             We believe in direct, meaningful conversation. Whether you&apos;re
             seeking guidance on fragrance selection, have questions about our
             craft process, or simply want to share your experience with
-            Raven—we&apos;re here to listen.
+            Raven-we&apos;re here to listen.
           </p>
 
         </div>

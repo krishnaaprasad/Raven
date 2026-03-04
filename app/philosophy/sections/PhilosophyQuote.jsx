@@ -27,7 +27,7 @@ export default function PhilosophyQuote({ quote, author }) {
             text-(--theme-muted)
           "
         >
-          — {author}
+          - {author}
         </cite>
 
       </div>

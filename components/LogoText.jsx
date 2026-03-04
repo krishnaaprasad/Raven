@@ -28,7 +28,7 @@ export default function LogoText({
 
   return (
     <div className={`flex items-center select-none leading-none ${className}`}>
-      {/* R — Cinzel */}
+      {/* R - Cinzel */}
       <span
         className={`${cinzel.className} ${sizes[size]} leading-none`}
         style={{
@@ -42,7 +42,7 @@ export default function LogoText({
         R
       </span>
 
-      {/* AVEN — Futura */}
+      {/* AVEN - Futura */}
       <span
         className={`${futura.className} ${sizes[size]} font-medium leading-none`}
         style={{

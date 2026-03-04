@@ -35,7 +35,7 @@ export default function TermsConditionsPage() {
             </li>
             <li>All products are for personal use only and not for resale.</li>
             <li>
-              Product images are for representation purposes only — packaging and
+              Product images are for representation purposes only - packaging and
               appearance may vary slightly.
             </li>
             <li>

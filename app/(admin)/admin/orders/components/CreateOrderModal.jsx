@@ -159,7 +159,7 @@ export default function CreateOrderModal({ onClose, onCreated }) {
               <option value="">Select size</option>
               {product.variants.map(v => (
                 <option key={v.size} value={v.size}>
-                  {v.size} — ₹{v.price}
+                  {v.size} - ₹{v.price}
                 </option>
               ))}
             </Select>

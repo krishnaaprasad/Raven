@@ -270,12 +270,12 @@ export default function CustomersClient() {
                 <td className="px-3">
                   {user.createdAt
                     ? new Date(user.createdAt).toLocaleDateString()
-                    : "—"}
+                    : "-"}
                 </td>
                 <td className="px-3">
                   {user.lastLogin
                     ? new Date(user.lastLogin).toLocaleString()
-                    : "—"}
+                    : "-"}
                 </td>
                 <td className="pr-4 text-right">
                   <Link href={`/admin/customers/${user._id}`}>

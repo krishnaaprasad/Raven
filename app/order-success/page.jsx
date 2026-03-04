@@ -9,7 +9,7 @@ export const metadata = {
   openGraph: {
     title: "Order Successful - Raven Fragrance",
     description:
-      "Your payment was successful — Raven Fragrance thanks you for your order.",
+      "Your payment was successful - Raven Fragrance thanks you for your order.",
     url: "https://www.ravenfragrance.in/order-success",
     siteName: "Raven Fragrance",
     images: [
@@ -27,7 +27,7 @@ export const metadata = {
     card: "summary_large_image",
     title: "Order Successful - Raven Fragrance",
     description:
-      "Your payment was successful — Raven Fragrance thanks you for your order.",
+      "Your payment was successful - Raven Fragrance thanks you for your order.",
     images: ["https://www.ravenfragrance.in/og-banner.jpg"],
   },
 };

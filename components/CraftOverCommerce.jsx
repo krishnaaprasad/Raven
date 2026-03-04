@@ -30,7 +30,7 @@ const WhyChooseRaven = () => {
       emoji: "🌗",
       title: "Philosophy First",
       description:
-        "We create not for trend, but for meaning. Raven is fragrance as a personal revelation — wear your story, not a fashion.",
+        "We create not for trend, but for meaning. Raven is fragrance as a personal revelation - wear your story, not a fashion.",
     },
   ];
 
@@ -63,7 +63,7 @@ const WhyChooseRaven = () => {
 
           <p className="text-[hsl(30_10%_45%)] outfit.className text-sm sm:text-base md:text-lg leading-relaxed px-4 sm:px-0">
             Raven stands alone in a world of fleeting trends. Every note, every bottle,
-            is an act of craft — a journey toward truth and a fragrance meant to reveal, not mask.
+            is an act of craft - a journey toward truth and a fragrance meant to reveal, not mask.
           </p>
         </div>
 

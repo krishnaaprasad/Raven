@@ -75,7 +75,7 @@ export default function AboutRaven() {
           variants={fade}
           className="text-lg sm:text-xl text-neutral-800 font-light leading-relaxed text-center mb-6"
         >
-          <span className="text-[#B28C34] font-semibold">Rebel</span> embodies effortless style and confident presence—never seeking attention, but always making an impact. To be a <span className="text-[#B28C34] font-semibold">Rebel</span> means challenging expectations and blending sophistication with boldness, turning every moment into a statement.
+          <span className="text-[#B28C34] font-semibold">Rebel</span> embodies effortless style and confident presence-never seeking attention, but always making an impact. To be a <span className="text-[#B28C34] font-semibold">Rebel</span> means challenging expectations and blending sophistication with boldness, turning every moment into a statement.
         </motion.p>
         {/* Signature quote */}
         <motion.p
@@ -104,7 +104,7 @@ export default function AboutRaven() {
         {/* Founder signature */}
         <motion.div variants={fade} className="mt-4">
           <span className="block text-xs text-[#846525] italic mb-1 text-center">Founded in the pursuit of truth and beauty</span>
-          <span className="block text-[#B28C34] font-semibold font-serif text-center">— The Raven Atelier</span>
+          <span className="block text-[#B28C34] font-semibold font-serif text-center">- The Raven Atelier</span>
         </motion.div>
       </motion.div>
     </section>

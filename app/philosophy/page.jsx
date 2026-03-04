@@ -2,7 +2,7 @@ import PhilosophyInteractive from "./PhilosophyInteractive";
 
 export const metadata = {
   title: "Philosophy – Raven Fragrance",
-  description: "Discover the philosophy behind Raven Fragrance — intentional creation, quiet confidence, and timeless perfumery crafted with restraint.",
+  description: "Discover the philosophy behind Raven Fragrance - intentional creation, quiet confidence, and timeless perfumery crafted with restraint.",
 };
 
 export default function Page() {
@@ -10,7 +10,7 @@ export default function Page() {
     {
       title: "The Anti-Marketing Approach",
       content:
-        "Traditional fragrance marketing relies on aspiration, celebrity endorsement, and manufactured desire. We reject this approach entirely. Our marketing is anti-marketing—honest communication about what we create and why.",
+        "Traditional fragrance marketing relies on aspiration, celebrity endorsement, and manufactured desire. We reject this approach entirely. Our marketing is anti-marketing-honest communication about what we create and why.",
     },
     {
       title: "Why Only Three Fragrances",
@@ -20,7 +20,7 @@ export default function Page() {
     {
       title: "The Role of Silence in Fragrance",
       content:
-        "In perfumery, silence—the absence of unnecessary notes—is as important as the ingredients we include. We design fragrances with space between accords to create subtle complexity.",
+        "In perfumery, silence-the absence of unnecessary notes-is as important as the ingredients we include. We design fragrances with space between accords to create subtle complexity.",
     },
     {
       title: "Sustainability Through Intention",
