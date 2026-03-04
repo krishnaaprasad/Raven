@@ -34,7 +34,7 @@ export const metadata = {
   metadataBase: new URL("https://www.ravenfragrance.in"),
 
   title: {
-    default: "Raven Fragrance - Premium Long-Lasting Perfumes",
+    default: "Raven Fragrance | Long-Lasting Perfumes for Men & Women",
     template: "%s | Raven Fragrance",
   },
 
@@ -63,7 +63,7 @@ export const metadata = {
   openGraph: {
     type: "website",
     url: "https://www.ravenfragrance.in",
-    title: "Raven Fragrance - Premium Long-Lasting Perfumes",
+    title: "Raven Fragrance | Long-Lasting Perfumes for Men & Women",
     description:
       "Luxury long-lasting perfumes crafted with high concentration oils. Elegant packaging. Free delivery across India.",
     siteName: "Raven Fragrance",
@@ -80,7 +80,7 @@ export const metadata = {
 
   twitter: {
     card: "summary_large_image",
-    title: "Raven Fragrance - Premium Long-Lasting Perfumes",
+    title: "Raven Fragrance | Premium Long-Lasting Perfumes",
     description:
       "Luxury long-lasting perfumes crafted with high concentration oils.",
     images: ["/Ravenfragrance.jpg"],
