@@ -8,7 +8,7 @@ export default function InstagramGallery() {
     <section className="py-10 bg-(--theme-bg)">
 
       {/* HEADER */}
-      <div className="max-w-7xl mx-auto px-6 mb-10 text-center">
+      <div className="max-w-7xl mx-auto px-6 mb-6 text-center">
 
         <p className="font-[system-ui] text-xs uppercase tracking-[0.35em] text-(--theme-muted) mb-3">
           @ravenfragrance.in
