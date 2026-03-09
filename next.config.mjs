@@ -29,6 +29,14 @@ const nextConfig = {
       {
         protocol: "https",
         hostname: "www.svgrepo.com", // keep for future uploads (optional)
+      },
+     {
+        protocol: "https",
+        hostname: "**.cdninstagram.com",
+      },
+      {
+        protocol: "https",
+        hostname: "**.fbcdn.net",
       }
     ],
   },
