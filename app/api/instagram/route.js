@@ -1,44 +1,43 @@
 export async function GET() {
   try {
 
-    const url =
-      "https://api.allorigins.win/raw?url=" +
-      encodeURIComponent(
-        "https://www.instagram.com/ravenfragrance.in/"
-      );
+    const accessToken = process.env.INSTAGRAM_ACCESS_TOKEN;
 
-    const res = await fetch(url, {
-      headers: {
-        "User-Agent": "Mozilla/5.0",
-      },
+    if (!accessToken) {
+      return Response.json(
+        { error: "Missing INSTAGRAM_ACCESS_TOKEN environment variable", data: [] },
+        { status: 500 }
+      );
+    }
+
+    const fields = "id,caption,media_url,thumbnail_url,permalink";
+    const limit = 12;
+    const apiUrl = `https://graph.instagram.com/me/media?fields=${fields}&access_token=${accessToken}&limit=${limit}`;
+
+    const res = await fetch(apiUrl, {
       next: { revalidate: 3600 },
     });
 
-    const html = await res.text();
+    if (!res.ok) {
+      const errorText = await res.text().catch(() => "");
+      console.error("Instagram API error:", res.status, errorText);
+      return Response.json(
+        { error: "Instagram API request failed", status: res.status, data: [] },
+        { status: res.status }
+      );
+    }
 
-    const jsonMatch = html.match(/window\._sharedData = (.*?);<\/script>/);
+    const data = await res.json();
+    const posts = Array.isArray(data?.data) ? data.data : [];
 
-    if (!jsonMatch) return Response.json([]);
-
-    const data = JSON.parse(jsonMatch[1]);
-
-    const posts =
-      data.entry_data.ProfilePage[0].graphql.user.edge_owner_to_timeline_media.edges;
-
-    const formatted = posts.slice(0, 12).map((post, index) => {
-
-      const node = post.node;
-
-      return {
-        id: index,
-        thumbnail: node.display_url,
-        image: node.display_url,
-        caption: node.edge_media_to_caption.edges?.[0]?.node?.text || "",
-        instagramUrl: `https://www.instagram.com/p/${node.shortcode}/`,
-        likes: node.edge_liked_by.count,
-      };
-
-    });
+    const formatted = posts.slice(0, 12).map((post, index) => ({
+      id: post.id ?? index,
+      thumbnail: post.thumbnail_url ?? post.media_url ?? "",
+      image: post.media_url ?? post.thumbnail_url ?? "",
+      caption: post.caption ?? "",
+      instagramUrl: post.permalink ?? "",
+      likes: null,
+    }));
 
     return Response.json(formatted);
 
@@ -46,7 +45,7 @@ export async function GET() {
 
     console.error("Instagram fetch error:", error);
 
-    return Response.json([]);
+    return Response.json({ error: "Instagram fetch exception", data: [] }, { status: 500 });
 
   }
 }
