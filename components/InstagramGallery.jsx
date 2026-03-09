@@ -31,7 +31,7 @@ export default function InstagramGallery() {
       </div>
 
       {/* FEED */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6">
+      <div className="w-full mx-auto px-4">
 
         <Script
           src="https://cdn.lightwidget.com/widgets/lightwidget.js"
