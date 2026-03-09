@@ -22,7 +22,7 @@ export default function InstagramGallery() {
           href="https://www.instagram.com/ravenfragrance.in/"
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 font-[system-ui] text-sm text-(--theme-text) hover:opacity-80 transition"
+          className="inline-flex items-center gap-2 font-[system-ui] text-sm text-(--theme-text)"
         >
           Follow us on Instagram
           <ArrowRight size={16} />
@@ -30,16 +30,14 @@ export default function InstagramGallery() {
 
       </div>
 
-      {/* INSTAGRAM FEED */}
-      <div className="max-w-7xl mx-auto px-6">
+      {/* FEED */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6">
 
-        {/* LightWidget script */}
         <Script
           src="https://cdn.lightwidget.com/widgets/lightwidget.js"
           strategy="lazyOnload"
         />
 
-        {/* Responsive wrapper */}
         <div className="w-full overflow-hidden rounded-xl">
 
           <iframe
@@ -51,7 +49,7 @@ export default function InstagramGallery() {
             className="lightwidget-widget w-full border-0"
             style={{
               width: "100%",
-              height: "750px",
+              height: "clamp(420px, 75vw, 900px)"
             }}
           />
 
