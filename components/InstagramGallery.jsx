@@ -43,7 +43,6 @@ export default function InstagramGallery() {
           <iframe
             title="Instagram gallery"
             src="https://lightwidget.com/widgets/da148bfeba415b6aba61614948badef6.html"
-            scrolling="no"
             allowtransparency="true"
             loading="lazy"
             className="lightwidget-widget w-full border-0"
