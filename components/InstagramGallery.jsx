@@ -5,10 +5,10 @@ import { ArrowRight } from "lucide-react";
 
 export default function InstagramGallery() {
   return (
-    <section className="py-16 bg-(--theme-bg)">
+    <section className="py-20 bg-(--theme-bg)">
 
       {/* HEADER */}
-      <div className="max-w-7xl mx-auto px-6 mb-12 text-center">
+      <div className="max-w-7xl mx-auto px-6 mb-14 text-center">
 
         <p className="font-[system-ui] text-xs uppercase tracking-[0.35em] text-(--theme-muted) mb-3">
           @ravenfragrance.in
@@ -33,17 +33,29 @@ export default function InstagramGallery() {
       {/* INSTAGRAM FEED */}
       <div className="max-w-7xl mx-auto px-6">
 
-        <Script src="https://cdn.lightwidget.com/widgets/lightwidget.js" strategy="lazyOnload" />
-
-        <iframe
-          title="Instagram gallery"
-          src="https://lightwidget.com/widgets/da148bfeba415b6aba61614948badef6.html"
-          scrolling="no"
-          allowtransparency="true"
-          loading="lazy"
-          className="lightwidget-widget w-full border-0 overflow-hidden"
-          style={{ height: "600px" }}
+        {/* LightWidget script */}
+        <Script
+          src="https://cdn.lightwidget.com/widgets/lightwidget.js"
+          strategy="lazyOnload"
         />
+
+        {/* Responsive wrapper */}
+        <div className="w-full overflow-hidden rounded-xl">
+
+          <iframe
+            title="Instagram gallery"
+            src="https://lightwidget.com/widgets/da148bfeba415b6aba61614948badef6.html"
+            scrolling="no"
+            allowtransparency="true"
+            loading="lazy"
+            className="lightwidget-widget w-full border-0"
+            style={{
+              width: "100%",
+              height: "750px",
+            }}
+          />
+
+        </div>
 
       </div>
 
