@@ -134,7 +134,7 @@ export default function TermsConditionsPage() {
           </p>
 
           <p className="mt-3 font-semibold text-(--theme-text)">
-            contact@ravenfragrance.in
+            ravenfragrances@gmail.com
           </p>
 
           <p className="text-(--theme-muted) font-[system-ui]">

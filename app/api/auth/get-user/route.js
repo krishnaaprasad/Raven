@@ -12,28 +12,28 @@ export async function GET() {
 
     await connectToDatabase();
 
-    // Try to find the user in DB
-    let user = await User.findOne({ email: session.user.email });
+    // Find the user by ID or Phone (from session)
+    let user = await User.findById(session.user.id);
 
-    // 🟢 If Google user doesn’t exist yet (rare case), create them on the fly
-    if (!user) {
-      user = await User.create({
-        name: session.user.name || "Unnamed User",
-        email: session.user.email,
-        password: null,
-        phone: "",
-        address: "",
-      });
-      console.log("🟢 Created user via get-user (Google fallback):", user.email);
+    if (!user && session.user.phone) {
+        user = await User.findOne({ phone: session.user.phone });
     }
 
-    // 🧩 Return consistent structure (even if some fields are empty)
+    if (!user) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
     return NextResponse.json({
       user: {
-        name: user.name || session.user.name || "",
-        email: user.email || session.user.email,
+        name: user.name || "",
+        email: user.email || "",
         phone: user.phone || "",
-        address: user.address || "",
+        address1: user.address1 || "",
+        address2: user.address2 || "",
+        city: user.city || "",
+        state: user.state || "",
+        pincode: user.pincode || "",
+        address: user.address || "", // Legacy
       },
     });
   } catch (err) {

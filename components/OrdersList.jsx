@@ -3,6 +3,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { Crimson_Text } from "next/font/google";
 
@@ -13,6 +14,7 @@ const crimson = Crimson_Text({
 });
 
 export default function OrdersList() {
+  const { data: session } = useSession();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
@@ -30,8 +32,13 @@ export default function OrdersList() {
         setLoading(false);
       }
     };
-    loadOrders();
-  }, []);
+    if (session) {
+      loadOrders();
+    } else {
+      setLoading(false);
+      setOrders([]);
+    }
+  }, [session]);
 
   if (loading) {
     return (

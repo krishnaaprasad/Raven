@@ -32,7 +32,7 @@ export default function LogoText({
       <span
         className={`${cinzel.className} ${sizes[size]} leading-none`}
         style={{
-          color: resolvedColor, // ✅ FORCE HERE
+          color: resolvedColor,
           letterSpacing: "0.30em",
           marginLeft: "-0.14em",
           transform: "translateY(-0.04em)",
@@ -46,7 +46,7 @@ export default function LogoText({
       <span
         className={`${futura.className} ${sizes[size]} font-medium leading-none`}
         style={{
-          color: resolvedColor, // ✅ FORCE HERE
+          color: resolvedColor,
           letterSpacing: "0.18em",
           marginLeft: "-0.14em",
           transform: "translateY(-0.08em)",

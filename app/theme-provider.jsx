@@ -5,7 +5,9 @@ import { createContext, useContext, useEffect, useState } from "react";
 const ThemeContext = createContext(null);
 
 export function ThemeProvider({ children }) {
-  const [theme, setTheme] = useState(null);
+  // ✅ Default to "light" immediately to avoid the "if (!theme) return null" block
+  // This allows the server-rendered HTML to match the client during hydration
+  const [theme, setTheme] = useState("light");
 
   useEffect(() => {
     const saved = localStorage.getItem("theme");
@@ -18,6 +20,7 @@ export function ThemeProvider({ children }) {
   }, []);
 
   function applyTheme(mode) {
+    if (typeof window === 'undefined') return;
     const root = document.documentElement;
 
     root.classList.toggle("dark", mode === "dark");
@@ -44,8 +47,6 @@ export function ThemeProvider({ children }) {
     applyTheme(next);
   };
 
-  if (!theme) return null;
-
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme }}>
       {children}
@@ -54,5 +55,7 @@ export function ThemeProvider({ children }) {
 }
 
 export function useTheme() {
-  return useContext(ThemeContext);
+  const context = useContext(ThemeContext);
+  if (!context) return { theme: 'light', toggleTheme: () => {} };
+  return context;
 }

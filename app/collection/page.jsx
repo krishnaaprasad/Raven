@@ -4,6 +4,7 @@ import CraftCredentials from "./components/CraftCredentials";
 import connectToDatabase from '@/lib/mongodb';
 import Product from '@/models/Product';
 import CollectionClientWrapper from './components/CollectionClientWrapper';
+import ScrollReveal from '@/components/ScrollReveal';
 
 // ✅ SEO metadata (optimized)
 export const metadata = {
@@ -75,23 +76,29 @@ export default async function ProductCollectionPage() {
     <main className="min-h-screen bg-[var(--theme-bg)] transition-colors duration-500">
 
       {/* 🔝 Header */}
-      <section className="bg-[var(--theme-bg)]">
-        <div className="max-w-[1100px] mx-auto px-6 py-16 sm:py-18 text-center">
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-semibold text-[var(--theme-text)] mb-2 leading-tight">
-            The Collection
-          </h1>
+      <ScrollReveal>
+        <section className="bg-[var(--theme-bg)]">
+          <div className="max-w-[1100px] mx-auto px-6 py-16 sm:py-18 text-center">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-semibold text-[var(--theme-text)] mb-2 leading-tight">
+              The Collection
+            </h1>
 
-          <p className="text-base sm:text-lg text-[var(--theme-muted)] max-w-2xl mx-auto mb-8">
-            Three signature fragrances, each created with intention. Designed to express quiet confidence and a presence that doesn’t ask for attention.
-          </p>
-        </div>
-      </section>
+            <p className="text-base sm:text-lg text-[var(--theme-muted)] max-w-2xl mx-auto mb-8">
+              Three signature fragrances, each created with intention. Designed to express quiet confidence and a presence that doesn’t ask for attention.
+            </p>
+          </div>
+        </section>
+      </ScrollReveal>
 
       {/* ✅ CLIENT SIDE FILTER + GRID */}
-      <CollectionClientWrapper initialProducts={products} />
+      <ScrollReveal>
+        <CollectionClientWrapper initialProducts={products} />
+      </ScrollReveal>
 
       {/* 🧪 Craft Transparency */}
-      <CraftCredentials credentials={craftCredentials} />
+      <ScrollReveal>
+        <CraftCredentials credentials={craftCredentials} />
+      </ScrollReveal>
 
     </main>
   );

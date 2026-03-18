@@ -74,8 +74,9 @@ const CraftSection = () => {
             src={src}
             alt=""
             fill
+            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 250px"
+            quality={70}
             className="object-cover grayscale hover:grayscale-0 transition duration-700 scale-[1.05] sm:scale-100"
-
           />
         </div>
       ))}
@@ -103,11 +104,11 @@ const CraftSection = () => {
             <div className="space-y-8">
               {principles.map((p, i) => (
                 <div key={i}>
-                  <h5
-                    className={`${inter.className} text-[16px] text-(--theme-text) mb-2`}
+                  <h3
+                    className={`${inter.className} text-[16px] text-(--theme-text) mb-2 font-semibold`}
                   >
                     {p.titles}
-                  </h5>
+                  </h3>
                   <p
                     className={`${inter.className} text-[15px] leading-[1.75] text-(--theme-muted) max-w-[520px]`}
                   >

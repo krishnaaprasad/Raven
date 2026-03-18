@@ -1,9 +1,8 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Eye, EyeOff, X } from 'lucide-react';
+import { X } from 'lucide-react';
 import { signIn } from 'next-auth/react';
-
 import { Crimson_Text } from "next/font/google";
 
 const crimson = Crimson_Text({
@@ -12,313 +11,328 @@ const crimson = Crimson_Text({
   display: "swap",
 });
 
+import Link from 'next/link';
 
-export default function LoginRegisterPage({ onClose, onLoginSuccess }) {
-  const [isRegistering, setIsRegistering] = useState(false);
-  const [direction, setDirection] = useState('right');
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
-  });
-  const [showPassword, setShowPassword] = useState(false);
+export default function LoginRegisterPage({ onClose, onLoginSuccess, verificationOnly = false }) {
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [otpSent, setOtpSent] = useState(false);
+  const [otp, setOtp] = useState(['', '', '', '']);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [resendTimer, setResendTimer] = useState(0);
+  const [confirmationData, setConfirmationData] = useState(null);
+  
+  const otpInputRefs = useRef([]);
 
-  const handleChange = (e) =>
-    setFormData({ ...formData, [e.target.id]: e.target.value });
+  const handleSendOtp = async (e) => {
+    e?.preventDefault();
+    if (!/^\d{10}$/.test(phoneNumber)) {
+      setError('Please enter a valid 10-digit mobile number');
+      return;
+    }
 
-  const validateEmail = (email) => /\S+@\S+\.\S+/.test(email);
-
-  const handleSwitch = (registering) => {
-    setDirection(registering ? 'left' : 'right');
-    setIsRegistering(registering);
-    setError('');
-    setFormData({ name: '', email: '', password: '', confirmPassword: '' });
-  };
-
-  const handleRegister = async (e) => {
-    e.preventDefault();
-    setError('');
     setLoading(true);
-
-    const { name, email, password, confirmPassword } = formData;
-    if (!name || !email || !password || !confirmPassword) {
-      setError('All fields are required.');
-      setLoading(false);
-      return;
-    }
-    if (!validateEmail(email)) {
-      setError('Please enter a valid email address.');
-      setLoading(false);
-      return;
-    }
-    if (password !== confirmPassword) {
-      setError('Passwords do not match.');
-      setLoading(false);
-      return;
-    }
+    setError('');
 
     try {
-      const res = await fetch('/api/register', {
+      const res = await fetch('/api/auth/otp/send', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, password }),
+        body: JSON.stringify({ phoneNumber })
       });
+
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Registration failed.');
-      alert('✅ Registration successful! Please login.');
-      handleSwitch(false);
+
+      if (!res.ok) throw new Error(data.error || 'Failed to send OTP');
+
+      setConfirmationData({
+        verificationId: data.verificationId,
+        authToken: data.authToken
+      });
+      setOtpSent(true);
+      setResendTimer(30);
+      setOtp(['', '', '', '']);
+
+      setTimeout(() => otpInputRefs.current[0]?.focus(), 100);
     } catch (err) {
-      setError(err.message || 'Registration failed.');
+      setError(err.message || 'Failed to send OTP. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    setError('');
-    setLoading(true);
+  useEffect(() => {
+    if (resendTimer > 0) {
+      const timer = setTimeout(() => setResendTimer(resendTimer - 1), 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [resendTimer]);
 
-    const { email, password } = formData;
-    if (!email || !password) {
-      setError('Email and password are required.');
-      setLoading(false);
+  const handleOtpChange = (index, value) => {
+    if (!/^\d*$/.test(value)) return;
+    const newOtp = [...otp];
+    newOtp[index] = value.slice(-1);
+    setOtp(newOtp);
+
+    if (value && index < 3) {
+      otpInputRefs.current[index + 1]?.focus();
+    }
+  };
+
+  const handleOtpKeyDown = (index, e) => {
+    if (e.key === 'Backspace' && !otp[index] && index > 0) {
+      otpInputRefs.current[index - 1]?.focus();
+    }
+  };
+
+  const handleOtpPaste = (e) => {
+    e.preventDefault();
+    const pastedData = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 4);
+    if (pastedData.length === 4) {
+      setOtp(pastedData.split(''));
+      otpInputRefs.current[3]?.focus();
+    }
+  };
+
+  const handleVerifyOtp = async (e) => {
+    e?.preventDefault();
+    const otpString = otp.join('');
+    if (otpString.length < 4) {
+      setError('Please enter the complete OTP');
       return;
     }
-    if (!validateEmail(email)) {
-      setError('Invalid email address.');
-      setLoading(false);
-      return;
-    }
+
+    setLoading(true);
+    setError('');
 
     try {
+      if (!confirmationData) {
+        throw new Error('Verification session lost. Please resend OTP.');
+      }
+
+      const res = await fetch('/api/auth/otp/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          verificationId: confirmationData.verificationId,
+          authToken: confirmationData.authToken,
+          otp: otpString,
+          phoneNumber: phoneNumber
+        })
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) throw new Error(data.error || 'Invalid OTP');
+
+      // ✅ Handle verificationOnly mode (Change phone without logout)
+      if (verificationOnly) {
+        onLoginSuccess?.(phoneNumber);
+        onClose?.();
+        return;
+      }
+
+      // OTP is valid. Now sign in using NextAuth Credentials
       const result = await signIn('credentials', {
         redirect: false,
-        email,
-        password,
+        phone: phoneNumber
       });
+
       if (result?.error) {
-        setError(result.error);
-      } else {
-        onLoginSuccess?.(email);
-        onClose?.();
+        throw new Error(result.error);
       }
+
+      onLoginSuccess?.(phoneNumber);
+      onClose?.();
+      
+      // Force reload to update session state globally
+      window.location.reload();
     } catch (err) {
-      setError('Login failed. Please try again.');
+      setError(err.message || 'Verification failed.');
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleGoogle = async () => {
-    await signIn('google', {
-      redirect: false,
-      callbackUrl: window.location.href,
-    });
-  };
-
-  const slideVariants = {
-    initial: (dir) => ({ x: dir === 'left' ? '100%' : '-100%', opacity: 0 }),
-    animate: { x: 0, opacity: 1 },
-    exit: (dir) => ({ x: dir === 'left' ? '-100%' : '100%', opacity: 0 }),
   };
 
   const modalAnimation = {
-    initial: { opacity: 0, y: 40, scale: 0.98 },
-    animate: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.35, ease: 'easeOut' } },
-    exit: { opacity: 0, y: 40, scale: 0.98, transition: { duration: 0.25, ease: 'easeIn' } },
+    initial: { opacity: 0, y: 20, scale: 0.95 },
+    animate: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.4, ease: [0.16, 1, 0.3, 1] } },
+    exit: { opacity: 0, scale: 0.95, transition: { duration: 0.2 } },
   };
-
-  const GoogleButton = ({ label }) => (
-    <button
-      type="button"
-      onClick={handleGoogle}
-      className="w-full flex items-center justify-center gap-3 py-2 px-4 rounded-lg border border-(--theme-border) bg-(--theme-bg) text-(--theme-text) font-medium hover:bg-(--theme-soft) transition duration-150 mb-2 cursor-pointer"
-    >
-      <img
-        src="https://www.svgrepo.com/show/355037/google.svg"
-        alt="Google"
-        className="w-5 h-5 rounded-full"
-      />
-      <span className="text-base font-medium">{label}</span>
-    </button>
-  );
 
   return (
     <motion.div
       {...modalAnimation}
-      className="flex items-center justify-center w-full h-full px-3 sm:px-4"
-      style={{
-        fontFamily: 'Manrope, sans-serif',
-        minHeight: '540px',
-        maxHeight: '90vh',
-      }}
+      className="flex items-center justify-center w-full px-4 sm:px-0"
     >
       <div
-        className="relative max-w-sm w-full bg-(--theme-bg) rounded-2xl shadow-xl overflow-hidden border border-(--theme-border) transition-colors duration-300"
-        style={{ boxShadow: '0 8px 40px rgba(0,0,0,.08)' }}
+        className="relative max-w-md w-full bg-(--theme-bg) rounded-[24px] shadow-2xl overflow-hidden border border-(--theme-border) transition-all duration-300"
+        style={{ boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.15)' }}
       >
-        {/* Close Button */}
+        {/* Header Decor */}
+        <div className="h-2 bg-gradient-to-r from-(--theme-text) to-(--theme-muted) opacity-80" />
+
         {onClose && (
           <button
             onClick={onClose}
-            className="absolute top-3 right-3 z-50 text-(--theme-bg) bg-(--theme-text)
-            rounded-full w-8 h-8 flex items-center justify-center
-            hover:opacity-90 transition-all duration-200"
-
+            className="absolute top-6 right-6 z-50 text-(--theme-muted) hover:text-(--theme-text) transition-colors p-2 rounded-full hover:bg-(--theme-soft)"
           >
-            <X size={18} />
+            <X size={20} />
           </button>
         )}
 
-        {/* Forms */}
-        <div className="relative w-full flex items-center justify-center min-h-[520px]">
-          <AnimatePresence mode="wait" custom={direction}>
-            {isRegistering ? (
+        <div className="px-8 pb-10 pt-10">
+          <div className="text-center mb-10">
+            <h2 className={`${crimson.className} text-[32px] font-bold text-(--theme-text) leading-tight mb-3`}>
+              {otpSent ? 'Verify' : 'Welcome'}
+            </h2>
+            <div className="w-12 h-1 bg-(--theme-text) mx-auto mb-4 rounded-full" />
+            <p className="text-(--theme-muted) text-[15px] max-w-[280px] mx-auto leading-relaxed font-medium">
+              {!otpSent 
+                ? "Enter your mobile number to get started."
+                : `Enter the code we sent to +91 ${phoneNumber}`}
+            </p>
+          </div>
+
+          <AnimatePresence mode="wait">
+            {!otpSent ? (
               <motion.div
-                key="register"
-                custom={direction}
-                variants={slideVariants}
-                initial="initial"
-                animate="animate"
-                exit="exit"
-                transition={{ duration: 0.3, ease: 'easeInOut' }}
-                className="absolute inset-0 flex flex-col justify-center px-5 py-8 bg-(--theme-bg)"
+                key="phone-entry"
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 10 }}
+                transition={{ duration: 0.3 }}
               >
-                <h2 className={`${crimson.className} text-2xl font-bold text-(--theme-text) mb-1 text-center`}>
-
-                  Create Account
-                </h2>
-                <p className="text-base mb-5 text-center text-(--theme-muted)">
-                  Let’s get you started.
-                </p>
-                <GoogleButton label="Sign up with Google" />
-                <p className="text-sm text-gray-400 mb-3 text-center">
-                  or use email registration
-                </p>
-
-                <form className="space-y-5" onSubmit={handleRegister}>
-                  <input
-                    id="name"
-                    value={formData.name}
-                    onChange={handleChange}
-                    type="text"
-                    placeholder="Full Name"
-                    className="w-full border rounded-lg p-3 bg-(--theme-bg) border-(--theme-border) text-(--theme-text) focus:ring-1 focus:ring-(--theme-text) focus:border-(--theme-text) outline-none font-medium transition"                  />
-                  <input
-                    id="email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    type="email"
-                    placeholder="Email"
-                    className="w-full border rounded-lg p-3 bg-(--theme-bg) border-(--theme-border) text-(--theme-text) focus:ring-1 focus:ring-(--theme-text) focus:border-(--theme-text) outline-none font-medium transition"                  />
-                  <div className="grid grid-cols-2 gap-3">
-                    <input
-                      id="password"
-                      value={formData.password}
-                      onChange={handleChange}
-                      type="password"
-                      placeholder="Password"
-                      className="border rounded-lg p-3 bg-(--theme-bg) border-(--theme-border) focus:ring-1 focus:ring-(--theme-text) font-medium"
-                    />
-                    <input
-                      id="confirmPassword"
-                      value={formData.confirmPassword}
-                      onChange={handleChange}
-                      type="password"
-                      placeholder="Confirm"
-                      className="border rounded-lg p-3 bg-(--theme-bg) border-(--theme-border) focus:ring-1 focus:ring-(--theme-text) font-medium"
-                    />
+                <form className="space-y-6" onSubmit={handleSendOtp}>
+                  <div className="space-y-2">
+                    <label className="text-xs uppercase tracking-[0.1em] font-bold text-(--theme-text) ml-1">
+                      Mobile Number
+                    </label>
+                    <div className="flex items-center h-14 border-2 border-(--theme-border) rounded-2xl overflow-hidden focus-within:border-(--theme-text) focus-within:ring-0 transition-all bg-(--theme-bg)">
+                      <div className="px-4 text-[16px] text-(--theme-muted) border-r border-(--theme-border) h-full flex items-center bg-(--theme-soft) font-bold">
+                        +91
+                      </div>
+                      <input
+                        type="tel"
+                        inputMode="numeric"
+                        autoFocus
+                        maxLength={10}
+                        value={phoneNumber}
+                        onChange={(e) => {
+                          setPhoneNumber(e.target.value.replace(/[^0-9]/g, '').slice(0, 10));
+                          setError('');
+                        }}
+                        placeholder="Enter 10-digit number"
+                        className="flex-1 h-full px-4 text-[17px] bg-transparent text-(--theme-text) outline-none font-medium tracking-wide"
+                      />
+                    </div>
                   </div>
-                  {error && <p className="text-red-600 text-sm font-medium">{error}</p>}
+                  
+                  {error && (
+                    <motion.p 
+                      initial={{ opacity: 0, y: -5 }} 
+                      animate={{ opacity: 1, y: 0 }}
+                      className="text-red-500 text-[13px] font-bold text-center bg-red-50 py-2 rounded-lg border border-red-100"
+                    >
+                      {error}
+                    </motion.p>
+                  )}
+                  
                   <button
                     type="submit"
-                    disabled={loading}
-                    className="w-full font-bold py-3 rounded-lg mt-2 bg-(--theme-text) text-(--theme-bg) hover:opacity-90 shadow-md cursor-pointer"
+                    disabled={loading || phoneNumber.length !== 10}
+                    className="w-full h-14 font-extrabold text-[16px] rounded-2xl bg-(--theme-text) text-(--theme-bg) hover:opacity-95 transition-all shadow-md transform active:scale-[0.98] disabled:opacity-30 disabled:pointer-events-none"
                   >
-                    {loading ? 'Processing...' : 'Register'}
+                    {loading ? (
+                       <span className="flex items-center justify-center gap-2">
+                         <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                           <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                           <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                         </svg>
+                         Processing...
+                       </span>
+                    ) : 'Generate OTP'}
                   </button>
                 </form>
 
-                <p className="text-center text-sm mt-5 text-(--theme-muted)">
-                  Already have an account?{' '}
-                  <button
-                    onClick={() => handleSwitch(false)}
-                    className="font-medium hover:underline text-(--theme-text) cursor-pointer"
-                  >
-                    Sign in
-                  </button>
-                </p>
+                <div className="mt-8 text-center">
+                  <p className="text-[11px] text-(--theme-muted)">
+                    By continuing, you agree to our{' '}
+                    <Link href="/policy/terms-conditions" className="text-(--theme-text) font-bold hover:underline">Terms</Link>
+                    {' '}&{' '}
+                    <Link href="/policy/privacy-policy" className="text-(--theme-text) font-bold hover:underline">Privacy Policy</Link>
+                  </p>
+                </div>
               </motion.div>
             ) : (
               <motion.div
-                key="login"
-                custom={direction}
-                variants={slideVariants}
-                initial="initial"
-                animate="animate"
-                exit="exit"
-                transition={{ duration: 0.3, ease: 'easeInOut' }}
-                className="absolute inset-0 flex flex-col justify-center px-5 py-8 bg-(--theme-bg)"
+                key="otp-entry"
+                initial={{ opacity: 0, x: 10 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -10 }}
+                transition={{ duration: 0.3 }}
               >
-                <h2 className={`${crimson.className} text-2xl font-bold text-(--theme-text) mb-1 text-center`}>
-                  Welcome Back
-                </h2>
-                <p className="text-base mb-5 text-center text-(--theme-muted)">
-                  Please enter your details to sign in.
-                </p>
-                <GoogleButton label="Sign in with Google" />
-                <p className="text-sm text-gray-400 mb-3 text-center">
-                  or with email and password
-                </p>
-
-                <form className="space-y-5" onSubmit={handleLogin}>
-                  <input
-                    id="email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    type="email"
-                    placeholder="Email"
-                    className="w-full border rounded-lg p-3 bg-(--theme-bg) border-(--theme-border) text-(--theme-text) focus:ring-1 focus:ring-(--theme-text) focus:border-(--theme-text) outline-none font-medium transition"                  />
-                  <div className="relative">
-                    <input
-                      id="password"
-                      value={formData.password}
-                      onChange={handleChange}
-                      type={showPassword ? 'text' : 'password'}
-                      placeholder="Password"
-                      className="w-full border rounded-lg p-3 pr-10 bg-(--theme-bg) border-(--theme-border) focus:ring-1 focus:ring-(--theme-text) font-medium"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-3 text-(--theme-muted)"
-                    >
-                      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                    </button>
+                <form className="space-y-8" onSubmit={handleVerifyOtp}>
+                  <div className="flex justify-center gap-3" onPaste={handleOtpPaste}>
+                    {otp.map((digit, index) => (
+                      <input
+                        key={index}
+                        ref={(el) => (otpInputRefs.current[index] = el)}
+                        type="text"
+                        inputMode="numeric"
+                        maxLength={1}
+                        value={digit}
+                        onChange={(e) => handleOtpChange(index, e.target.value)}
+                        onKeyDown={(e) => handleOtpKeyDown(index, e)}
+                        className="w-14 h-16 text-center text-2xl font-black border-2 border-(--theme-border) rounded-2xl bg-(--theme-bg) text-(--theme-text) outline-none focus:border-(--theme-text) transition-all shadow-sm"
+                      />
+                    ))}
                   </div>
-                  {error && <p className="text-red-600 text-sm font-medium">{error}</p>}
+
+                  {error && (
+                    <motion.p 
+                      initial={{ opacity: 0 }} 
+                      animate={{ opacity: 1 }}
+                      className="text-red-500 text-[13px] font-bold text-center bg-red-50 py-2 rounded-lg border border-red-100"
+                    >
+                      {error}
+                    </motion.p>
+                  )}
+
                   <button
                     type="submit"
-                    disabled={loading}
-                    className="w-full font-bold py-3 rounded-lg bg-(--theme-text) text-(--theme-bg) hover:opacity-90 shadow-md cursor-pointer"
+                    disabled={loading || otp.join('').length !== 4}
+                    className="w-full h-14 font-extrabold text-[16px] rounded-2xl bg-(--theme-text) text-(--theme-bg) hover:opacity-95 transition-all shadow-md transform active:scale-[0.98] disabled:opacity-30 disabled:pointer-events-none uppercase tracking-widest"
                   >
-                    {loading ? 'Signing in...' : 'Sign In'}
+                    {loading ? 'Verifying...' : 'Complete Login'}
                   </button>
                 </form>
 
-                <p className="text-center text-sm mt-6 text-(--theme-muted)">
-                  Don’t have an account?{' '}
+                <div className="mt-10 flex flex-col items-center gap-4">
                   <button
-                    onClick={() => handleSwitch(true)}
-                    className="font-medium hover:underline text-(--theme-text) cursor-pointer"
+                    type="button"
+                    onClick={() => {
+                      setOtpSent(false);
+                      setOtp(['', '', '', '']);
+                      setError('');
+                    }}
+                    className="text-sm text-(--theme-muted) hover:text-(--theme-text) font-bold underline underline-offset-4 decoration-2 transition-all cursor-pointer"
                   >
-                    Sign up
+                    Use different mobile
                   </button>
-                </p>
+                  
+                  <button
+                    type="button"
+                    onClick={handleSendOtp}
+                    disabled={resendTimer > 0 || loading}
+                    className="group text-[13px] text-(--theme-text) font-bold flex items-center gap-2 disabled:opacity-40"
+                  >
+                    <span>Didn't receive?</span>
+                    <span className="text-(--theme-muted) group-hover:text-(--theme-text) transition-colors underline decoration-dotted decoration-2 underline-offset-4">
+                      {resendTimer > 0 ? `Resend in ${resendTimer}s` : 'Resend OTP Now'}
+                    </span>
+                  </button>
+                </div>
               </motion.div>
             )}
           </AnimatePresence>
@@ -327,3 +341,4 @@ export default function LoginRegisterPage({ onClose, onLoginSuccess }) {
     </motion.div>
   );
 }
+

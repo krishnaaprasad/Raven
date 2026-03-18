@@ -3,11 +3,19 @@ import bcrypt from "bcryptjs";
 
 const UserSchema = new mongoose.Schema(
   {
-    name: { type: String, required: true },
-    email: { type: String, required: true, unique: true },
-    password: { type: String, required: false }, // optional for Google
-    phone: { type: String, default: "" },
-    address: { type: String, default: "" },
+    name: { type: String, default: "" },
+    email: { type: String, required: false }, // Optional now
+    password: { type: String, required: false }, // optional for Google/OTP
+    phone: { type: String, required: true, unique: true },
+    phoneVerified: { type: Boolean, default: false },
+    
+    // Address Fields
+    address1: { type: String, default: "" },
+    address2: { type: String, default: "" },
+    city: { type: String, default: "" },
+    state: { type: String, default: "" },
+    pincode: { type: String, default: "" },
+    address: { type: String, default: "" }, // Legacy compatibility
 
     // 🔥 REAL GUEST FLAG
     isGuest: {

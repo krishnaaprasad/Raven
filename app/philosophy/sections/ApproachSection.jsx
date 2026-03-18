@@ -33,6 +33,7 @@ export default function ApproachSection({ approaches }) {
                     src={approach.image}
                     alt={approach.alt || approach.title}
                     fill
+                    sizes="(max-width: 1024px) 100vw, 50vw"
                     className="object-cover"
                   />
                 </div>

@@ -68,5 +68,11 @@
     "eslint": "^9",
     "eslint-config-next": "^16.0.1",
     "tailwindcss": "^4"
-  }
+  },
+  "browserslist": [
+    "last 2 versions",
+    "not dead",
+    "> 0.5%",
+    "not ie 11"
+  ]
 }

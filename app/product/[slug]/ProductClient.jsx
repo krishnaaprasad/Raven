@@ -8,6 +8,7 @@ import { FaCheck, FaShoppingCart } from 'react-icons/fa';
 import ProductReviews from "@/components/ProductReviews";
 import { Star } from "lucide-react";
 import { Share2, Check } from "lucide-react";
+import ScrollReveal from "@/components/ScrollReveal";
 
 // Swiper (mobile gallery)
 import SwiperCore from 'swiper';
@@ -753,84 +754,91 @@ event({
       </div>
 
       {/* FULL-WIDTH REVIEWS SECTION */}
-      <div className="max-w-7xl md:max-w-15xl mx-auto mt-14 sm:mt-20 px-2">
-        <div
-          id="reviews-section"
-          className="bg-(--theme-bg) "
-        >
-          <h2 className="text-2xl sm:text-3xl text-center text-(--theme-text) font-semibold  px-2 sm:px-4 py-2 sm:py-4 ">
-            Customer Reviews for {product.name}
-          </h2>
-          <ProductReviews
-            productId={product._id}
-            onSummary={(data) => setReviewSummary(data)}
-          />
+      <ScrollReveal>
+        <div className="max-w-7xl md:max-w-15xl mx-auto mt-14 sm:mt-20 px-2">
+          <div
+            id="reviews-section"
+            className="bg-(--theme-bg) "
+          >
+            <h2 className="text-2xl sm:text-3xl text-center text-(--theme-text) font-semibold  px-2 sm:px-4 py-2 sm:py-4 ">
+              Customer Reviews for {product.name}
+            </h2>
+            <ProductReviews
+              productId={product._id}
+              onSummary={(data) => setReviewSummary(data)}
+            />
+          </div>
         </div>
-      </div>
+      </ScrollReveal>
 
       {/* ───────────────
-    YOU MIGHT ALSO LIKE
-──────────────── */}
-{relatedProducts.length > 0 && (
-  <div className="max-w-7xl mx-auto mt-14 sm:mt-16 px-5">
-    
-    <h2
-      className="
-        font-[system-ui]
-        text-2xl sm:text-3xl
-        text-(--theme-text)
-        text-center
-        mb-15
-      "
-    >
-      You Might Also Like
-    </h2>
-
-    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
-      {relatedProducts.map((item) => (
-        <div
-          key={item._id}
-          onClick={() => router.push(`/product/${item.slug}`)}
+      YOU MIGHT ALSO LIKE
+  ──────────────── */}
+  {relatedProducts.length > 0 && (
+    <ScrollReveal>
+      <div className="max-w-7xl mx-auto mt-14 sm:mt-16 px-5">
+        
+        <h2
           className="
-            group
-            cursor-pointer
-            border border-(--theme-border)
-            bg-(--theme-bg)
-            transition
-            
+            font-[system-ui]
+            text-2xl sm:text-3xl
+            text-(--theme-text)
+            text-center
+            mb-15
           "
         >
-          <div className="relative aspect-4/5 overflow-hidden bg-(--theme-soft)">
-            <Image
-              src={
-                (typeof item.images?.[0] === "string"
-                  ? item.images[0]
-                  : item.images?.[0]?.original) || "/placeholder-product.jpg"
-              }
-              alt={item.name}
-              fill
-              className="object-cover transition-transform duration-700 group-hover:scale-105"
-            />          </div>
+          You Might Also Like
+        </h2>
 
-          <div className="p-4 space-y-2">
-            <p className="font-[Crimson_Text] text-base text-(--theme-text) line-clamp-1">
-              {item.name}
-            </p>
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
+          {relatedProducts.map((item) => (
+            <div
+              key={item._id}
+              onClick={() => router.push(`/product/${item.slug}`)}
+              className="
+                group
+                cursor-pointer
+                border border-(--theme-border)
+                bg-(--theme-bg)
+                transition
+                hover:shadow-lg
+              "
+            >
+              <div className="relative aspect-4/5 overflow-hidden bg-(--theme-soft)">
+                <Image
+                  src={
+                    (typeof item.images?.[0] === "string"
+                      ? item.images[0]
+                      : item.images?.[0]?.original) || "/placeholder-product.jpg"
+                  }
+                  alt={item.name}
+                  fill
+                  sizes="(max-width: 640px) 50vw, 25vw"
+                  className="object-cover transition-transform duration-700 group-hover:scale-105"
+                />
+              </div>
 
-            {item.accords?.length > 0 && (
-              <p className="text-[10.5px] uppercase tracking-[0.18em] text-(--theme-muted)">
-                {item.accords.slice(0, 2).join(" | ")}
-              </p>
-            )}
+              <div className="p-4 space-y-2">
+                <p className="font-[Crimson_Text] text-base text-(--theme-text) line-clamp-1">
+                  {item.name}
+                </p>
 
-            <p className="font-[system-ui] text-sm font-semibold text-(--theme-text)">
-              ₹{item.variants?.[0]?.price?.toFixed(0) ?? "N/A"}
-            </p>          </div>
+                {item.accords?.length > 0 && (
+                  <p className="text-[10.5px] uppercase tracking-[0.18em] text-(--theme-muted)">
+                    {item.accords.slice(0, 2).join(" | ")}
+                  </p>
+                )}
+
+                <p className="font-[system-ui] text-sm font-semibold text-(--theme-text)">
+                  ₹{item.variants?.[0]?.price?.toFixed(0) ?? "N/A"}
+                </p>
+              </div>
+            </div>
+          ))}
         </div>
-      ))}
-    </div>
-  </div>
-)}
+      </div>
+    </ScrollReveal>
+  )}
 
       {/* FULLSCREEN LIGHTBOX (DESKTOP + MOBILE) */}
       {lightboxOpen && (

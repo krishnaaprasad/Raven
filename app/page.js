@@ -1,20 +1,11 @@
-export const dynamic = "force-dynamic";
-
-import Marquee from "react-fast-marquee";
-import ScentStorySection from "@/components/ScentStorySection";
-import AboutRaven from '@/components/AboutRaven';
-import WhyChooseRaven from '@/components/WhyChooseRaven';
-import RebelSpirit from '@/components/RebelSpirit';
-import RebelFinale from '@/components/RebelFinale';
-import RavenBadge from '@/components/RavenBadge';
-import ProductCarousel from "@/components/ProductCarousel";
-import InstagramGallery from "@/components/InstagramGallery";
 import connectToDatabase from "@/lib/mongodb";
 import Product from "@/models/Product";
 import HeroSection from "@/components/HeroSection";
-import Testimonials from "@/components/Testimonial";
-import FAQSection from '@/components/FAQSection';
-
+import RavenBadge from '@/components/RavenBadge';
+import ProductCarousel from "@/components/ProductCarousel";
+import WhyChooseRaven from '@/components/WhyChooseRaven';
+import HomeBottomFold from "@/components/HomeBottomFold";
+import ScrollReveal from "@/components/ScrollReveal";
 
 export default async function Home() {
   
@@ -35,25 +26,27 @@ export default async function Home() {
     )
     .slice(0, 3) // top 3
     .map((p) => p._id);
+
   return (
     <div className="homepage-theme" >
-
-      {/* HERO VIDEO */}
+      {/* HERO SECTION */}
       <HeroSection products={products.slice(0, 5)} />
-      {/* SECTIONS */}
-      <RavenBadge />
-      {/* ⭐ PASS bestsellerIds ALSO ⭐ */}
-      <ProductCarousel products={products} bestsellerIds={bestsellerIds} />
-      <WhyChooseRaven />
-      <Testimonials />
-      {/* <FAQSection /> */}
-      <InstagramGallery /> 
-      {/*
-      <AboutRaven />
-      <RebelSpirit />
-      <RebelFinale />
-      <ScentStorySection />
-      */}
+
+      {/* REVEALING SECTIONS */}
+      <ScrollReveal>
+        <RavenBadge />
+      </ScrollReveal>
+
+      <ScrollReveal>
+        <ProductCarousel products={products} bestsellerIds={bestsellerIds} />
+      </ScrollReveal>
+
+      <ScrollReveal>
+        <WhyChooseRaven />
+      </ScrollReveal>
+
+      {/* OFF-SCREEN LAZY SECTIONS */}
+      <HomeBottomFold />
     </div>
   );
 }

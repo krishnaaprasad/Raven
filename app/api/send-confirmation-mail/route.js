@@ -111,9 +111,9 @@ export async function POST(req) {
 
     // Hostinger SMTP Transporter
     const transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST || "smtp.hostinger.com",
-      port: Number(process.env.SMTP_PORT) || 465,
-      secure: true,
+      host: process.env.MAIL_HOST || "smtp.gmail.com",
+      port: Number(process.env.MAIL_PORT) || 465,
+      secure: Number(process.env.MAIL_PORT) === 465, 
       auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS,
@@ -158,7 +158,7 @@ export async function POST(req) {
     // 2️⃣ Send admin copy
     await transporter.sendMail({
       from: `Raven Fragrance <${process.env.EMAIL_USER}>`,
-      to: "contact@ravenfragrance.in",
+      to: "ravenfragrances@gmail.com",
       subject: `New Order Received - ${orderId}`,
       html: `
         <h2>New Order Received</h2>

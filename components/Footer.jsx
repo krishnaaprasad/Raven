@@ -192,16 +192,18 @@ export default function Footer() {
 
           <div className="flex items-center gap-5 ">
             {[
-              { src: "/upi.svg", alt: "UPI" },
-              { src: "/visa.svg", alt: "Visa" },
-              { src: "/mastercard.svg", alt: "Mastercard" },
-              { src: "/rupay.svg", alt: "RuPay" },
+              { src: "/upi.svg", alt: "UPI", w: 40, h: 24 },
+              { src: "/visa.svg", alt: "Visa", w: 45, h: 24 },
+              { src: "/mastercard.svg", alt: "Mastercard", w: 35, h: 24 },
+              { src: "/rupay.svg", alt: "RuPay", w: 50, h: 24 },
             ].map((p) => (
               <img
                 key={p.alt}
                 src={p.src}
                 alt={p.alt}
-                className="h-6 md:h-7 transition duration-300"
+                width={p.w}
+                height={p.h}
+                className="h-6 md:h-7 w-auto transition duration-300"
                 loading="lazy"
               />
             ))}

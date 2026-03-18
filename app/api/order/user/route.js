@@ -12,8 +12,17 @@ export async function GET(req) {
     }
 
     await connectToDatabase();
+    
+    // Build a dynamic query based on what we have in session
+    const orConditions = [];
+    if (session.user.phone) orConditions.push({ phone: session.user.phone });
+    if (session.user.email) orConditions.push({ email: session.user.email });
 
-    const orders = await Order.find({ email: session.user.email })
+    if (orConditions.length === 0) {
+      return NextResponse.json({ success: true, orders: [] });
+    }
+
+    const orders = await Order.find({ $or: orConditions })
       .sort({ createdAt: -1 });
 
     return NextResponse.json({ success: true, orders });

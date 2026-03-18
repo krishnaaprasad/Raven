@@ -72,20 +72,28 @@ export default function NavBar() {
   useEffect(() => {
     if (typeof window === "undefined") return;
 
+    // Cache the height to avoid repeated layout querying across all scroll events
+    let viewportHeight = window.innerHeight;
+    const updateViewport = () => { viewportHeight = window.innerHeight; };
+    window.addEventListener("resize", updateViewport);
+
     const handleScroll = () => {
       const y = window.scrollY;
       if (isHome) {
         setPastMarquee(y > MARQUEE_HEIGHT);
-        setIsScrolled(y > window.innerHeight - 80);
+        setIsScrolled(y > viewportHeight - 80);
       } else {
         setPastMarquee(true);
         setIsScrolled(true);
       }
     };
 
-    window.addEventListener("scroll", handleScroll);
+    window.addEventListener("scroll", handleScroll, { passive: true });
     handleScroll();
-    return () => window.removeEventListener("scroll", handleScroll);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("resize", updateViewport);
+    };
   }, [isHome]);
 
   useEffect(() => {
@@ -179,6 +187,7 @@ const sidebarTop = pastMarquee
                 onClick={toggleTheme}
                 aria-label="Toggle theme"
                 aria-pressed={theme === 'dark'}
+                className="flex items-center"
               >
                 {theme === "dark" ? (
                   <Sun className="h-5 w-5 text-(--theme-text) cursor-pointer" />
@@ -188,9 +197,13 @@ const sidebarTop = pastMarquee
               </button>
 
               {/* Desktop user only */}
-              <div className="hidden sm:block">
+              <div className="hidden sm:flex items-center">
                 {!session ? (
-                  <button onClick={() => setShowAuthModal(true)}>
+                  <button 
+                    onClick={() => setShowAuthModal(true)}
+                    className="flex items-center"
+                    aria-label="User Account"
+                  >
                     <UserIcon className="h-5 w-5 text-(--theme-text) cursor-pointer" />
                   </button>
                 ) : (
@@ -237,7 +250,7 @@ const sidebarTop = pastMarquee
               </div>
 
               {/* Cart */}
-              <button onClick={openCart} className="relative">
+              <button onClick={openCart} className="relative flex items-center" aria-label="Open Shopping Bag">
                 <ShoppingBagIcon
                   className={`h-5 w-5 text-(--theme-text) cursor-pointer${
                     animateCart ? "animate-bounce" : ""

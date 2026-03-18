@@ -61,7 +61,7 @@ const emailPayload = {
         });
   })(),};
     const baseURL =
-    process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+    process.env.NEXT_PUBLIC_BASE_URL || "https://www.ravenfragrance.in";
     await fetch(`${baseURL}/api/send-confirmation-mail`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },

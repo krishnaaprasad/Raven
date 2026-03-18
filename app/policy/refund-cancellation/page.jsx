@@ -41,7 +41,7 @@ export default function RefundCancellationPolicyPage() {
           <p className="text-(--theme-muted) font-[system-ui] leading-relaxed">
             To initiate a return, please contact us via email at{" "}
             <span className="font-semibold text-(--theme-text)">
-              contact@ravenfragrance.in
+              ravenfragrances@gmail.com
             </span>{" "}
             or WhatsApp at{" "}
             <span className="font-semibold text-(--theme-text)">
@@ -104,7 +104,7 @@ export default function RefundCancellationPolicyPage() {
             However, returns are still possible after delivery as per our return
             policy. To cancel an order, please contact us immediately at{" "}
             <span className="font-semibold text-(--theme-text)">
-              contact@ravenfragrance.in
+              ravenfragrances@gmail.com
             </span>
             .
           </p>
@@ -121,7 +121,7 @@ export default function RefundCancellationPolicyPage() {
           </p>
 
           <p className="mt-2 font-semibold text-(--theme-text)">
-            contact@ravenfragrance.in
+            ravenfragrances@gmail.com
           </p>
 
           <p className="text-(--theme-muted) font-[system-ui]">

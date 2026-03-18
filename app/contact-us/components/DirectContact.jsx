@@ -7,7 +7,7 @@ const DirectContact = ({ className = "" }) => {
     {
       icon: "EnvelopeIcon",
       label: "Email",
-      value: "contact@ravenfragrance.in",
+      value: "ravenfragrances@gmail.com",
       description: "For general inquiries and detailed questions",
     },
     {

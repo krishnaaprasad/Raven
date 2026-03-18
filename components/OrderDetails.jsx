@@ -204,7 +204,7 @@ useEffect(() => {
                 const orderNo = order.customOrderId || order._id;
                 const subject = `Support Request for Order ${orderNo}`;
                 const body = `Hello Raven Support,%0D%0A%0D%0AI need help with my order.%0D%0AOrder ID: ${orderNo}%0D%0AThank you.`;
-                window.location.href = `mailto:contact@ravenfragrance.in?subject=${subject}&body=${body}`;
+                window.location.href = `mailto:ravenfragrances@gmail.com?subject=${subject}&body=${body}`;
               }}
               className="flex cursor-pointer items-center justify-center rounded-lg h-10 px-4 border border-(--theme-border) text-(--theme-text) gap-2 text-xs font-bold hover:bg-(--theme-soft)"
             >

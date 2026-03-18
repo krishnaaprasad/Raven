@@ -1,33 +1,38 @@
-import { Geist, Geist_Mono } from "next/font/google";
-import NavBar from "@/components/NavBar";
-import Footer from "@/components/Footer";
-import "./globals.css";
-import { SpeedInsights } from '@vercel/speed-insights/next';
-import { Analytics } from "@vercel/analytics/next"
-import Providers from "./Providers";
-import WhatsAppButton from "@/components/WhatsAppButton";
-import HomeMarquee from "@/components/HomeMarquee"; // ✅ new client component
-import QuickViewModal from "@/app/collection/components/QuickViewModal";
-import { QuickViewProvider } from "@/app/context/QuickViewContext";
 import Script from "next/script";
 import { ThemeProvider } from "./theme-provider";
-import { Crimson_Text } from 'next/font/google';
+import { Crimson_Text, Cinzel } from 'next/font/google';
+import localFont from 'next/font/local';
 
+// Core layout components
+import NavBar from "@/components/NavBar";
+import Footer from "@/components/Footer";
+import Providers from "./Providers";
+import { QuickViewProvider } from "@/app/context/QuickViewContext";
+import { SpeedInsights } from '@vercel/speed-insights/next';
+import { Analytics } from "@vercel/analytics/next";
+import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
+// Use safe wrappers for dynamic client-only widgets
+import { HomeMarqueeWidget, QuickViewWidget, WhatsAppWidget } from "@/components/DynamicWidgets";
+
 
 export const crimson = Crimson_Text({
   subsets: ['latin'],
   weight: ['400', '600', '700'],
   display: 'swap',
+  variable: '--font-crimson',
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+export const cinzel = Cinzel({
   subsets: ["latin"],
+  display: "swap",
+  variable: "--font-cinzel",
+});
+
+export const futura = localFont({
+  src: "../public/fonts/Futura.ttf",
+  display: "swap",
+  variable: "--font-futura",
 });
 
 export const metadata = {
@@ -115,27 +120,29 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" >
       <head>
+        {/* LCP Preloads for fast image discovery */}
+        <link rel="preload" as="image" href="/hero-desktop-light.PNG" media="(min-width: 768px)" fetchpriority="high" />
+        <link rel="preload" as="image" href="/hero-mobile-light.PNG" media="(max-width: 767px)" fetchpriority="high" />
+
         {process.env.NEXT_PUBLIC_GA_ID && (
           <>
             <Script
-              strategy="afterInteractive"
+              strategy="lazyOnload"
               src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GA_ID}`}
             />
-            <Script id="ga-init" strategy="afterInteractive">
+            <Script id="ga-init" strategy="lazyOnload">
               {`
                 window.dataLayer = window.dataLayer || [];
                 function gtag(){dataLayer.push(arguments);}
                 gtag('js', new Date());
-                gtag('config', '${process.env.NEXT_PUBLIC_GA_ID}', {
-                  page_path: window.location.pathname,
-                });
+                gtag('config', '${process.env.NEXT_PUBLIC_GA_ID}');
               `}
             </Script>
           </>
         )}
       </head>
 
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+      <body className={`${crimson.variable} ${cinzel.variable} ${futura.variable} antialiased`}>
         <script
             type="application/ld+json"
             dangerouslySetInnerHTML={{
@@ -145,15 +152,15 @@ export default function RootLayout({ children }) {
       <ThemeProvider>
         <Providers>
           <QuickViewProvider>
-            <HomeMarquee />
+            <HomeMarqueeWidget />
             <NavBar />
 
             <div className="pt-12">{children}</div>
 
-            <QuickViewModal />
+            <QuickViewWidget />
 
             <Footer />
-            <WhatsAppButton />
+            <WhatsAppWidget />
 
             <SpeedInsights />
             <Analytics />

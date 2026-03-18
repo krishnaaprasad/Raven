@@ -100,7 +100,7 @@ export default function ShippingPolicyPage() {
             In the rare event that your shipment is lost, delayed, or
             untraceable, please contact us immediately at{" "}
             <span className="font-semibold text-(--theme-text)">
-              contact@ravenfragrance.in
+              ravenfragrances@gmail.com
             </span>{" "}
             or WhatsApp at{" "}
             <span className="font-semibold text-(--theme-text)">
@@ -147,7 +147,7 @@ export default function ShippingPolicyPage() {
           </p>
 
           <p className="mt-2 font-semibold text-(--theme-text)">
-            contact@ravenfragrance.in
+            ravenfragrances@gmail.com
           </p>
 
           <p className="text-(--theme-muted) font-[system-ui]">

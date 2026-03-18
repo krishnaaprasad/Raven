@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from "react";
 import Icon from "@/components/ui/AppIcon";
+import { toast } from "react-hot-toast";
 
-const ContactForm = ({ className = "" }) => {
+const ContactForm = ({ className = "", setSubmitted, setError }) => {
   const [isHydrated, setIsHydrated] = useState(false);
 
   const [formData, setFormData] = useState({
@@ -16,7 +17,6 @@ const ContactForm = ({ className = "" }) => {
 
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitSuccess, setSubmitSuccess] = useState(false);
 
   useEffect(() => {
     setIsHydrated(true);
@@ -76,11 +76,18 @@ const ContactForm = ({ className = "" }) => {
 
     setIsSubmitting(true);
 
-    // Simulated submit (replace with API if needed)
-    setTimeout(() => {
-      setIsSubmitting(false);
-      setSubmitSuccess(true);
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
 
+      if (!res.ok) throw new Error("Failed to send message");
+
+      toast.success("Message sent successfully!");
+      if (setSubmitted) setSubmitted(true);
+      
       setFormData({
         name: "",
         email: "",
@@ -89,10 +96,12 @@ const ContactForm = ({ className = "" }) => {
         message: "",
       });
 
-      setTimeout(() => {
-        setSubmitSuccess(false);
-      }, 5000);
-    }, 1500);
+    } catch (err) {
+      console.error("Submission error:", err);
+      toast.error("Something went wrong while sending the message.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const subjectOptions = [
@@ -124,21 +133,6 @@ const ContactForm = ({ className = "" }) => {
     <div
       className={`bg-(--theme-bg) border border-(--theme-border) p-8 lg:p-12 transition-colors duration-500 ${className}`}
     >
-      {/* SUCCESS */}
-      {submitSuccess && (
-        <div className="mb-8 p-6 border border-(--theme-border) bg-(--theme-soft) flex gap-4">
-          <Icon name="CheckCircleIcon" size={22} />
-          <div>
-            <h3 className="font-serif text-lg text-(--theme-text)">
-              Message Sent Successfully
-            </h3>
-            <p className="text-sm text-(--theme-muted) font-[system-ui]">
-              Thank you for reaching out. We typically respond within 24–48 hours.
-            </p>
-          </div>
-        </div>
-      )}
-
       {/* FORM */}
       <form onSubmit={handleSubmit} className="space-y-6 font-[system-ui]">
         {/* NAME + EMAIL */}

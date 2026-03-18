@@ -146,7 +146,7 @@ export default function FAQSection() {
             Still have questions about Raven Fragrance?
           </p>
           <a
-            href="mailto:contact@ravenfragrance.in"
+            href="mailto:ravenfragrances@gmail.com"
             className="font-[Outfit] text-[#b28c34] hover:text-[#9a864c] font-medium transition"
           >
             Contact our fragrance experts →

@@ -3,7 +3,7 @@ import nodemailer from 'nodemailer'
 // POST handler for contact form
 export async function POST(req) {
   try {
-    const { name, email, subject, message, token } = await req.json()
+    const { name, email, phone, subject, message, token } = await req.json()
 
     // Optional: verify reCAPTCHA server-side here if needed
     // const recaptchaRes = await fetch(
@@ -17,25 +17,30 @@ export async function POST(req) {
 
     // Create Hostinger SMTP transporter
     const transporter = nodemailer.createTransport({
-      host: 'smtp.hostinger.com',
-      port: 587,
-      secure: false,
+      host: process.env.MAIL_HOST || 'smtp.gmail.com',
+      port: Number(process.env.MAIL_PORT) || 465,
+      secure: Number(process.env.MAIL_PORT) === 465, // true for 465, false for other ports
       auth: {
-        user: process.env.EMAIL_USER, // e.g., contact@ravenfragrance.in
-        pass: process.env.EMAIL_PASS, // email password
+        user: process.env.EMAIL_USER, 
+        pass: process.env.EMAIL_PASS, 
       },
     })
 
     // Send mail
     await transporter.sendMail({
-      from: `"Raven Fragrance Contact" <${process.env.EMAIL_USER}>`, // Must match authenticated email
-      to: process.env.EMAIL_USER, // Your inbox (same email)
-      replyTo: email, // User’s email for easy reply
+      from: `"Raven Fragrance Contact" <${process.env.EMAIL_USER}>`,
+      to: "ravenfragrances@gmail.com",
+      replyTo: email,
       subject: subject || 'New Contact Form Message',
       html: `
+        <h2>New Inquiry Received</h2>
         <p><strong>Name:</strong> ${name}</p>
         <p><strong>Email:</strong> ${email}</p>
+        <p><strong>Phone:</strong> ${phone || "Not Provided"}</p>
+        <p><strong>Subject:</strong> ${subject || "General Inquiry"}</p>
         <p><strong>Message:</strong><br/>${message}</p>
+        <br/>
+        <p>This message was sent from the Raven Fragrance Contact Form.</p>
       `,
     })
 

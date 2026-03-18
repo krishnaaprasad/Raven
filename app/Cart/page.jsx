@@ -7,6 +7,7 @@ import { useCart } from '../context/cartcontext';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { MdDelete } from 'react-icons/md';
+import ScrollReveal from '@/components/ScrollReveal';
 
 export default function CartPage() {
   usePageMetadata(
@@ -54,90 +55,93 @@ export default function CartPage() {
         {/* Left Column */}
         <div className="lg:col-span-2 space-y-6">
           {cartItems.map((item, i) => (
-            <div
-              key={i}
-              className="flex items-center justify-between bg-(--theme-soft) border border-(--theme-border) p-5 transition"
-            >
-              {/* Product Info */}
-              <div className="flex items-start gap-5 grow">
-                <div className="h-[95px] w-[95px] overflow-hidden border border-(--theme-border)">
-                  <Image
-                    src={item.image}
-                    alt={item.name}
-                    width={95}
-                    height={95}
-                    className="object-cover w-full h-full"
-                    unoptimized
-                  />
+            <ScrollReveal key={i}>
+              <div
+                className="flex items-center justify-between bg-(--theme-soft) border border-(--theme-border) p-5 transition"
+              >
+                {/* Product Info */}
+                <div className="flex items-start gap-5 grow">
+                  <div className="h-[95px] w-[95px] overflow-hidden border border-(--theme-border)">
+                    <Image
+                      src={item.image}
+                      alt={item.name}
+                      width={95}
+                      height={95}
+                      className="object-cover w-full h-full"
+                      unoptimized
+                    />
+                  </div>
+
+                  <div>
+                    <Link
+                      href={`/product/${item.slug}`}
+                      className="block text-base sm:text-lg font-semibold hover:opacity-70 transition"
+                    >
+                      {item.name}
+                    </Link>
+
+                    <p className="text-sm text-(--theme-muted) mt-1">
+                      ₹{item.price}.00
+                    </p>
+
+                    <p className="text-sm text-(--theme-muted)">
+                      {item.size}
+                    </p>
+                  </div>
                 </div>
 
-                <div>
-                  <Link
-                    href={`/product/${item.slug}`}
-                    className="block text-base sm:text-lg font-semibold hover:opacity-70 transition"
-                  >
-                    {item.name}
-                  </Link>
+                {/* Quantity */}
+                <div className="flex items-center gap-6">
+                  <div className="flex items-center gap-2 border border-(--theme-border) px-3 py-1">
+                    <button
+                      onClick={() =>
+                        updateQuantity(item.id, item.size, Math.max(item.quantity - 1, 1))
+                      }
+                      className="h-7 w-7 flex items-center justify-center text-sm font-medium hover:bg-(--theme-bg) cursor-pointer"
+                    >
+                      −
+                    </button>
 
-                  <p className="text-sm text-(--theme-muted) mt-1">
-                    ₹{item.price}.00
+                    <span className="w-6 text-center text-sm">
+                      {item.quantity}
+                    </span>
+
+                    <button
+                      onClick={() =>
+                        updateQuantity(item.id, item.size, item.quantity + 1)
+                      }
+                      className="h-7 w-7 flex items-center justify-center text-sm font-medium hover:bg-(--theme-bg) cursor-pointer"
+                    >
+                      +
+                    </button>
+                  </div>
+
+                  <p className="font-semibold text-right w-20 hidden sm:block">
+                    ₹{item.price * item.quantity}.00
                   </p>
 
-                  <p className="text-sm text-(--theme-muted)">
-                    {item.size}
-                  </p>
-                </div>
-              </div>
-
-              {/* Quantity */}
-              <div className="flex items-center gap-6">
-                <div className="flex items-center gap-2 border border-(--theme-border) px-3 py-1">
                   <button
-                    onClick={() =>
-                      updateQuantity(item.id, item.size, Math.max(item.quantity - 1, 1))
-                    }
-                    className="h-7 w-7 flex items-center justify-center text-sm font-medium hover:bg-(--theme-bg) cursor-pointer"
+                    className="text-(--theme-muted) hover:text-(--theme-text) transition cursor-pointer"
+                    onClick={() => removeFromCart(item.id, item.size)}
                   >
-                    −
-                  </button>
-
-                  <span className="w-6 text-center text-sm">
-                    {item.quantity}
-                  </span>
-
-                  <button
-                    onClick={() =>
-                      updateQuantity(item.id, item.size, item.quantity + 1)
-                    }
-                    className="h-7 w-7 flex items-center justify-center text-sm font-medium hover:bg-(--theme-bg) cursor-pointer"
-                  >
-                    +
+                    <MdDelete size={18} />
                   </button>
                 </div>
-
-                <p className="font-semibold text-right w-20 hidden sm:block">
-                  ₹{item.price * item.quantity}.00
-                </p>
-
-                <button
-                  className="text-(--theme-muted) hover:text-(--theme-text) transition cursor-pointer"
-                  onClick={() => removeFromCart(item.id, item.size)}
-                >
-                  <MdDelete size={18} />
-                </button>
               </div>
-            </div>
+            </ScrollReveal>
           ))}
 
           {/* Continue Shopping */}
-          <div className="text-center mt-6">
-            <Link
-              href="/collection"
-              className="text-sm underline text-(--theme-muted) hover:text-(--theme-text) transition"
-            >
-              Continue Shopping
-            </Link>
-          </div>
+          <ScrollReveal>
+            <div className="text-center mt-6">
+              <Link
+                href="/collection"
+                className="text-sm underline text-(--theme-muted) hover:text-(--theme-text) transition"
+              >
+                Continue Shopping
+              </Link>
+            </div>
+          </ScrollReveal>
         </div>
 
         {/* Right Column - Summary */}

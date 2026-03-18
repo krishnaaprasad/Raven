@@ -8,6 +8,7 @@ import ApproachSection from './sections/ApproachSection';
 import ValuesPillars from './sections/ValuesPillars';
 import ExpandableContent from './sections/ExpandableContent';
 import CTASection from './sections/CTASection';
+import ScrollReveal from '@/components/ScrollReveal';
 
 export default function PhilosophyInteractive() {
 
@@ -119,7 +120,9 @@ export default function PhilosophyInteractive() {
     <div className="min-h-screen bg-(--theme-bg) transition-colors duration-500">
       <div className="h-20 lg:h-24" />
 
-      <PhilosophyHero title={heroData.title} subtitle={heroData.subtitle} />
+      <ScrollReveal>
+        <PhilosophyHero title={heroData.title} subtitle={heroData.subtitle} />
+      </ScrollReveal>
 
       <section className="py-24 lg:py-32">
         <div className="max-w-[1200px] mx-auto px-6 lg:px-12">
@@ -127,23 +130,41 @@ export default function PhilosophyInteractive() {
             Core Principles
           </h2>
           {corePrinciples.map((p, i) => (
-            <CorePrinciple key={i} {...p} />
+            <ScrollReveal key={i}>
+              <CorePrinciple {...p} />
+            </ScrollReveal>
           ))}
         </div>
       </section>
 
-      <ManifestoSection statements={manifestoStatements} />
-      <PhilosophyQuote quote={quoteData.quote} author={quoteData.author} />
-      <ApproachSection approaches={approaches} />
-      <ValuesPillars pillars={valuePillars} />
-      <ExpandableContent sections={expandableSections} />
+      <ScrollReveal>
+        <ManifestoSection statements={manifestoStatements} />
+      </ScrollReveal>
 
-      <CTASection
-        title={ctaData.title}
-        description={ctaData.description}
-        primaryLink={ctaData.primaryLink}
-        secondaryLink={ctaData.secondaryLink}
-      />
+      <ScrollReveal>
+        <PhilosophyQuote quote={quoteData.quote} author={quoteData.author} />
+      </ScrollReveal>
+
+      <ScrollReveal>
+        <ApproachSection approaches={approaches} />
+      </ScrollReveal>
+
+      <ScrollReveal>
+        <ValuesPillars pillars={valuePillars} />
+      </ScrollReveal>
+
+      <ScrollReveal>
+        <ExpandableContent sections={expandableSections} />
+      </ScrollReveal>
+
+      <ScrollReveal>
+        <CTASection
+          title={ctaData.title}
+          description={ctaData.description}
+          primaryLink={ctaData.primaryLink}
+          secondaryLink={ctaData.secondaryLink}
+        />
+      </ScrollReveal>
     </div>
   );
 }

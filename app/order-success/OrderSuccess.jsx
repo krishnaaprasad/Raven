@@ -401,8 +401,8 @@ export default function OrderSuccess() {
                   <p className="text-sm text-(--theme-muted) leading-relaxed max-w-md">
                     Need help with your payment? <br />
                     Reach out to our <span className="text-(--theme-text) font-medium">Support Team</span> at <br />
-                    <a href="mailto:support@ravenfragrance.in" className="text-(--theme-text) hover:underline">
-                      contact@ravenfragrance.in
+                    <a href="mailto:ravenfragrances@gmail.com" className="text-(--theme-text) hover:underline">
+                      ravenfragrances@gmail.com
                     </a>{' '}
                     or{' '}
                     <a

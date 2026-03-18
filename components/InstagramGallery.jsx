@@ -34,7 +34,7 @@ export default function InstagramGallery() {
       <div className="w-full mx-auto px-4">
 
         <Script
-          src="https://cdn.lightwidget.com/widgets/lightwidget.js"
+          src="/scripts/lightwidget.js"
           strategy="lazyOnload"
         />
 
