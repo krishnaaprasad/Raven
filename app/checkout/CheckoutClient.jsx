@@ -37,6 +37,106 @@ const isValidPincodeRegion = (pincode) => {
   return pincode && /^\d{6}$/.test(pincode) && ALLOWED_PINCODE_PREFIXES.some(prefix => pincode.startsWith(prefix));
 };
 
+// ✅ Floating Input (Moved OUTSIDE to prevent focus loss on re-render)
+const FloatingInput = ({ 
+  name, 
+  label, 
+  control, 
+  errors, 
+  setValue,
+  setHasUserEdited, 
+  pincodeError, 
+  setPincodeError, 
+  fieldRefs,
+  type = 'text', 
+  inputMode, 
+  maxLength, 
+  rules, 
+  helperText 
+}) => {
+  return (
+    <Controller
+      name={name}
+      control={control}
+      rules={rules}
+      render={({ field: { onChange, value } }) => {
+        const hasError = Boolean(errors[name]);
+        const hasValue = value?.trim() !== '';
+
+        const handleChange = async (e) => {
+          let val = e.target.value;
+          if (name === 'pincode') {
+            val = val.replace(/[^0-9]/g, '').slice(0, 6);
+            if (val.length === 6) {
+              if (!isValidPincodeRegion(val)) {
+                setPincodeError('We are currently delivering only in Mumbai and Sangli. We will soon start service in your area — stay tuned!');
+              } else {
+                setPincodeError('');
+                // 🚀 FREE SMART AUTO-FILL: Fetch City/State from Pincode
+                try {
+                  const res = await fetch(`https://api.postalpincode.in/pincode/${val}`);
+                  const data = await res.json();
+                  if (data?.[0]?.Status === "Success") {
+                    const info = data[0].PostOffice[0];
+                    if (info.District) setValue('city', info.District, { shouldValidate: true });
+                    if (info.State) setValue('state', info.State, { shouldValidate: true });
+                  }
+                } catch (err) {
+                  console.warn("Pincode lookup failed:", err);
+                }
+              }
+            } else {
+              setPincodeError('');
+            }
+          }
+          setHasUserEdited(true);
+          onChange(val);
+        };
+
+        return (
+          <div ref={(el) => (fieldRefs.current[name] = el)} className="relative mb-5 w-[95%] max-w-[640px]">
+            <input
+              type={type}
+              inputMode={inputMode}
+              maxLength={maxLength}
+              value={value ?? ''}
+              onChange={handleChange}
+              placeholder=" "
+              autoComplete="off"
+              className={`peer w-full h-11 px-4 pr-10 text-[15px] text-(--theme-text) bg-(--theme-bg) rounded-md border outline-none transition-all
+                ${hasError || (name === 'pincode' && pincodeError)
+                  ? 'border-red-500'
+                  : 'border-(--theme-border) focus:border-(--theme-text) focus:ring-1 focus:ring-(--theme-text)'
+                }`}
+            />
+            <label
+              className={`absolute left-4 text-(--theme-muted) bg-(--theme-bg) px-1 transition-all duration-300 pointer-events-none
+                ${hasValue
+                  ? '-top-2 text-xs font-medium'
+                  : 'top-2.5 text-[15px] peer-focus:-top-2 peer-focus:text-xs'
+                }`}
+            >
+              {label}
+            </label>
+            {helperText && (
+              <p className="mt-1 text-xs text-amber-600 flex items-center gap-1">
+                <FiHelpCircle size={12} className="flex-shrink-0" />
+                {helperText}
+              </p>
+            )}
+            {hasError && <p className="mt-1 text-xs text-red-600">{errors[name].message}</p>}
+            {name === 'pincode' && pincodeError && (
+              <div className="mt-2 p-3 bg-amber-50 border border-amber-200 rounded-md">
+                <p className="text-xs text-amber-700 font-medium">📍 {pincodeError}</p>
+              </div>
+            )}
+          </div>
+        );
+      }}
+    />
+  );
+};
+
 export default function CheckoutClient() {
   const mode = typeof window !== "undefined"
     ? new URLSearchParams(window.location.search).get("mode")
@@ -152,17 +252,20 @@ export default function CheckoutClient() {
   // ✅ Auto-save locally (debounced)
   useEffect(() => {
     const subscription = watch((value) => {
-      if (!hasUserEdited) return;
+      // Re-hydrate full checkout user object including phone
+      const dataToSave = { ...value, phone: verifiedPhone };
+      
+      if (!hasUserEdited && !verifiedPhone) return;
       clearTimeout(window._checkoutSaveTimer);
       window._checkoutSaveTimer = setTimeout(() => {
         const nonEmptyData = Object.fromEntries(
-          Object.entries(value).filter(([_, v]) => v && v.trim() !== '')
+          Object.entries(dataToSave).filter(([_, v]) => v && v.toString().trim() !== '')
         );
         localStorage.setItem('checkoutUser', JSON.stringify(nonEmptyData));
       }, 800);
     });
     return () => subscription.unsubscribe();
-  }, [watch, hasUserEdited]);
+  }, [watch, hasUserEdited, verifiedPhone]);
 
   const shippingCharges = { standard: 50, express: 120, pickup: 0 };
   const subtotal = checkoutItems.reduce((sum, i) => sum + i.price * i.quantity, 0);
@@ -194,14 +297,21 @@ export default function CheckoutClient() {
     }
   }, [subtotal]);
 
+  const hasPrefilledRef = useRef(false);
+
   // ========== PREFILL LOGIC ==========
   useEffect(() => {
-    // If user is logged in AND they haven't manually overridden the phone, use session phone
+    // Stop all auto-prefill attempts if user has manually edited or we already succeeded
+    if (hasUserEdited || hasPrefilledRef.current) {
+      if (status !== 'loading') setIsInitialized(true);
+      return;
+    }
+
+    // 1. Session-based prefill
     if (session?.user?.phone && !isPhoneOverridden) {
       setVerifiedPhone(session.user.phone);
       setValue('phone', session.user.phone, { shouldDirty: false });
 
-      // Automatically fetch user data if session is active
       const fetchUserData = async () => {
         try {
           const fetchRes = await fetch('/api/user/by-phone', {
@@ -211,85 +321,73 @@ export default function CheckoutClient() {
           });
           const userData = await fetchRes.json();
           if (userData.exists) {
-            if (userData.email) setValue('email', userData.email, { shouldDirty: false });
-            if (userData.firstName) setValue('firstName', userData.firstName, { shouldDirty: false });
-            if (userData.lastName) setValue('lastName', userData.lastName, { shouldDirty: false });
-            if (userData.address1) setValue('address1', userData.address1, { shouldDirty: false });
-            if (userData.address2) setValue('address2', userData.address2, { shouldDirty: false });
-            if (userData.city) setValue('city', userData.city, { shouldDirty: false });
-            if (userData.state) setValue('state', userData.state, { shouldDirty: false });
-            if (userData.pincode) setValue('pincode', userData.pincode, { shouldDirty: false });
+            ['email', 'firstName', 'lastName', 'address1', 'address2', 'city', 'state', 'pincode'].forEach(key => {
+              if (userData[key]) setValue(key, userData[key], { shouldDirty: false });
+            });
+            hasPrefilledRef.current = true;
           }
         } catch (err) {
           console.warn('Prefill error:', err);
+        } finally {
+          setIsInitialized(true);
         }
       };
       fetchUserData();
-    } else if (status === 'unauthenticated' && !session) {
-      // Auto-open modal if not logged in
-      setShowAuthModal(true);
-    }
+    } else {
+      if (status === 'unauthenticated' && !session) {
+        setShowAuthModal(true);
+      }
 
-    // Original prefill logic (modified to remove currentStep dependency)
-    if (hasUserEdited) return; // Only prefill if user hasn't started editing
-
-    let hasPrefilled = false;
-
-    // 1️⃣ Failed order
-    const failedOrderData = loadFailedOrderData();
-    if (failedOrderData && Object.keys(failedOrderData).length) {
-      Object.entries(failedOrderData).forEach(([key, value]) => {
-        if (value && key !== 'phone') setValue(key, value, { shouldDirty: false });
-      });
-      localStorage.removeItem('failedOrder');
-      hasPrefilled = true;
-      return;
-    }
-
-    // 2️⃣ Local saved data
-    const savedCheckoutData = localStorage.getItem('checkoutUser');
-    if (savedCheckoutData) {
-      const parsed = JSON.parse(savedCheckoutData);
-      if (Object.keys(parsed).length > 0) {
-        Object.entries(parsed).forEach(([key, value]) => {
+      // 2. Local-storage/Fallback prefill
+      const failedOrderData = loadFailedOrderData();
+      if (failedOrderData && Object.keys(failedOrderData).length) {
+        Object.entries(failedOrderData).forEach(([key, value]) => {
           if (value && key !== 'phone') setValue(key, value, { shouldDirty: false });
+          if (key === 'phone' && value) setVerifiedPhone(value);
         });
-        hasPrefilled = true;
-        return;
+        localStorage.removeItem('failedOrder');
+        hasPrefilledRef.current = true;
+      }
+
+      if (!hasPrefilledRef.current) {
+        const savedCheckoutData = localStorage.getItem('checkoutUser');
+        if (savedCheckoutData) {
+          const parsed = JSON.parse(savedCheckoutData);
+          if (Object.keys(parsed).length > 0) {
+            Object.entries(parsed).forEach(([key, value]) => {
+              if (value && key !== 'phone') setValue(key, value, { shouldDirty: false });
+              if (key === 'phone' && value) setVerifiedPhone(value);
+            });
+            hasPrefilledRef.current = true;
+          }
+        }
+      }
+
+      // 3. One last check for DB data using verified phone (not session)
+      if (!hasPrefilledRef.current && verifiedPhone) {
+        const loadDBData = async () => {
+          try {
+            const res = await fetch('/api/user/by-phone', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ phone: verifiedPhone }),
+            });
+            const data = await res.json();
+            if (data?.exists) {
+              ['email', 'firstName', 'lastName', 'address1', 'address2', 'city', 'state', 'pincode'].forEach(key => {
+                if (data[key]) setValue(key, data[key], { shouldDirty: false });
+              });
+              hasPrefilledRef.current = true;
+            }
+          } catch (err) {} 
+          finally { setIsInitialized(true); }
+        };
+        loadDBData();
+      } else {
+        if (status !== 'loading') setIsInitialized(true);
       }
     }
-
-    // 3️⃣ DB user data (if logged in via NextAuth or verified OTP)
-    const fetchPhone = session?.user?.phone || verifiedPhone;
-    if (fetchPhone && !hasPrefilled) { // Only fetch if not already prefilled by local data
-      const loadDBData = async () => {
-        try {
-          const fetchRes = await fetch('/api/user/by-phone', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ phone: fetchPhone }),
-          });
-          const data = await fetchRes.json();
-          if (data?.exists) {
-            if (data.email) setValue('email', data.email, { shouldDirty: false });
-            if (data.firstName) setValue('firstName', data.firstName, { shouldDirty: false });
-            if (data.lastName) setValue('lastName', data.lastName, { shouldDirty: false });
-            if (data.address1) setValue('address1', data.address1, { shouldDirty: false });
-            if (data.address2) setValue('address2', data.address2, { shouldDirty: false });
-            if (data.city) setValue('city', data.city, { shouldDirty: false });
-            if (data.state) setValue('state', data.state, { shouldDirty: false });
-            if (data.pincode) setValue('pincode', data.pincode, { shouldDirty: false });
-          }
-        } catch (err) {
-          console.warn('Could not load user data:', err);
-        }
-      };
-      loadDBData();
-    }
-    if (status !== 'loading' && (status === 'unauthenticated' || (status === 'authenticated' && session))) {
-      setIsInitialized(true);
-    }
-  }, [session, setValue, hasUserEdited, verifiedPhone, status, isPhoneOverridden]); // Added status/overridden to dependencies
+  }, [session, status, verifiedPhone, isPhoneOverridden, setValue]); // 👈 hasUserEdited EXCLUDED to prevent re-fill loops // Added status/overridden to dependencies
 
   // ✅ Close tooltip/dropdown on outside click
   useEffect(() => {
@@ -438,78 +536,7 @@ export default function CheckoutClient() {
     }
   };
 
-  // ✅ Floating Input
-  const FloatingInput = ({ name, label, type = 'text', inputMode, maxLength, rules, helperText }) => (
-    <Controller
-      name={name}
-      control={control}
-      rules={rules}
-      render={({ field: { onChange, value } }) => {
-        const hasError = Boolean(errors[name]);
-        const hasValue = value?.trim() !== '';
-
-        const handleChange = (e) => {
-          let val = e.target.value;
-          if (name === 'pincode') {
-            val = val.replace(/[^0-9]/g, '').slice(0, 6);
-            // Live pincode validation
-            if (val.length === 6) {
-              if (!isMumbaiPincode(val)) {
-                setPincodeError('We are currently delivering only in Mumbai. We will soon start service in your area — stay tuned!');
-              } else {
-                setPincodeError('');
-              }
-            } else {
-              setPincodeError('');
-            }
-          }
-          setHasUserEdited(true);
-          onChange(val);
-        };
-
-        return (
-          <div ref={(el) => (fieldRefs.current[name] = el)} className="relative mb-5 w-[95%] max-w-[640px]">
-            <input
-              type={type}
-              inputMode={inputMode}
-              maxLength={maxLength}
-              value={value ?? ''}
-              onChange={handleChange}
-              placeholder=" "
-              autoComplete="off"
-              className={`peer w-full h-11 px-4 pr-10 text-[15px] text-(--theme-text) bg-(--theme-bg) rounded-md border outline-none transition-all
-                ${hasError || (name === 'pincode' && pincodeError)
-                  ? 'border-red-500'
-                  : 'border-(--theme-border) focus:border-(--theme-text) focus:ring-1 focus:ring-(--theme-text)'
-                }`}
-            />
-            <label
-              className={`absolute left-4 text-(--theme-muted) bg-(--theme-bg) px-1 transition-all duration-300 pointer-events-none
-                ${hasValue
-                  ? '-top-2 text-xs font-medium'
-                  : 'top-2.5 text-[15px] peer-focus:-top-2 peer-focus:text-xs'
-                }`}
-            >
-              {label}
-            </label>
-            {helperText && (
-              <p className="mt-1 text-xs text-amber-600 flex items-center gap-1">
-                <FiHelpCircle size={12} className="flex-shrink-0" />
-                {helperText}
-              </p>
-            )}
-            {hasError && <p className="mt-1 text-xs text-red-600">{errors[name].message}</p>}
-            {name === 'pincode' && pincodeError && (
-              <div className="mt-2 p-3 bg-amber-50 border border-amber-200 rounded-md">
-                <p className="text-xs text-amber-700 font-medium">📍 {pincodeError}</p>
-              </div>
-            )}
-          </div>
-        );
-      }}
-    />
-  );
-
+  // ========== HELPERS & UI COMPONENTS ==========
   if (!checkoutItems.length)
     return (
       <div className="min-h-screen flex items-center justify-center bg-(--theme-bg)">
@@ -606,6 +633,11 @@ export default function CheckoutClient() {
               <FloatingInput
                 name="email"
                 label="Email Address"
+                control={control}
+                errors={errors}
+                setValue={setValue}
+                setHasUserEdited={setHasUserEdited}
+                fieldRefs={fieldRefs}
                 type="email"
                 helperText="Please type your correct email — your invoice and order confirmation will be sent here"
                 rules={{
@@ -613,11 +645,11 @@ export default function CheckoutClient() {
                   pattern: { value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: 'Enter a valid email' },
                 }}
               />
-              <FloatingInput name="firstName" label="First Name" rules={{ required: 'First name is required' }} />
-              <FloatingInput name="lastName" label="Last Name" rules={{ required: 'Last name is required' }} />
-              <FloatingInput name="address1" label="Street Address" rules={{ required: 'Street address is required' }} />
-              <FloatingInput name="address2" label="Apartment, suite, etc. (Optional)" />
-              <FloatingInput name="city" label="City" rules={{ required: 'City is required' }} />
+              <FloatingInput name="firstName" label="First Name" control={control} errors={errors} setValue={setValue} setHasUserEdited={setHasUserEdited} fieldRefs={fieldRefs} rules={{ required: 'First name is required' }} />
+              <FloatingInput name="lastName" label="Last Name" control={control} errors={errors} setValue={setValue} setHasUserEdited={setHasUserEdited} fieldRefs={fieldRefs} rules={{ required: 'Last name is required' }} />
+              <FloatingInput name="address1" label="Street Address" control={control} errors={errors} setValue={setValue} setHasUserEdited={setHasUserEdited} fieldRefs={fieldRefs} rules={{ required: 'Street address is required' }} />
+              <FloatingInput name="address2" label="Apartment, suite, etc. (Optional)" control={control} errors={errors} setValue={setValue} setHasUserEdited={setHasUserEdited} fieldRefs={fieldRefs} />
+              <FloatingInput name="city" label="City" control={control} errors={errors} setValue={setValue} setHasUserEdited={setHasUserEdited} fieldRefs={fieldRefs} rules={{ required: 'City is required' }} />
 
               {/* STATE DROPDOWN */}
               <Controller
@@ -633,8 +665,8 @@ export default function CheckoutClient() {
                       <div
                         onClick={() => setShowStateList(!showStateList)}
                         className={`flex justify-between items-center h-11 px-4 border rounded-md bg-(--theme-bg) cursor-pointer ${errors.state
-                            ? 'border-red-500'
-                            : 'border-(--theme-border) hover:border-(--theme-text)'
+                          ? 'border-red-500'
+                          : 'border-(--theme-border) hover:border-(--theme-text)'
                           }`}
                       >
                         <span
@@ -682,10 +714,23 @@ export default function CheckoutClient() {
                 }}
               />
 
-              <FloatingInput name="pincode" label="PIN Code" inputMode="numeric" rules={{
-                required: 'Pincode is required',
-                pattern: { value: /^\d{6}$/, message: 'Pincode must be 6 digits' },
-              }} />
+              <FloatingInput 
+                name="pincode" 
+                label="PIN Code" 
+                control={control}
+                errors={errors}
+                setValue={setValue}
+                setHasUserEdited={setHasUserEdited}
+                pincodeError={pincodeError}
+                setPincodeError={setPincodeError}
+                fieldRefs={fieldRefs}
+                inputMode="numeric" 
+                maxLength={6} 
+                rules={{
+                  required: 'Pincode is required',
+                  pattern: { value: /^\d{6}$/, message: 'Pincode must be 6 digits' },
+                }} 
+              />
 
               <div className="flex items-center gap-2 mt-2">
                 <input
@@ -723,8 +768,8 @@ export default function CheckoutClient() {
                     <label
                       key={key}
                       className={`flex justify-between items-center p-3 border rounded-md cursor-pointer transition-all duration-200 ${shipping === key
-                          ? 'border-(--theme-text) bg-(--theme-soft)'
-                          : 'border-(--theme-border) hover:bg-(--theme-soft) hover:border-(--theme-text)'
+                        ? 'border-(--theme-text) bg-(--theme-soft)'
+                        : 'border-(--theme-border) hover:bg-(--theme-soft) hover:border-(--theme-text)'
                         }`}
                     >
                       <div className="flex items-center gap-3">

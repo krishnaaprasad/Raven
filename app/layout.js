@@ -121,8 +121,8 @@ export default function RootLayout({ children }) {
     <html lang="en" >
       <head>
         {/* LCP Preloads for fast image discovery */}
-        <link rel="preload" as="image" href="/hero-desktop-light.PNG" media="(min-width: 768px)" fetchpriority="high" />
-        <link rel="preload" as="image" href="/hero-mobile-light.PNG" media="(max-width: 767px)" fetchpriority="high" />
+        <link rel="preload" as="image" href="/hero-desktop-light.PNG" media="(min-width: 768px)" fetchPriority="high" />
+        <link rel="preload" as="image" href="/hero-mobile-light.PNG" media="(max-width: 767px)" fetchPriority="high" />
 
         {process.env.NEXT_PUBLIC_GA_ID && (
           <>

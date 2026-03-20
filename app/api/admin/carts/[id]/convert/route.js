@@ -4,8 +4,8 @@ import { Order } from "@/models/Order";
 
 export async function POST(req, { params }) {
   try {
+    const { id } = await params;
     await connectToDatabase();
-    const { id } = params;   // ❌ no await
 
     const body = await req.json(); // form data sent from front
 

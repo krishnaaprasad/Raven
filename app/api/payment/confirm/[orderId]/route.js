@@ -4,8 +4,9 @@ import { NextResponse } from 'next/server'
 
 export async function POST(req, { params }) {
   try {
+    const { orderId } = await params;
     await connectToDatabase()
-    const order = await Order.findById(params.orderId)
+    const order = await Order.findById(orderId)
     if (!order) return NextResponse.json({ error: 'Order not found' }, { status: 404 })
 
     order.paymentStatus = 'paid'

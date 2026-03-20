@@ -5,8 +5,8 @@ import { revalidatePath } from "next/cache";
 
 export async function PATCH(req, { params }) {
   try {
+    const { id } = await params;
     await connectToDatabase();
-    const { id } = params;
 
     const product = await Product.findById(id);
     product.deleted = !product.deleted;
