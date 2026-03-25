@@ -38,21 +38,21 @@ const isValidPincodeRegion = (pincode) => {
 };
 
 // ✅ Floating Input (Moved OUTSIDE to prevent focus loss on re-render)
-const FloatingInput = ({ 
-  name, 
-  label, 
-  control, 
-  errors, 
+const FloatingInput = ({
+  name,
+  label,
+  control,
+  errors,
   setValue,
-  setHasUserEdited, 
-  pincodeError, 
-  setPincodeError, 
+  setHasUserEdited,
+  pincodeError,
+  setPincodeError,
   fieldRefs,
-  type = 'text', 
-  inputMode, 
-  maxLength, 
-  rules, 
-  helperText 
+  type = 'text',
+  inputMode,
+  maxLength,
+  rules,
+  helperText
 }) => {
   return (
     <Controller
@@ -161,7 +161,7 @@ export default function CheckoutClient() {
     setCheckoutItems(cartContextItems);
   }, [mode, cartContextItems]);
 
-  // 🔥 GA4: Track begin_checkout
+
   useEffect(() => {
     if (!checkoutItems?.length) return;
     event({
@@ -254,7 +254,7 @@ export default function CheckoutClient() {
     const subscription = watch((value) => {
       // Re-hydrate full checkout user object including phone
       const dataToSave = { ...value, phone: verifiedPhone };
-      
+
       if (!hasUserEdited && !verifiedPhone) return;
       clearTimeout(window._checkoutSaveTimer);
       window._checkoutSaveTimer = setTimeout(() => {
@@ -379,7 +379,7 @@ export default function CheckoutClient() {
               });
               hasPrefilledRef.current = true;
             }
-          } catch (err) {} 
+          } catch (err) { }
           finally { setIsInitialized(true); }
         };
         loadDBData();
@@ -714,9 +714,9 @@ export default function CheckoutClient() {
                 }}
               />
 
-              <FloatingInput 
-                name="pincode" 
-                label="PIN Code" 
+              <FloatingInput
+                name="pincode"
+                label="PIN Code"
                 control={control}
                 errors={errors}
                 setValue={setValue}
@@ -724,12 +724,12 @@ export default function CheckoutClient() {
                 pincodeError={pincodeError}
                 setPincodeError={setPincodeError}
                 fieldRefs={fieldRefs}
-                inputMode="numeric" 
-                maxLength={6} 
+                inputMode="numeric"
+                maxLength={6}
                 rules={{
                   required: 'Pincode is required',
                   pattern: { value: /^\d{6}$/, message: 'Pincode must be 6 digits' },
-                }} 
+                }}
               />
 
               <div className="flex items-center gap-2 mt-2">
