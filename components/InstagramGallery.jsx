@@ -32,7 +32,7 @@ export default function InstagramGallery() {
       {/* FEED */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
 
-        <div className="w-full overflow-hidden rounded-xl">
+        <div className="w-full overflow-hidden">
 
           <iframe
             src="https://snapwidget.com/embed/1120701"
