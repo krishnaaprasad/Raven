@@ -1,6 +1,5 @@
 "use client";
 
-import Script from "next/script";
 import { ArrowRight } from "lucide-react";
 
 export default function InstagramGallery() {
@@ -31,24 +30,22 @@ export default function InstagramGallery() {
       </div>
 
       {/* FEED */}
-      <div className="w-full mx-auto px-4">
-
-        <Script
-          src="/scripts/lightwidget.js"
-          strategy="lazyOnload"
-        />
+      <div className="max-w-7xl mx-auto px-4 sm:px-6">
 
         <div className="w-full overflow-hidden rounded-xl">
 
           <iframe
-            title="Instagram gallery"
-            src="http://lightwidget.com/widgets/8c33a1b4d36e5ea4ab3b54ece0db1ae0.html"
+            src="https://snapwidget.com/embed/1120701"
+            className="snapwidget-widget w-full"
             allowtransparency="true"
-            loading="lazy"
-            className="lightwidget-widget w-full border-0"
+            frameBorder="0"
+            scrolling="no"
+            title="Posts from Instagram"
             style={{
+              border: "none",
+              overflow: "hidden",
               width: "100%",
-              height: "clamp(420px, 75vw, 900px)"
+              aspectRatio: "1040 / 360"
             }}
           />
 
