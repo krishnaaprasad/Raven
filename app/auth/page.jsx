@@ -16,7 +16,7 @@ import Link from 'next/link';
 export default function LoginRegisterPage({ onClose, onLoginSuccess, verificationOnly = false }) {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [otpSent, setOtpSent] = useState(false);
-  const [otp, setOtp] = useState(['', '', '', '', '', '']);
+  const [otp, setOtp] = useState(['', '', '', '']);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [resendTimer, setResendTimer] = useState(0);
@@ -51,7 +51,7 @@ export default function LoginRegisterPage({ onClose, onLoginSuccess, verificatio
       });
       setOtpSent(true);
       setResendTimer(30);
-      setOtp(['', '', '', '', '', '']);
+      setOtp(['', '', '', '']);
 
       setTimeout(() => otpInputRefs.current[0]?.focus(), 100);
     } catch (err) {
@@ -74,7 +74,7 @@ export default function LoginRegisterPage({ onClose, onLoginSuccess, verificatio
     newOtp[index] = value.slice(-1);
     setOtp(newOtp);
   
-    if (value && index < 5) {
+    if (value && index < 3) {
       otpInputRefs.current[index + 1]?.focus();
     }
   };
@@ -87,18 +87,18 @@ export default function LoginRegisterPage({ onClose, onLoginSuccess, verificatio
 
   const handleOtpPaste = (e) => {
     e.preventDefault();
-    const pastedData = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6);
-    if (pastedData.length === 6) {
+    const pastedData = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 4);
+    if (pastedData.length === 4) {
       setOtp(pastedData.split(''));
-      otpInputRefs.current[5]?.focus();
+      otpInputRefs.current[3]?.focus();
     }
   };
 
   const handleVerifyOtp = async (e) => {
     e?.preventDefault();
     const otpString = otp.join('');
-    if (otpString.length < 6) {
-      setError('Please enter the complete 6-digit OTP');
+    if (otpString.length < 4) {
+      setError('Please enter the complete 4-digit OTP');
       return;
     }
 
@@ -301,7 +301,7 @@ export default function LoginRegisterPage({ onClose, onLoginSuccess, verificatio
 
                   <button
                     type="submit"
-                    disabled={loading || otp.join('').length !== 6}
+                    disabled={loading || otp.join('').length !== 4}
                     className="w-full h-14 font-extrabold text-[16px] rounded-2xl bg-(--theme-text) text-(--theme-bg) hover:opacity-95 transition-all shadow-md transform active:scale-[0.98] disabled:opacity-30 disabled:pointer-events-none uppercase tracking-widest"
                   >
                     {loading ? 'Verifying...' : 'Complete Login'}

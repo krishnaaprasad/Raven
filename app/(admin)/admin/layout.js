@@ -3,9 +3,11 @@
 import { useState, useEffect } from "react";
 import AdminSidebar from "./components/AdminSidebar";
 import AdminHeader from "./components/AdminHeader";
+import { usePathname } from "next/navigation";
 
 export default function AdminLayout({ children }) {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const pathname = usePathname();
 
   useEffect(() => {
     document.body.style.overflow = mobileOpen ? "hidden" : "auto";
@@ -21,6 +23,11 @@ export default function AdminLayout({ children }) {
       }
     };
   }, [mobileOpen]);
+
+  // Strip sidebar if user is just on the login screen
+  if (pathname === "/admin/login") {
+    return <div className="font-[Manrope,sans-serif]">{children}</div>;
+  }
 
   return (
     <div

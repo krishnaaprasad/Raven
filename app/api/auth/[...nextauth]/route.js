@@ -1,10 +1,15 @@
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
+import GoogleProvider from "next-auth/providers/google";
 import connectToDatabase from "@/lib/mongodb";
 import User from "@/models/User";
 
 export const authOptions = {
   providers: [
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    }),
     // CREDENTIAL LOGIN (Now handling our OTP flow)
     CredentialsProvider({
       name: "OTP",
@@ -38,9 +43,32 @@ export const authOptions = {
   ],
 
   callbacks: {
+    // SIGNIN CALLBACK (Google Auth Checks)
+    async signIn({ user, account, profile }) {
+      if (account?.provider === "google") {
+        await connectToDatabase();
+        // Enforce that only users with the ADMIN role can login via Google
+        const dbUser = await User.findOne({ email: user.email, role: "ADMIN" });
+        if (!dbUser) {
+          return "/admin/login?error=AccessDenied"; // Bounce unauthorized google logins
+        }
+        return true;
+      }
+      return true; // Pass through OTP
+    },
+
     // JWT CALLBACK (Token building)
-    async jwt({ token, user }) {
-      if (user) {
+    async jwt({ token, user, account }) {
+      if (account?.provider === "google") {
+        await connectToDatabase();
+        const dbUser = await User.findOne({ email: user.email, role: "ADMIN" });
+        if (dbUser) {
+          token.id = dbUser._id.toString();
+          token.phone = dbUser.phone || "";
+          token.name = dbUser.name || user.name;
+          token.role = dbUser.role;
+        }
+      } else if (user) {
         token.id = user.id;
         token.phone = user.phone;
         token.name = user.name;

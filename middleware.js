@@ -9,10 +9,10 @@ export async function middleware(req) {
   const { pathname } = req.nextUrl;
 
   // Protect admin routes
-  if (pathname.startsWith("/admin")) {
-    // If user not logged in → redirect home
+  if (pathname.startsWith("/admin") && !pathname.startsWith("/admin/login")) {
+    // If user not logged in → redirect to admin login
     if (!token) {
-      return NextResponse.redirect(new URL("/", req.url));
+      return NextResponse.redirect(new URL("/admin/login", req.url));
     }
 
     // If logged in but role is NOT ADMIN
