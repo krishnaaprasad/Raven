@@ -23,12 +23,15 @@ export const authOptions = {
         let user = await User.findOne({ phone });
 
         if (!user) {
-          // If no user exists, create one silently on successful OTP verify
+          // If no user exists, create one silently on successful OTP verify.
+          // Use a unique placeholder email for phone-only accounts so existing
+          // unique email indexes do not block OTP registration.
           user = await User.create({
             phone,
             phoneVerified: true,
             isGuest: false,
-            role: "USER"
+            role: "USER",
+            email: `phone-only+${phone}@raven.local`,
           });
         }
 

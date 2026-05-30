@@ -19,7 +19,9 @@ export async function POST(req) {
     if (user) {
       // Update existing user with new address details
       user.name = fullName || user.name;
-      if (email && !user.email) user.email = email; // only set if empty, don't overwrite
+      if (email && (!user.email || user.email.startsWith("phone-only+"))) {
+        user.email = email; // replace placeholder email when the real email is supplied
+      }
       user.address1 = address1 || user.address1;
       user.address2 = address2 || user.address2;
       user.city = city || user.city;

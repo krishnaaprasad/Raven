@@ -4,7 +4,7 @@ import bcrypt from "bcryptjs";
 const UserSchema = new mongoose.Schema(
   {
     name: { type: String, default: "" },
-    email: { type: String, required: false }, // Optional now
+    email: { type: String, required: false, unique: true, sparse: true, default: undefined }, // Optional now
     password: { type: String, required: false }, // optional for Google/OTP
     phone: { type: String, required: true, unique: true },
     phoneVerified: { type: Boolean, default: false },
@@ -40,6 +40,8 @@ const UserSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+UserSchema.index({ email: 1 }, { unique: true, sparse: true });
 
 // Auto-hash password if present
 UserSchema.pre("save", async function (next) {
