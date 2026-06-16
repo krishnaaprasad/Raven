@@ -6,8 +6,8 @@ export async function POST(req) {
       return new Response(JSON.stringify({ error: "Valid 10-digit phone number required" }), { status: 400 });
     }
 
-    const customerId = process.env.MESSAGECENTRAL_CUSTOMER_ID;
-    const authToken = process.env.MESSAGECENTRAL_AUTH_TOKEN;
+    const customerId = process.env.MESSAGE_CENTRAL_CUSTOMER_ID || process.env.MESSAGECENTRAL_CUSTOMER_ID;
+    const authToken = process.env.MESSAGE_CENTRAL_AUTH_TOKEN || process.env.MESSAGECENTRAL_AUTH_TOKEN;
 
     if (!customerId || !authToken) {
       console.error("MessageCentral credentials missing");

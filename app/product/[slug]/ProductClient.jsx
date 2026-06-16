@@ -11,10 +11,8 @@ import { Share2, Check } from "lucide-react";
 import ScrollReveal from "@/components/ScrollReveal";
 
 // Swiper (mobile gallery)
-import SwiperCore from 'swiper';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Thumbs, Pagination } from 'swiper/modules';
-SwiperCore.use([Thumbs, Pagination]);
 
 import 'swiper/css';
 import 'swiper/css/thumbs';
@@ -26,7 +24,7 @@ import 'yet-another-react-lightbox/styles.css';
 import { motion, AnimatePresence } from "framer-motion";
 import { useCart } from '@/app/context/cartcontext';
 import { toast } from 'react-hot-toast';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { event } from "@/lib/ga";
 
 // ---------- Cloudinary Helper ----------
@@ -68,9 +66,13 @@ export default function ProductClient({ slug }) {
 
   const { addToCart } = useCart();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [relatedProducts, setRelatedProducts] = useState([]);
 
   const [copied, setCopied] = useState(false);
+  const shouldOpenReviewSection =
+    searchParams.get("review") === "true" ||
+    searchParams.get("writeReview") === "true";
 
 const handleShare = async () => {
   const shareData = {
@@ -163,6 +165,54 @@ event({
 }, [product]);
 
 
+  // Scroll to Reviews & open Review section
+  const scrollToReviews = () => {
+    const section = document.getElementById("reviews-section");
+    if (section) {
+      const absoluteTop = section.getBoundingClientRect().top + window.scrollY;
+      const headerOffset = 112;
+      window.scrollTo({
+        top: Math.max(absoluteTop - headerOffset, 0),
+        behavior: "smooth",
+      });
+      setActiveTab("Review");
+      setOpenSections((prev) => ({ ...prev, Review: true }));
+    }
+  };
+
+  useEffect(() => {
+    if (!product?._id) return;
+    if (!shouldOpenReviewSection) return;
+
+    let timeoutId = null;
+    let attempts = 0;
+
+    const forceScrollToReviews = () => {
+      const section = document.getElementById("reviews-section");
+      if (!section) return;
+
+      const absoluteTop = section.getBoundingClientRect().top + window.scrollY;
+      const headerOffset = 112;
+      window.scrollTo({
+        top: Math.max(absoluteTop - headerOffset, 0),
+        behavior: attempts === 0 ? "auto" : "smooth",
+      });
+
+      attempts += 1;
+      if (attempts < 8) {
+        timeoutId = window.setTimeout(forceScrollToReviews, 300);
+      }
+    };
+
+    timeoutId = window.setTimeout(forceScrollToReviews, 150);
+    window.addEventListener("load", forceScrollToReviews);
+
+    return () => {
+      if (timeoutId) window.clearTimeout(timeoutId);
+      window.removeEventListener("load", forceScrollToReviews);
+    };
+  }, [product?._id, shouldOpenReviewSection]);
+
   // ─────────────────────────
   // Skeleton while loading / missing
   // ─────────────────────────
@@ -199,7 +249,6 @@ event({
       quantity
     );
 
-    // 🔥 GA4: Track add to cart
     event({
       action: "add_to_cart",
       params: {
@@ -236,16 +285,6 @@ event({
 
     sessionStorage.setItem("buyNowItem", JSON.stringify(buyNowItem));
     router.push('/checkout?mode=buynow');
-  };
-
-  // Scroll to Reviews & open Review section
-  const scrollToReviews = () => {
-    const section = document.getElementById("reviews-section");
-    if (section) {
-      section.scrollIntoView({ behavior: "smooth", block: "start" });
-      setActiveTab("Review");
-      setOpenSections((prev) => ({ ...prev, Review: true }));
-    }
   };
 
   const formatAmount = (value) => {
@@ -758,13 +797,14 @@ event({
         <div className="max-w-7xl md:max-w-15xl mx-auto mt-14 sm:mt-20 px-2">
           <div
             id="reviews-section"
-            className="bg-(--theme-bg) "
+            className="bg-(--theme-bg) scroll-mt-28"
           >
             <h2 className="text-2xl sm:text-3xl text-center text-(--theme-text) font-semibold  px-2 sm:px-4 py-2 sm:py-4 ">
               Customer Reviews for {product.name}
             </h2>
             <ProductReviews
               productId={product._id}
+              initialOpenForm={shouldOpenReviewSection}
               onSummary={(data) => setReviewSummary(data)}
             />
           </div>

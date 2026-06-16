@@ -39,7 +39,7 @@ const StarRating = ({ rating, size = 18 }) => (
 /* Main Component */
 /* ───────────────────────── */
 
-export default function ProductReviews({ productId }) {
+export default function ProductReviews({ productId, initialOpenForm = false }) {
   const { data: session } = useSession();
 
   const [reviews, setReviews] = useState([]);
@@ -85,6 +85,12 @@ export default function ProductReviews({ productId }) {
       }));
     }
   }, [session]);
+
+  useEffect(() => {
+    if (initialOpenForm) {
+      setShowForm(true);
+    }
+  }, [initialOpenForm]);
 
   /* ───────────────────────── */
   /* Sorting */

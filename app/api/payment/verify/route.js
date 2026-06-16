@@ -5,6 +5,7 @@ import { Order } from "@/models/Order";
 import axios from "axios";
 import { generateInvoice } from "@/lib/invoice/generateInvoice"; // ✅ still here
 import Coupon from "@/models/Coupon";
+import { sendOrderConfirmation } from "@/lib/notifications/whatsapp.service";
 
 export async function GET(req) {
   try {
@@ -32,6 +33,12 @@ if (!order) {
 
 // Prevent double verification
 if (order.payment_status === "PAID" && order.verified === true) {
+  try {
+    await sendOrderConfirmation(order);
+  } catch (whatsappErr) {
+    console.error("WhatsApp confirmation skipped for already verified order:", whatsappErr);
+  }
+
   return NextResponse.json({
     success: true,
     paid: true,
@@ -298,6 +305,13 @@ if (order.payment_status === "PAID" && order.verified === true) {
         }
       } catch (mailErr) {
         console.error("❌ Email Sending Error:", mailErr);
+      }
+
+      try {
+        const orderForWhatsapp = await Order.findById(orderId);
+        await sendOrderConfirmation(orderForWhatsapp);
+      } catch (whatsappErr) {
+        console.error("❌ WhatsApp confirmation error:", whatsappErr);
       }
     }
 

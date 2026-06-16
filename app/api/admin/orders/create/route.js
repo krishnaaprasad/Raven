@@ -3,6 +3,7 @@ import connectToDatabase from "@/lib/mongodb";
 import { Order, OrderCounter } from "@/models/Order";
 import Product from "@/models/Product"; // ✅ ADD
 import { generateSequentialOrderIdFromItems } from "@/lib/generateOrderId";
+import { sendOrderConfirmation } from "@/lib/notifications/whatsapp.service";
 
 
 export async function POST(req) {
@@ -177,6 +178,12 @@ const customOrderId = await generateSequentialOrderIdFromItems([
         },
       ],
     });
+
+    try {
+      await sendOrderConfirmation(order);
+    } catch (whatsappErr) {
+      console.error("❌ Manual order WhatsApp confirmation error:", whatsappErr);
+    }
 
     return NextResponse.json({ success: true, order });
   } catch (e) {

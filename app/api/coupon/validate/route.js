@@ -8,7 +8,9 @@ export async function POST(req) {
 
     const body = await req.json();
     const code = typeof body?.code === "string" ? body.code.toUpperCase().trim() : null;
-    const cartTotal = Number(body?.cartTotal);
+    const parsedCartTotal = Number.parseFloat(body?.cartTotal);
+    const cartTotal = Number.isFinite(parsedCartTotal) ? parsedCartTotal : NaN;
+
     if (!code) {
       return NextResponse.json(
         { message: "Coupon code required" },
@@ -16,7 +18,7 @@ export async function POST(req) {
       );
     }
 
-    if (!cartTotal || isNaN(cartTotal) || cartTotal <= 0) {
+    if (!Number.isFinite(cartTotal) || cartTotal < 0) {
       return NextResponse.json(
         { message: "Invalid cart total" },
         { status: 400 }
@@ -36,8 +38,9 @@ export async function POST(req) {
       );
     }
 
-    // Expiry check (safe)
-    if (coupon.expiryDate && new Date() > coupon.expiryDate) {
+    // Expiry check (only when a valid date is present)
+    const expiryDate = coupon.expiryDate ? new Date(coupon.expiryDate) : null;
+    if (expiryDate && !Number.isNaN(expiryDate.getTime()) && new Date() > expiryDate) {
       return NextResponse.json(
         { message: "Coupon expired" },
         { status: 400 }
@@ -75,11 +78,11 @@ export async function POST(req) {
         discount = Math.min(discount, coupon.maxDiscount);
       }
     } else {
-      discount = coupon.value;
+      discount = Math.min(Number(coupon.value) || 0, cartTotal);
     }
 
     // Prevent negative final total
-    const finalTotal = Math.max(0, cartTotal - discount);
+    const finalTotal = Math.max(0, cartTotal - Math.min(discount, cartTotal));
 
     return NextResponse.json({
       success: true,

@@ -28,8 +28,23 @@ const orderHistoryItem = new mongoose.Schema(
   { _id: false }
 );
 
+const whatsappLogItem = new mongoose.Schema(
+  {
+    timestamp: { type: Date, default: Date.now },
+    templateName: { type: String, required: true },
+    status: {
+      type: String,
+      enum: ["queued", "logged", "sent", "failed", "skipped"],
+      default: "queued",
+    },
+    phone: { type: String },
+    response: { type: mongoose.Schema.Types.Mixed, default: null },
+  },
+  { _id: false }
+);
 
-const orderSchema = new mongoose.Schema(
+
+const orderSchema = mongoose.models.Order?.schema || new mongoose.Schema(
   {
     manualOrderId: { type: String, default: null },
     customOrderId: { type: String, unique: true, sparse: true },
@@ -66,7 +81,9 @@ const orderSchema = new mongoose.Schema(
     totalAmount: { type: Number, required: true },
 
     // ---------- Coupon / Discount ----------
-    discount: { type: Number, default: 0, min: [0, "Discount cannot be negative"] },    couponCode: { type: String, default: null },
+    discount: { type: Number, default: 0, min: [0, "Discount cannot be negative"] },
+    couponCode: { type: String, default: null },
+    couponUsageApplied: { type: Boolean, default: false },
 
     // ---------- Payment raw from gateway ----------
     payment_state: {
@@ -128,6 +145,19 @@ const orderSchema = new mongoose.Schema(
       type: [orderHistoryItem],
       default: [],
     },
+
+    // ---------- WhatsApp notification automation ----------
+    whatsappLogs: {
+      type: [whatsappLogItem],
+      default: [],
+    },
+    orderConfirmationSent: { type: Boolean, default: false },
+    deliveryMessageSent: { type: Boolean, default: false },
+    deliveredWhatsappSent: { type: Boolean, default: false },
+    reviewRequestSent: { type: Boolean, default: false },
+    repurchaseReminderSent: { type: Boolean, default: false },
+    deliveredAt: { type: Date, default: null },
+
     // ---------- Soft delete ----------
     deleted: { type: Boolean, default: false },
     deleteReason: { type: String, default: null },
@@ -136,10 +166,11 @@ const orderSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-orderSchema.index({ email: 1, payment_status: 1, createdAt: -1 });
+if (!mongoose.models.Order) {
+  orderSchema.index({ email: 1, payment_status: 1, createdAt: -1 });
+}
 
-const Order =
-  mongoose.models.Order || mongoose.model("Order", orderSchema);
+const Order = mongoose.models.Order || mongoose.model("Order", orderSchema);
 
 export default Order;         // default export
 export { Order };   

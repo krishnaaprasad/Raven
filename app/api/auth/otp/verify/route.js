@@ -6,7 +6,12 @@ export async function POST(req) {
       return new Response(JSON.stringify({ error: "Missing required fields" }), { status: 400 });
     }
 
-    const customerId = process.env.MESSAGECENTRAL_CUSTOMER_ID;
+    const customerId = process.env.MESSAGE_CENTRAL_CUSTOMER_ID || process.env.MESSAGECENTRAL_CUSTOMER_ID;
+
+    if (!customerId || !authToken) {
+      console.error("MessageCentral credentials missing for OTP verification");
+      return new Response(JSON.stringify({ error: "SMS service not configured" }), { status: 500 });
+    }
 
     // Use GET method and add url search parameters
     const validateResponse = await fetch(`https://cpaas.messagecentral.com/verification/v3/validateOtp?countryCode=91&mobileNumber=${phoneNumber}&verificationId=${verificationId}&customerId=${customerId}&code=${otp}`, {

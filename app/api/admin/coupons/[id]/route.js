@@ -50,10 +50,32 @@ export async function PATCH(req, context) {
     }
 
     const body = await req.json();
+    const allowedFields = ["type", "value", "minOrderAmount", "maxDiscount", "usageLimit", "expiryDate", "isActive"];
+
+    if (!body || typeof body !== "object" || Array.isArray(body)) {
+      return NextResponse.json(
+        { error: "Invalid update payload" },
+        { status: 400 }
+      );
+    }
+
+    const update = {};
+    for (const field of allowedFields) {
+      if (Object.prototype.hasOwnProperty.call(body, field) && body[field] !== undefined) {
+        update[field] = body[field];
+      }
+    }
+
+    if (Object.keys(update).length === 0) {
+      return NextResponse.json(
+        { error: "No valid fields provided for update" },
+        { status: 400 }
+      );
+    }
 
     const updatedCoupon = await Coupon.findByIdAndUpdate(
       id,
-      { $set: body },
+      { $set: update },
       { new: true, runValidators: true }
     );
 

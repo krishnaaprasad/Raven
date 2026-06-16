@@ -292,10 +292,10 @@ export default function CheckoutClient() {
   ];
 
   useEffect(() => {
-    if (couponData) {
-      handleApplyCoupon();
+    if (couponData?.code) {
+      handleApplyCoupon(couponData.code);
     }
-  }, [subtotal]);
+  }, [subtotal, couponData?.code, handleApplyCoupon]);
 
   const hasPrefilledRef = useRef(false);
 
@@ -409,25 +409,28 @@ export default function CheckoutClient() {
     }
   };
 
-  const handleApplyCoupon = async () => {
-    if (!couponCode.trim()) {
+  const handleApplyCoupon = useCallback(async (code = couponCode) => {
+    const normalizedCode = (code || "").trim().toUpperCase();
+
+    if (!normalizedCode) {
       setCouponError("Please enter a coupon code");
       return;
     }
+
     setApplyingCoupon(true);
     setCouponError("");
     try {
       const res = await fetch("/api/coupon/validate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code: couponCode, cartTotal: subtotal }),
+        body: JSON.stringify({ code: normalizedCode, cartTotal: subtotal }),
       });
       const data = await res.json();
       if (!res.ok) {
         setCouponError(data.message);
         setCouponData(null);
       } else {
-        setCouponData({ ...data, code: couponCode.toUpperCase() });
+        setCouponData({ ...data, code: normalizedCode });
         setCouponError("");
       }
     } catch (err) {
@@ -435,7 +438,7 @@ export default function CheckoutClient() {
     } finally {
       setApplyingCoupon(false);
     }
-  };
+  }, [couponCode, subtotal]);
 
   // ✅ Payment handler
   const handlePayment = async (formData) => {
@@ -837,6 +840,14 @@ export default function CheckoutClient() {
                     type="text"
                     value={couponCode}
                     onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        if (!applyingCoupon) {
+                          handleApplyCoupon();
+                        }
+                      }
+                    }}
                     placeholder="Discount code"
                     className="flex-1 h-10 px-3 border border-(--theme-border) rounded-md text-sm bg-(--theme-bg) focus:border-(--theme-text) outline-none"
                   />

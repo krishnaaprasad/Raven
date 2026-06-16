@@ -119,12 +119,12 @@ export async function POST(req) {
       );
     }
     
-    if (!cartItems || cartItems.length === 0) {
-  return NextResponse.json(
-    { error: "Cart is empty" },
-    { status: 400 }
-  );
-}
+    if (!Array.isArray(cartItems) || cartItems.length === 0) {
+      return NextResponse.json(
+        { error: "Cart is empty" },
+        { status: 400 }
+      );
+    }
     // =============================
     // SECURE PRICE RE-CALCULATION
     // =============================
@@ -133,7 +133,17 @@ export async function POST(req) {
     let subtotal = 0;
 
     for (const item of cartItems) {
-      const product = await Product.findOne({ slug: item.slug });
+      const slug = typeof item?.slug === "string" ? item.slug.trim() : "";
+      const quantity = Number(item?.quantity);
+
+      if (!slug || !Number.isFinite(quantity) || quantity <= 0) {
+        return NextResponse.json(
+          { error: "Invalid cart item" },
+          { status: 400 }
+        );
+      }
+
+      const product = await Product.findOne({ slug });
 
       if (!product) {
         return NextResponse.json(
@@ -143,24 +153,27 @@ export async function POST(req) {
       }
 
       const variant = product.variants.find(
-        (v) => String(v.size) === String(item.size)
+        (v) => String(v.size) === String(item?.size)
       );
 
-      if (!variant) {
+      if (!variant || !Number.isFinite(Number(variant.price)) || Number(variant.price) < 0) {
         return NextResponse.json(
           { error: "Invalid product variant" },
           { status: 400 }
         );
       }
 
-      subtotal += variant.price * item.quantity;
+      const dbPrice = Number(variant.price);
+      subtotal += dbPrice * quantity;
 
-      // override unsafe frontend price
-      item.price = variant.price;
+      item.price = dbPrice;
     }
 
     // 2️⃣ Calculate shipping safely
-    const safeShippingCharge = Number(shippingCharge) || 0;
+    const parsedShippingCharge = Number.parseFloat(shippingCharge);
+    const safeShippingCharge = Number.isFinite(parsedShippingCharge) && parsedShippingCharge >= 0
+      ? parsedShippingCharge
+      : 0;
 
     // 3️⃣ Validate coupon if provided
     let discountAmount = 0;
@@ -170,6 +183,7 @@ export async function POST(req) {
       const coupon = await Coupon.findOne({
         code: couponCode.toUpperCase(),
         isActive: true,
+        deleted: { $ne: true },
       });
 
       if (!coupon) {
@@ -179,39 +193,53 @@ export async function POST(req) {
         );
       }
 
-      if (coupon.expiryDate && new Date() > coupon.expiryDate) {
-        return NextResponse.json(
-          { error: "Coupon expired" },
-          { status: 400 }
-        );
-      }
+      const now = new Date();
+      const reservedCoupon = await Coupon.findOneAndUpdate(
+        {
+          _id: coupon._id,
+          isActive: true,
+          deleted: { $ne: true },
+          $or: [
+            { expiryDate: { $exists: false } },
+            { expiryDate: null },
+            { expiryDate: { $gte: now } },
+          ],
+          $or: [
+            { usageLimit: { $exists: false } },
+            { usageLimit: null },
+            { $expr: { $lt: ["$usedCount", "$usageLimit"] } },
+          ],
+        },
+        { $inc: { usedCount: 1 } },
+        { new: true }
+      );
 
-      if (coupon.usageLimit && coupon.usedCount >= coupon.usageLimit) {
+      if (!reservedCoupon) {
         return NextResponse.json(
           { error: "Coupon usage limit reached" },
           { status: 400 }
         );
       }
 
-      if (subtotal < coupon.minOrderAmount) {
+      if (subtotal < reservedCoupon.minOrderAmount) {
         return NextResponse.json(
-          { error: `Minimum order ₹${coupon.minOrderAmount} required` },
+          { error: `Minimum order ₹${reservedCoupon.minOrderAmount} required` },
           { status: 400 }
         );
       }
 
       // Calculate discount
-      if (coupon.type === "PERCENT") {
-        discountAmount = (subtotal * coupon.value) / 100;
+      if (reservedCoupon.type === "PERCENT") {
+        discountAmount = (subtotal * reservedCoupon.value) / 100;
 
-        if (coupon.maxDiscount) {
-          discountAmount = Math.min(discountAmount, coupon.maxDiscount);
+        if (reservedCoupon.maxDiscount) {
+          discountAmount = Math.min(discountAmount, reservedCoupon.maxDiscount);
         }
       } else {
-        discountAmount = coupon.value;
+        discountAmount = reservedCoupon.value;
       }
 
-      appliedCoupon = coupon;
+      appliedCoupon = reservedCoupon;
     }
 
     // 4️⃣ Final secure total
@@ -316,12 +344,6 @@ export async function POST(req) {
       payment_session_id: cfData.payment_session_id,
       cashfreeResponse: cfData,
     });
-
-    if (appliedCoupon) {
-      await Coupon.findByIdAndUpdate(appliedCoupon._id, {
-        $inc: { usedCount: 1 },
-      });
-    }
 
     // ✅ Return customOrderId to frontend
     return NextResponse.json(

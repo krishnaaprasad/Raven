@@ -1,3 +1,5 @@
+import connectToDatabase from "@/lib/mongodb";
+import Product from "@/models/Product";
 import ProductClient from "./ProductClient";
 
 export async function generateMetadata({ params }) {
@@ -10,13 +12,13 @@ export async function generateMetadata({ params }) {
       : "https://www.ravenfragrance.in");
 
   try {
-    const res = await fetch(`${baseUrl}/api/products/${slug}`, {
-      next: { revalidate: 60 },
-    });
+    await connectToDatabase();
+    const product = await Product.findOne({
+      slug,
+      deleted: { $ne: true },
+    }).lean();
 
-    if (!res.ok) throw new Error("Failed to fetch product");
-
-    const product = await res.json();
+    if (!product) throw new Error("Failed to fetch product");
 
     const image =
       product.images?.[0]?.original ||

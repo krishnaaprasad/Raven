@@ -12,6 +12,7 @@ import {
   Truck,
   CheckCircle2,
   Clock3,
+  RefreshCw,
 } from "lucide-react";
 import { toast } from "react-hot-toast";
 
@@ -52,6 +53,7 @@ export default function OrderDetailsClient({ orderFromServer }) {
   const [updating, setUpdating] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState(order.order_status);
   const [sendingMail, setSendingMail] = useState(false);
+  const [verifyingPayment, setVerifyingPayment] = useState(false);
   const { data: session } = useSession();
   
   const createdAt = order.createdAt ? new Date(order.createdAt) : new Date();
@@ -154,6 +156,39 @@ export default function OrderDetailsClient({ orderFromServer }) {
     window.open(`/api/invoice?orderId=${order._id}`, "_blank");
   };
 
+  const handleVerifyPayment = async () => {
+    if (
+      !window.confirm(
+        "Re-check this order's payment status directly with Cashfree?"
+      )
+    ) {
+      return;
+    }
+    setVerifyingPayment(true);
+    try {
+      const res = await fetch(
+        `/api/admin/orders/${order._id}/verify-payment`,
+        { method: "POST" }
+      );
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        toast.error(data.error || "Failed to verify payment.");
+      } else {
+        if (data.order) setOrder(data.order);
+        if (data.paid) {
+          toast.success("Payment confirmed. Order marked as PAID.");
+        } else {
+          toast(data.message || "Cashfree did not report a successful payment.");
+        }
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Error verifying payment.");
+    } finally {
+      setVerifyingPayment(false);
+    }
+  };
+
   const handleSendMailAgain = async () => {
     if (!window.confirm("Send order confirmation email again to customer?")) {
       return;
@@ -231,6 +266,21 @@ export default function OrderDetailsClient({ orderFromServer }) {
                 >
                   {paymentStatus}
                 </span>
+                {paymentStatus !== "PAID" && (
+                  <button
+                    onClick={handleVerifyPayment}
+                    disabled={verifyingPayment}
+                    title="Re-check payment status with Cashfree"
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold border border-[#e7e1cf] rounded-full text-[#1b180d] hover:bg-[#f5f1e6] disabled:opacity-60 cursor-pointer"
+                  >
+                    <RefreshCw
+                      className={`w-3.5 h-3.5 ${
+                        verifyingPayment ? "animate-spin" : ""
+                      }`}
+                    />
+                    {verifyingPayment ? "Verifying..." : "Re-verify"}
+                  </button>
+                )}
               </div>
             </div>
 

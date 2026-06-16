@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import connectToDatabase from "@/lib/mongodb";
 import { Order } from "@/models/Order";
+import { sendDeliveryMessage } from "@/lib/notifications/whatsapp.service";
 
 export async function GET(req, { params }) {
   try {
@@ -74,8 +75,22 @@ export async function PATCH(req, { params }) {
       at: new Date(),
     });
 
+    const previousStatus = order.order_status;
     order.order_status = order_status;
+
+    if (order_status === "Delivered" && previousStatus !== "Delivered" && !order.deliveredAt) {
+      order.deliveredAt = new Date();
+    }
+
     await order.save();
+
+    if (order_status === "Delivered" && previousStatus !== "Delivered") {
+      try {
+        await sendDeliveryMessage(order);
+      } catch (whatsappErr) {
+        console.error("❌ Delivery WhatsApp message error:", whatsappErr);
+      }
+    }
 
     return NextResponse.json({
       success: true,
