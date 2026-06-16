@@ -247,9 +247,8 @@ export default function CustomersClient() {
           <tbody className="divide-y divide-[#e7e1cf] bg-[#fcfbf8]">
             {users.map((user) => {
               const isFakeEmail = user.email?.includes("@raven.local");
-              const displayName = isFakeEmail && (!user.name || user.name.startsWith("phone-only"))
-                ? user.phone || user.email?.replace(/@raven\.local$/, "").replace("phone-only+", "")
-                : user.name;
+              const isFakeName = !user.name || user.name.startsWith("phone-only");
+              const displayName = isFakeName ? "Guest User" : user.name;
               const subtitle = isFakeEmail
                 ? (user.phone || "")
                 : user.email;

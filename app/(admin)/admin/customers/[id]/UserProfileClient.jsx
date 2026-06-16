@@ -197,7 +197,7 @@ export default function UserProfileClient({ userId }) {
             <div className="mt-4 space-y-1">
               <p className="text-[22px] font-bold">
                 {user.email?.includes("@raven.local") && (!user.name || user.name.startsWith("phone-only"))
-                  ? user.phone || user.email?.replace(/@raven\.local$/, "").replace("phone-only+", "")
+                  ? "Guest User"
                   : user.name}
               </p>
               {user.email && !user.email.includes("@raven.local") && (
