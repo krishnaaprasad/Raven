@@ -924,7 +924,7 @@ export default function CheckoutClient() {
 
             <div className="mt-6 text-center">
               <p className="text-[11px] text-(--theme-muted) leading-relaxed">
-                By placing this order, you agree to Raven Fragrance's{' '}
+                By placing this order, you agree to Raven Fragrance&apos;s{' '}
                 <Link href="/policy/terms-conditions" className="text-(--theme-text) font-bold hover:underline">Terms of Service</Link>
                 {' '}&{' '}
                 <Link href="/policy/privacy-policy" className="text-(--theme-text) font-bold hover:underline">Privacy Policy</Link>.

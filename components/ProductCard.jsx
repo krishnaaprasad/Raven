@@ -15,12 +15,11 @@ const cormorant = Cormorant_Garamond({
 });
 
 export default function ProductCard({ product, bestsellerIds = [] }) {
-  if (!product) return null;
-
   const [liked, setLiked] = useState(false);
-
   const { openQuickView } = useQuickView();
   const [hover, setHover] = useState(false);
+
+  if (!product) return null;
 
   const img1 = product.images?.[0]?.original;
   const img2 = product.images?.[1]?.original;
@@ -112,7 +111,7 @@ export default function ProductCard({ product, bestsellerIds = [] }) {
             />
           </div>
 
-          /* Second image on hover */
+          {/* Second image on hover */}
           {img2 && (
             <div className="absolute inset-0 transition-opacity duration-700">
               <Image
@@ -126,7 +125,7 @@ export default function ProductCard({ product, bestsellerIds = [] }) {
             </div>
           )}
 
-          /* Gradient overlay */
+          {/* Gradient overlay */}
           <div className="absolute inset-0 bg-linear-to-t from-black/25 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
       </Link>
 

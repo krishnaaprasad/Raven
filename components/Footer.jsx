@@ -11,10 +11,10 @@ import { useRouter } from "next/navigation";
 
 export default function Footer() {
   const pathname = usePathname();
-  if (pathname.startsWith("/admin")) return null;
-
   const [email, setEmail] = useState("");
   const router = useRouter();
+
+  if (pathname.startsWith("/admin")) return null;
 
   const handleSubscribe = async (e) => {
   e.preventDefault();

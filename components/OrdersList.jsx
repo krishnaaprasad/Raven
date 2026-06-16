@@ -51,7 +51,7 @@ export default function OrdersList() {
   if (!orders.length) {
     return (
       <div className="py-6">
-        <p className="text-center text-(--theme-muted)">You haven't placed any orders yet.</p>
+        <p className="text-center text-(--theme-muted)">You haven&apos;t placed any orders yet.</p>
       </div>
     );
   }

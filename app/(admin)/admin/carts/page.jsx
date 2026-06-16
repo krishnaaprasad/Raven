@@ -254,8 +254,6 @@ function DropdownItem({ label, active, onClick }) {
 
 
 function ConvertToOrderModal({ cart, onClose }) {
-  if (!cart) return null;
-
   const [form, setForm] = useState({
     name: cart?.userId?.name || "",
     email: cart?.userId?.email || "",
@@ -267,8 +265,9 @@ function ConvertToOrderModal({ cart, onClose }) {
     pincode: "",
   });
 
-
   const [errors, setErrors] = useState({});
+
+  if (!cart) return null;
 
   const validateForm = () => {
     const err = {};

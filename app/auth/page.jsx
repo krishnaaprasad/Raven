@@ -327,7 +327,7 @@ export default function LoginRegisterPage({ onClose, onLoginSuccess, verificatio
                     disabled={resendTimer > 0 || loading}
                     className="group text-[13px] text-(--theme-text) font-bold flex items-center gap-2 disabled:opacity-40"
                   >
-                    <span>Didn't receive?</span>
+                    <span>Didn&apos;t receive?</span>
                     <span className="text-(--theme-muted) group-hover:text-(--theme-text) transition-colors underline decoration-dotted decoration-2 underline-offset-4">
                       {resendTimer > 0 ? `Resend in ${resendTimer}s` : 'Resend OTP Now'}
                     </span>
