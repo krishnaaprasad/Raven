@@ -15,11 +15,28 @@ export default function AdminLayout({ children }) {
     const root = document.documentElement;
     root.classList.remove("dark");
 
+    // Force light theme CSS variables on root so portalled modals
+    // (rendered via createPortal to document.body) also get correct colors
+    root.style.setProperty("--theme-bg", "#fcfbf8");
+    root.style.setProperty("--theme-soft", "#f6f6f6");
+    root.style.setProperty("--theme-border", "#e7e1cf");
+    root.style.setProperty("--theme-text", "#1b180d");
+    root.style.setProperty("--theme-muted", "#6b6654");
+    root.style.setProperty("--background", "#ffffff");
+    root.style.setProperty("--foreground", "#171717");
+
     return () => {
       // when leaving admin, restore dark if saved
       const saved = localStorage.getItem("theme");
       if (saved === "dark") {
         root.classList.add("dark");
+        root.style.setProperty("--theme-bg", "#0f0f0f");
+        root.style.setProperty("--theme-soft", "#161616");
+        root.style.setProperty("--theme-border", "#262626");
+        root.style.setProperty("--theme-text", "#f5f5f5");
+        root.style.setProperty("--theme-muted", "#9a9a9a");
+        root.style.setProperty("--background", "#0f0f0f");
+        root.style.setProperty("--foreground", "#f5f5f5");
       }
     };
   }, [mobileOpen]);

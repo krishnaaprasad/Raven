@@ -104,7 +104,7 @@ export default function EditOrderModal({ order, onClose, onUpdated }) {
 
   return (
     <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center px-3">
-      <div className="bg-white w-full max-w-md rounded-xl shadow-xl flex flex-col">
+      <div className="bg-white w-full max-w-md rounded-xl shadow-xl flex flex-col text-[#1b180d]">
 
         {/* HEADER */}
         <div className="flex justify-between px-4 py-3 border-b">
@@ -154,7 +154,7 @@ export default function EditOrderModal({ order, onClose, onUpdated }) {
   <select
     value={form.state}
     onChange={e => update("state", e.target.value)}
-    className="w-full h-9 border rounded-md px-3 text-sm bg-white"
+    className="w-full h-9 border rounded-md px-3 text-sm text-[#1b180d] bg-white"
   >
     <option value="">Select state</option>
     {INDIAN_STATES.map(state => (
@@ -201,7 +201,7 @@ export default function EditOrderModal({ order, onClose, onUpdated }) {
   <select
     value={form.paymentMethod}
     onChange={e => update("paymentMethod", e.target.value)}
-    className="w-full h-9 border rounded-md px-3 text-sm bg-white"
+    className="w-full h-9 border rounded-md px-3 text-sm text-[#1b180d] bg-white"
   >
     {PAYMENT_METHODS.map(method => (
       <option key={method} value={method}>
@@ -225,7 +225,7 @@ export default function EditOrderModal({ order, onClose, onUpdated }) {
               rows={2}
               value={form.remark}
               onChange={e => update("remark", e.target.value)}
-              className="w-full border rounded-md px-3 py-2 text-sm"
+              className="w-full border rounded-md px-3 py-2 text-sm text-[#1b180d] bg-white"
             />
           </div>
 
@@ -283,7 +283,7 @@ function Input({ label, ...props }) {
       <label className="text-xs text-gray-600">{label}</label>
       <input
         {...props}
-        className="w-full h-9 border rounded-md px-3 text-sm disabled:bg-gray-100"
+        className="w-full h-9 border rounded-md px-3 text-sm text-[#1b180d] bg-white disabled:bg-gray-100"
       />
     </div>
   );
@@ -304,7 +304,7 @@ function NumberInput({ label, value, onChange }) {
         value={value}
         onChange={e => onChange(e.target.value)}
         onWheel={e => e.target.blur()}   // 🚫 disable scroll change
-        className="w-full h-9 border rounded-md px-3 text-sm"
+        className="w-full h-9 border rounded-md px-3 text-sm text-[#1b180d] bg-white"
       />
     </div>
   );

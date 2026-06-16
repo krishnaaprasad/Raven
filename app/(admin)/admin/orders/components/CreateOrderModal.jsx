@@ -98,7 +98,7 @@ export default function CreateOrderModal({ onClose, onCreated }) {
 
   return (
     <div className="fixed inset-0 z-50 bg-black/30 flex items-center justify-center px-3">
-      <div className="bg-white w-full max-w-md rounded-xl shadow-xl">
+      <div className="bg-white w-full max-w-md rounded-xl shadow-xl text-[#1b180d]">
 
         {/* HEADER */}
         <div className="flex justify-between px-4 py-3 border-b">
@@ -210,7 +210,7 @@ export default function CreateOrderModal({ onClose, onCreated }) {
               value={form.remark}
               onChange={e => update("remark", e.target.value)}
               placeholder="Any internal note (sold by, special request, etc.)"
-              className="w-full border rounded-md px-3 py-2 text-sm"
+              className="w-full border rounded-md px-3 py-2 text-sm text-[#1b180d] bg-white"
             />
           </div>
 
@@ -269,7 +269,7 @@ function Input({ label, type, ...props }) {
         type={type}
         inputMode={type === "number" ? "numeric" : undefined}
         onWheel={type === "number" ? e => e.target.blur() : undefined}
-        className="w-full h-9 border rounded-md px-3 text-sm"
+        className="w-full h-9 border rounded-md px-3 text-sm text-[#1b180d] bg-white"
       />
     </div>
   );
@@ -281,7 +281,7 @@ function Select({ label, children, ...props }) {
   return (
     <div>
       {label && <label className="text-xs text-gray-600">{label}</label>}
-      <select {...props} className="w-full h-9 border rounded-md px-3 text-sm">
+      <select {...props} className="w-full h-9 border rounded-md px-3 text-sm text-[#1b180d] bg-white">
         {children}
       </select>
     </div>

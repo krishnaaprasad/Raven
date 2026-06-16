@@ -284,7 +284,7 @@ const didInitProduct = useRef(false);
       {confirmModal &&
         createPortal(
           <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
-            <div className="bg-white p-6 rounded-xl w-[350px] shadow-xl text-center">
+            <div className="bg-white p-6 rounded-xl w-[350px] shadow-xl text-center text-[#1b180d]">
               <h3 className="text-lg font-semibold text-[#1b180d] mb-2">Confirm Update</h3>
               <p className="text-sm text-[#6b6654] mb-4">
                 Do you want to update status to <b>{selectedStatus}</b>?
@@ -305,7 +305,7 @@ const didInitProduct = useRef(false);
         {showDelete &&
           createPortal(
             <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
-              <div className="bg-white p-6 rounded-xl w-[380px] shadow-xl">
+              <div className="bg-white p-6 rounded-xl w-[380px] shadow-xl text-[#1b180d]">
                 <h3 className="text-lg font-semibold text-[#1b180d] mb-2">
                   Delete Order
                 </h3>
@@ -317,7 +317,7 @@ const didInitProduct = useRef(false);
                   value={deleteReason}
                   onChange={(e) => setDeleteReason(e.target.value)}
                   placeholder="Reason..."
-                  className="w-full border border-[#e7e1cf] rounded-lg p-2 text-sm mb-4"
+                  className="w-full border border-[#e7e1cf] rounded-lg p-2 text-sm mb-4 text-[#1b180d] bg-white"
                   rows={3}
                 />
 

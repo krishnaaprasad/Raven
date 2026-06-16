@@ -315,14 +315,14 @@ function ConvertToOrderModal({ cart, onClose }) {
         }
       };
 
-  const inputClass = "border border-[#e7e1cf] rounded-md p-2 w-full text-sm";
+  const inputClass = "border border-[#e7e1cf] rounded-md p-2 w-full text-sm text-[#1b180d] bg-white";
 
   return (
     <>
       <div className="fixed inset-0 bg-black/40 z-9999" onClick={onClose}></div>
 
       <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 
-        bg-white p-6 rounded-xl w-[92vw] sm:w-[450px] z-10000 space-y-4">
+        bg-white p-6 rounded-xl w-[92vw] sm:w-[450px] z-10000 space-y-4 text-[#1b180d]">
 
         <h2 className="text-lg font-semibold">Convert to Order</h2>
 
