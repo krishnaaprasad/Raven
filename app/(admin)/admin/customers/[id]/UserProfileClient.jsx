@@ -195,8 +195,17 @@ export default function UserProfileClient({ userId }) {
           <div className="bg-[#fcfbf8] border border-[#e7e1cf] rounded-xl p-6 text-center">
             <ProfileAvatar name={user.name} image={user.image} size={90} />
             <div className="mt-4 space-y-1">
-              <p className="text-[22px] font-bold">{user.name}</p>
-              <p className="text-sm text-[#9a864c] break-all">{user.email}</p>
+              <p className="text-[22px] font-bold">
+                {user.email?.includes("@raven.local") && (!user.name || user.name.startsWith("phone-only"))
+                  ? user.phone || user.email?.replace(/@raven\.local$/, "").replace("phone-only+", "")
+                  : user.name}
+              </p>
+              {user.email && !user.email.includes("@raven.local") && (
+                <p className="text-sm text-[#9a864c] break-all">{user.email}</p>
+              )}
+              {user.phone && (
+                <p className="text-sm text-[#9a864c]">{user.phone}</p>
+              )}
               <p className="text-sm text-[#9a864c]">Joined: {joinedDate}</p>
             </div>
           </div>

@@ -245,14 +245,25 @@ export default function CustomersClient() {
             </tr>
           </thead>
           <tbody className="divide-y divide-[#e7e1cf] bg-[#fcfbf8]">
-            {users.map((user) => (
+            {users.map((user) => {
+              const isFakeEmail = user.email?.includes("@raven.local");
+              const displayName = isFakeEmail && (!user.name || user.name.startsWith("phone-only"))
+                ? user.phone || user.email?.replace(/@raven\.local$/, "").replace("phone-only+", "")
+                : user.name;
+              const subtitle = isFakeEmail
+                ? (user.phone || "")
+                : user.email;
+
+              return (
               <tr key={user._id}>
                 <td className="py-4 pl-4">
                   <div className="flex items-center gap-3">
-                    <Avatar name={user.name} />
+                    <Avatar name={displayName} />
                     <div>
-                      <p className="font-medium">{user.name}</p>
-                      <p className="text-xs text-gray-500">{user.email}</p>
+                      <p className="font-medium">{displayName}</p>
+                      {subtitle && (
+                        <p className="text-xs text-gray-500">{subtitle}</p>
+                      )}
                     </div>
                   </div>
                 </td>
@@ -285,7 +296,8 @@ export default function CustomersClient() {
                   </Link>
                 </td>
               </tr>
-            ))}
+              );
+            })}
 
             {users.length === 0 && (
               <tr>
