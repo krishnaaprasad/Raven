@@ -291,11 +291,7 @@ export default function CheckoutClient() {
     'Jammu and Kashmir', 'Ladakh', 'Lakshadweep', 'Puducherry',
   ];
 
-  useEffect(() => {
-    if (couponData?.code) {
-      handleApplyCoupon(couponData.code);
-    }
-  }, [subtotal, couponData?.code, handleApplyCoupon]);
+  // (moved coupon re-apply effect after handleApplyCoupon definition below)
 
   const hasPrefilledRef = useRef(false);
 
@@ -439,6 +435,13 @@ export default function CheckoutClient() {
       setApplyingCoupon(false);
     }
   }, [couponCode, subtotal]);
+
+  // Re-apply coupon when subtotal changes
+  useEffect(() => {
+    if (couponData?.code) {
+      handleApplyCoupon(couponData.code);
+    }
+  }, [subtotal, couponData?.code, handleApplyCoupon]);
 
   // ✅ Payment handler
   const handlePayment = async (formData) => {
