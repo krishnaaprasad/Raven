@@ -2,24 +2,40 @@ import { NextResponse } from "next/server";
 import connectToDatabase from "@/lib/mongodb";
 import { Order } from "@/models/Order";
 import { sendWhatsAppTemplate } from "@/lib/notifications/whatsapp.service";
-import { getDeliveryPayload } from "@/lib/notifications/templates.service";
+import { getDeliveryPayload, getReviewPayload } from "@/lib/notifications/templates.service";
 
 // POST /api/admin/orders/[id]/send-whatsapp
-// Manually triggers the delivery WhatsApp message for an order (bypasses sent flags).
-// Use this for testing.
+// Manually triggers WhatsApp messages for an order (bypasses sent flags).
+// Body: { "type": "delivered" } or { "type": "review" }
+// Default is "delivered" if no type specified.
 export async function POST(req, { params }) {
   try {
     await connectToDatabase();
     const { id } = await params;
+
+    let body = {};
+    try { body = await req.json(); } catch (e) { /* empty body is fine */ }
+
+    const type = body.type || "delivered";
 
     const order = await Order.findById(id);
     if (!order) {
       return NextResponse.json({ success: false, error: "Order not found" }, { status: 404 });
     }
 
-    const payload = getDeliveryPayload(order);
+    let payload;
+    if (type === "review") {
+      const firstItem = order.cartItems?.[0];
+      if (!firstItem) {
+        return NextResponse.json({ success: false, error: "Order has no items" }, { status: 400 });
+      }
+      payload = getReviewPayload(order, firstItem);
+      console.log("🧪 Manual WhatsApp REVIEW send for order:", id);
+    } else {
+      payload = getDeliveryPayload(order);
+      console.log("🧪 Manual WhatsApp DELIVERED send for order:", id);
+    }
 
-    console.log("🧪 Manual WhatsApp send for order:", id);
     console.log("📦 Payload:", JSON.stringify(payload, null, 2));
 
     const result = await sendWhatsAppTemplate({
@@ -27,14 +43,6 @@ export async function POST(req, { params }) {
       phone: order.phone,
       ...payload,
     });
-
-    // Reset flags so automatic send can work later if needed
-    if (result.ok && !result.loggedOnly) {
-      await Order.findByIdAndUpdate(id, {
-        deliveryMessageSent: true,
-        deliveredWhatsappSent: true,
-      });
-    }
 
     return NextResponse.json({
       success: result.ok,
