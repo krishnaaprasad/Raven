@@ -4,6 +4,7 @@ import connectToDatabase from "@/lib/mongodb";
 import { Order } from "@/models/Order";
 import Coupon from "@/models/Coupon";
 import { sendOrderConfirmation } from "@/lib/notifications/whatsapp.service";
+import axios from "axios";
 
 export async function POST(req) {
   try {
@@ -20,16 +21,7 @@ export async function POST(req) {
 
     await connectToDatabase();
 
-    // -----------------------------------------
-    // Extract identifiers + status from the ACTUAL Cashfree payload
-    // (API version 2022-09-01)
-    //   data.order.order_id      → our merchant order id (= customOrderId)
-    //   data.order.cf_order_id   → Cashfree's order id (not always present)
-    //   data.payment.payment_status → SUCCESS | FAILED | PENDING | ...
-    // Older/test payloads sometimes used data.order.order_status, so we fall
-    // back to that if payment.payment_status is missing.
-    // -----------------------------------------
-    const merchantOrderId = body.data.order.order_id; // = customOrderId
+    const merchantOrderId = body.data.order.order_id;
     const cfOrderId = body.data.order.cf_order_id || null;
 
     const rawStatus = (
@@ -43,9 +35,7 @@ export async function POST(req) {
       return NextResponse.json({ success: true }, { status: 200 });
     }
 
-    // -----------------------------------------
     // Map gateway status → business status
-    // -----------------------------------------
     let payment_state = rawStatus || "PENDING";
     let payment_status = "PENDING";
     let order_status = "Payment Awaiting";
@@ -58,14 +48,11 @@ export async function POST(req) {
       payment_status = "CANCELLED";
       order_status = "Cancelled";
     } else if (rawStatus && rawStatus !== "PENDING") {
-      // FAILED, USER_DROPPED, FLAGGED, etc.
       payment_status = "FAILED";
       order_status = "Cancelled";
     }
 
-    // -----------------------------------------
-    // Locate the order (prefer customOrderId, fall back to cf_order_id)
-    // -----------------------------------------
+    // Locate the order
     const matchQuery = merchantOrderId
       ? { customOrderId: merchantOrderId }
       : { cf_order_id: cfOrderId };
@@ -77,10 +64,80 @@ export async function POST(req) {
       return NextResponse.json({ success: true }, { status: 200 });
     }
 
-    // Idempotency: if already PAID + verified, don't downgrade or re-notify
+    // Idempotency: if already PAID + verified, don't re-process
     const alreadyFinalized =
       existingOrder.payment_status === "PAID" && existingOrder.verified === true;
 
+    if (alreadyFinalized) {
+      return NextResponse.json({ success: true }, { status: 200 });
+    }
+
+    // -----------------------------------------
+    // Fetch payment method details from Cashfree (UPI/Card/NB/Wallet)
+    // -----------------------------------------
+    let paymentMethod = "Cashfree";
+    let paymentDetails = {};
+
+    if (payment_status === "PAID") {
+      const isProduction = process.env.NEXT_PUBLIC_CASHFREE_ENV === "production";
+      const baseUrl = isProduction
+        ? "https://api.cashfree.com/pg/orders"
+        : "https://sandbox.cashfree.com/pg/orders";
+
+      const lookupId = merchantOrderId || existingOrder.customOrderId;
+
+      try {
+        const paymentRes = await axios.get(`${baseUrl}/${lookupId}/payments`, {
+          headers: {
+            "x-client-id": process.env.CASHFREE_APP_ID,
+            "x-client-secret": process.env.CASHFREE_SECRET_KEY,
+            "x-api-version": "2022-09-01",
+          },
+        });
+
+        const payments = Array.isArray(paymentRes.data)
+          ? paymentRes.data
+          : paymentRes.data?.data || [];
+        const payment = payments[0];
+
+        if (payment?.payment_method?.upi) {
+          const upiId = payment.payment_method.upi?.upi_id || "unknown@upi";
+          paymentMethod = `UPI (${upiId})`;
+          paymentDetails = { type: "UPI", upiId };
+        } else if (payment?.payment_method?.card) {
+          const card = payment.payment_method.card;
+          const last4 = (card?.card_number || "").slice(-4) || "XXXX";
+          const network = card?.card_network?.toUpperCase() || "CARD";
+          const bank = card?.card_bank_name || "Bank";
+          paymentMethod = `${network} ending in ${last4}`;
+          paymentDetails = { type: "CARD", last4, network, bank };
+        } else if (payment?.payment_method?.netbanking) {
+          const bankCode = payment.payment_method.netbanking?.bank_code || "BANK";
+          paymentMethod = `NetBanking (${bankCode})`;
+          paymentDetails = { type: "NETBANKING", bankCode };
+        } else if (payment?.payment_method?.wallet) {
+          const provider = payment.payment_method.wallet?.provider || "Wallet";
+          paymentMethod = `Wallet (${provider})`;
+          paymentDetails = { type: "WALLET", provider };
+        } else if (!isProduction) {
+          paymentMethod = "UPI (testsuccess@gocash)";
+          paymentDetails = { type: "UPI", upiId: "testsuccess@gocash" };
+        } else {
+          paymentMethod = "Online Payment (Cashfree)";
+          paymentDetails = { type: "OTHER" };
+        }
+      } catch (err) {
+        console.warn("⚠️ Webhook: Could not fetch payment details:", err.message);
+        if (!isProduction) {
+          paymentMethod = "UPI (testsuccess@gocash)";
+          paymentDetails = { type: "UPI", upiId: "testsuccess@gocash" };
+        }
+      }
+    }
+
+    // -----------------------------------------
+    // Update order
+    // -----------------------------------------
     const updatePayload = {
       payment_state,
       payment_status,
@@ -88,7 +145,8 @@ export async function POST(req) {
       status: payment_status,
       verified: payment_status === "PAID",
       transactionDate: new Date(),
-      paymentDetails: body,
+      paymentMethod: payment_status === "PAID" ? paymentMethod : "Payment Failed",
+      paymentDetails: payment_status === "PAID" ? paymentDetails : {},
     };
 
     if (cfOrderId && !existingOrder.cf_order_id) {
@@ -102,7 +160,7 @@ export async function POST(req) {
     );
 
     // -----------------------------------------
-    // Apply coupon usage once on successful payment
+    // Apply coupon usage once
     // -----------------------------------------
     if (
       payment_status === "PAID" &&
@@ -155,9 +213,53 @@ export async function POST(req) {
     }
 
     // -----------------------------------------
-    // Send confirmation once (skip if order was already finalized)
+    // Send confirmation email + WhatsApp on successful payment
     // -----------------------------------------
-    if (payment_status === "PAID" && !alreadyFinalized) {
+    if (payment_status === "PAID") {
+      // Send confirmation email
+      try {
+        const freshOrder = await Order.findById(updatedOrder._id);
+
+        if (!freshOrder.emailSent) {
+          const emailPayload = {
+            email: freshOrder.email,
+            name: freshOrder.userName,
+            orderId: freshOrder.customOrderId || freshOrder._id.toString(),
+            paymentMethod,
+            subtotal: freshOrder.cartItems.reduce(
+              (acc, item) => acc + item.price * item.quantity,
+              0
+            ),
+            shippingCost: freshOrder.shippingCharge,
+            discount: freshOrder.discount || 0,
+            couponCode: freshOrder.couponCode || null,
+            totalAmount: freshOrder.totalAmount,
+            items: freshOrder.cartItems,
+            shipping: freshOrder.deliveryType,
+            address: {
+              ...freshOrder.addressDetails,
+              phone: freshOrder.phone,
+            },
+          };
+
+          fetch(
+            `${process.env.NEXT_PUBLIC_BASE_URL || "https://www.ravenfragrance.in"}/api/send-confirmation-mail`,
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(emailPayload),
+            }
+          )
+            .then(() => console.log("📨 Webhook: Email triggered successfully"))
+            .catch((err) => console.error("📩 Webhook: Email trigger error:", err));
+
+          await Order.findByIdAndUpdate(freshOrder._id, { emailSent: true });
+        }
+      } catch (mailErr) {
+        console.error("❌ Webhook email error:", mailErr);
+      }
+
+      // Send WhatsApp confirmation
       try {
         await sendOrderConfirmation(updatedOrder);
       } catch (whatsappErr) {
