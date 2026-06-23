@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import connectToDatabase from "@/lib/mongodb";
 import { Order } from "@/models/Order";
+import Product from "@/models/Product";
+import StockLog from "@/models/StockLog";
 import { sendDeliveryMessage } from "@/lib/notifications/whatsapp.service";
 
 export async function GET(req, { params }) {
@@ -83,6 +85,60 @@ export async function PATCH(req, { params }) {
     }
 
     await order.save();
+
+    // ✅ Stock restoration on cancellation
+    if (
+      order_status === "Cancelled" &&
+      previousStatus !== "Cancelled" &&
+      order.payment_status === "PAID" &&
+      order.stockDeducted === true &&
+      !order.stockRestored
+    ) {
+      try {
+        for (const item of order.cartItems) {
+          const product = await Product.findOne({ slug: item.slug });
+          if (!product) continue;
+
+          const variant = product.variants.find(
+            (v) => String(v.size) === String(item.size)
+          );
+          if (!variant) continue;
+
+          const previousStock = variant.stock;
+          const quantity = Number(item.quantity);
+
+          const updated = await Product.findOneAndUpdate(
+            {
+              _id: product._id,
+              "variants.size": item.size,
+            },
+            { $inc: { "variants.$.stock": quantity } },
+            { new: true }
+          );
+
+          if (updated) {
+            const updatedVariant = updated.variants.find(
+              (v) => String(v.size) === String(item.size)
+            );
+            await StockLog.create({
+              productId: product._id,
+              variantSize: item.size,
+              type: "ORDER_CANCELLED",
+              quantity: quantity,
+              previousStock,
+              newStock: updatedVariant?.stock ?? previousStock + quantity,
+              orderId: order._id,
+              by: "admin",
+            });
+          }
+        }
+
+        order.stockRestored = true;
+        await order.save();
+      } catch (stockErr) {
+        console.error("❌ Stock restoration error:", stockErr);
+      }
+    }
 
     if (order_status === "Delivered" && previousStatus !== "Delivered") {
       try {

@@ -282,365 +282,266 @@ const exportCSV = async () => {
     <div className="space-y-6">
 
       {/* SEARCH + FILTERS */}
-      <div className="flex flex-col gap-4">
+      <div className="space-y-3">
 
-        {/* ⭐ SEARCH + FILTERS (PREMIUM RAVEN THEME) */}
-<div className="flex flex-col gap-4">
-
-  {/* 🔍 SEARCH BAR */}
-  <div className="flex items-center w-full rounded-lg border border-[#e7e1cf] bg-[#fcfbf8] px-4 py-2">
-    <Search size={20} className="text-[#b28c34]" />
-    <input
-      value={q}
-      onChange={(e) => setQ(e.target.value)}
-      placeholder="Search by Order ID, customer, or product..."
-      className="ml-3 w-full bg-transparent outline-none text-[15px] text-[#1b180d]"
-    />
-    {/* Search Button */}
-    <button
-      onClick={() => fetchOrders(1)}
-      className="ml-3 px-4 py-2 bg-[#b28c34] text-white text-sm font-semibold rounded-lg hover:bg-[#9a864c] transition"
-    >
-      Search
-    </button>
-  </div>
-
-  {/* 🔽 FILTER ROW */}
-  <div className="flex flex-wrap items-center justify-between gap-3">
-
-    <div className="flex flex-wrap gap-3 items-center">
-     
-     {/* PAYMENT STATUS DROPDOWN */}
-        <div className="relative" ref={paymentRef}>
-        <button
-            onClick={() => setShowPayment((v) => !v)}
-            className="
-            h-10 px-4 rounded-lg border border-[#e7e1cf]
-            bg-[#fcfbf8] text-[14px] text-[#1b180d]
-            flex items-center justify-between gap-2 min-w-[150px]
-            hover:border-[#b28c34] transition
-            "
-        >
-            {paymentStatus === ""
-            ? "Payment Status"
-            : paymentStatus === "ALL"
-            ? "All"
-            : paymentStatus.charAt(0) + paymentStatus.slice(1).toLowerCase()}
-            
-            <ChevronDown
-            size={16}
-            className={`text-[#b28c34] transition-transform ${
-                showPayment ? "rotate-180" : ""
-            }`}
-            />
-        </button>
-
-        {showPayment && (
-            <div
-            className="
-                absolute mt-2 w-40 bg-white border border-[#e7e1cf]
-                rounded-lg shadow-lg z-20
-            "
-            >
-            {["ALL", "PAID", "PENDING", "FAILED", "CANCELLED"].map((s) => (
-                <div
-                key={s}
-                onClick={() => {
-                    setPaymentStatus(s === "ALL" ? "" : s);
-                    setShowPayment(false);
-                }}
-                className={`
-                    px-4 py-2 text-[14px] cursor-pointer 
-                    hover:bg-[#f3efe6]
-                    ${paymentStatus === s ? "bg-[#f8f4eb] font-medium" : ""}
-                `}
-                >
-                {s === "ALL"
-                    ? "All"
-                    : s.charAt(0) + s.slice(1).toLowerCase()}
-                </div>
-            ))}
-            </div>
-        )}
+        {/* Search Bar */}
+        <div className="flex items-center gap-2 w-full rounded-xl border border-[#e7e1cf] bg-white px-4 h-11">
+          <Search size={18} className="text-[#9a864c] shrink-0" />
+          <input
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && fetchOrders(1)}
+            placeholder="Search by Order ID, customer, or product..."
+            className="flex-1 bg-transparent outline-none text-sm text-[#1b180d] placeholder:text-[#9a864c]"
+          />
+          <button
+            onClick={() => fetchOrders(1)}
+            className="px-3 py-1.5 bg-[#b28c34] text-white text-xs font-semibold rounded-lg hover:bg-[#9a864c] transition shrink-0"
+          >
+            Search
+          </button>
         </div>
 
+        {/* Filters Row */}
+        <div className="flex flex-wrap items-center gap-2">
 
-      {/* ORDER STATUS DROPDOWN */}
-        <div className="relative" ref={orderRef}>
-        <button
-            onClick={() => setShowOrder((v) => !v)}
-            className="
-            h-10 px-4 rounded-lg border border-[#e7e1cf]
-            bg-[#fcfbf8] text-[14px] text-[#1b180d]
-            flex items-center justify-between gap-2 min-w-40
-            hover:border-[#b28c34] transition
-            "
-        >
-            {orderStatus === ""
-            ? "Order Status"
-            : orderStatus === "ALL"
-            ? "All"
-            : orderStatus}
-
-            <ChevronDown
-            size={16}
-            className={`text-[#b28c34] transition-transform ${
-                showOrder ? "rotate-180" : ""
-            }`}
-            />
-        </button>
-
-        {showOrder && (
-            <div
-            className="
-                absolute mt-2 w-44 bg-white border border-[#e7e1cf]
-                rounded-lg shadow-lg z-20
-            "
+          {/* Payment Status */}
+          <div className="relative" ref={paymentRef}>
+            <button
+              onClick={() => setShowPayment((v) => !v)}
+              className="h-9 px-3 rounded-lg border border-[#e7e1cf] bg-white text-xs text-[#1b180d] flex items-center gap-2 hover:border-[#b28c34] transition"
             >
-            {[
-                "ALL",
-                "Processing",
-                "Out for Delivery",
-                "Shipped",
-                "Delivered",
-                "Cancelled",
-            ].map((s) => (
-                <div
-                key={s}
-                onClick={() => {
-                    setOrderStatus(s === "ALL" ? "" : s);
-                    setShowOrder(false);
-                }}
-                className={`
-                    px-4 py-2 text-[14px] cursor-pointer 
-                    hover:bg-[#f5f1e6]
-                    ${orderStatus === s ? "bg-[#f8f4eb] font-medium" : ""}
-                `}
-                >
-                {s === "ALL" ? "All" : s}
-                </div>
-            ))}
-            </div>
-        )}
-        </div>
+              {paymentStatus ? paymentStatus.charAt(0) + paymentStatus.slice(1).toLowerCase() : "Payment Status"}
+              <ChevronDown size={14} className={`text-[#b28c34] transition-transform ${showPayment ? "rotate-180" : ""}`} />
+            </button>
 
-    {/* DATE RANGE DROPDOWN */}
-<div className="relative" ref={pickerRef}>
-  <button
-    onClick={() => setShowDatePicker((v) => !v)}
-    className="
-      h-10 px-4 rounded-lg border border-[#e7e1cf]
-      bg-[#fcfbf8] text-[14px] text-[#1b180d]
-      flex items-center justify-between gap-2 min-w-[165px]
-      hover:border-[#b28c34] transition
-    "
-  >
-    {dateLabel()}
-    <CalendarIcon size={16} className="text-[#b28c34]" />
-  </button>
-
-  {showDatePicker && (
-    <div
-      ref={pickerRef}
-      className="
-        absolute mt-2 z-30 bg-white border border-[#e7e1cf] rounded-lg shadow-xl
-      "
-    >
-      <DateRange
-        ranges={[range]}
-        onChange={onRangeChange}
-        moveRangeOnFirstSelection={false}
-        editableDateInputs={true}
-        months={2}
-        direction="horizontal"
-        rangeColors={["#b28c34"]}
-        className="text-[#1b180d]"
-      />
-
-      {/* APPLY BUTTON */}
-      <div className="flex justify-end p-3 border-t border-[#e7e1cf] bg-[#fcfbf8]">
-        <button
-          onClick={() => {
-            setShowDatePicker(false);
-            applyFilters();
-          }}
-          className="px-4 py-2 bg-[#b28c34] text-white rounded-lg text-sm hover:bg-[#9a864c]"
-        >
-          Apply Date
-        </button>
-      </div>
-    </div>
-  )}
-</div>
-      
-    {/* PRODUCT NAME DROPDOWN */}
-<select
-  value={productName}
-  onChange={(e) => setProductName(e.target.value)}
-  className="h-10 px-3 rounded-lg border border-[#e7e1cf] bg-[#fcfbf8] text-[14px]"
->
-  <option value="">All Products</option>
-  {uniqueProducts.map((p) => (
-    <option key={p} value={p}>
-      {p}
-    </option>
-  ))}
-</select>
-
-{/* DISCOUNT FILTER */}
-<select
-  value={hasDiscount}
-  onChange={(e) => setHasDiscount(e.target.value)}
-  className="h-10 px-3 rounded-lg border border-[#e7e1cf] bg-[#fcfbf8] text-[14px]"
->
-  <option value="">Discount Filter</option>
-  <option value="yes">With Discount</option>
-  <option value="no">No Discount</option>
-</select>
-
-      {/* Apply Button */}
-      <button
-        onClick={applyFilters}
-        className="h-10 px-4 bg-[#b28c34] text-white rounded-lg text-sm font-semibold hover:bg-[#9a864c] transition"
-      >
-        Apply
-      </button>
-    </div>
-
-    <div className="flex flex-wrap items-center gap-3 justify-end">
-      {/* 🗂 Active / Deleted Toggle */}
-      <button
-        onClick={() => {
-          const next = !showDeleted;
-          setShowDeleted(next);
-
-          setFrom("");
-          setTo("");
-          setQ("");
-          setPaymentStatus("");
-          setOrderStatus("");
-
-          fetchOrders(1, next);
-        }}
-        className={`
-          h-10 px-4 rounded-lg text-sm font-semibold border transition
-          ${
-            showDeleted
-              ? "bg-[#f5f1e6] text-[#1b180d] border-[#b28c34]"
-              : "bg-[#fcfbf8] text-[#1b180d] border-[#e7e1cf] hover:border-[#b28c34]"
-          }
-        `}
-      >
-        {showDeleted ? "Deleted Orders" : "Active Orders"}
-      </button>
-
-      {/* ➕ Create Order */}
-      <button
-        onClick={() => setShowCreateOrder(true)}
-        className="
-          h-10 px-4 rounded-lg text-sm font-semibold
-          bg-[#1b180d] text-white hover:bg-[#2a2618]
-          transition
-        "
-      >
-        + Create
-      </button>
-
-      {/* ⬇️ Export */}
-      <button
-        onClick={exportCSV}
-        className="
-          h-10 px-4 rounded-lg text-sm font-semibold border
-          border-[#e7e1cf] text-[#1b180d]
-          bg-[#fcfbf8] hover:bg-[#f5f1e6]
-          flex items-center gap-2 transition
-        "
-      >
-        <Download size={16} />
-        Export
-      </button>
-    </div>
-
-  </div>
-</div>
-
-      </div>
-
-      {/* TABLE WRAPPER for mobile horizontal scroll */}
-      <div className="rounded-lg border border-[#e7e1cf] bg-white overflow-x-auto w-full">
-        <table className="min-w-[900px] w-full text-[15px]">
-          <thead className="bg-[#fcfbf8] text-[12px] uppercase text-[#1b180d]/60">
-            <tr>
-              <th className="px-6 py-4 text-left min-w-[120px]">Order ID</th>
-              <th className="px-6 py-4 text-left min-w-[170px]">Customer</th>
-              <th className="px-6 py-4 text-left min-w-[170px]">Date</th>
-              <th className="px-6 py-4 text-left min-w-[120px]">Amount</th>
-              <th className="px-6 py-4 text-left min-w-[120px]">Payment</th>
-              <th className="px-6 py-4 text-left min-w-40">Status</th>
-              {showDeleted && (
-                <th className="px-6 py-4 text-left min-w-[200px]">Delete Reason</th>
-              )}
-              <th className="px-6 py-4 text-left min-w-[120px]">Action</th>
-              <th className="px-6 py-4 text-left min-w-[120px]">Discount</th>
-              <th className="px-6 py-4 text-left min-w-[150px]">Coupon</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {loading ? (
-              <tr>
-                <td colSpan={showDeleted ? 10 : 9} className="text-center py-6 text-sm">
-                  Loading...
-                </td>
-              </tr>
-            ) : orders.length ? (
-              orders.map((o) => (
-                <OrderRow
-                  key={o._id}
-                  order={o}
-                  showDeleted={showDeleted}
-                  onStatusUpdated={resetAfterStatusUpdate}
-                />
-              ))
-            ) : (
-              <tr>
-                <td colSpan={showDeleted ? 10 : 9} className="text-center py-6 text-sm text-gray-500">
-                  No orders found
-                </td>
-              </tr>
+            {showPayment && (
+              <div className="absolute mt-1 w-36 bg-white border border-[#e7e1cf] rounded-lg shadow-lg z-20">
+                {["ALL", "PAID", "PENDING", "FAILED", "CANCELLED"].map((s) => (
+                  <div
+                    key={s}
+                    onClick={() => { setPaymentStatus(s === "ALL" ? "" : s); setShowPayment(false); }}
+                    className={`px-3 py-2 text-xs cursor-pointer hover:bg-[#f5f1e6] ${paymentStatus === s ? "bg-[#f5f1e6] font-semibold" : ""}`}
+                  >
+                    {s === "ALL" ? "All" : s.charAt(0) + s.slice(1).toLowerCase()}
+                  </div>
+                ))}
+              </div>
             )}
-          </tbody>
-        </table>
+          </div>
+
+          {/* Order Status */}
+          <div className="relative" ref={orderRef}>
+            <button
+              onClick={() => setShowOrder((v) => !v)}
+              className="h-9 px-3 rounded-lg border border-[#e7e1cf] bg-white text-xs text-[#1b180d] flex items-center gap-2 hover:border-[#b28c34] transition"
+            >
+              {orderStatus || "Order Status"}
+              <ChevronDown size={14} className={`text-[#b28c34] transition-transform ${showOrder ? "rotate-180" : ""}`} />
+            </button>
+
+            {showOrder && (
+              <div className="absolute mt-1 w-40 bg-white border border-[#e7e1cf] rounded-lg shadow-lg z-20">
+                {["ALL", "Processing", "Shipped", "Out for Delivery", "Delivered", "Cancelled"].map((s) => (
+                  <div
+                    key={s}
+                    onClick={() => { setOrderStatus(s === "ALL" ? "" : s); setShowOrder(false); }}
+                    className={`px-3 py-2 text-xs cursor-pointer hover:bg-[#f5f1e6] ${orderStatus === s ? "bg-[#f5f1e6] font-semibold" : ""}`}
+                  >
+                    {s === "ALL" ? "All" : s}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Date Range */}
+          <div className="relative" ref={pickerRef}>
+            <button
+              onClick={() => setShowDatePicker((v) => !v)}
+              className="h-9 px-3 rounded-lg border border-[#e7e1cf] bg-white text-xs text-[#1b180d] flex items-center gap-2 hover:border-[#b28c34] transition"
+            >
+              {dateLabel()}
+              <CalendarIcon size={14} className="text-[#b28c34]" />
+            </button>
+
+            {showDatePicker && (
+              <div className="absolute mt-1 z-30 bg-white border border-[#e7e1cf] rounded-xl shadow-xl">
+                <DateRange
+                  ranges={[range]}
+                  onChange={onRangeChange}
+                  moveRangeOnFirstSelection={false}
+                  editableDateInputs={true}
+                  months={2}
+                  direction="horizontal"
+                  rangeColors={["#b28c34"]}
+                  className="text-[#1b180d]"
+                />
+                <div className="flex justify-end p-2.5 border-t border-[#e7e1cf]">
+                  <button
+                    onClick={() => { setShowDatePicker(false); applyFilters(); }}
+                    className="px-3 py-1.5 bg-[#b28c34] text-white rounded-lg text-xs font-semibold hover:bg-[#9a864c]"
+                  >
+                    Apply Date
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Product Filter */}
+          <select
+            value={productName}
+            onChange={(e) => setProductName(e.target.value)}
+            className="h-9 px-3 rounded-lg border border-[#e7e1cf] bg-white text-xs text-[#1b180d]"
+          >
+            <option value="">All Products</option>
+            {uniqueProducts.map((p) => (
+              <option key={p} value={p}>{p}</option>
+            ))}
+          </select>
+
+          {/* Discount Filter */}
+          <select
+            value={hasDiscount}
+            onChange={(e) => setHasDiscount(e.target.value)}
+            className="h-9 px-3 rounded-lg border border-[#e7e1cf] bg-white text-xs text-[#1b180d]"
+          >
+            <option value="">Discount</option>
+            <option value="yes">With Discount</option>
+            <option value="no">No Discount</option>
+          </select>
+
+          {/* Apply */}
+          <button
+            onClick={applyFilters}
+            className="h-9 px-4 bg-[#b28c34] text-white rounded-lg text-xs font-semibold hover:bg-[#9a864c] transition"
+          >
+            Apply
+          </button>
+
+          {/* Spacer */}
+          <div className="flex-1" />
+
+          {/* Active/Deleted Toggle */}
+          <button
+            onClick={() => {
+              const next = !showDeleted;
+              setShowDeleted(next);
+              setFrom(""); setTo(""); setQ(""); setPaymentStatus(""); setOrderStatus("");
+              fetchOrders(1, next);
+            }}
+            className={`h-9 px-3 rounded-lg text-xs font-semibold border transition ${
+              showDeleted
+                ? "bg-red-50 text-red-600 border-red-200"
+                : "bg-white text-[#1b180d] border-[#e7e1cf] hover:border-[#b28c34]"
+            }`}
+          >
+            {showDeleted ? "Deleted" : "Active"}
+          </button>
+
+          {/* Create */}
+          <button
+            onClick={() => setShowCreateOrder(true)}
+            className="h-9 px-3 rounded-lg text-xs font-semibold bg-[#1b180d] text-white hover:bg-[#2a2618] transition"
+          >
+            + Create
+          </button>
+
+          {/* Export */}
+          <button
+            onClick={exportCSV}
+            className="h-9 px-3 rounded-lg text-xs font-semibold border border-[#e7e1cf] bg-white text-[#1b180d] hover:bg-[#f5f1e6] flex items-center gap-1.5 transition"
+          >
+            <Download size={14} />
+            Export
+          </button>
+        </div>
+      </div>
+
+      {/* TABLE */}
+      <div className="rounded-xl border border-[#e7e1cf] overflow-hidden bg-white shadow-sm">
+        <div className="overflow-x-auto">
+          <table className="min-w-[950px] w-full">
+            <thead>
+              <tr className="bg-[#1b180d]">
+                <th className="px-4 py-3.5 text-left text-[10px] font-semibold uppercase tracking-widest text-white/80">Order ID</th>
+                <th className="px-4 py-3.5 text-left text-[10px] font-semibold uppercase tracking-widest text-white/80">Customer</th>
+                <th className="px-4 py-3.5 text-left text-[10px] font-semibold uppercase tracking-widest text-white/80">Date</th>
+                <th className="px-4 py-3.5 text-left text-[10px] font-semibold uppercase tracking-widest text-white/80">Amount</th>
+                <th className="px-4 py-3.5 text-left text-[10px] font-semibold uppercase tracking-widest text-white/80">Payment</th>
+                <th className="px-4 py-3.5 text-left text-[10px] font-semibold uppercase tracking-widest text-white/80">Status</th>
+                {showDeleted && (
+                  <th className="px-4 py-3.5 text-left text-[10px] font-semibold uppercase tracking-widest text-white/80">Reason</th>
+                )}
+                <th className="px-4 py-3.5 text-left text-[10px] font-semibold uppercase tracking-widest text-white/80">Actions</th>
+                <th className="px-4 py-3.5 text-left text-[10px] font-semibold uppercase tracking-widest text-white/80">Discount</th>
+                <th className="px-4 py-3.5 text-left text-[10px] font-semibold uppercase tracking-widest text-white/80">Coupon</th>
+              </tr>
+            </thead>
+
+            <tbody className="divide-y divide-[#f0ece3]">
+              {loading ? (
+                <tr>
+                  <td colSpan={showDeleted ? 10 : 9} className="text-center py-16 text-sm text-[#6b6654]">
+                    <div className="flex flex-col items-center gap-2">
+                      <div className="w-6 h-6 border-2 border-[#b28c34] border-t-transparent rounded-full animate-spin" />
+                      <span>Loading orders...</span>
+                    </div>
+                  </td>
+                </tr>
+              ) : orders.length ? (
+                orders.map((o) => (
+                  <OrderRow
+                    key={o._id}
+                    order={o}
+                    showDeleted={showDeleted}
+                    onStatusUpdated={resetAfterStatusUpdate}
+                  />
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={showDeleted ? 10 : 9} className="text-center py-16 text-sm text-[#9a864c]">
+                    No orders found
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {/* PAGINATION */}
-      <div className="flex items-center justify-between text-sm">
-        <p className="text-[#1b180d]/60">
-          Showing{" "}
-          <span className="font-semibold">{(meta.page - 1) * meta.limit + 1}</span> to{" "}
-          <span className="font-semibold">{Math.min(meta.page * meta.limit, meta.total)}</span> of{" "}
-          <span className="font-semibold">{meta.total}</span> results
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+        <p className="text-[#6b6654]">
+          Showing <span className="font-semibold text-[#1b180d]">{(meta.page - 1) * meta.limit + 1}</span> to{" "}
+          <span className="font-semibold text-[#1b180d]">{Math.min(meta.page * meta.limit, meta.total)}</span> of{" "}
+          <span className="font-semibold text-[#1b180d]">{meta.total}</span> orders
         </p>
 
         <div className="flex items-center gap-1">
           <button
             disabled={meta.page === 1}
             onClick={() => fetchOrders(meta.page - 1)}
-            className="w-9 h-9 flex items-center justify-center border border-[#e7e1cf] rounded-lg"
+            className="w-8 h-8 flex items-center justify-center border border-[#e7e1cf] rounded-lg hover:bg-[#f5f1e6] disabled:opacity-40 disabled:cursor-not-allowed transition"
           >
-            <ChevronLeft size={16} />
+            <ChevronLeft size={14} />
           </button>
 
           {buildPages().map((p, i) =>
             p === "left-dots" || p === "right-dots" ? (
-              <span key={`dots-${p}-${i}`} className="px-2">
+              <span key={`dots-${p}-${i}`} className="px-1.5 text-[#9a864c]">
                 …
               </span>
             ) : (
               <button
                 key={`page-${p}-${i}`}
                 onClick={() => fetchOrders(p)}
-                className={`w-9 h-9 rounded-lg ${p === meta.page ? "bg-[#b28c34] text-white" : "hover:bg-[#e7e1cf]"}`}
+                className={`w-8 h-8 rounded-lg text-xs font-medium transition ${
+                  p === meta.page
+                    ? "bg-[#b28c34] text-white shadow-sm"
+                    : "hover:bg-[#f5f1e6] text-[#1b180d]"
+                }`}
               >
                 {p}
               </button>
@@ -650,19 +551,18 @@ const exportCSV = async () => {
           <button
             disabled={meta.page === meta.pages}
             onClick={() => fetchOrders(meta.page + 1)}
-            className="w-9 h-9 flex items-center justify-center border border-[#e7e1cf] rounded-lg"
+            className="w-8 h-8 flex items-center justify-center border border-[#e7e1cf] rounded-lg hover:bg-[#f5f1e6] disabled:opacity-40 disabled:cursor-not-allowed transition"
           >
-            <ChevronRight size={16} />
+            <ChevronRight size={14} />
           </button>
-
-          {showCreateOrder && (
-  <CreateOrderModal
-    onClose={() => setShowCreateOrder(false)}
-    onCreated={() => fetchOrders(1)}
-  />
-)}
-
         </div>
+
+        {showCreateOrder && (
+          <CreateOrderModal
+            onClose={() => setShowCreateOrder(false)}
+            onCreated={() => fetchOrders(1)}
+          />
+        )}
       </div>
     </div>
   );

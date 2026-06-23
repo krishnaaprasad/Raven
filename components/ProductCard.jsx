@@ -33,6 +33,9 @@ export default function ProductCard({ product, bestsellerIds = [] }) {
   const rating = product?.rating || 0;
   const reviewCount = product?.reviewCount || 0;
 
+  // Check if ALL variants are out of stock
+  const isProductOOS = product.variants?.every((v) => !v.stock || v.stock <= 0);
+
   // ======================================
   // ⭐ BADGE LOGIC
   // ======================================
@@ -141,6 +144,11 @@ export default function ProductCard({ product, bestsellerIds = [] }) {
 
         {/* DESKTOP Add to Cart - keep clickable */}
         <div className="absolute bottom-3 left-3 right-3 hidden sm:block opacity-0 group-hover:opacity-100 translate-y-3 group-hover:translate-y-0 transition-all duration-500 pointer-events-auto z-20">
+          {isProductOOS ? (
+            <div className="w-full bg-gray-400 text-white py-2 rounded-full flex items-center justify-center gap-2 font-semibold shadow-md">
+              Out of Stock
+            </div>
+          ) : (
           <button
             onClick={() => openQuickView(product)}
             className="w-full bg-[#22221a] text-white py-2 rounded-full flex items-center justify-center gap-2 font-semibold shadow-md hover:brightness-110"
@@ -148,6 +156,7 @@ export default function ProductCard({ product, bestsellerIds = [] }) {
             <ShoppingBag className="w-4 h-4" />
             Add to Cart
           </button>
+          )}
         </div>
         </div>
 
@@ -191,12 +200,16 @@ export default function ProductCard({ product, bestsellerIds = [] }) {
             )}
 
             {/* MOBILE ADD BUTTON */}
+            {isProductOOS ? (
+              <span className="sm:hidden text-xs text-red-500 font-semibold">Out of Stock</span>
+            ) : (
             <button
               onClick={() => openQuickView(product)}
               className="sm:hidden w-9 h-9 rounded-full bg-[#22221a] flex items-center justify-center shadow-md active:scale-95 transition"
             >
               <ShoppingBag className="w-4 h-4 text-white" />
             </button>
+            )}
 
           </div>
 

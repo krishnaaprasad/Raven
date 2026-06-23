@@ -6,17 +6,17 @@ export async function GET() {
   try {
     await connectToDatabase();
 
-    // Latest 10 orders sorted by createdAt descending
-    const orders = await Order.find({})
+    const orders = await Order.find({ deleted: { $ne: true } })
       .sort({ createdAt: -1 })
       .limit(10)
       .lean();
 
     const formatted = orders.map((o) => ({
-      id: o.customOrderId || o._id.toString().slice(-6).toUpperCase(),
-      name: o.userName,
-      amount: o.totalAmount,
-      status: o.order_status || o.status,
+      id: o.customOrderId || o.manualOrderId || `#${o._id.toString().slice(-6).toUpperCase()}`,
+      name: o.userName || "Guest",
+      amount: o.totalAmount || 0,
+      status: o.order_status || o.status || "Pending",
+      date: o.createdAt,
     }));
 
     return NextResponse.json(formatted);

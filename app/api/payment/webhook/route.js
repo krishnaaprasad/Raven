@@ -3,6 +3,8 @@ import { NextResponse } from "next/server";
 import connectToDatabase from "@/lib/mongodb";
 import { Order } from "@/models/Order";
 import Coupon from "@/models/Coupon";
+import Product from "@/models/Product";
+import StockLog from "@/models/StockLog";
 import { sendOrderConfirmation } from "@/lib/notifications/whatsapp.service";
 import axios from "axios";
 
@@ -209,6 +211,64 @@ export async function POST(req) {
         }
       } catch (couponErr) {
         console.error("❌ Webhook coupon usage update error:", couponErr);
+      }
+    }
+
+    // -----------------------------------------
+    // Stock deduction on successful payment
+    // -----------------------------------------
+    if (payment_status === "PAID" && !updatedOrder?.stockDeducted) {
+      try {
+        for (const item of updatedOrder.cartItems) {
+          const product = await Product.findOne({ slug: item.slug });
+          if (!product) continue;
+
+          const variant = product.variants.find(
+            (v) => String(v.size) === String(item.size)
+          );
+          if (!variant) continue;
+
+          const previousStock = variant.stock;
+          const quantity = Number(item.quantity);
+
+          // Atomic decrement with stock floor check
+          const updated = await Product.findOneAndUpdate(
+            {
+              _id: product._id,
+              "variants.size": item.size,
+              "variants.stock": { $gte: quantity },
+            },
+            { $inc: { "variants.$.stock": -quantity } },
+            { new: true }
+          );
+
+          if (updated) {
+            const updatedVariant = updated.variants.find(
+              (v) => String(v.size) === String(item.size)
+            );
+            await StockLog.create({
+              productId: product._id,
+              variantSize: item.size,
+              type: "ORDER_PLACED",
+              quantity: -quantity,
+              previousStock,
+              newStock: updatedVariant?.stock ?? previousStock - quantity,
+              orderId: updatedOrder._id,
+              by: "system",
+            });
+          } else {
+            // Stock insufficient — log anyway with what we can
+            console.warn(
+              `⚠️ Stock insufficient for ${item.slug} (${item.size}) qty: ${quantity}`
+            );
+          }
+        }
+
+        await Order.findByIdAndUpdate(updatedOrder._id, {
+          stockDeducted: true,
+        });
+      } catch (stockErr) {
+        console.error("❌ Webhook stock deduction error:", stockErr);
       }
     }
 

@@ -163,6 +163,14 @@ export async function POST(req) {
         );
       }
 
+      // Stock availability check
+      if (variant.stock < quantity) {
+        return NextResponse.json(
+          { error: `${product.name} (${item.size}) is out of stock` },
+          { status: 400 }
+        );
+      }
+
       const dbPrice = Number(variant.price);
       subtotal += dbPrice * quantity;
 
@@ -263,6 +271,32 @@ export async function POST(req) {
         phone,
         address: address1,
       });
+    }
+
+    // Update user profile with checkout details (auto-save on every checkout)
+    if (finalUserId) {
+      try {
+        const fullName = `${firstName} ${lastName}`.trim();
+        const updates = {
+          name: fullName,
+          phone: phone,
+          address: `${address1}, ${address2 || ""}, ${city}, ${state}, ${pincode}`.replace(/, ,/g, ","),
+          address1,
+          address2: address2 || "",
+          city,
+          state,
+          pincode,
+        };
+
+        // Only update email if it's a real one (not fake)
+        if (email && !email.includes("@raven.local")) {
+          updates.email = email;
+        }
+
+        await User.findByIdAndUpdate(finalUserId, updates);
+      } catch (profileErr) {
+        console.error("⚠️ Failed to update user profile from checkout:", profileErr.message);
+      }
     }
 
     // Create Order

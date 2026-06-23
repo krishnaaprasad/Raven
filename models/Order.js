@@ -158,6 +158,10 @@ const orderSchema = mongoose.models.Order?.schema || new mongoose.Schema(
     repurchaseReminderSent: { type: Boolean, default: false },
     deliveredAt: { type: Date, default: null },
 
+    // ---------- Inventory tracking ----------
+    stockDeducted: { type: Boolean, default: false },
+    stockRestored: { type: Boolean, default: false },
+
     // ---------- Soft delete ----------
     deleted: { type: Boolean, default: false },
     deleteReason: { type: String, default: null },

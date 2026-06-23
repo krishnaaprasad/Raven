@@ -11,91 +11,142 @@ import {
   Users,
   BadgePercent,
   ShoppingBag,
-  BarChart3,
   Star,
   X,
-  Flower,
+  ExternalLink,
+  ChevronLeft,
+  Warehouse,
 } from "lucide-react";
 
-export default function AdminSidebar({ closeMobile }) {
+export default function AdminSidebar({ closeMobile, collapsed, onToggleCollapse }) {
   const pathname = usePathname();
   const { data: session } = useSession();
 
   const menu = [
-    { name: "Dashboard", icon: <LayoutDashboard size={20} />, href: "/admin" },
-    { name: "Orders", icon: <ShoppingCart size={20} />, href: "/admin/orders" },
-    { name: "Products", icon: <Boxes size={20} />, href: "/admin/products" },
-    { name: "Customers", icon: <Users size={20} />, href: "/admin/customers" },
-    { name: "Reviews", icon: <Star size={20} />, href: "/admin/reviews" },
-    { name: "Carts", icon: <ShoppingBag size={20} />, href: "/admin/carts" },
-    { name: "Coupons", icon: <BadgePercent size={20} />, href: "/admin/coupons" },
+    { name: "Dashboard", icon: LayoutDashboard, href: "/admin" },
+    { name: "Orders", icon: ShoppingCart, href: "/admin/orders" },
+    { name: "Products", icon: Boxes, href: "/admin/products" },
+    { name: "Inventory", icon: Warehouse, href: "/admin/inventory" },
+    { name: "Customers", icon: Users, href: "/admin/customers" },
+    { name: "Reviews", icon: Star, href: "/admin/reviews" },
+    { name: "Carts", icon: ShoppingBag, href: "/admin/carts" },
+    { name: "Coupons", icon: BadgePercent, href: "/admin/coupons" },
   ];
 
   const isActive = (href) =>
     href === "/admin" ? pathname === "/admin" : pathname?.startsWith(href);
 
-  const avatar =
-    "https://lh3.googleusercontent.com/aida-public/AB6AXuAiEvFRw0W1r2tGqrilugxDup0fex1t4xQE6riRQrAIQHDA5Jkbjv-SehJFLdN1ppqEbBoGKHxS9dmoylH3I_ljoIVk-lZVbp9xJ9piYDhnwghKHa4madgUzQnI4Q7VmZ1fG30OqcgEZBYL_ghb0SipKjtjoNtET13WBXAeTaqZW630f5hITguW1XZxjHIuDvZMz_C09gS96zpdfbkaFJ4mOjWaqRzZrKdDHL1Fy9hgip4n37jTsdi0_f2kY3jtkblFg7E2VVrKOJ4";
+  const userName = session?.user?.name || "Admin";
+  const initials = userName
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
 
   return (
-    <div className="flex flex-col h-full bg-[#fcfbf8]">
-
-      {/* Mobile Close Button */}
-      <div className="flex md:hidden justify-end p-4">
-        <button onClick={closeMobile}>
-          <X size={24} className="text-[#1b180d]" />
-        </button>
-      </div>
-      {/* Logo */}
-      <div className="p-6 flex items-center gap-3">
-        <div className="rounded-full bg-[#9a864c] p-0 text-white">
+    <div className="flex flex-col h-full bg-white relative">
+      {/* Logo + Mobile Close */}
+      <div className={`flex items-center border-b border-[#e7e1cf] ${collapsed ? "flex-col gap-3 px-2 py-4" : "justify-between px-5 py-4"}`}>
+        <div className={`flex items-center ${collapsed ? "" : "gap-3"}`}>
           <Image
             src="/favicon2.png"
-            alt="logo"
-            width={40}
-            height={40}
+            alt="Raven Fragrance"
+            width={30}
+            height={30}
+            className="rounded-full shrink-0"
           />
+          {!collapsed && (
+            <div className="min-w-0">
+              <p className="text-sm font-bold text-[#1b180d] leading-tight truncate">Raven Fragrance</p>
+              <p className="text-[10px] text-[#9a864c]">Admin</p>
+            </div>
+          )}
         </div>
-        <p className="text-lg font-semibold">Raven Fragrance</p>
+
+        <div className="flex items-center gap-1">
+          {/* Collapse toggle (desktop) */}
+          {onToggleCollapse && (
+            <button
+              onClick={onToggleCollapse}
+              title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+              className={`p-1.5 rounded-lg text-[#6b6654] hover:bg-[#f5f1e6] hover:text-[#b28c34] transition-all duration-200 hidden md:flex ${collapsed ? "mt-1" : ""}`}
+            >
+              <ChevronLeft size={16} className={`transition-transform duration-300 ${collapsed ? "rotate-180" : ""}`} />
+            </button>
+          )}
+
+          {/* Close button (mobile) */}
+          {closeMobile && (
+            <button onClick={closeMobile} className="p-1.5 rounded-lg hover:bg-[#f5f1e6] md:hidden">
+              <X size={18} className="text-[#1b180d]" />
+            </button>
+          )}
+        </div>
       </div>
 
-      {/* Menu */}
-      <nav className="flex-1 px-4">
-        {menu.map((item) => (
-          <Link
-            key={item.href}
-            href={item.href}
-            onClick={closeMobile}
-            className={`flex items-center gap-4 h-12 px-4 rounded-lg mb-1 transition ${
-              isActive(item.href)
-                ? "bg-[#f3efe6] text-[#9a864c] font-semibold"
-                : "hover:bg-black/5"
-            }`}
-          >
-            <span
-              className={
-                isActive(item.href) ? "text-[#9a864c]" : "text-[#8a846e]"
-              }
-            >
-              {item.icon}
-            </span>
+      {/* Navigation */}
+      <nav className={`flex-1 py-4 space-y-0.5 overflow-y-auto ${collapsed ? "px-2" : "px-3"}`}>
+        {!collapsed && (
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-[#9a864c] px-3 mb-2">
+            Menu
+          </p>
+        )}
 
-            <span className="text-sm">{item.name}</span>
-          </Link>
-        ))}
+        {menu.map((item) => {
+          const Icon = item.icon;
+          const active = isActive(item.href);
+
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              onClick={closeMobile}
+              title={collapsed ? item.name : undefined}
+              className={`
+                flex items-center rounded-lg text-[13px] transition-all duration-150
+                ${collapsed ? "justify-center h-10 w-10 mx-auto" : "gap-3 h-10 px-3"}
+                ${active
+                  ? "bg-[#b28c34] text-white font-semibold shadow-sm"
+                  : "text-[#4a4637] hover:bg-[#f5f1e6] hover:text-[#1b180d]"
+                }
+              `}
+            >
+              <Icon size={17} strokeWidth={active ? 2.2 : 1.8} />
+              {!collapsed && <span>{item.name}</span>}
+            </Link>
+          );
+        })}
       </nav>
 
-      {/* User Section */}
-      <div className="p-4 border-t border-[#e7e1cf] flex items-center gap-3">
-        <img
-          src={avatar}
-          className="h-10 w-10 rounded-full object-cover"
-          alt="avatar"
-        />
+      {/* Visit Store */}
+      <div className={`${collapsed ? "px-2" : "px-3"} pb-2`}>
+        <a
+          href="https://www.ravenfragrance.in"
+          target="_blank"
+          rel="noopener noreferrer"
+          title={collapsed ? "Visit Store" : undefined}
+          className={`flex items-center rounded-lg text-[12px] text-[#6b6654] hover:bg-[#f5f1e6] transition ${
+            collapsed ? "justify-center h-10 w-10 mx-auto" : "gap-2 px-3 py-2"
+          }`}
+        >
+          <ExternalLink size={14} />
+          {!collapsed && <span>Visit Store</span>}
+        </a>
+      </div>
 
-        <div>
-          <p className="font-medium">{session?.user?.name || "Loading..."}</p>
-          <p className="text-xs text-[#9a864c]">{session?.user?.role || "Admin"}</p>
+      {/* User Section */}
+      <div className={`border-t border-[#e7e1cf] ${collapsed ? "px-2 py-3 flex justify-center" : "px-4 py-3"}`}>
+        <div className={`flex items-center ${collapsed ? "" : "gap-2.5"}`}>
+          <div className="w-8 h-8 rounded-full bg-[#b28c34] text-white text-[11px] font-bold flex items-center justify-center shrink-0">
+            {initials}
+          </div>
+          {!collapsed && (
+            <div className="min-w-0">
+              <p className="text-xs font-semibold text-[#1b180d] truncate">{userName}</p>
+              <p className="text-[10px] text-[#9a864c] uppercase">Admin</p>
+            </div>
+          )}
         </div>
       </div>
     </div>

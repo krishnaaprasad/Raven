@@ -74,22 +74,20 @@ export default function AbandonedCartsPage() {
     <main className="font-[Manrope,sans-serif] text-[#1b180d] space-y-6 min-h-screen">
 
       {/* STATS */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <StatCard icon={<ShoppingCart size={22} />} label="Total Carts" value={stats.totalCarts} />
-        <StatCard icon={<Users size={22} />} label="Guest Carts" value={stats.guestCarts} />
-        <StatCard icon={<Users size={22} />} label="Registered Carts" value={stats.registeredCarts} />
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <StatCard icon={<ShoppingCart size={18} />} label="Total Carts" value={stats.totalCarts} />
+        <StatCard icon={<Users size={18} />} label="Guest Carts" value={stats.guestCarts} />
+        <StatCard icon={<Users size={18} />} label="Registered Carts" value={stats.registeredCarts} />
       </div>
 
       {/* SEARCH & FILTERS */}
-      <div className="flex flex-wrap items-center gap-3">
+      <div className="flex flex-wrap items-center gap-2">
         
-        <div className="flex items-center h-11 w-full md:flex-1 rounded-lg border border-[#e7e1cf] bg-white">
-          <span className="px-3 text-gray-500">
-            <Search size={18} />
-          </span>
+        <div className="flex items-center h-9 flex-1 min-w-[200px] max-w-md rounded-lg border border-[#e7e1cf] bg-white px-3">
+          <Search size={15} className="text-[#9a864c] shrink-0" />
           <input
-            className="flex-1 h-full text-sm outline-none"
-            placeholder="Search by name, email or session…"
+            className="flex-1 ml-2 text-xs outline-none bg-transparent text-[#1b180d] placeholder:text-[#9a864c]"
+            placeholder="Search by name, phone or session…"
             value={search}
             onChange={(e) => {
               setSearch(e.target.value);
@@ -97,8 +95,8 @@ export default function AbandonedCartsPage() {
             }}
           />
           {search && (
-            <button className="px-3 text-gray-400" onClick={() => setSearch("")}>
-              <X size={18} />
+            <button onClick={() => setSearch("")}>
+              <X size={14} className="text-[#6b6654]" />
             </button>
           )}
         </div>
@@ -106,19 +104,19 @@ export default function AbandonedCartsPage() {
         {/* TYPE */}
         <div className="relative dropdown-type">
           <button
-            className="flex items-center gap-2 h-11 px-4 rounded-lg border border-[#e7e1cf] bg-white text-sm"
+            className="flex items-center gap-2 h-9 px-3 rounded-lg border border-[#e7e1cf] bg-white text-xs hover:border-[#b28c34] transition"
             onClick={() => {
               setTypeOpen(!typeOpen);
               setDateOpen(false);
             }}
           >
-            <Filter size={16} />
-            <span>User Type: {type === "all" ? "All" : type === "guest" ? "Guest" : "Registered"}</span>
-            <ChevronDown size={14} />
+            <Filter size={13} />
+            <span>{type === "all" ? "All Types" : type === "guest" ? "Guest" : "Registered"}</span>
+            <ChevronDown size={12} className={`text-[#b28c34] transition-transform ${typeOpen ? "rotate-180" : ""}`} />
           </button>
 
           {typeOpen && (
-            <div className="absolute mt-2 left-0 w-44 bg-white shadow-lg border border-[#e7e1cf] rounded-lg z-20">
+            <div className="absolute mt-1 left-0 w-36 bg-white shadow-lg border border-[#e7e1cf] rounded-lg z-20">
               <DropdownItem label="All" active={type === "all"} onClick={() => setType("all")} />
               <DropdownItem label="Guest" active={type === "guest"} onClick={() => setType("guest")} />
               <DropdownItem label="Registered" active={type === "registered"} onClick={() => setType("registered")} />
@@ -129,19 +127,19 @@ export default function AbandonedCartsPage() {
         {/* DATE */}
         <div className="relative dropdown-date">
           <button
-            className="flex items-center gap-2 h-11 px-4 rounded-lg border border-[#e7e1cf] bg-white text-sm"
+            className="flex items-center gap-2 h-9 px-3 rounded-lg border border-[#e7e1cf] bg-white text-xs hover:border-[#b28c34] transition"
             onClick={() => {
               setDateOpen(!dateOpen);
               setTypeOpen(false);
             }}
           >
-            <Calendar size={16} />
-            <span>{dateRange === "all" ? "Date Range" : dateRange === "7" ? "Last 7 Days" : "Last 30 Days"}</span>
-            <ChevronDown size={14} />
+            <Calendar size={13} />
+            <span>{dateRange === "all" ? "All Time" : dateRange === "7" ? "7 Days" : "30 Days"}</span>
+            <ChevronDown size={12} className={`text-[#b28c34] transition-transform ${dateOpen ? "rotate-180" : ""}`} />
           </button>
 
           {dateOpen && (
-            <div className="absolute mt-2 left-0 w-44 bg-white shadow-lg border border-[#e7e1cf] rounded-lg z-20">
+            <div className="absolute mt-1 left-0 w-36 bg-white shadow-lg border border-[#e7e1cf] rounded-lg z-20">
               <DropdownItem label="All Time" active={dateRange === "all"} onClick={() => setDateRange("all")} />
               <DropdownItem label="Last 7 Days" active={dateRange === "7"} onClick={() => setDateRange("7")} />
               <DropdownItem label="Last 30 Days" active={dateRange === "30"} onClick={() => setDateRange("30")} />
@@ -151,56 +149,61 @@ export default function AbandonedCartsPage() {
       </div>
 
       {/* TABLE */}
-      <div className="rounded-xl border border-[#e7e1cf] overflow-hidden bg-white overflow-x-auto">
-        <table className="min-w-[800px] w-full text-sm divide-y divide-[#e7e1cf]">
-          <thead className="bg-[#f5f1e6]">
-            <tr>
-              <th className="py-3 pl-4 text-left font-semibold">User</th>
-              <th className="px-3 text-left font-semibold">Items</th>
-              <th className="px-3 text-left font-semibold">Total Value</th>
-              <th className="px-3 text-left font-semibold">Last Updated</th>
-              <th></th>
-            </tr>
-          </thead>
-
-          <tbody className="divide-y divide-[#e7e1cf] bg-[#fcfbf8]">
-            {carts.map((c) => (
-              <tr key={c._id}>
-                <td className="py-4 pl-4">
-                  <p className="font-medium">{c.userId ? c.userId.name : `Guest-${c.sessionId.slice(0, 6)}`}</p>
-                  <p className="text-xs text-gray-500">{c.userId ? c.userId.email : "Guest User"}</p>
-                </td>
-
-                <td className="px-3">{c.items.reduce((s, i) => s + i.quantity, 0)} items</td>
-                <td className="px-3 font-semibold">₹{c.items.reduce((s, i) => s + i.price * i.quantity, 0).toLocaleString("en-IN")}</td>
-                <td className="px-3">{new Date(c.updatedAt).toLocaleString()}</td>
-
-                <td className="pr-4 text-right">
-                  <button
-                    onClick={() => {
-                      setSelectedCart(c);
-                      setDrawerOpen(true);
-                    }}
-                    className="px-3 py-1.5 rounded-lg border border-[#e7e1cf] text-xs hover:bg-[#f5f1e6]"
-                  >
-                    View Cart
-                  </button>
-                </td>
+      <div className="rounded-xl border border-[#e7e1cf] overflow-hidden bg-white shadow-sm">
+        <div className="overflow-x-auto">
+          <table className="min-w-[700px] w-full">
+            <thead>
+              <tr className="bg-[#1b180d]">
+                <th className="py-3 pl-4 text-left text-[10px] font-semibold uppercase tracking-widest text-white/80">User</th>
+                <th className="px-3 text-left text-[10px] font-semibold uppercase tracking-widest text-white/80">Items</th>
+                <th className="px-3 text-left text-[10px] font-semibold uppercase tracking-widest text-white/80">Value</th>
+                <th className="px-3 text-left text-[10px] font-semibold uppercase tracking-widest text-white/80">Last Updated</th>
+                <th className="pr-4 text-right text-[10px] font-semibold uppercase tracking-widest text-white/80"></th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+
+            <tbody className="divide-y divide-[#f0ece3]">
+              {carts.map((c) => {
+                const userName = c.userId?.name || (c.userId?.phone ? c.userId.phone : `Guest-${c.sessionId?.slice(0, 6)}`);
+                const userSub = c.userId?.phone || c.userId?.email || "Guest User";
+                const isFakeEmail = userSub?.includes("@raven.local");
+
+                return (
+                  <tr key={c._id} className="hover:bg-[#faf8f3] transition-colors duration-150">
+                    <td className="py-3 pl-4">
+                      <p className="text-[13px] font-semibold text-[#1b180d]">{userName}</p>
+                      <p className="text-[11px] text-[#6b6654]">{isFakeEmail ? (c.userId?.phone || "") : userSub}</p>
+                    </td>
+
+                    <td className="px-3 text-[13px]">{c.items.reduce((s, i) => s + i.quantity, 0)} items</td>
+                    <td className="px-3 text-[13px] font-semibold">₹{c.items.reduce((s, i) => s + i.price * i.quantity, 0).toLocaleString("en-IN")}</td>
+                    <td className="px-3 text-[12px] text-[#4a4637]">{new Date(c.updatedAt).toLocaleString("en-IN", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}</td>
+
+                    <td className="pr-4 text-right">
+                      <button
+                        onClick={() => { setSelectedCart(c); setDrawerOpen(true); }}
+                        className="px-3 py-1.5 rounded-lg text-[11px] font-semibold border border-[#e7e1cf] hover:bg-[#f5f1e6] hover:border-[#b28c34] transition"
+                      >
+                        View Cart
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
 
         {/* Pagination */}
-        <div className="flex justify-between items-center px-4 py-3 text-sm">
-          <p>
-            Showing <b>{from}</b> to <b>{to}</b> of <b>{total}</b> results
+        <div className="flex justify-between items-center px-4 py-3 border-t border-[#f0ece3] text-xs">
+          <p className="text-[#6b6654]">
+            Showing <span className="font-semibold text-[#1b180d]">{from}</span> to <span className="font-semibold text-[#1b180d]">{to}</span> of <span className="font-semibold text-[#1b180d]">{total}</span>
           </p>
-          <div className="flex gap-2">
-            <button disabled={page <= 1} onClick={() => setPage(page - 1)} className="px-3 py-1.5 border border-[#e7e1cf] rounded disabled:opacity-40">
+          <div className="flex gap-1.5">
+            <button disabled={page <= 1} onClick={() => setPage(page - 1)} className="px-3 py-1.5 border border-[#e7e1cf] rounded-lg hover:bg-[#f5f1e6] disabled:opacity-40 transition">
               Previous
             </button>
-            <button disabled={page >= pages} onClick={() => setPage(page + 1)} className="px-3 py-1.5 border border-[#e7e1cf] rounded disabled:opacity-40">
+            <button disabled={page >= pages} onClick={() => setPage(page + 1)} className="px-3 py-1.5 border border-[#e7e1cf] rounded-lg hover:bg-[#f5f1e6] disabled:opacity-40 transition">
               Next
             </button>
           </div>
@@ -229,11 +232,13 @@ export default function AbandonedCartsPage() {
 /* COMPONENTS */
 function StatCard({ icon, label, value }) {
   return (
-    <div className="rounded-xl p-5 border border-[#e7e1cf] bg-[#fcfbf8] flex gap-3 items-center">
-      {icon}
+    <div className="rounded-xl border border-[#e7e1cf] p-4 bg-white flex items-center gap-3">
+      <div className="w-9 h-9 rounded-lg bg-[#fff9ee] flex items-center justify-center text-[#b28c34]">
+        {icon}
+      </div>
       <div>
-        <p className="text-xs text-gray-600">{label}</p>
-        <p className="text-2xl font-bold">{value}</p>
+        <p className="text-2xl font-bold text-[#1b180d]">{value}</p>
+        <p className="text-[11px] text-[#6b6654]">{label}</p>
       </div>
     </div>
   );

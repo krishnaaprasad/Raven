@@ -141,27 +141,27 @@ const didInitProduct = useRef(false);
 
   return (
     <>
-      <tr className="hover:bg-[#fff9eb] transition border-b border-[#e7e1cf] text-[13px]">
-        <td className="px-6 py-4 font-semibold text-[#1b180d] min-w-[130px]">
+      <tr className="hover:bg-[#faf8f3] transition-colors duration-150 text-[13px]">
+        <td className="px-4 py-3.5 font-semibold text-[#1b180d] whitespace-nowrap">
           {displayId}
         </td>
 
-        <td className="px-6 py-4 min-w-[170px]">
+        <td className="px-4 py-3.5">
           <div className="flex flex-col leading-tight">
-            <span className="font-semibold text-[14px] text-[#1b180d]">{order.userName}</span>
-            <span className="text-[11px] text-[#8b8b8b]">{customerType}</span>
+            <span className="font-semibold text-[13px] text-[#1b180d]">{order.userName}</span>
+            <span className="text-[11px] text-[#9a864c]">{customerType}</span>
           </div>
         </td>
 
-        <td className="px-6 py-4 whitespace-nowrap min-w-[150px]">{createdAt}</td>
+        <td className="px-4 py-3.5 whitespace-nowrap text-[#4a4637]">{createdAt}</td>
 
-        <td className="px-6 py-4 font-semibold min-w-[120px]">
+        <td className="px-4 py-3.5 font-semibold text-[#1b180d]">
   ₹{amount}
 </td>
 
 
 
-        <td className="px-6 py-4">
+        <td className="px-4 py-3.5">
           {(() => {
             const status = (order.payment_status || order.status || "PENDING").toUpperCase();
             const rawMethod = order.paymentMethod || "";
@@ -193,7 +193,7 @@ const didInitProduct = useRef(false);
         </td>
 
         {/* DROPDOWN */}
-        <td className="px-6 py-4 min-w-[120px] relative " ref={dropdownRef} >
+        <td className="px-4 py-3.5 relative" ref={dropdownRef} >
           <button
             onClick={() => setOpen((v) => !v)}
             className="flex items-center justify-between w-[140px] px-3 py-1.5 text-[12px] border border-[#b28c34] text-[#1b180d] rounded-lg hover:bg-[#fff4dd] cursor-pointer"
@@ -225,15 +225,15 @@ const didInitProduct = useRef(false);
         </td>
 
         {showDeleted && (
-          <td className="px-6 py-4 text-[12px] text-[#6b6654] max-w-60">
+          <td className="px-4 py-3.5 text-[12px] text-[#6b6654] max-w-60">
             {order.deleteReason || "--"}
           </td>
         )}
 
         
 
-        <td className="px-6 py-4 min-w-20">
-          <div className="flex items-center gap-4">
+        <td className="px-4 py-3.5">
+          <div className="flex items-center gap-3">
             {/* Edit - ONLY manual */}
             {isManualOrder && (
               <button
@@ -258,24 +258,24 @@ const didInitProduct = useRef(false);
           </div>
         </td>
         {/* Discount Column */}
-<td className="px-6 py-4 min-w-[120px]">
+<td className="px-4 py-3.5">
   {order.discount > 0 ? (
     <span className="text-green-700 font-medium">
       ₹{Number(order.discount).toLocaleString("en-IN")}
     </span>
   ) : (
-    <span className="text-[#8b8b8b]">--</span>
+    <span className="text-[#9a864c]">--</span>
   )}
 </td>
 
 {/* Coupon Column */}
-<td className="px-6 py-4 min-w-[150px]">
+<td className="px-4 py-3.5">
   {order.couponCode ? (
-    <span className="px-2 py-1 rounded-md bg-[#fff4dd] text-[#b28c34] text-[12px] font-medium">
+    <span className="px-2 py-0.5 rounded-md bg-[#fff9ee] text-[#b28c34] text-[11px] font-semibold">
       {order.couponCode}
     </span>
   ) : (
-    <span className="text-[#8b8b8b]">--</span>
+    <span className="text-[#9a864c]">--</span>
   )}
 </td>
       </tr>

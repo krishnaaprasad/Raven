@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ReceiptText } from "lucide-react";
+import Link from "next/link";
+import { Clock, ArrowRight } from "lucide-react";
 
 export default function RecentActivity() {
   const [orders, setOrders] = useState([]);
@@ -12,7 +13,7 @@ export default function RecentActivity() {
       try {
         const res = await fetch("/api/admin/recent-activity");
         const data = await res.json();
-        setOrders(data);
+        if (Array.isArray(data)) setOrders(data);
       } catch (err) {
         console.error("Failed to load recent activity:", err);
       } finally {
@@ -24,62 +25,86 @@ export default function RecentActivity() {
 
   if (loading) {
     return (
-      <div className="rounded-xl border border-[#e7e1cf] p-6 bg-[#fcfbf8]">
-        Loading recent activity...
+      <div className="rounded-xl border border-[#e7e1cf] p-5 bg-white animate-pulse">
+        <div className="h-4 w-32 bg-[#f0ece3] rounded mb-4" />
+        {[1, 2, 3, 4].map((i) => (
+          <div key={i} className="h-12 bg-[#f8f5ee] rounded-lg mb-2" />
+        ))}
       </div>
     );
   }
 
-  const getStatusColor = (status) => {
-    switch (status.toLowerCase()) {
-      case "delivered":
-      case "paid":
-      case "shipped":
-        return "text-green-600";
-      case "processing":
-      case "pending":
-        return "text-yellow-600";
-      case "cancelled":
-      case "failed":
-        return "text-red-600";
-      default:
-        return "text-[#9a864c]";
-    }
-  };
-
   return (
-    <div className="rounded-xl border border-[#e7e1cf] p-6 bg-[#fcfbf8] w-full">
-      <h4 className="text-lg font-serif font-semibold mb-4 text-[#1b180d]">
-        Recent Activity
-      </h4>
+    <div className="rounded-xl border border-[#e7e1cf] p-5 bg-white w-full">
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <Clock size={16} className="text-[#b28c34]" />
+          <h4 className="text-sm font-bold text-[#1b180d]">Recent Orders</h4>
+        </div>
+        <Link
+          href="/admin/orders"
+          className="text-[11px] font-medium text-[#b28c34] hover:underline inline-flex items-center gap-1"
+        >
+          View All <ArrowRight size={10} />
+        </Link>
+      </div>
 
-      <ul className="space-y-4">
-        {orders.slice() // Don't mutate original
-          .sort((a, b) => new Date(b.date) - new Date(a.date)) // most recent first
-          .slice(0, 5) // take top 5 only
-          .map((item) => (
-          <li key={item.id} className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-[#fff9ee] flex items-center justify-center text-[#9a864c]">
-                <ReceiptText size={18} />
-              </div>
-              <div>
-                <div className="font-semibold text-[#1b180d]">
-                  {item.id}
+      {orders.length === 0 ? (
+        <p className="text-xs text-[#6b6654] text-center py-4">No recent orders</p>
+      ) : (
+        <ul className="space-y-2.5">
+          {orders.slice(0, 6).map((item) => (
+            <li
+              key={item.id}
+              className="flex items-center justify-between p-2.5 rounded-lg hover:bg-[#fcfbf8] transition"
+            >
+              <div className="flex items-center gap-2.5 min-w-0">
+                <StatusDot status={item.status} />
+                <div className="min-w-0">
+                  <p className="text-xs font-semibold text-[#1b180d] truncate">
+                    {item.id}
+                  </p>
+                  <p className="text-[11px] text-[#6b6654] truncate">{item.name}</p>
                 </div>
-                <div className="text-sm text-[#6d6c6c]">{item.name}</div>
               </div>
-            </div>
 
-            <div className="text-right">
-              <div className="font-normal">₹{item.amount}</div>
-              <div className={`text-sm ${getStatusColor(item.status)}`}>
-                {item.status}
+              <div className="text-right shrink-0 ml-2">
+                <p className="text-xs font-semibold text-[#1b180d]">
+                  ₹{Number(item.amount || 0).toLocaleString("en-IN")}
+                </p>
+                <p className={`text-[10px] font-medium ${getStatusColor(item.status)}`}>
+                  {item.status}
+                </p>
               </div>
-            </div>
-          </li>
-        ))}
-      </ul>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
+}
+
+function StatusDot({ status }) {
+  const color = getDotColor(status);
+  return (
+    <div className={`w-2 h-2 rounded-full shrink-0 ${color}`} />
+  );
+}
+
+function getDotColor(status) {
+  const s = (status || "").toLowerCase();
+  if (["delivered", "paid"].includes(s)) return "bg-green-500";
+  if (["shipped", "out for delivery"].includes(s)) return "bg-blue-500";
+  if (["processing"].includes(s)) return "bg-yellow-500";
+  if (["cancelled", "failed"].includes(s)) return "bg-red-500";
+  return "bg-gray-400";
+}
+
+function getStatusColor(status) {
+  const s = (status || "").toLowerCase();
+  if (["delivered", "paid"].includes(s)) return "text-green-600";
+  if (["shipped", "out for delivery"].includes(s)) return "text-blue-600";
+  if (["processing", "pending"].includes(s)) return "text-yellow-600";
+  if (["cancelled", "failed"].includes(s)) return "text-red-600";
+  return "text-[#6b6654]";
 }

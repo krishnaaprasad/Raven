@@ -17,7 +17,6 @@ export default function ProductsPage() {
       const params = new URLSearchParams();
       params.set("page", page);
       params.set("limit", meta.limit);
-
       if (q) params.set("q", q);
 
       const res = await fetch(`/api/admin/products?${params.toString()}`);
@@ -37,61 +36,57 @@ export default function ProductsPage() {
     fetchProducts(1);
   }, []);
 
-  const changePage = (p) => {
-    fetchProducts(p);
-  };
-
   return (
-    <div className="flex flex-col gap-6 w-full">
-      {/* HEADER SEARCH + ADD BUTTON */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        {/* Search Bar */}
-        <div className="flex-1">
-          <div className="flex items-center w-full rounded-lg border border-[#e7e1cf] bg-[#fcfbf8] px-4 py-2">
-            <Search size={20} className="text-[#b28c34]" />
-            <input
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
-              placeholder="Search by Product Name, Slug, Brand..."
-              className="ml-3 w-full bg-transparent outline-none text-[15px] text-[#1b180d]"
-            />
-            <button
-              onClick={() => fetchProducts(1)}
-              className="ml-3 px-4 py-2 bg-[#b28c34] text-white text-sm font-semibold rounded-lg hover:bg-[#9a864c] transition"
-            >
-              Search
-            </button>
-          </div>
+    <div className="space-y-5">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="flex items-center gap-2 flex-1 max-w-lg rounded-xl border border-[#e7e1cf] bg-white px-3 h-10">
+          <Search size={16} className="text-[#9a864c] shrink-0" />
+          <input
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && fetchProducts(1)}
+            placeholder="Search by name, slug, brand..."
+            className="flex-1 bg-transparent outline-none text-sm text-[#1b180d] placeholder:text-[#9a864c]"
+          />
+          <button
+            onClick={() => fetchProducts(1)}
+            className="px-3 py-1.5 bg-[#b28c34] text-white text-xs font-semibold rounded-lg hover:bg-[#9a864c] transition"
+          >
+            Search
+          </button>
         </div>
 
         <button
           onClick={() => window.location.assign("/admin/products/add")}
-          className="flex items-center justify-center gap-2 h-10 px-3 rounded-lg bg-[#b28c34] text-white text-sm font-bold hover:bg-[#9a864c] transition"
+          className="inline-flex items-center gap-2 h-10 px-4 rounded-lg bg-[#1b180d] text-white text-xs font-semibold hover:bg-[#2a2618] transition"
         >
-          <Plus size={18} /> Add New Product
+          <Plus size={15} /> Add Product
         </button>
       </div>
 
       {/* Table */}
-      <div className="rounded-xl border border-[#e7e1cf] bg-white overflow-hidden">
+      <div className="rounded-xl border border-[#e7e1cf] overflow-hidden bg-white shadow-sm">
         <div className="overflow-x-auto">
-          <table className="w-full text-left">
-            <thead className="bg-[#fcfbf8] text-[12px] uppercase text-[#1b180d]/60">
-              <tr>
-                <th className="p-4">Image</th>
-                <th className="p-4">Product Name</th>
-                <th className="p-4">URL</th>
-                <th className="p-4">Brand</th>
-                <th className="p-4">Base Price</th>
-                <th className="p-4">Stock</th>
-                <th className="p-4 text-right">Actions</th>
+          <table className="w-full min-w-[750px]">
+            <thead>
+              <tr className="bg-[#1b180d]">
+                <th className="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-widest text-white/80">Product</th>
+                <th className="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-widest text-white/80">Slug</th>
+                <th className="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-widest text-white/80">Brand</th>
+                <th className="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-widest text-white/80">Price</th>
+                <th className="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-widest text-white/80">Stock</th>
+                <th className="px-4 py-3 text-right text-[10px] font-semibold uppercase tracking-widest text-white/80">Actions</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="divide-y divide-[#f0ece3]">
               {loading ? (
                 <tr>
-                  <td colSpan={7} className="text-center py-6 text-sm">
-                    Loading...
+                  <td colSpan={6} className="text-center py-16 text-sm text-[#6b6654]">
+                    <div className="flex flex-col items-center gap-2">
+                      <div className="w-5 h-5 border-2 border-[#b28c34] border-t-transparent rounded-full animate-spin" />
+                      Loading products...
+                    </div>
                   </td>
                 </tr>
               ) : products.length ? (
@@ -100,7 +95,7 @@ export default function ProductsPage() {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={7} className="text-center py-6 text-sm text-gray-500">
+                  <td colSpan={6} className="text-center py-16 text-sm text-[#9a864c]">
                     No products found
                   </td>
                 </tr>
@@ -110,38 +105,52 @@ export default function ProductsPage() {
         </div>
 
         {/* Pagination */}
-        <div className="flex items-center justify-between p-4 text-sm">
-          <button
-            disabled={meta.page === 1}
-            onClick={() => changePage(meta.page - 1)}
-            className="flex items-center gap-1 px-3 py-1.5 rounded-lg hover:bg-[#f5f1e6] disabled:opacity-40"
-          >
-            <ChevronLeft size={16} /> Previous
-          </button>
+        <div className="flex items-center justify-between px-4 py-3 border-t border-[#f0ece3] text-xs">
+          <p className="text-[#6b6654]">
+            Page <span className="font-semibold text-[#1b180d]">{meta.page}</span> of{" "}
+            <span className="font-semibold text-[#1b180d]">{meta.pages}</span>
+            {" "}({meta.total} products)
+          </p>
 
-          <div className="flex items-center gap-2">
-            {Array.from({ length: meta.pages }, (_, i) => (
-              <button
-                key={i}
-                onClick={() => changePage(i + 1)}
-                className={`w-8 h-8 rounded-lg ${
-                  meta.page === i + 1
-                    ? "bg-[#b28c34] text-white"
-                    : "hover:bg-[#e7e1cf]"
-                }`}
-              >
-                {i + 1}
-              </button>
-            ))}
+          <div className="flex items-center gap-1">
+            <button
+              disabled={meta.page === 1}
+              onClick={() => fetchProducts(meta.page - 1)}
+              className="w-8 h-8 flex items-center justify-center rounded-lg border border-[#e7e1cf] hover:bg-[#f5f1e6] disabled:opacity-40 transition"
+            >
+              <ChevronLeft size={14} />
+            </button>
+
+            {Array.from({ length: Math.min(meta.pages, 7) }, (_, i) => {
+              let pageNum = i + 1;
+              if (meta.pages > 7) {
+                if (meta.page <= 4) pageNum = i + 1;
+                else if (meta.page >= meta.pages - 3) pageNum = meta.pages - 6 + i;
+                else pageNum = meta.page - 3 + i;
+              }
+              return (
+                <button
+                  key={pageNum}
+                  onClick={() => fetchProducts(pageNum)}
+                  className={`w-8 h-8 rounded-lg text-xs font-medium transition ${
+                    meta.page === pageNum
+                      ? "bg-[#b28c34] text-white shadow-sm"
+                      : "hover:bg-[#f5f1e6] text-[#1b180d]"
+                  }`}
+                >
+                  {pageNum}
+                </button>
+              );
+            })}
+
+            <button
+              disabled={meta.page === meta.pages}
+              onClick={() => fetchProducts(meta.page + 1)}
+              className="w-8 h-8 flex items-center justify-center rounded-lg border border-[#e7e1cf] hover:bg-[#f5f1e6] disabled:opacity-40 transition"
+            >
+              <ChevronRight size={14} />
+            </button>
           </div>
-
-          <button
-            disabled={meta.page === meta.pages}
-            onClick={() => changePage(meta.page + 1)}
-            className="flex items-center gap-1 px-3 py-1.5 rounded-lg hover:bg-[#f5f1e6] disabled:opacity-40"
-          >
-            Next <ChevronRight size={16} />
-          </button>
         </div>
       </div>
     </div>

@@ -227,10 +227,16 @@ event({
   // ─────────────────────────
   // Helpers
   // ─────────────────────────
-  const increase = () => setQuantity((q) => q + 1);
+  const increase = () => {
+    const maxStock = selected?.stock || 0;
+    setQuantity((q) => (maxStock > 0 && q >= maxStock ? q : q + 1));
+  };
   const decrease = () => setQuantity((q) => (q > 1 ? q - 1 : 1));
 
+  const isOutOfStock = !selected?.stock || selected.stock <= 0;
+
   const handleAddToCart = () => {
+    if (isOutOfStock) return;
     setIsAdding(true);
 
     const imageUrl = Array.isArray(product.images)
@@ -270,6 +276,7 @@ event({
   };
 
   const handleBuyNow = () => {
+    if (isOutOfStock) return;
     const buyNowItem = {
       id: product._id,
       name: product.name,
@@ -624,26 +631,36 @@ event({
     </p>
 
     <div className="flex gap-3">
-  {product.variants?.map((v, i) => (
+  {product.variants?.map((v, i) => {
+    const variantOOS = !v.stock || v.stock <= 0;
+    return (
     <button
       key={i}
-      onClick={() => setSelected(v)}
+      onClick={() => { setSelected(v); setQuantity(1); }}
+      disabled={variantOOS}
       className={`
         px-5 py-2
         font-[system-ui]
         text-xs uppercase tracking-[0.18em]
         border
-        transition-all duration-300 cursor-pointer
+        transition-all duration-300
+        ${variantOOS
+          ? "border-(--theme-border) text-(--theme-muted) opacity-50 line-through cursor-not-allowed"
+          : "cursor-pointer"
+        }
         ${
-          selected.size === v.size
+          !variantOOS && selected.size === v.size
             ? "border-(--theme-text) text-(--theme-text)"
-            : "border-(--theme-border) text-(--theme-muted) hover:text-(--theme-text)"
+            : !variantOOS
+            ? "border-(--theme-border) text-(--theme-muted) hover:text-(--theme-text)"
+            : ""
         }
       `}
     >
       {v.size} ML
     </button>
-  ))}
+    );
+  })}
 </div>
   </div>
 
@@ -653,10 +670,11 @@ event({
       Quantity
     </p>
 
-    <div className="inline-flex items-center border border-(--theme-border)">
+    <div className={`inline-flex items-center border border-(--theme-border) ${isOutOfStock ? "opacity-50 pointer-events-none" : ""}`}>
       <button
         onClick={decrease}
-        className="w-10 h-10 flex items-center justify-center text-(--theme-text) hover:bg-(--theme-soft) cursor-pointer"
+        disabled={isOutOfStock}
+        className="w-10 h-10 flex items-center justify-center text-(--theme-text) hover:bg-(--theme-soft) cursor-pointer disabled:cursor-not-allowed"
       >
         −
       </button>
@@ -667,14 +685,29 @@ event({
 
       <button
         onClick={increase}
-        className="w-10 h-10 flex items-center justify-center text-(--theme-text) hover:bg-(--theme-soft) cursor-pointer"
+        disabled={isOutOfStock}
+        className="w-10 h-10 flex items-center justify-center text-(--theme-text) hover:bg-(--theme-soft) cursor-pointer disabled:cursor-not-allowed"
       >
         +
       </button>
     </div>
+
+    {!isOutOfStock && selected?.stock <= 5 && (
+      <p className="text-xs text-orange-600 mt-2">Only {selected.stock} left in stock</p>
+    )}
   </div>
 
   {/* ▸ CTA Buttons */}
+  {isOutOfStock ? (
+    <div className="flex flex-col gap-3">
+      <div className="h-12 flex items-center justify-center bg-gray-200 text-gray-500 font-[system-ui] text-xs uppercase tracking-[0.2em]">
+        Out of Stock
+      </div>
+      <p className="text-xs text-(--theme-muted) text-center">
+        This variant is currently unavailable. Please check back later.
+      </p>
+    </div>
+  ) : (
   <div className="flex flex-col gap-3 ">
     <button
   onClick={handleAddToCart}
@@ -711,6 +744,7 @@ event({
 </button>
 
   </div>
+  )}
 
   <div className="border-t border-(--theme-border) pt-4" />
 

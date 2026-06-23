@@ -7,6 +7,7 @@ import { usePathname } from "next/navigation";
 
 export default function AdminLayout({ children }) {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
   const pathname = usePathname();
 
   useEffect(() => {
@@ -15,8 +16,6 @@ export default function AdminLayout({ children }) {
     const root = document.documentElement;
     root.classList.remove("dark");
 
-    // Force light theme CSS variables on root so portalled modals
-    // (rendered via createPortal to document.body) also get correct colors
     root.style.setProperty("--theme-bg", "#fcfbf8");
     root.style.setProperty("--theme-soft", "#f6f6f6");
     root.style.setProperty("--theme-border", "#e7e1cf");
@@ -26,7 +25,6 @@ export default function AdminLayout({ children }) {
     root.style.setProperty("--foreground", "#171717");
 
     return () => {
-      // when leaving admin, restore dark if saved
       const saved = localStorage.getItem("theme");
       if (saved === "dark") {
         root.classList.add("dark");
@@ -41,7 +39,6 @@ export default function AdminLayout({ children }) {
     };
   }, [mobileOpen]);
 
-  // Strip sidebar if user is just on the login screen
   if (pathname === "/admin/login") {
     return <div className="font-[Manrope,sans-serif]">{children}</div>;
   }
@@ -52,6 +49,7 @@ export default function AdminLayout({ children }) {
       style={{
         backgroundColor: "#fcfbf8",
         color: "#1b180d",
+        marginTop: "-48px",
         "--theme-bg": "#fcfbf8",
         "--theme-soft": "#f6f6f6",
         "--theme-border": "#e7e1cf",
@@ -60,13 +58,17 @@ export default function AdminLayout({ children }) {
       }}
     >
       {/* Desktop Sidebar */}
-      <aside className="hidden md:block w-64 shrink-0 border-r border-[#e7e1cf] bg-[#fcfbf8] h-screen sticky top-0">
-        <AdminSidebar />
+      <aside
+        className={`hidden md:block shrink-0 border-r border-[#e7e1cf] bg-white h-screen sticky top-0 transition-all duration-300 ${
+          collapsed ? "w-[68px]" : "w-60"
+        }`}
+      >
+        <AdminSidebar collapsed={collapsed} onToggleCollapse={() => setCollapsed(!collapsed)} />
       </aside>
 
       {/* Mobile Sidebar */}
       <aside
-        className={`fixed inset-y-0 left-0 z-40 w-64 bg-[#fcfbf8] border-r border-[#e7e1cf] transform transition-transform duration-300 md:hidden ${
+        className={`fixed inset-y-0 left-0 z-40 w-60 bg-white border-r border-[#e7e1cf] transform transition-transform duration-300 md:hidden ${
           mobileOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >

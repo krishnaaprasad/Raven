@@ -16,11 +16,12 @@ export async function GET(req) {
 
     const query = {};
 
-    // 🔍 Search by name or email
+    // 🔍 Search by name, email, or phone
     if (search) {
       query.$or = [
         { name: { $regex: search, $options: "i" } },
         { email: { $regex: search, $options: "i" } },
+        { phone: { $regex: search, $options: "i" } },
       ];
     }
 
