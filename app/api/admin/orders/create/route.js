@@ -1,9 +1,8 @@
 import { NextResponse } from "next/server";
 import connectToDatabase from "@/lib/mongodb";
 import { Order, OrderCounter } from "@/models/Order";
-import Product from "@/models/Product"; // ✅ ADD
+import Product from "@/models/Product";
 import { generateSequentialOrderIdFromItems } from "@/lib/generateOrderId";
-import { sendOrderConfirmation } from "@/lib/notifications/whatsapp.service";
 
 
 export async function POST(req) {
@@ -133,9 +132,9 @@ const customOrderId = await generateSequentialOrderIdFromItems([
         {
           name: product.name,
           size: variant.size,
-          price: Number(unitPrice),   // ⬅ ENSURE NUMBER
+          price: Number(unitPrice),
           quantity: qty,
-          image: product.images?.[0] || "",
+          image: product.images?.[0]?.original || product.images?.[0]?.thumbnail || "",
           slug: product.slug,
         },
       ],
@@ -179,10 +178,42 @@ const customOrderId = await generateSequentialOrderIdFromItems([
       ],
     });
 
-    try {
-      await sendOrderConfirmation(order);
-    } catch (whatsappErr) {
-      console.error("❌ Manual order WhatsApp confirmation error:", whatsappErr);
+    // Send confirmation email for manual order
+    if (order.email) {
+      try {
+        const emailPayload = {
+          email: order.email,
+          name: order.userName,
+          orderId: order.customOrderId || order._id.toString(),
+          paymentMethod: order.paymentMethod || "Cash",
+          subtotal: subTotal,
+          shippingCost: ship,
+          discount: discountAmount,
+          couponCode: couponCode || null,
+          totalAmount: order.totalAmount,
+          items: order.cartItems,
+          shipping: order.deliveryType,
+          address: {
+            ...order.addressDetails,
+            phone: order.phone,
+          },
+        };
+
+        fetch(
+          `${process.env.NEXT_PUBLIC_BASE_URL || "https://www.ravenfragrance.in"}/api/send-confirmation-mail`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(emailPayload),
+          }
+        )
+          .then(() => console.log("📨 Manual order: email sent"))
+          .catch((err) => console.error("📩 Manual order email error:", err));
+
+        await Order.findByIdAndUpdate(order._id, { emailSent: true });
+      } catch (mailErr) {
+        console.error("❌ Manual order email error:", mailErr);
+      }
     }
 
     return NextResponse.json({ success: true, order });
