@@ -16,6 +16,7 @@ import {
   ExternalLink,
   ChevronLeft,
   Warehouse,
+  Receipt,
 } from "lucide-react";
 
 export default function AdminSidebar({ closeMobile, collapsed, onToggleCollapse }) {
@@ -27,6 +28,7 @@ export default function AdminSidebar({ closeMobile, collapsed, onToggleCollapse 
     { name: "Orders", icon: ShoppingCart, href: "/admin/orders" },
     { name: "Products", icon: Boxes, href: "/admin/products" },
     { name: "Inventory", icon: Warehouse, href: "/admin/inventory" },
+    { name: "Expenses", icon: Receipt, href: "/admin/expenses" },
     { name: "Customers", icon: Users, href: "/admin/customers" },
     { name: "Reviews", icon: Star, href: "/admin/reviews" },
     { name: "Carts", icon: ShoppingBag, href: "/admin/carts" },

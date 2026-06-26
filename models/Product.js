@@ -6,6 +6,11 @@ const VariantSchema = new mongoose.Schema({
   price: { type: Number, required: true },
   mrp: { type: Number, required: true },
   stock: { type: Number, default: 0 },
+  // Cost tracking for COGS/P&L
+  oil_cost: { type: Number, default: 0 },
+  packaging_cost: { type: Number, default: 0 },
+  other_cost: { type: Number, default: 0 },
+  total_cost: { type: Number, default: 0 },
 });
 
 // ⭐ UPDATED PRODUCT MODEL
