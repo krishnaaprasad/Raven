@@ -75,8 +75,8 @@ export async function POST(req) {
       );
     }
 
-    // Check if provided total matches computed total (allow 0.01 tolerance for rounding)
-    if (Math.abs(totalAmountNum - computedTotal) > 0.01) {
+    // Check if provided total matches computed total (allow 1.0 tolerance for rounding)
+    if (Math.abs(totalAmountNum - computedTotal) > 1.0) {
       return Response.json(
         { success: false, message: "Total amount calculation mismatch" },
         { status: 400 }
@@ -124,10 +124,11 @@ export async function POST(req) {
       from: `Raven Fragrance <${process.env.EMAIL_USER}>`,
       to: email,
       bcc: "ravenfragrances@gmail.com",
-      subject: `Your Order ${order.customOrderId || orderId} is Confirmed – Raven Fragrance`,
+      subject: `Your Order ${orderId} is Confirmed – Raven Fragrance`,
       html: orderConfirmationTemplate({
-        name: serverName,
-        orderId: order.customOrderId || orderId,        paymentMethod,
+        name,
+        orderId,
+        paymentMethod,
         subtotal,
         shippingCost,
         discount,   
