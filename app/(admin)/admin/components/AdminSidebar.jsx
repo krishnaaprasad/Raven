@@ -17,6 +17,7 @@ import {
   ChevronLeft,
   Warehouse,
   Receipt,
+  HandCoins,
 } from "lucide-react";
 
 export default function AdminSidebar({ closeMobile, collapsed, onToggleCollapse }) {
@@ -29,6 +30,7 @@ export default function AdminSidebar({ closeMobile, collapsed, onToggleCollapse 
     { name: "Products", icon: Boxes, href: "/admin/products" },
     { name: "Inventory", icon: Warehouse, href: "/admin/inventory" },
     { name: "Expenses", icon: Receipt, href: "/admin/expenses" },
+    { name: "Bulk Sales", icon: HandCoins, href: "/admin/bulk-sales" },
     { name: "Customers", icon: Users, href: "/admin/customers" },
     { name: "Reviews", icon: Star, href: "/admin/reviews" },
     { name: "Carts", icon: ShoppingBag, href: "/admin/carts" },

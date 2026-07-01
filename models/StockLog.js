@@ -18,6 +18,8 @@ const stockLogSchema = new mongoose.Schema(
         "DAMAGE",
         "RETURN",
         "CORRECTION",
+        "BULK_SALE",
+        "BULK_SALE_CANCELLED",
       ],
       required: true,
     },
