@@ -856,7 +856,7 @@ export default function CheckoutClient() {
                   />
                   <button
                     type="button"
-                    onClick={handleApplyCoupon}
+                    onClick={() => handleApplyCoupon()}
                     disabled={applyingCoupon}
                     className="px-4 text-sm font-medium bg-(--theme-text) text-(--theme-bg) rounded-md hover:opacity-90 disabled:opacity-60"
                   >
