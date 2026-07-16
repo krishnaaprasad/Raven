@@ -158,6 +158,59 @@ export default function CheckoutClient() {
         return;
       }
     }
+
+    // Instagram Shop / Facebook Commerce: parse products from URL
+    // Format: /checkout?products=slug1:qty1,slug2:qty2&coupon=CODE
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const productsParam = params.get("products");
+      const couponParam = params.get("coupon");
+
+      if (productsParam) {
+        (async () => {
+          try {
+            const entries = productsParam.split(",").map((entry) => {
+              const [slug, qty] = entry.split(":");
+              return { slug: slug.trim(), quantity: parseInt(qty) || 1 };
+            });
+
+            const items = [];
+            for (const entry of entries) {
+              const res = await fetch(`/api/products/${entry.slug}`);
+              if (!res.ok) continue;
+              const product = await res.json();
+              if (!product) continue;
+
+              const variant = product.variants?.[0];
+              if (!variant) continue;
+
+              items.push({
+                id: product._id,
+                name: product.name,
+                slug: product.slug,
+                price: variant.price,
+                image: product.images?.[0]?.original || "",
+                size: variant.size,
+                quantity: entry.quantity,
+              });
+            }
+
+            if (items.length > 0) {
+              setCheckoutItems(items);
+              // Auto-apply coupon from URL if provided
+              if (couponParam) {
+                setCouponCode(couponParam.toUpperCase());
+              }
+              return;
+            }
+          } catch (err) {
+            console.error("Instagram checkout parse error:", err);
+          }
+        })();
+        return;
+      }
+    }
+
     setCheckoutItems(cartContextItems);
   }, [mode, cartContextItems]);
 
