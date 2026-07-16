@@ -11,6 +11,11 @@ const VariantSchema = new mongoose.Schema({
   packaging_cost: { type: Number, default: 0 },
   other_cost: { type: Number, default: 0 },
   total_cost: { type: Number, default: 0 },
+  // Dynamic cost breakdown (flexible categories)
+  cost_items: [{
+    label: { type: String, required: true },
+    amount: { type: Number, default: 0 },
+  }],
 });
 
 // ⭐ UPDATED PRODUCT MODEL

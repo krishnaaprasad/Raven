@@ -158,7 +158,14 @@ export default function EditProductClient({ productId }) {
 
   // Variants
   const [variants, setVariants] = useState([
-    { size: "", price: "", mrp: "", stock: "" },
+    { size: "", price: "", mrp: "", stock: "", oil_cost: "", packaging_cost: "", other_cost: "", total_cost: "", cost_items: [
+      { label: "Fragrance Oil", amount: "" },
+      { label: "Bottle", amount: "" },
+      { label: "Cap", amount: "" },
+      { label: "Box", amount: "" },
+      { label: "Sticker/Label", amount: "" },
+      { label: "Fixative", amount: "" },
+    ] },
   ]);
 
   // Images (with id for drag & drop)
@@ -228,13 +235,49 @@ export default function EditProductClient({ productId }) {
 
         setVariants(
           (p.variants || []).length
-            ? p.variants.map((v) => ({
-                size: v.size || "",
-                price: v.price ?? "",
-                mrp: v.mrp ?? "",
-                stock: v.stock ?? "",
-              }))
-            : [{ size: "", price: "", mrp: "", stock: "" }]
+            ? p.variants.map((v) => {
+                // Default cost categories for fragrance products
+                const defaultCostItems = [
+                  { label: "Fragrance Oil", amount: "" },
+                  { label: "Bottle", amount: "" },
+                  { label: "Cap", amount: "" },
+                  { label: "Box", amount: "" },
+                  { label: "Sticker/Label", amount: "" },
+                  { label: "Fixative", amount: "" },
+                ];
+
+                // Use existing cost_items if available, otherwise use defaults
+                // Also migrate old oil_cost/packaging_cost if cost_items is empty
+                let costItems = v.cost_items && v.cost_items.length > 0
+                  ? v.cost_items.map((ci) => ({ label: ci.label || "", amount: ci.amount ?? "" }))
+                  : (v.oil_cost || v.packaging_cost || v.other_cost)
+                    ? [
+                        { label: "Fragrance Oil", amount: v.oil_cost || "" },
+                        { label: "Packaging", amount: v.packaging_cost || "" },
+                        { label: "Other", amount: v.other_cost || "" },
+                      ].filter((ci) => ci.amount)
+                    : defaultCostItems;
+
+                return {
+                  size: v.size || "",
+                  price: v.price ?? "",
+                  mrp: v.mrp ?? "",
+                  stock: v.stock ?? "",
+                  oil_cost: v.oil_cost ?? "",
+                  packaging_cost: v.packaging_cost ?? "",
+                  other_cost: v.other_cost ?? "",
+                  total_cost: v.total_cost ?? "",
+                  cost_items: costItems,
+                };
+              })
+            : [{ size: "", price: "", mrp: "", stock: "", oil_cost: "", packaging_cost: "", other_cost: "", total_cost: "", cost_items: [
+                { label: "Fragrance Oil", amount: "" },
+                { label: "Bottle", amount: "" },
+                { label: "Cap", amount: "" },
+                { label: "Box", amount: "" },
+                { label: "Sticker/Label", amount: "" },
+                { label: "Fixative", amount: "" },
+              ] }]
         );
 
         setFragranceType(p.fragranceType || "Eau de Parfum");
@@ -275,7 +318,14 @@ export default function EditProductClient({ productId }) {
   const addVariantRow = () => {
     setVariants((prev) => [
       ...prev,
-      { size: "", price: "", mrp: "", stock: "" },
+      { size: "", price: "", mrp: "", stock: "", oil_cost: "", packaging_cost: "", other_cost: "", total_cost: "", cost_items: [
+        { label: "Fragrance Oil", amount: "" },
+        { label: "Bottle", amount: "" },
+        { label: "Cap", amount: "" },
+        { label: "Box", amount: "" },
+        { label: "Sticker/Label", amount: "" },
+        { label: "Fixative", amount: "" },
+      ] },
     ]);
   };
 
@@ -444,12 +494,21 @@ export default function EditProductClient({ productId }) {
       benefits,
       variants: variants
         .filter((v) => v.size && v.price)
-        .map((v) => ({
-          size: v.size.trim(),
-          price: Number(v.price),
-          mrp: v.mrp ? Number(v.mrp) : undefined,
-          stock: Number(v.stock) || 0,
-        })),
+        .map((v) => {
+          const costItems = (v.cost_items || []).filter((ci) => ci.label && ci.label.trim());
+          const totalFromItems = costItems.reduce((s, ci) => s + (Number(ci.amount) || 0), 0);
+          return {
+            size: v.size.trim(),
+            price: Number(v.price),
+            mrp: v.mrp ? Number(v.mrp) : undefined,
+            stock: Number(v.stock) || 0,
+            oil_cost: Number(v.oil_cost) || 0,
+            packaging_cost: Number(v.packaging_cost) || 0,
+            other_cost: Number(v.other_cost) || 0,
+            total_cost: totalFromItems || ((Number(v.oil_cost) || 0) + (Number(v.packaging_cost) || 0) + (Number(v.other_cost) || 0)),
+            cost_items: costItems.map((ci) => ({ label: ci.label.trim(), amount: Number(ci.amount) || 0 })),
+          };
+        }),
       fragranceType,
       longevity,
       sillage,
@@ -755,8 +814,8 @@ export default function EditProductClient({ productId }) {
 
             <div className="space-y-3">
               {variants.map((v, idx) => (
+                <div key={idx}>
                 <div
-                  key={idx}
                   className="flex flex-col sm:flex-row items-start gap-3"
                 >
                   <div className="flex-1">
@@ -824,6 +883,65 @@ export default function EditProductClient({ productId }) {
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
+                </div>
+
+                {/* COGS Breakdown — Dynamic Categories */}
+                <div className="ml-0 mt-2 mb-4 p-3 bg-white border border-[#e7e1cf] rounded-lg">
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-[11px] font-semibold text-[#9a864c] uppercase tracking-wider">Cost Breakdown (COGS)</p>
+                    <span className="text-xs font-bold text-[#1b180d]">
+                      Total: ₹{(v.cost_items || []).reduce((s, ci) => s + (Number(ci.amount) || 0), 0).toLocaleString("en-IN")}
+                    </span>
+                  </div>
+                  <div className="space-y-1.5">
+                    {(v.cost_items || []).map((ci, ciIdx) => (
+                      <div key={ciIdx} className="flex items-center gap-2">
+                        <input
+                          value={ci.label}
+                          onChange={(e) => {
+                            const items = [...(v.cost_items || [])];
+                            items[ciIdx] = { ...items[ciIdx], label: e.target.value };
+                            updateVariant(idx, "cost_items", items);
+                          }}
+                          placeholder="e.g. Oil, Bottle, Cap, Sticker"
+                          className="flex-1 h-8 rounded-lg border border-[#e7e1cf] bg-[#fcfbf8] px-3 text-xs text-[#1b180d]"
+                        />
+                        <input
+                          type="number"
+                          min="0"
+                          value={ci.amount}
+                          onChange={(e) => {
+                            const items = [...(v.cost_items || [])];
+                            items[ciIdx] = { ...items[ciIdx], amount: e.target.value };
+                            updateVariant(idx, "cost_items", items);
+                          }}
+                          placeholder="₹"
+                          className="w-24 h-8 rounded-lg border border-[#e7e1cf] bg-[#fcfbf8] px-3 text-xs text-[#1b180d] text-right"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const items = (v.cost_items || []).filter((_, i) => i !== ciIdx);
+                            updateVariant(idx, "cost_items", items);
+                          }}
+                          className="w-8 h-8 flex items-center justify-center rounded-lg text-red-400 hover:bg-red-50"
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const items = [...(v.cost_items || []), { label: "", amount: "" }];
+                      updateVariant(idx, "cost_items", items);
+                    }}
+                    className="mt-2 text-[11px] font-medium text-[#b28c34] hover:underline"
+                  >
+                    + Add Cost Category
+                  </button>
+                </div>
                 </div>
               ))}
             </div>
