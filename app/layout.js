@@ -120,6 +120,9 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" >
       <head>
+        {/* Facebook Domain Verification */}
+        <meta name="facebook-domain-verification" content="h0276sauorpptmhwh0t1lq48t8kazb" />
+
         {/* LCP Preloads for fast image discovery */}
         <link rel="preload" as="image" href="/hero-desktop-light.PNG" media="(min-width: 768px)" fetchPriority="high" />
         <link rel="preload" as="image" href="/hero-mobile-light.PNG" media="(max-width: 767px)" fetchPriority="high" />
