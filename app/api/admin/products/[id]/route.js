@@ -83,6 +83,7 @@ export async function PATCH(req, { params }) {
       baseNotes,
       ingredients,
       accords = [],
+      isComingSoon,
     } = body;
 
     if (!name || !slug || !variants || variants.length === 0) {
@@ -132,6 +133,7 @@ export async function PATCH(req, { params }) {
     product.baseNotes = baseNotes || [];
     product.ingredients = ingredients || [];
     product.accords = accords || [];
+    product.isComingSoon = isComingSoon !== undefined ? Boolean(isComingSoon) : product.isComingSoon;
     // keep product.deleted as-is
     
 

@@ -56,6 +56,9 @@ const ProductSchema = new mongoose.Schema(
     reviewCount: { type: Number, default: 0 },
 
 
+    // ⭐ Coming Soon flag for upcoming launches
+    isComingSoon: { type: Boolean, default: false },
+
     // SOFT DELETE
     deleted: { type: Boolean, default: false },
   },

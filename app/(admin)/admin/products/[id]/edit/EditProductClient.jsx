@@ -136,6 +136,7 @@ export default function EditProductClient({ productId }) {
   const [slug, setSlug] = useState("");
   const [slugTouched, setSlugTouched] = useState(false);
   const [brand, setBrand] = useState("");
+  const [isComingSoon, setIsComingSoon] = useState(false);
 
   // description initial content from DB
   const [initialDescription, setInitialDescription] = useState("");
@@ -220,6 +221,7 @@ export default function EditProductClient({ productId }) {
         setName(p.name || "");
         setSlug(p.slug || "");
         setBrand(p.brand || "");
+        setIsComingSoon(!!p.isComingSoon);
         setInitialDescription(p.description || "");
 
         const mappedImages = (p.images || []).map((img, idx) => ({
@@ -486,6 +488,7 @@ export default function EditProductClient({ productId }) {
       name: name.trim(),
       slug: finalSlug,
       brand: brand.trim(),
+      isComingSoon: Boolean(isComingSoon),
       description: descriptionHtml,
       images: images.map((img) => ({
         original: img.original,
@@ -620,6 +623,21 @@ export default function EditProductClient({ productId }) {
                   placeholder="e.g., Maison de Parfum"
                 />
               </div>
+            </div>
+
+            {/* Coming Soon Toggle */}
+            <div className="mb-6 flex items-center gap-3 bg-[#fff8e1]/60 border border-[#e7e1cf] rounded-lg p-3.5">
+              <input
+                id="isComingSoon"
+                type="checkbox"
+                checked={isComingSoon}
+                onChange={(e) => setIsComingSoon(e.target.checked)}
+                className="w-5 h-5 rounded border-gray-300 text-[#b28c34] focus:ring-[#b28c34] cursor-pointer"
+              />
+              <label htmlFor="isComingSoon" className="text-sm font-semibold text-[#1b180d] cursor-pointer flex items-center gap-2">
+                Mark as Coming Soon
+                <span className="text-xs font-normal text-[#6b6654]">(Product will show "COMING SOON" on collection cards instead of Add to Bag)</span>
+              </label>
             </div>
 
             {/* Description (Tiptap) */}

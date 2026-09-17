@@ -20,7 +20,20 @@ const ProductCard = ({ product }) => {
   const variant = product?.variants?.[0] || {};
   const price = variant.price ?? 0;
   const size = variant.size ?? "";
-  const outOfStock = variant?.stock <= 0;
+
+  const isComingSoon = Boolean(
+    product?.isComingSoon ||
+      product?.comingSoon ||
+      product?.status === "coming_soon" ||
+      product?.status === "comingSoon" ||
+      primaryImage?.toLowerCase().includes("coming") ||
+      product?.name?.toLowerCase().includes("horizon")
+  );
+
+  const outOfStock =
+    !isComingSoon &&
+    (product?.variants?.length === 0 ||
+      product?.variants?.every((v) => !v.stock || v.stock <= 0));
 
   return (
     <div
@@ -129,9 +142,9 @@ const ProductCard = ({ product }) => {
 
         {/* Button */}
         <button
-          disabled={outOfStock}
+          disabled={outOfStock || isComingSoon}
           onClick={() => {
-            if (outOfStock) return;
+            if (outOfStock || isComingSoon) return;
 
             addToCart(
               {
@@ -161,14 +174,18 @@ const ProductCard = ({ product }) => {
             border transition
             flex items-center justify-center gap-2
             ${
-              outOfStock
+              isComingSoon || outOfStock
                 ? "bg-(--theme-soft) text-(--theme-muted) cursor-not-allowed border-(--theme-border)"
                 : "bg-(--theme-bg) text-(--theme-text) border-(--theme-border) hover:bg-(--theme-soft)"
             }
           `}
         >
-          <ShoppingBag size={16} />
-          {outOfStock ? "Out of Stock" : "Add to Bag"}
+          {!isComingSoon && <ShoppingBag size={16} />}
+          {isComingSoon
+            ? "Coming Soon"
+            : outOfStock
+            ? "Out of Stock"
+            : "Add to Bag"}
         </button>
       </div>
     </div>

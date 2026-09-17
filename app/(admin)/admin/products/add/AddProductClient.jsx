@@ -141,6 +141,7 @@ export default function AddProductClient() {
   const [slug, setSlug] = useState("");
   const [slugTouched, setSlugTouched] = useState(false);
   const [brand, setBrand] = useState("");
+  const [isComingSoon, setIsComingSoon] = useState(false);
 
   // Fragrance profile
   const [fragranceType, setFragranceType] = useState("Eau de Parfum");
@@ -364,6 +365,7 @@ export default function AddProductClient() {
       name: name.trim(),
       slug: finalSlug,
       brand: brand.trim(),
+      isComingSoon: Boolean(isComingSoon),
       description: descriptionHtml,
       images,
       benefits,
@@ -483,6 +485,21 @@ export default function AddProductClient() {
                   placeholder="e.g., Maison de Parfum"
                 />
               </div>
+            </div>
+
+            {/* Coming Soon Toggle */}
+            <div className="mb-6 flex items-center gap-3 bg-[#fff8e1]/60 border border-[#e7e1cf] rounded-lg p-3.5">
+              <input
+                id="isComingSoon"
+                type="checkbox"
+                checked={isComingSoon}
+                onChange={(e) => setIsComingSoon(e.target.checked)}
+                className="w-5 h-5 rounded border-gray-300 text-[#b28c34] focus:ring-[#b28c34] cursor-pointer"
+              />
+              <label htmlFor="isComingSoon" className="text-sm font-semibold text-[#1b180d] cursor-pointer flex items-center gap-2">
+                Mark as Coming Soon
+                <span className="text-xs font-normal text-[#6b6654]">(Product will show "COMING SOON" on collection cards instead of Add to Bag)</span>
+              </label>
             </div>
 
             {/* Description (Tiptap) */}

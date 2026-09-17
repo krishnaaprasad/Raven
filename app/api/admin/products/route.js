@@ -76,6 +76,7 @@ export async function POST(req) {
       baseNotes = [],
       ingredients = [],
       accords = [],
+      isComingSoon = false,
     } = body;
 
     // Basic validation
@@ -129,6 +130,7 @@ export async function POST(req) {
       baseNotes,
       ingredients,
       accords,
+      isComingSoon: Boolean(isComingSoon),
       deleted: false, // SOFT DELETE
     });
 

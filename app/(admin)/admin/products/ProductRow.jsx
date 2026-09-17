@@ -57,7 +57,14 @@ export default function ProductRow({ product, refresh }) {
                 </div>
               )}
             </div>
-            <span className="font-semibold text-[13px] text-[#1b180d]">{product.name}</span>
+            <div className="flex flex-col">
+              <span className="font-semibold text-[13px] text-[#1b180d]">{product.name}</span>
+              {product.isComingSoon && (
+                <span className="inline-block mt-0.5 text-[10px] font-bold tracking-wider text-[#b28c34] bg-[#fff8e1] px-1.5 py-0.5 rounded border border-[#b28c34]/30 w-fit">
+                  COMING SOON
+                </span>
+              )}
+            </div>
           </div>
         </td>
 
