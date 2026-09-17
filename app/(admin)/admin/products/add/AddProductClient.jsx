@@ -498,7 +498,7 @@ export default function AddProductClient() {
               />
               <label htmlFor="isComingSoon" className="text-sm font-semibold text-[#1b180d] cursor-pointer flex items-center gap-2">
                 Mark as Coming Soon
-                <span className="text-xs font-normal text-[#6b6654]">(Product will show "COMING SOON" on collection cards instead of Add to Bag)</span>
+                <span className="text-xs font-normal text-[#6b6654]">(Product will show &quot;COMING SOON&quot; on collection cards instead of Add to Bag)</span>
               </label>
             </div>
 
