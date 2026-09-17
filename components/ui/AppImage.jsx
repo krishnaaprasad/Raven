@@ -54,9 +54,10 @@ function AppImage({
         if (fill) {
             return (
                 <div className={`relative ${className}`} style={{ width: width || '100%', height: height || '100%' }}>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                         src={imageSrc}
-                        alt={alt}
+                        alt={alt || "image"}
                         className={`${commonClassName} absolute inset-0 w-full h-full object-cover`}
                         onError={handleError}
                         onLoad={handleLoad}
@@ -69,16 +70,19 @@ function AppImage({
         }
 
         return (
-            <img
-                src={imageSrc}
-                alt={alt}
-                className={commonClassName}
-                onError={handleError}
-                onLoad={handleLoad}
-                onClick={onClick}
-                style={imgStyle}
-                {...props}
-            />
+            <>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                    src={imageSrc}
+                    alt={alt || "image"}
+                    className={commonClassName}
+                    onError={handleError}
+                    onLoad={handleLoad}
+                    onClick={onClick}
+                    style={imgStyle}
+                    {...props}
+                />
+            </>
         );
     }
 
@@ -102,6 +106,7 @@ function AppImage({
         return (
             <div className={`relative ${className}`}>
                 <Image
+                    alt={alt || 'image'}
                     {...imageProps}
                     fill
                     sizes={sizes || '100vw'}
@@ -113,6 +118,7 @@ function AppImage({
 
     return (
         <Image
+            alt={alt || 'image'}
             {...imageProps}
             width={width || 400}
             height={height || 300}

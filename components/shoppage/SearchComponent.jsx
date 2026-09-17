@@ -94,6 +94,7 @@ export default function SearchComponent({
                 onClick={() => goTo(p.slug)}
                 className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-[#f3efe3] transition"
               >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={p?.images?.[0]?.original || '/placeholder.png'}
                   alt={p.name}
