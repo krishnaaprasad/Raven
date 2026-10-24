@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
+import mongoose from "mongoose";
 import connectToDatabase from "@/lib/mongodb";
 import { Order } from "@/models/Order";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
 export async function GET(request, context) {
   try {
@@ -9,7 +12,22 @@ export async function GET(request, context) {
 
     await connectToDatabase();
 
-    const order = await Order.findById(id);
+    const session = await getServerSession(authOptions);
+    if (!session?.user) {
+      return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
+    }
+
+    const order = mongoose.isValidObjectId(id) ? await Order.findById(id) : null;
+
+    // Only the customer who placed the order (or an admin) may read it — it contains name, phone and address
+    const isOwner =
+      order &&
+      ((order.userId && String(order.userId) === String(session.user.id)) ||
+        (session.user.phone && order.phone === session.user.phone));
+    if (order && !isOwner && session.user.role !== "ADMIN") {
+      return NextResponse.json({ success: false, message: "Order not found" }, { status: 404 });
+    }
+
     if (!order) {
       return NextResponse.json(
         { success: false, message: "Order not found" },

@@ -60,31 +60,37 @@ export default function OrderSuccess() {
       setReferenceId(verifyData.referenceId || "N/A");
 
         if (verifyData?.success === true && orderJson?.success === true) {
-            // 🔥 GA4: Track successful purchase
-          event({
-            action: "purchase",
-            params: {
-              transaction_id: mergedOrder.customOrderId || mergedOrder._id,
-              currency: "INR",
-              value:
-                (mergedOrder.cartItems || []).reduce(
-                  (sum, i) => sum + i.price * i.quantity,
-                  0
-                ) +
-                (mergedOrder.shippingCharge || 0) -
-                (mergedOrder.discount || 0),
+          // 🔥 GA4: Track successful purchase — once per order (refreshing this page used to re-count the sale)
+          const trackedKey = `ga_purchase_${orderId}`;
+          let alreadyTracked = false;
+          try { alreadyTracked = localStorage.getItem(trackedKey) === "1"; } catch {}
+          if (!alreadyTracked) {
+            try { localStorage.setItem(trackedKey, "1"); } catch {}
+            event({
+              action: "purchase",
+              params: {
+                transaction_id: mergedOrder.customOrderId || mergedOrder._id,
+                currency: "INR",
+                value:
+                  (mergedOrder.cartItems || []).reduce(
+                    (sum, i) => sum + i.price * i.quantity,
+                    0
+                  ) +
+                  (mergedOrder.shippingCharge || 0) -
+                  (mergedOrder.discount || 0),
 
-              shipping: mergedOrder.shippingCharge || 0,
+                shipping: mergedOrder.shippingCharge || 0,
 
-              items: (mergedOrder.cartItems || []).map((item) => ({
-                item_id: item.productId || item.id || item._id || item.slug,
-                item_name: item.name,
-                price: item.price,
-                quantity: item.quantity,
-                item_variant: item.size,
-              })),
-            },
-          });
+                items: (mergedOrder.cartItems || []).map((item) => ({
+                  item_id: item.productId || item.id || item._id || item.slug,
+                  item_name: item.name,
+                  price: item.price,
+                  quantity: item.quantity,
+                  item_variant: item.size,
+                })),
+              },
+            });
+          }
           clearCart();
             localStorage.removeItem("failedOrder");
             localStorage.removeItem("checkoutUser");
@@ -101,7 +107,7 @@ export default function OrderSuccess() {
         const failedCart = orderJson.order?.cartItems || [];
         const failedUser = {
           firstName: orderJson.order?.userName?.split(" ")[0] || "",
-          lastName: orderJson.order?.userName?.split(" ")[1] || "",
+          lastName: orderJson.order?.userName?.split(" ").slice(1).join(" ") || "",
           email: orderJson.order?.email,
           phone: orderJson.order?.phone,
           address1: orderJson.order?.addressDetails?.address1 || "",

@@ -1,6 +1,9 @@
 import connectToDatabase from "@/lib/mongodb";
 import Product from "@/models/Product";
 
+// Regenerate hourly so new products show up without a redeploy
+export const revalidate = 3600;
+
 export default async function sitemap() {
   const baseUrl = "https://www.ravenfragrance.in";
 
@@ -40,11 +43,28 @@ export default async function sitemap() {
       priority: 0.9,
     },
     {
+      url: `${baseUrl}/philosophy`,
+      lastModified: new Date(),
+      changeFrequency: "monthly",
+      priority: 0.6,
+    },
+    {
       url: `${baseUrl}/contact-us`,
       lastModified: new Date(),
       changeFrequency: "monthly",
       priority: 0.5,
     },
+    ...[
+      "privacy-policy",
+      "refund-cancellation",
+      "shipping-delivery",
+      "terms-conditions",
+    ].map((slug) => ({
+      url: `${baseUrl}/policy/${slug}`,
+      lastModified: new Date(),
+      changeFrequency: "yearly",
+      priority: 0.3,
+    })),
     ...productUrls,
   ];
 }

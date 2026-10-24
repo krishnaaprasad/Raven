@@ -69,7 +69,6 @@ export default function Footer() {
               width={150}
               height={42}
               className="mb-6"
-              priority
             />
 
             <p className="text-[#fcfbf8]/70 text-sm leading-relaxed mb-6 font-[Manrope,sans-serif] max-w-sm">
@@ -79,16 +78,16 @@ export default function Footer() {
 
             <div className="flex gap-3">
               {[
-                { icon: FaFacebookF, href: "https://www.facebook.com/Ravenfragrance" },
-                { icon: FaInstagram, href: "https://www.instagram.com/ravenfragrance.in/" },
-                { icon: FaWhatsapp, href: "https://chat.whatsapp.com/YourCommunityLinkHere" },
-              ].map(({ icon: Icon, href }, i) => (
+                { icon: FaFacebookF, href: "https://www.facebook.com/Ravenfragrance", label: "Facebook" },
+                { icon: FaInstagram, href: "https://www.instagram.com/ravenfragrance.in/", label: "Instagram" },
+                { icon: FaWhatsapp, href: "https://wa.me/918424832375", label: "WhatsApp" },
+              ].map(({ icon: Icon, href, label }, i) => (
                 <a
                   key={i}
                   href={href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  aria-label="Social link"
+                  aria-label={label}
                   className="w-10 h-10 rounded-full bg-[#fcfbf8]/10 flex items-center justify-center text-[#fcfbf8]/70 hover:bg-[#f8f7f4] hover:text-[#1b180d] transition-all duration-300 hover:-translate-y-0.5"
                 >
                   <Icon size={16} />

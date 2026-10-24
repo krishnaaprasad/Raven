@@ -44,7 +44,7 @@ export const metadata = {
   },
 
   description:
-    "Luxury long-lasting perfumes crafted with high concentration oils. Elegant packaging. Free delivery across India.",
+    "Luxury long-lasting perfumes crafted with high concentration oils. Elegant packaging. Free shipping on orders above ₹1499.",
 
   keywords: [
     "luxury perfumes India",
@@ -54,9 +54,7 @@ export const metadata = {
     "Raven Fragrance",
   ],
 
-  alternates: {
-    canonical: "https://www.ravenfragrance.in",
-  },
+  // No site-wide canonical here: it was inherited by every page and told Google they were all the homepage
 
   icons: {
     icon: "/favicon.ico",
@@ -70,7 +68,7 @@ export const metadata = {
     url: "https://www.ravenfragrance.in",
     title: "Raven Fragrance | Long-Lasting Perfumes for Men & Women",
     description:
-      "Luxury long-lasting perfumes crafted with high concentration oils. Elegant packaging. Free delivery across India.",
+      "Luxury long-lasting perfumes crafted with high concentration oils. Elegant packaging. Free shipping on orders above ₹1499.",
     siteName: "Raven Fragrance",
     locale: "en_IN",
     images: [

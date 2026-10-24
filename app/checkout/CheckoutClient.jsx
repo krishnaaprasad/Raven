@@ -14,6 +14,8 @@ import { useSession, signOut } from 'next-auth/react';
 import { loadFailedOrderData } from '../context/cartcontext';
 import { event } from "@/lib/ga";
 import dynamic from 'next/dynamic';
+import { toast } from 'react-hot-toast';
+import { getShippingCharge, isValidPincodeRegion, FREE_SHIPPING_MIN, DELIVERY_AREA_MESSAGE } from '@/lib/checkoutRules';
 
 const AuthModal = dynamic(() => import('@/app/auth/modal'), {
   ssr: false,
@@ -30,12 +32,6 @@ const crimson = Crimson_Text({
   weight: ["400", "600", "700"],
   display: "swap",
 });
-
-// ✅ Region pincode validation (Mumbai: 400, Sangli: 416)
-const ALLOWED_PINCODE_PREFIXES = ['400', '416'];
-const isValidPincodeRegion = (pincode) => {
-  return pincode && /^\d{6}$/.test(pincode) && ALLOWED_PINCODE_PREFIXES.some(prefix => pincode.startsWith(prefix));
-};
 
 // ✅ Floating Input (Moved OUTSIDE to prevent focus loss on re-render)
 const FloatingInput = ({
@@ -69,7 +65,7 @@ const FloatingInput = ({
             val = val.replace(/[^0-9]/g, '').slice(0, 6);
             if (val.length === 6) {
               if (!isValidPincodeRegion(val)) {
-                setPincodeError('We are currently delivering only in Mumbai and Sangli. We will soon start service in your area — stay tuned!');
+                setPincodeError(DELIVERY_AREA_MESSAGE);
               } else {
                 setPincodeError('');
                 // 🚀 FREE SMART AUTO-FILL: Fetch City/State from Pincode
@@ -320,8 +316,13 @@ export default function CheckoutClient() {
     return () => subscription.unsubscribe();
   }, [watch, hasUserEdited, verifiedPhone]);
 
-  const shippingCharges = { standard: 50, express: 120, pickup: 0 };
   const subtotal = checkoutItems.reduce((sum, i) => sum + i.price * i.quantity, 0);
+  // Same rules as the server (lib/checkoutRules.js) — includes free standard shipping above ₹1499
+  const shippingCharges = {
+    standard: getShippingCharge('standard', subtotal),
+    express: getShippingCharge('express', subtotal),
+    pickup: getShippingCharge('pickup', subtotal),
+  };
   const shippingAmount = shippingCharges[shipping] || 0;
   const discountAmount = couponData?.discount || 0;
   const total = Math.max(subtotal + shippingAmount - discountAmount, 0);
@@ -500,7 +501,7 @@ export default function CheckoutClient() {
   const handlePayment = async (formData) => {
     // Validate pincode before proceeding
     if (!isValidPincodeRegion(formData.pincode)) {
-      setPincodeError('We are currently delivering only in Mumbai and Sangli. We will soon start service in your area — stay tuned!');
+      setPincodeError(DELIVERY_AREA_MESSAGE);
       if (fieldRefs.current['pincode']) {
         fieldRefs.current['pincode'].scrollIntoView({ behavior: 'smooth', block: 'center' });
       }
@@ -569,27 +570,32 @@ export default function CheckoutClient() {
       });
 
       const data = await res.json();
-      if (data.payment_session_id) {
-        localStorage.setItem(
-          'orderPreview',
-          JSON.stringify({
-            checkoutItems,
-            shipping,
-            shippingCharge: shippingCharges[shipping],
-            totalAmount: total,
-            user: fullFormData,
-          })
-        );
-        const cashfreeMode = process.env.NEXT_PUBLIC_CASHFREE_ENV || 'sandbox';
-        const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://www.ravenfragrance.in";
-        const cashfree = await load({ mode: cashfreeMode });
-        await cashfree.checkout({
-          paymentSessionId: data.payment_session_id,
-          redirectTarget: '_self',
-        });
+
+      // Show server-side rejections (out of stock, coupon, pincode…) instead of failing silently
+      if (!res.ok || !data.payment_session_id) {
+        toast.error(data?.error || 'Could not start payment. Please try again.');
+        return;
       }
+
+      localStorage.setItem(
+        'orderPreview',
+        JSON.stringify({
+          checkoutItems,
+          shipping,
+          shippingCharge: shippingCharges[shipping],
+          totalAmount: total,
+          user: fullFormData,
+        })
+      );
+      const cashfreeMode = process.env.NEXT_PUBLIC_CASHFREE_ENV || 'sandbox';
+      const cashfree = await load({ mode: cashfreeMode });
+      await cashfree.checkout({
+        paymentSessionId: data.payment_session_id,
+        redirectTarget: '_self',
+      });
     } catch (err) {
       console.error('Payment error:', err);
+      toast.error('Something went wrong. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -820,9 +826,9 @@ export default function CheckoutClient() {
                 <h3 className="text-[17px] font-bold mb-3">Shipping Method</h3>
                 <div className="space-y-3">
                   {Object.entries({
-                    standard: ['Standard Shipping', 'Estimated 5–7 business days', 50],
-                    express: ['Express Shipping', 'Estimated 2–3 business days', 120],
-                    pickup: ['Self Pick-Up', 'Collect from our Raven Boutique', 0],
+                    standard: ['Standard Shipping', subtotal >= FREE_SHIPPING_MIN ? 'Free on orders above ₹1499 · 5–7 business days' : `Estimated 5–7 business days · Free above ₹${FREE_SHIPPING_MIN}`, shippingCharges.standard],
+                    express: ['Express Shipping', 'Estimated 2–3 business days', shippingCharges.express],
+                    pickup: ['Self Pick-Up', 'Collect from our Raven Boutique', shippingCharges.pickup],
                   }).map(([key, [title, desc, price]]) => (
                     <label
                       key={key}
@@ -843,7 +849,7 @@ export default function CheckoutClient() {
                           <p className="text-xs text-(--theme-muted)">{desc}</p>
                         </div>
                       </div>
-                      <p className="font-medium text-[14px] text-(--theme-text)">₹{price}.00</p>
+                      <p className="font-medium text-[14px] text-(--theme-text)">{price === 0 ? 'FREE' : `₹${price}.00`}</p>
                     </label>
                   ))}
                 </div>
@@ -954,7 +960,7 @@ export default function CheckoutClient() {
               )}
               <div className="flex justify-between">
                 <span className="text-(--theme-muted)">Shipping</span>
-                <span>₹{formatAmount(shippingCharges[shipping])}</span>
+                <span>{shippingAmount === 0 ? 'FREE' : `₹${formatAmount(shippingAmount)}`}</span>
               </div>
             </div>
             <div className="my-4 border-t border-(--theme-border)" />

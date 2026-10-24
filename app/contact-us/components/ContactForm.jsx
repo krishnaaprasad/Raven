@@ -144,6 +144,7 @@ const ContactForm = ({ className = "", setSubmitted, setError }) => {
             </label>
             <input
               name="name"
+              maxLength={100}
               value={formData.name}
               onChange={handleChange}
               placeholder="Your full name"
@@ -174,6 +175,7 @@ const ContactForm = ({ className = "", setSubmitted, setError }) => {
             </label>
             <input
               name="email"
+              maxLength={200}
               value={formData.email}
               onChange={handleChange}
               placeholder="your.email@example.com"
@@ -206,6 +208,7 @@ const ContactForm = ({ className = "", setSubmitted, setError }) => {
             </label>
             <input
               name="phone"
+              maxLength={20}
               value={formData.phone}
               onChange={handleChange}
               placeholder="+91 00000 00000"
@@ -257,6 +260,7 @@ const ContactForm = ({ className = "", setSubmitted, setError }) => {
           </label>
           <textarea
             name="message"
+              maxLength={5000}
             rows={6}
             value={formData.message}
             onChange={handleChange}

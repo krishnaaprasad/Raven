@@ -18,11 +18,17 @@ const sessionId = typeof window !== "undefined"
 // Load Cart
 function loadCartFromStorage() {
   try {
+    // Restore the cart from a failed payment ONCE, then treat it as the normal cart
+    // (previously it overrode the cart on every reload, undoing the customer's changes)
     const failedOrder = localStorage.getItem('failedOrder')
     if (failedOrder) {
       const parsed = JSON.parse(failedOrder)
-      if (parsed.cartItems && Array.isArray(parsed.cartItems)) {
-        return parsed.cartItems
+      if (Array.isArray(parsed.cartItems) && parsed.cartItems.length) {
+        // Order items have no cart id — fall back to slug so remove/update target the right item
+        const items = parsed.cartItems.map((item) => ({ ...item, id: item.id || item.productId || item.slug }))
+        saveToLocal(items)
+        localStorage.setItem('failedOrder', JSON.stringify({ ...parsed, cartItems: [] }))
+        return items
       }
     }
 
@@ -122,34 +128,32 @@ export function CartProvider({ children }) {
   const addToCart = (product, quantity) => {
     setCartItems(prev => {
       const idx = prev.findIndex(item => item.id === product.id && item.size === product.size)
-      let updated
 
-      if (idx >= 0) {
-        updated = [...prev]
-        updated[idx].quantity += quantity
-      } else {
-        updated = [...prev, { ...product, quantity }]
-      }
+      // Immutable update — mutating the existing item double-counted quantity in strict mode
+      const updated = idx >= 0
+        ? prev.map((item, i) => i === idx ? { ...item, quantity: item.quantity + quantity } : item)
+        : [...prev, { ...product, quantity }]
 
       saveToLocal(updated)
-      // 🔥 GA4 Track add_to_cart (safe + non-blocking)
-      event({
-        action: "add_to_cart",
-        params: {
-          currency: "INR",
-          value: product.price * quantity,
-          items: [
-            {
-              item_id: product.id,
-              item_name: product.name,
-              price: product.price,
-              quantity,
-              item_variant: product.size,
-            },
-          ],
-        },
-      })
       return updated
+    })
+
+    // 🔥 GA4 Track add_to_cart (outside the state updater so it fires once)
+    event({
+      action: "add_to_cart",
+      params: {
+        currency: "INR",
+        value: product.price * quantity,
+        items: [
+          {
+            item_id: product.id,
+            item_name: product.name,
+            price: product.price,
+            quantity,
+            item_variant: product.size,
+          },
+        ],
+      },
     })
   }
 

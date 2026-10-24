@@ -47,6 +47,14 @@ const QuickViewModal = () => {
     };
   }, [isOpen]);
 
+  // Close on Escape
+  useEffect(() => {
+    if (!isOpen) return;
+    const onKey = (e) => e.key === 'Escape' && closeQuickView();
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [isOpen, closeQuickView]);
+
   if (!isOpen || !product) return null;
 
   const activeVariant =
@@ -115,7 +123,8 @@ const handleAddToCart = () => {
 
   const handleQuantityChange = (delta) => {
     const next = quantity + delta;
-    if (next >= 1 && next <= 10) setQuantity(next);
+    // Never more than what's in stock (checkout would reject it)
+    if (next >= 1 && next <= Math.min(10, stock)) setQuantity(next);
   };
 
 
@@ -245,7 +254,7 @@ const viewDetails = () => {
                     {variants.map((v) => (
                       <button
                         key={v.size}
-                        onClick={() => setSelectedSize(v.size)}
+                        onClick={() => { setSelectedSize(v.size); setQuantity(1); }}
                         className={`px-6 py-3 border rounded-md font-[Outfit] text-sm transition ${
                           selectedSize === v.size
                             ? 'border-[#b28c34] bg-[#b28c34]/10 text-[#b28c34]'

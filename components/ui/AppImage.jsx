@@ -1,145 +1,73 @@
-// src/components/AppImage.jsx
 'use client';
 
-import React, { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import PropTypes from 'prop-types';
 
+// next/image wrapper with a fallback. External hosts are optimised too (allowed in next.config.mjs),
+// so product photos are served resized/WebP instead of full-size originals.
+// next/image throws on values that aren't a path or http(s) URL (e.g. old orders saved "{ original: … }")
+const isUsableSrc = (v) => typeof v === 'string' && (v.startsWith('/') || /^https?:\/\//.test(v));
+
 function AppImage({
-    src,
-    alt,
-    width,
-    height,
-    className = '',
-    priority = false,
-    quality = 75,
-    placeholder = 'empty',
-    blurDataURL,
-    fill = false,
-    sizes,
-    onClick,
-    fallbackSrc = '/assets/images/no_image.png',
-    ...props
+  src,
+  alt,
+  width,
+  height,
+  className = '',
+  priority = false,
+  quality = 75,
+  fill = false,
+  sizes,
+  onClick,
+  fallbackSrc = '/placeholder.png',
+  ...props
 }) {
-    const [imageSrc, setImageSrc] = useState(src);
-    const [isLoading, setIsLoading] = useState(true);
-    const [hasError, setHasError] = useState(false);
+  const [imageSrc, setImageSrc] = useState(isUsableSrc(src) ? src : fallbackSrc);
 
-    // More reliable external URL detection
-    const isExternal = imageSrc?.startsWith('http://') || imageSrc?.startsWith('https://');
-    const isLocal = imageSrc?.startsWith('/') || imageSrc?.startsWith('./') || imageSrc?.startsWith('data:');
+  // Follow prop changes (the same instance is reused when another product opens)
+  useEffect(() => {
+    setImageSrc(isUsableSrc(src) ? src : fallbackSrc);
+  }, [src, fallbackSrc]);
 
-    const handleError = () => {
-        if (!hasError && imageSrc !== fallbackSrc) {
-            setImageSrc(fallbackSrc);
-            setHasError(true);
-        }
-        setIsLoading(false);
-    };
+  const handleError = () => {
+    if (imageSrc !== fallbackSrc) setImageSrc(fallbackSrc);
+  };
 
-    const handleLoad = () => {
-        setIsLoading(false);
-        setHasError(false);
-    };
+  const common = {
+    src: imageSrc,
+    alt: alt || 'image',
+    quality,
+    priority,
+    onError: handleError,
+    onClick,
+    className: `${className} ${onClick ? 'cursor-pointer hover:opacity-90 transition-opacity' : ''}`,
+    ...props,
+  };
 
-    const commonClassName = `${className} ${isLoading ? 'bg-gray-200' : ''} ${onClick ? 'cursor-pointer hover:opacity-90 transition-opacity' : ''}`;
-
-    // For external URLs or when in doubt, use regular img tag
-    if (isExternal && !isLocal) {
-        const imgStyle = {};
-
-        if (width) imgStyle.width = width;
-        if (height) imgStyle.height = height;
-
-        if (fill) {
-            return (
-                <div className={`relative ${className}`} style={{ width: width || '100%', height: height || '100%' }}>
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                        src={imageSrc}
-                        alt={alt || "image"}
-                        className={`${commonClassName} absolute inset-0 w-full h-full object-cover`}
-                        onError={handleError}
-                        onLoad={handleLoad}
-                        onClick={onClick}
-                        style={imgStyle}
-                        {...props}
-                    />
-                </div>
-            );
-        }
-
-        return (
-            <>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                    src={imageSrc}
-                    alt={alt || "image"}
-                    className={commonClassName}
-                    onError={handleError}
-                    onLoad={handleLoad}
-                    onClick={onClick}
-                    style={imgStyle}
-                    {...props}
-                />
-            </>
-        );
-    }
-
-    // For local images and data URLs, use Next.js Image component
-    const imageProps = {
-        src: imageSrc,
-        alt,
-        className: commonClassName,
-        priority,
-        quality,
-        placeholder,
-        blurDataURL,
-        unoptimized: true,
-        onError: handleError,
-        onLoad: handleLoad,
-        onClick,
-        ...props,
-    };
-
-    if (fill) {
-        return (
-            <div className={`relative ${className}`}>
-                <Image
-                    alt={alt || 'image'}
-                    {...imageProps}
-                    fill
-                    sizes={sizes || '100vw'}
-                    style={{ objectFit: 'cover' }}
-                />
-            </div>
-        );
-    }
-
+  if (fill || (!width && !height)) {
     return (
-        <Image
-            alt={alt || 'image'}
-            {...imageProps}
-            width={width || 400}
-            height={height || 300}
-        />
+      <div className="relative w-full h-full">
+        <Image {...common} fill sizes={sizes || '(max-width: 768px) 100vw, 50vw'} style={{ objectFit: 'cover' }} />
+      </div>
     );
+  }
+
+  return <Image {...common} width={width} height={height} sizes={sizes} />;
 }
 
 AppImage.propTypes = {
-    src: PropTypes?.string?.isRequired,
-    alt: PropTypes?.string?.isRequired,
-    width: PropTypes?.number,
-    height: PropTypes?.number,
-    className: PropTypes?.string,
-    priority: PropTypes?.bool,
-    quality: PropTypes?.number,
-    placeholder: PropTypes?.oneOf(['blur', 'empty']),
-    blurDataURL: PropTypes?.string,
-    fill: PropTypes?.bool,
-    sizes: PropTypes?.string,
-    onClick: PropTypes?.func,
-    fallbackSrc: PropTypes?.string,
+  src: PropTypes.string,
+  alt: PropTypes.string,
+  width: PropTypes.number,
+  height: PropTypes.number,
+  className: PropTypes.string,
+  priority: PropTypes.bool,
+  quality: PropTypes.number,
+  fill: PropTypes.bool,
+  sizes: PropTypes.string,
+  onClick: PropTypes.func,
+  fallbackSrc: PropTypes.string,
 };
 
 export default AppImage;

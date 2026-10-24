@@ -1,6 +1,7 @@
 import connectToDatabase from "@/lib/mongodb";
 import Review from "@/models/Review";
 import Product from "@/models/Product";
+import { Order } from "@/models/Order";
 import mongoose from "mongoose";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
@@ -39,7 +40,13 @@ export async function POST(req) {
     const body = await req.json();
     const { productId, name, rating, title, comment, images } = body;
 
-    if (!productId || !name || !title || !comment) {
+    // Type-check first: non-string values would throw on .trim() (500) instead of a clean 400
+    if (
+      typeof productId !== "string" ||
+      typeof name !== "string" || !name.trim() ||
+      typeof title !== "string" || !title.trim() ||
+      typeof comment !== "string" || !comment.trim()
+    ) {
       return Response.json(
         { message: "Missing required fields" },
         { status: 400 }
@@ -67,9 +74,16 @@ export async function POST(req) {
       );
     }
 
+    // Basic length limits (stops spam / giant payloads)
+    if (String(name).length > 60 || String(title).length > 120 || String(comment).length > 2000) {
+      return Response.json({ message: "Review is too long" }, { status: 400 });
+    }
+
     // Check if product exists
-    const productExists = await Product.exists({ _id: productId });
-    if (!productExists) {
+    const product = await Product.findOne({ _id: productId, deleted: { $ne: true } })
+      .select("slug")
+      .lean();
+    if (!product) {
       return Response.json(
         { message: "Product not found" },
         { status: 404 }
@@ -79,19 +93,39 @@ export async function POST(req) {
     // ✅ Secure Verified Logic (Server Side)
     const session = await getServerSession(authOptions);
 
-    // Validate images array
+    // Only accept our own Cloudinary uploads (max 5) — arbitrary URLs could embed any external image
+    const cloudPrefix = `https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/`;
     const validImages = Array.isArray(images)
-      ? images.filter((img) => typeof img === "string")
+      ? images.filter((img) => typeof img === "string" && img.startsWith(cloudPrefix)).slice(0, 5)
       : [];
+
+    // "Verified" = logged-in customer who actually has a paid order containing this product
+    let isVerified = false;
+    if (session?.user) {
+      const ownerMatch = [];
+      if (session.user.id && mongoose.Types.ObjectId.isValid(session.user.id)) {
+        ownerMatch.push({ userId: session.user.id });
+      }
+      if (session.user.phone) ownerMatch.push({ phone: session.user.phone });
+      if (ownerMatch.length) {
+        isVerified = Boolean(
+          await Order.exists({
+            $or: ownerMatch,
+            payment_status: "PAID",
+            "cartItems.slug": product.slug,
+          })
+        );
+      }
+    }
 
     const review = await Review.create({
       productId,
-      name,
+      name: String(name).trim(),
       rating: numericRating,
-      title,
-      comment,
+      title: String(title).trim(),
+      comment: String(comment).trim(),
       images: validImages,
-      isVerified: !!session, // Verified if logged in
+      isVerified,
     });
     // Recalculate rating
     const reviews = await Review.find({

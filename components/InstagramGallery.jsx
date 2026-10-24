@@ -41,6 +41,7 @@ export default function InstagramGallery() {
             frameBorder="0"
             scrolling="no"
             title="Posts from Instagram"
+            loading="lazy"
             style={{
               border: "none",
               overflow: "hidden",

@@ -67,6 +67,15 @@ export default function LoginRegisterPage({ onClose, onLoginSuccess, verificatio
 
   const handleOtpChange = (index, value) => {
     if (!/^\d*$/.test(value)) return;
+
+    // SMS autofill / paste puts the whole code into one box — spread it across the boxes
+    if (value.length > 1) {
+      const digits = value.slice(0, 4).split('');
+      setOtp([0, 1, 2, 3].map((i) => digits[i] || ''));
+      otpInputRefs.current[Math.min(digits.length, 4) - 1]?.focus();
+      return;
+    }
+
     const newOtp = [...otp];
     newOtp[index] = value.slice(-1);
     setOtp(newOtp);
@@ -277,7 +286,9 @@ export default function LoginRegisterPage({ onClose, onLoginSuccess, verificatio
                         ref={(el) => (otpInputRefs.current[index] = el)}
                         type="text"
                         inputMode="numeric"
-                        maxLength={1}
+                        autoComplete={index === 0 ? "one-time-code" : "off"}
+                        aria-label={`OTP digit ${index + 1}`}
+                        maxLength={index === 0 ? 4 : 1}
                         value={digit}
                         onChange={(e) => handleOtpChange(index, e.target.value)}
                         onKeyDown={(e) => handleOtpKeyDown(index, e)}

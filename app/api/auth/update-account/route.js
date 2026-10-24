@@ -10,7 +10,8 @@ export async function POST(req) {
     if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const data = await req.json();
-    const { name, email, phone, address1, address2, city, state, pincode } = data;
+    // Phone is the OTP-verified login identity — it can't be changed here without verification
+    const { name, email, address1, address2, city, state, pincode } = data;
     
     await connectToDatabase();
 
@@ -19,14 +20,16 @@ export async function POST(req) {
 
     // Update fields
     if (name !== undefined) user.name = name;
-    if (email !== undefined) user.email = email;
-    if (phone !== undefined) {
-        // Only update if it doesn't conflict with another user
-        if (phone !== user.phone) {
-            const existing = await User.findOne({ phone });
-            if (existing) return NextResponse.json({ error: "Phone number already in use" }, { status: 400 });
-            user.phone = phone;
-        }
+    if (email !== undefined) {
+      const cleanEmail = String(email).trim().toLowerCase();
+      if (cleanEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
+        return NextResponse.json({ error: "Please enter a valid email" }, { status: 400 });
+      }
+      if (cleanEmail && cleanEmail !== user.email) {
+        const taken = await User.findOne({ email: cleanEmail, _id: { $ne: user._id } });
+        if (taken) return NextResponse.json({ error: "Email already in use" }, { status: 400 });
+      }
+      user.email = cleanEmail || user.email;
     }
     if (address1 !== undefined) user.address1 = address1;
     if (address2 !== undefined) user.address2 = address2;

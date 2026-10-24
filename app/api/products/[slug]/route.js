@@ -1,5 +1,6 @@
 import connectToDatabase from "@/lib/mongodb";
 import Product from "@/models/Product";
+import { PUBLIC_PRODUCT_FIELDS } from "@/lib/publicProduct";
 
 export async function GET(request, context) {
   try {
@@ -11,7 +12,9 @@ export async function GET(request, context) {
     const product = await Product.findOne({
       slug,
       deleted: { $ne: true },
-    }).lean();
+    })
+      .select(PUBLIC_PRODUCT_FIELDS)
+      .lean();
 
     if (!product) {
       return new Response(

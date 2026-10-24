@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { Crimson_Text } from "next/font/google";
+import AppImage from "@/components/ui/AppImage";
 
 const crimson = Crimson_Text({
   subsets: ["latin"],
@@ -107,22 +108,14 @@ export default function OrdersList() {
             {/* DESKTOP IMAGE */}
             <div className="hidden sm:flex items-center justify-center w-40 p-4">
               <div className="w-24 h-24 rounded-lg overflow-hidden shadow border border-(--theme-border)">
-                <img
-                  src={firstImage}
-                  className="w-full h-full object-cover"
-                  alt="Product"
-                />
+                <AppImage src={firstImage} alt="Product" sizes="96px" className="object-cover" />
               </div>
             </div>
 
             {/* MOBILE BANNER IMAGE */}
             <div className="block sm:hidden w-full">
               <div className="h-44 w-full overflow-hidden rounded-t-xl">
-                <img
-                  src={firstImage}
-                  className="w-full h-full object-cover"
-                  alt="Product"
-                />
+                <AppImage src={firstImage} alt="Product" sizes="100vw" className="object-cover" />
               </div>
             </div>
 

@@ -1,22 +1,20 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import ProductGridNavigation from '@/components/shoppage/ProductGridNavigation';
 import ProductGrid from './ProductGrid';
-import { ArrowUp, CheckCircle } from 'lucide-react';
+import { ArrowUp } from 'lucide-react';
 import { useCart } from '@/app/context/cartcontext';
 import { useQuickView } from "@/app/context/QuickViewContext";
 import { motion, AnimatePresence } from "framer-motion";
 
 const ProductCollectionInteractive = ({ initialProducts, activeFilters }) => {
   const { addToCart, openCart } = useCart();
-  const [filteredProducts, setFilteredProducts] = useState(initialProducts || []);
   const [currentPage, setCurrentPage] = useState(1);
   const [sortBy, setSortBy] = useState('featured');
   const [viewMode, setViewMode] = useState('grid');
   const { openQuickView } = useQuickView();
   const [showScrollTop, setShowScrollTop] = useState(false);
-  const [cartNotification, setCartNotification] = useState(null);
   const productsPerPage = 24;
 
   /* Scroll to top visibility */
@@ -24,61 +22,52 @@ const ProductCollectionInteractive = ({ initialProducts, activeFilters }) => {
     const handleScroll = () => {
       setShowScrollTop(window.scrollY > 500);
     };
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
 
-  /* ---------------- SORTING ---------------- */
-  const applySorting = (sortValue, baseProducts = filteredProducts) => {
-  let sorted = [...baseProducts];
+  /* ---------------- FILTER + SORT ----------------
+     Always derived from the original list, so "Featured" restores the original order
+     and switching sorts never compounds a previous sort. */
+  const filteredProducts = useMemo(() => {
+    let list = [...(initialProducts || [])];
 
-  switch (sortValue) {
-    case 'price-low':
-      sorted.sort(
-        (a, b) =>
-          (a?.variants?.[0]?.price || 0) -
-          (b?.variants?.[0]?.price || 0)
+    if (activeFilters?.accords?.length) {
+      list = list.filter((product) =>
+        product.accords?.some((a) => activeFilters.accords.includes(a.toLowerCase()))
       );
-      break;
+    }
 
-    case 'price-high':
-      sorted.sort(
-        (a, b) =>
-          (b?.variants?.[0]?.price || 0) -
-          (a?.variants?.[0]?.price || 0)
-      );
-      break;
-
-    case 'name-asc':
-      sorted.sort((a, b) => a.name.localeCompare(b.name));
-      break;
-
-    case 'name-desc':
-      sorted.sort((a, b) => b.name.localeCompare(a.name));
-      break;
-
-    case 'rating':
-      sorted.sort((a, b) => (b.rating || 0) - (a.rating || 0));
-      break;
-
-    case 'newest':
-      sorted.sort(
-        (a, b) =>
-          new Date(b.createdAt) - new Date(a.createdAt)
-      );
-      break;
-
-    default:
-      break;
-  }
-
-  setFilteredProducts(sorted);
-};
+    const price = (p) => p?.variants?.[0]?.price || 0;
+    switch (sortBy) {
+      case 'price-low':
+        list.sort((a, b) => price(a) - price(b));
+        break;
+      case 'price-high':
+        list.sort((a, b) => price(b) - price(a));
+        break;
+      case 'name-asc':
+        list.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+        break;
+      case 'name-desc':
+        list.sort((a, b) => (b.name || '').localeCompare(a.name || ''));
+        break;
+      case 'rating':
+        list.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+        break;
+      case 'newest':
+        list.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        break;
+      default:
+        break; // featured = original order
+    }
+    return list;
+  }, [initialProducts, activeFilters, sortBy]);
 
   const handleSortChange = (value) => {
     setSortBy(value);
-    applySorting(value);
+    setCurrentPage(1);
   };
 
   const handleViewChange = (mode) => {
@@ -121,21 +110,10 @@ const ProductCollectionInteractive = ({ initialProducts, activeFilters }) => {
     currentPage * productsPerPage
   );
 
+  // Back to page 1 whenever the filters change
   useEffect(() => {
-  let filtered = [...initialProducts];
-
-  if (activeFilters?.accords?.length) {
-    filtered = filtered.filter(product =>
-      product.accords?.some(a =>
-        activeFilters.accords.includes(a.toLowerCase())
-      )
-    );
-  }
-
-  applySorting(sortBy, filtered);
-  setCurrentPage(1);
-
-}, [activeFilters]);
+    setCurrentPage(1);
+  }, [activeFilters]);
 
   return (
     <div className="min-h-screen bg-[var(--theme-bg)] transition-colors duration-500">
@@ -186,27 +164,12 @@ const ProductCollectionInteractive = ({ initialProducts, activeFilters }) => {
         </div>
       </div>
 
-      {/* Cart Toast */}
-      {cartNotification && (
-        <div className="
-          fixed bottom-8 right-8 z-50
-          bg-[var(--theme-bg)]
-          text-[var(--theme-text)]
-          border border-[var(--theme-border)]
-          px-6 py-4 rounded-lg shadow-lg
-          flex items-center gap-3
-        ">
-          <CheckCircle size={22} />
-          <span className="font-[Outfit] text-sm font-medium">
-            {cartNotification}
-          </span>
-        </div>
-      )}
 
       {/* Scroll Top */}
       {showScrollTop && (
         <button
           onClick={scrollToTop}
+          aria-label="Scroll to top"
           className="
             fixed bottom-8 left-8 z-50
             w-12 h-12 rounded-full

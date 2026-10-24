@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
 import { Printer, HelpCircle, RotateCcw, Truck, CreditCard, Banknote, Wallet } from "lucide-react";
 import { Crimson_Text } from "next/font/google";
+import AppImage from "@/components/ui/AppImage";
 
 const crimson = Crimson_Text({
   subsets: ["latin"],
@@ -18,17 +19,37 @@ export default function OrderDetails({ orderId }) {
   const router = useRouter();
 
   const [order, setOrder] = useState(null);
+  const [notFound, setNotFound] = useState(false);
+  const [loadError, setLoadError] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
   const formatAmount = (amount) => {
   if (!amount || isNaN(amount)) return "0.00";
   return parseFloat(amount).toFixed(2);
 };
 
 useEffect(() => {
+  // Reset per orderId and drop responses that arrive for a previous orderId
+  let active = true;
+  setOrder(null);
+  setNotFound(false);
+  setLoadError(false);
+
   const loadOrder = async () => {
-    // 1️⃣ Fetch order
-    const res = await fetch(`/api/order/${orderId}`);
-    const data = await res.json();
-    if (!data.success) return;
+    // 1️⃣ Fetch order — network/parse/server failures are retryable errors, only 401/404 mean "not found"
+    let res, data;
+    try {
+      res = await fetch(`/api/order/${orderId}`);
+      data = await res.json();
+    } catch {
+      if (active) setLoadError(true);
+      return;
+    }
+    if (!active) return;
+    if (!data?.success) {
+      if (res.status === 404 || res.status === 401) setNotFound(true);
+      else setLoadError(true);
+      return;
+    }
 
     let merged = data.order;
 
@@ -52,16 +73,37 @@ useEffect(() => {
       } catch (err) {
         console.log("Verification skipped: ", err);
       }
-    } else {
-      console.log("⚠️ No cf_order_id → skipping verification");
     }
 
-    setOrder(merged);
+    if (active) setOrder(merged);
   };
 
   loadOrder();
-}, [orderId]);
+  return () => {
+    active = false;
+  };
+}, [orderId, reloadKey]);
 
+
+  if (notFound) {
+    return (
+      <p className="text-center py-6 text-(--theme-muted)">Order not found.</p>
+    );
+  }
+
+  if (loadError) {
+    return (
+      <div className="text-center py-6">
+        <p className="text-(--theme-muted) mb-3">Couldn&apos;t load this order. Please check your connection.</p>
+        <button
+          onClick={() => setReloadKey((k) => k + 1)}
+          className="px-4 py-2 text-xs font-bold border border-(--theme-border) rounded-lg text-(--theme-text) hover:bg-(--theme-soft)"
+        >
+          Try again
+        </button>
+      </div>
+    );
+  }
 
   if (!order) {
     return (
@@ -163,11 +205,9 @@ useEffect(() => {
           <div className="flex flex-col divide-y divide-[#e7e1cf]">
             {order.cartItems.map((item, index) => (
               <div key={index} className="flex items-center py-6 gap-4">
-                <img
-                  src={item.image}
-                  className="w-24 h-24 object-cover rounded-lg border border-(--theme-border)"
-                  alt={item.name}
-                />
+                <div className="w-24 h-24 shrink-0 overflow-hidden rounded-lg border border-(--theme-border)">
+                  <AppImage src={item.image} alt={item.name} sizes="96px" className="object-cover" />
+                </div>
 
                 <div className="grow">
                   <p className="text-(--theme-text) font-bold">{item.name}</p>

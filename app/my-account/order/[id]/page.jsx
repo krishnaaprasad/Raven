@@ -5,6 +5,7 @@ import { useCart } from "@/app/context/cartcontext";
 import { Playfair_Display, Manrope } from "next/font/google";
 import Link from "next/link";
 import { useParams } from "next/navigation";
+import AppImage from "@/components/ui/AppImage";
 
 // import usePageMetadata from '../hooks/usePageMetadata';
 
@@ -21,24 +22,62 @@ export default function OrderDetailPage() {
   const id = params.id;
   const { addToCart } = useCart();
   const [order, setOrder] = useState(null);
+  const [notFound, setNotFound] = useState(false);
+  const [loadError, setLoadError] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
-    const fetchOrder = async () => {
-      const res = await fetch(`/api/order/${id}`, {
-        cache: "no-store",
-      });
-      const data = await res.json();
+    // Reset when the id changes and ignore responses for a previous id
+    let active = true;
+    setOrder(null);
+    setNotFound(false);
+    setLoadError(false);
 
-      if (data.success) setOrder(data.order);
+    const fetchOrder = async () => {
+      // Network/parse/server failures are retryable; only 401/404 mean "not found"
+      let res, data;
+      try {
+        res = await fetch(`/api/order/${id}`, { cache: "no-store" });
+        data = await res.json();
+      } catch {
+        if (active) setLoadError(true);
+        return;
+      }
+      if (!active) return;
+
+      if (data?.success) {
+        setOrder(data.order);
+      } else if (res.status === 404 || res.status === 401) {
+        setNotFound(true);
+      } else {
+        setLoadError(true);
+      }
     };
     fetchOrder();
-  }, [id]);
+    return () => {
+      active = false;
+    };
+  }, [id, reloadKey]);
 
   if (!order)
     return (
-      <p className="p-6 text-center font-medium text-(--theme-text)">
-        Loading order...
-      </p>
+      <div className="p-6 text-center font-medium text-(--theme-text)">
+        {notFound ? (
+          "Order not found. Please log in with the number used for this order."
+        ) : loadError ? (
+          <>
+            <p className="mb-3">Couldn&apos;t load this order. Please check your connection.</p>
+            <button
+              onClick={() => setReloadKey((k) => k + 1)}
+              className="px-4 py-2 text-sm border border-(--theme-border) rounded-lg hover:bg-(--theme-soft)"
+            >
+              Try again
+            </button>
+          </>
+        ) : (
+          "Loading order..."
+        )}
+      </div>
     );
    // Always cast to Number (handles string, Decimal128, etc.)
 const subtotal = order.cartItems.reduce(
@@ -66,14 +105,12 @@ const total = Number(order.totalAmount || 0);
     });
     window.location.href = "/Cart";
   };
- console.log("FRONTEND ORDER:", order);
-console.log("DISCOUNT FROM API:", order.discount);
   return (
     <div className="max-w-4xl mx-auto p-6 mt-6 mb-20 bg-(--theme-bg) text-(--theme-text) rounded-2xl border border-(--theme-border) shadow-sm transition-colors duration-300">
       
       {/* Back Button */}
       <Link
-        href="/account/orders"
+        href="/my-account?tab=Orders"
         className="text-sm text-(--theme-muted) hover:text-(--theme-text) hover:underline mb-4 inline-block transition"
       >
         ← Back to Orders
@@ -101,7 +138,7 @@ console.log("DISCOUNT FROM API:", order.discount);
         <div className="bg-(--theme-soft) rounded-lg p-4 border border-(--theme-border)">
           <p className="text-sm text-(--theme-muted)">Order Date</p>
           <p className="font-medium text-(--theme-text)">
-            {new Date(order.createdAt).toLocaleString()}
+            {new Date(order.createdAt).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short", timeZone: "Asia/Kolkata" })}
           </p>
         </div>
       </div>
@@ -151,11 +188,9 @@ console.log("DISCOUNT FROM API:", order.discount);
             className="flex justify-between items-center py-4 border-b border-(--theme-border)"
           >
             <div className="flex gap-4">
-              <img
-                src={item.image}
-                className="w-20 h-20 rounded-md border border-(--theme-border)"
-                alt={item.name}
-              />
+              <div className="w-20 h-20 shrink-0 overflow-hidden rounded-md border border-(--theme-border)">
+                <AppImage src={item.image} alt={item.name} sizes="80px" className="object-cover" />
+              </div>
               <div>
                 <p className="font-semibold text-(--theme-text)">{item.name}</p>
                 <p className="text-sm text-(--theme-muted)">{item.size}</p>
@@ -230,7 +265,7 @@ console.log("DISCOUNT FROM API:", order.discount);
         </button>
 
         <Link
-          href="/account/orders"
+          href="/my-account?tab=Orders"
           className="px-6 py-3 rounded-lg border border-(--theme-border) text-(--theme-text) hover:bg-(--theme-dark) hover:text-(--theme-bg) transition w-full md:w-auto text-center"
         >
           Back to Orders

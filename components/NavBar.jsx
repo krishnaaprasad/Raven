@@ -252,7 +252,7 @@ const sidebarTop = pastMarquee
               {/* Cart */}
               <button onClick={openCart} className="relative flex items-center" aria-label="Open Shopping Bag">
                 <ShoppingBagIcon
-                  className={`h-5 w-5 text-(--theme-text) cursor-pointer${
+                  className={`h-5 w-5 text-(--theme-text) cursor-pointer ${
                     animateCart ? "animate-bounce" : ""
                   }`}
                 />

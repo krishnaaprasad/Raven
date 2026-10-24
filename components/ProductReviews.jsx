@@ -7,6 +7,8 @@ import { useSession } from "next-auth/react";
 import { X } from "lucide-react";
 
 const REVIEWS_PER_PAGE = 4;
+const MAX_REVIEW_IMAGES = 5; // server keeps at most 5
+const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
 
 /* ───────────────────────── */
 /* ⭐ Star Rating Component */
@@ -165,8 +167,22 @@ export default function ProductReviews({ productId, initialOpenForm = false }) {
     }
   };
 
+  const [uploading, setUploading] = useState(false);
+
   const handleImageUpload = async (e) => {
-    const files = Array.from(e.target.files);
+    const picked = Array.from(e.target.files || []);
+    e.target.value = ""; // allow re-selecting the same file
+    const room = MAX_REVIEW_IMAGES - form.images.length;
+    const files = picked
+      .filter((f) => f.type.startsWith("image/") && f.size <= MAX_IMAGE_BYTES)
+      .slice(0, Math.max(room, 0));
+
+    if (files.length < picked.length) {
+      setError(`Up to ${MAX_REVIEW_IMAGES} images, max 5 MB each.`);
+    }
+    if (!files.length) return;
+
+    setUploading(true);
     try {
       const results = await Promise.allSettled(
         files.map(uploadToCloudinary)
@@ -190,6 +206,8 @@ export default function ProductReviews({ productId, initialOpenForm = false }) {
     } catch (err) {
       console.error("Image upload error:", err);
       setError("Failed to upload images. Please try again.");
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -234,7 +252,7 @@ const handleSubmit = async (e) => {
     }
 
     setShowForm(false);
-    setForm({ rating: 0, title: "", body: "", name: "", images: [] });
+    setForm({ rating: 0, title: "", body: "", name: session?.user?.name || "", images: [] });
     setError(null);
   } catch (err) {
     console.error("Submit error:", err);
@@ -468,8 +486,10 @@ useEffect(() => {
             <Upload className="w-7 h-7 text-(--theme-muted)" />
             <input
               type="file"
+              accept="image/*"
               multiple
               onChange={handleImageUpload}
+              disabled={uploading || form.images.length >= MAX_REVIEW_IMAGES}
               className="hidden"
             />
           </label>
@@ -493,7 +513,8 @@ useEffect(() => {
                       images: prev.images.filter((_,index)=>index!==i)
                     }))
                   }
-                  className="absolute -top-2 -right-2 w-6 h-6 bg-(--theme-text) text-(--theme-bg) text-xs flex items-center justify-center rounded-full opacity-0 group-hover:opacity-100 transition cursor-pointer"
+                  aria-label="Remove image"
+                  className="absolute -top-2 -right-2 w-6 h-6 bg-(--theme-text) text-(--theme-bg) text-xs flex items-center justify-center rounded-full opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition cursor-pointer"
                 >
                   ×
                 </button>
@@ -541,10 +562,10 @@ useEffect(() => {
 
         <button
           type="submit"
-          disabled={submitting || !form.rating || !form.title || !form.body || !form.name}
+          disabled={submitting || uploading || !form.rating || !form.title || !form.body || !form.name}
           className="px-10 py-3 bg-(--theme-text) text-(--theme-bg) text-[13px] uppercase tracking-wide disabled:opacity-40 hover:opacity-90 transition cursor-pointer"
         >
-          {submitting ? "Submitting..." : "Submit Review"}
+          {submitting ? "Submitting..." : uploading ? "Uploading photos..." : "Submit Review"}
         </button>
 
       </div>
@@ -614,7 +635,7 @@ useEffect(() => {
             <div className="flex justify-between mb-2">
               <StarRating rating={r.rating} size={17} />
               <span className="text-xs text-(--theme-muted)">
-                {new Date(r.createdAt).toLocaleDateString()}
+                {new Date(r.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric", timeZone: "Asia/Kolkata" })}
               </span>
             </div>
 
@@ -678,7 +699,7 @@ useEffect(() => {
 
     {r.replyAt && (
       <p className="text-xs text-(--theme-muted) mt-2">
-        {new Date(r.replyAt).toLocaleDateString()}
+        {new Date(r.replyAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric", timeZone: "Asia/Kolkata" })}
       </p>
     )}
   </div>

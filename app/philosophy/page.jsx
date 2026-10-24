@@ -13,9 +13,9 @@ export default function Page() {
         "Traditional fragrance marketing relies on aspiration, celebrity endorsement, and manufactured desire. We reject this approach entirely. Our marketing is anti-marketing-honest communication about what we create and why.",
     },
     {
-      title: "Why Only Three Fragrances",
+      title: "Why a Small Collection",
       content:
-        "Our decision to offer just three signature scents is intentional. This restraint allows us to perfect each composition and maintain consistent quality rather than dilute our focus across dozens of offerings.",
+        "Our decision to keep a small, curated collection of signature scents is intentional. This restraint allows us to perfect each composition and maintain consistent quality rather than dilute our focus across dozens of offerings.",
     },
     {
       title: "The Role of Silence in Fragrance",

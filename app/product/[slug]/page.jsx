@@ -1,6 +1,8 @@
 import { cache } from "react";
+import { notFound } from "next/navigation";
 import connectToDatabase from "@/lib/mongodb";
 import Product from "@/models/Product";
+import { PUBLIC_PRODUCT_FIELDS } from "@/lib/publicProduct";
 import ProductClient from "./ProductClient";
 
 // Cache rendered product pages; refresh every 60s so price/stock edits show up quickly
@@ -10,7 +12,7 @@ export const revalidate = 60;
 const getProduct = cache(async (slug) => {
   await connectToDatabase();
   const product = await Product.findOne({ slug, deleted: { $ne: true } })
-    .select("-__v")
+    .select(PUBLIC_PRODUCT_FIELDS)
     .lean();
   return product ? JSON.parse(JSON.stringify(product)) : null;
 });
@@ -101,10 +103,14 @@ export async function generateMetadata({ params }) {
 export default async function Page({ params }) {
   const { slug } = await params;
   let product = null;
+  let failed = false;
   try {
     product = await getProduct(slug);
   } catch (error) {
+    failed = true;
     console.error("Product fetch error:", error);
   }
+  // Real 404 for removed/unknown products (DB errors still fall back to the client fetch)
+  if (!product && !failed) notFound();
   return <ProductClient slug={slug} initialProduct={product} />;
 }

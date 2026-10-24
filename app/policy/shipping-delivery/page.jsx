@@ -15,7 +15,7 @@ export default function ShippingPolicyPage() {
         </h1>
 
         <p className="text-sm text-(--theme-muted) text-center mb-10 font-[system-ui]">
-          Last updated: October 2025
+          Last updated: October 2026
         </p>
 
         {/* Intro */}
@@ -37,6 +37,27 @@ export default function ShippingPolicyPage() {
             During festive or high sale periods, processing time may extend up to
             2–3 business days.
           </p>
+        </section>
+
+        {/* Serviceable Areas & Charges */}
+        <section className="mb-8">
+          <h2 className="text-2xl font-semibold mb-4 font-[Crimson_Text]">
+            Serviceable Areas &amp; Shipping Charges
+          </h2>
+
+          <p className="text-(--theme-muted) font-[system-ui] leading-relaxed">
+            We currently deliver to <strong>Mumbai and nearby areas</strong>{" "}
+            (Thane, Navi Mumbai, Mira-Bhayandar, Vasai-Virar, Kalyan-Dombivli,
+            Ulhasnagar, Ambernath, Badlapur, Bhiwandi and Panvel — PIN codes
+            starting with 400, 401, 410 and 421) and <strong>Sangli</strong>{" "}
+            (PIN codes starting with 416). We will be expanding to more cities soon.
+          </p>
+
+          <ul className="list-disc pl-6 mt-3 space-y-1 text-(--theme-muted) font-[system-ui]">
+            <li>Standard Shipping: ₹50 (free on orders above ₹1499)</li>
+            <li>Express Shipping: ₹120</li>
+            <li>Self Pick-Up from our boutique: Free</li>
+          </ul>
         </section>
 
         {/* Delivery Timeline */}

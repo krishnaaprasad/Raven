@@ -72,12 +72,20 @@ export default function HomeMarquee() {
         className="bg-black text-white text-xs font-semibold uppercase tracking-wider h-8 flex items-center overflow-hidden"
       >
         <Marquee pauseOnHover gradient={false} speed={60}>
-          {marquee.lines.map((item, i) => (
-            <span key={i} className="flex items-center gap-2 mx-8">
-              {renderIcon(item.icon)}
-              {item.text}
-            </span>
-          ))}
+          {marquee.lines.map((item, i) =>
+            // Admin can attach a link to a line; only same-site paths or https links are used
+            item.link && (item.link.startsWith("/") || item.link.startsWith("https://")) ? (
+              <a key={i} href={item.link} className="flex items-center gap-2 mx-8 hover:underline">
+                {renderIcon(item.icon)}
+                {item.text}
+              </a>
+            ) : (
+              <span key={i} className="flex items-center gap-2 mx-8">
+                {renderIcon(item.icon)}
+                {item.text}
+              </span>
+            )
+          )}
         </Marquee>
       </motion.div>
     </AnimatePresence>

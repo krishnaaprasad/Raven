@@ -5,9 +5,11 @@ export async function POST(req) {
   try {
     await connectToDatabase();
 
-    const { email } = await req.json();
+    const body = await req.json();
+    // Normalise and validate; also rejects non-string values (e.g. {"$ne": null} query injection)
+    const email = typeof body?.email === "string" ? body.email.trim().toLowerCase() : "";
 
-    if (!email || !email.includes("@")) {
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || email.length > 200) {
       return Response.json(
         { message: "Valid email is required" },
         { status: 400 }

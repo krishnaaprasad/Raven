@@ -5,9 +5,9 @@ import Image from 'next/image';
 import usePageMetadata from '../hooks/usePageMetadata';
 import { useCart } from '../context/cartcontext';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
 import { MdDelete } from 'react-icons/md';
 import ScrollReveal from '@/components/ScrollReveal';
+import { FREE_SHIPPING_MIN } from '@/lib/checkoutRules';
 
 export default function CartPage() {
   usePageMetadata(
@@ -17,8 +17,6 @@ export default function CartPage() {
 
   const { cartItems, removeFromCart, updateQuantity } = useCart();
   const router = useRouter();
-  const [discount, setDiscount] = useState('');
-  
   const totalPrice = cartItems.reduce(
     (sum, item) => sum + item.price * item.quantity,
     0
@@ -54,22 +52,24 @@ export default function CartPage() {
 
         {/* Left Column */}
         <div className="lg:col-span-2 space-y-6">
-          {cartItems.map((item, i) => (
-            <ScrollReveal key={i}>
+          {cartItems.map((item) => (
+            <ScrollReveal key={`${item.id}-${item.size}`}>
               <div
                 className="flex items-center justify-between bg-(--theme-soft) border border-(--theme-border) p-5 transition"
               >
                 {/* Product Info */}
                 <div className="flex items-start gap-5 grow">
                   <div className="h-[95px] w-[95px] overflow-hidden border border-(--theme-border)">
-                    <Image
-                      src={item.image}
-                      alt={item.name}
-                      width={95}
-                      height={95}
-                      className="object-cover w-full h-full"
-                      unoptimized
-                    />
+                    {item.image && (
+                      <Image
+                        src={item.image}
+                        alt={item.name}
+                        width={95}
+                        height={95}
+                        sizes="95px"
+                        className="object-cover w-full h-full"
+                      />
+                    )}
                   </div>
 
                   <div>
@@ -161,37 +161,16 @@ export default function CartPage() {
 
             <div className="flex justify-between">
               <span className="text-(--theme-muted)">Shipping</span>
-              <span>Calculated at next step</span>
+              <span>{totalPrice >= FREE_SHIPPING_MIN ? 'FREE (standard)' : 'Calculated at next step'}</span>
             </div>
+
+            {totalPrice < FREE_SHIPPING_MIN && (
+              <p className="text-xs text-(--theme-muted)">
+                Add ₹{FREE_SHIPPING_MIN - totalPrice} more for free standard shipping
+              </p>
+            )}
           </div>
 
-          {/* Discount */}
-          {/* <div>
-            <label
-              htmlFor="discount-code"
-              className="block text-sm font-semibold mb-2"
-            >
-              Discount Code
-            </label>
-
-            <div className="flex gap-2">
-              <input
-                id="discount-code"
-                type="text"
-                placeholder="Enter code"
-                value={discount}
-                onChange={(e) => setDiscount(e.target.value)}
-                className="grow border border-(--theme-border) bg-(--theme-bg) text-sm py-2 px-3 focus:outline-none"
-              />
-
-              <button
-                type="button"
-                className="px-4 py-2 border border-(--theme-border) text-sm font-semibold hover:bg-(--theme-bg) transition"
-              >
-                Apply
-              </button>
-            </div>
-          </div> */}
 
           {/* Total */}
           <div className="border-t border-(--theme-border) pt-4">
@@ -213,11 +192,7 @@ export default function CartPage() {
 
           {/* Payment Logos */}
           <div className="flex items-center justify-center gap-4 pt-4 opacity-80">
-            {[
-              'https://upload.wikimedia.org/wikipedia/commons/9/98/Visa_Inc._logo_%282005%E2%80%932014%29.svg',
-              'https://upload.wikimedia.org/wikipedia/commons/d/d1/RuPay.svg',
-              'https://upload.wikimedia.org/wikipedia/commons/e/e1/UPI-Logo-vector.svg'
-            ].map((src, i) => (
+            {['/visa.svg', '/rupay.svg', '/upi.svg'].map((src, i) => (
               <img
                 key={i}
                 src={src}

@@ -8,6 +8,7 @@ import User from "@/models/User";
 import { generateSequentialOrderIdFromItems } from "@/lib/generateOrderId";
 import Coupon from "@/models/Coupon";
 import Product from "@/models/Product";
+import { getShippingCharge, isValidPincodeRegion, DELIVERY_AREA_MESSAGE } from "@/lib/checkoutRules";
 
 // =============================
 // Helper → Generate Sequential Custom Order ID
@@ -118,6 +119,23 @@ export async function POST(req) {
       );
     }
     
+    // All text fields must be strings (objects like {"$ne": null} would reach Mongo queries)
+    const textFields = [firstName, lastName, email, phone, address1, city, state, pincode, shipping];
+    if (
+      textFields.some((v) => typeof v !== "string") ||
+      (address2 != null && typeof address2 !== "string") ||
+      (couponCode != null && typeof couponCode !== "string")
+    ) {
+      return NextResponse.json({ error: "Invalid checkout details" }, { status: 400 });
+    }
+
+    if (!isValidPincodeRegion(pincode)) {
+      return NextResponse.json(
+        { error: DELIVERY_AREA_MESSAGE },
+        { status: 400 }
+      );
+    }
+
     if (!Array.isArray(cartItems) || cartItems.length === 0) {
       return NextResponse.json(
         { error: "Cart is empty" },
@@ -176,13 +194,11 @@ export async function POST(req) {
       item.price = dbPrice;
     }
 
-    // 2️⃣ Shipping is priced on the server — never trust the client's amount
-    // (keep in sync with shippingCharges in app/checkout/CheckoutClient.jsx)
-    const SHIPPING_CHARGES = { standard: 50, express: 120, pickup: 0 };
-    if (!(shipping in SHIPPING_CHARGES)) {
+    // 2️⃣ Shipping is priced on the server (same rules as checkout page) — never trust the client's amount
+    const safeShippingCharge = getShippingCharge(shipping, subtotal);
+    if (safeShippingCharge === null) {
       return NextResponse.json({ error: "Invalid shipping method" }, { status: 400 });
     }
-    const safeShippingCharge = SHIPPING_CHARGES[shipping];
 
     // 3️⃣ Validate coupon if provided
     let discountAmount = 0;
@@ -269,7 +285,8 @@ export async function POST(req) {
     // 👇 Decide which user to attach to this order
     let finalUserId = null;
 
-    if (session?.user && session.user.email) {
+    // OTP logins have no email in the session — link by account id
+    if (session?.user?.id) {
       // Logged-in user (credentials/Google) - attach real account
       finalUserId = session.user.id;
     } else {
@@ -288,7 +305,6 @@ export async function POST(req) {
         const fullName = `${firstName} ${lastName}`.trim();
         const updates = {
           name: fullName,
-          phone: phone,
           address: `${address1}, ${address2 || ""}, ${city}, ${state}, ${pincode}`.replace(/, ,/g, ","),
           address1,
           address2: address2 || "",
@@ -296,6 +312,10 @@ export async function POST(req) {
           state,
           pincode,
         };
+
+        // A logged-in account keeps its OTP-verified phone (this order may use a different number);
+        // only a new guest record takes the checkout phone
+        if (!session?.user?.id) updates.phone = phone;
 
         // Only update email if it's a real one (not fake)
         if (email && !email.includes("@raven.local")) {

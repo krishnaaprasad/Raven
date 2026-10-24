@@ -36,7 +36,7 @@ export default function PhilosophyInteractive() {
     {
       number: "04",
       title: "Restraint as Luxury",
-      description: "In a world of excess, restraint becomes the ultimate luxury. We apply this principle to every aspect of our brand-from our minimalist packaging to our curated collection of just three signature scents. This intentional limitation allows us to perfect each fragrance rather than dilute our focus across dozens of offerings."
+      description: "In a world of excess, restraint becomes the ultimate luxury. We apply this principle to every aspect of our brand-from our minimalist packaging to our small, curated collection of signature scents. This intentional limitation allows us to perfect each fragrance rather than dilute our focus across dozens of offerings."
     }
   ];
 
@@ -64,19 +64,19 @@ export default function PhilosophyInteractive() {
     {
       title: "Small-Batch Craftsmanship",
       description: "Our commitment to small-batch production ensures every bottle receives meticulous attention. We work with master perfumers who share our vision of intentional luxury, creating fragrances that balance complexity with wearability. This approach allows us to maintain strict quality control and make adjustments based on seasonal ingredient variations, ensuring consistency without compromise.",
-      image: "https://img.rocket.new/generatedImages/rocket_gen_img_16b86ed99-1764763413688.png",
+      image: "/philosophy/craft-1.webp",
       alt: "Close-up of artisan perfumer carefully measuring essential oils into glass beaker in minimalist laboratory setting"
     },
     {
       title: "Ingredient Transparency",
       description: "We believe you deserve to know what you're wearing. Our fragrances use natural and synthetic ingredients selected for their quality and performance. We're transparent about our formulations, sharing concentration levels and key components. This openness reflects our respect for discerning customers who value authenticity over marketing mystique.",
-      image: "https://images.unsplash.com/photo-1573197328573-a8813b331688",
+      image: "/philosophy/craft-2.webp",
       alt: "Array of natural perfume ingredients including dried flowers, essential oil bottles, and botanical extracts arranged on white marble surface"
     },
     {
       title: "Mood-Based Design",
       description: "Rather than following traditional fragrance families, we design around emotional states and occasions. Each scent is crafted to support a specific mindset-whether you need quiet confidence for important meetings, rebellious energy for creative work, or balanced presence for everyday life. This approach makes fragrance selection intuitive and personal.",
-      image: "https://images.unsplash.com/photo-1725393197042-7b7691ba7446",
+      image: "/philosophy/craft-3.webp",
       alt: "Serene woman with closed eyes in black turtleneck against dark background, embodying peaceful confidence and intentional presence"
     }
   ];
@@ -96,8 +96,8 @@ export default function PhilosophyInteractive() {
       content: "Traditional fragrance marketing relies on aspiration, celebrity endorsement, and manufactured desire. We reject this approach entirely. Our marketing is anti-marketing-honest communication about what we create and why. We don't promise transformation or status. We offer well-crafted fragrances for people who appreciate quality without needing external validation. This honesty attracts customers who share our values and creates relationships built on mutual respect rather than manufactured need."
     },
     {
-      title: "Why Only Three Fragrances",
-      content: "Our decision to offer just three signature scents is intentional, not limiting. This restraint allows us to perfect each composition, maintain consistent quality, and avoid the dilution that comes with extensive product lines. Each fragrance represents years of development and refinement. By focusing our energy on three exceptional offerings rather than dozens of adequate ones, we deliver the depth and complexity that discerning customers expect. This approach also reflects our philosophy that more isn't always better-sometimes it's just more."
+      title: "Why a Small Collection",
+      content: "Our decision to keep a small, curated collection of signature scents is intentional, not limiting. This restraint allows us to perfect each composition, maintain consistent quality, and avoid the dilution that comes with extensive product lines. Each fragrance represents years of development and refinement. By focusing our energy on a few exceptional offerings rather than dozens of adequate ones, we deliver the depth and complexity that discerning customers expect. This approach also reflects our philosophy that more isn't always better-sometimes it's just more."
     },
     {
       title: "The Role of Silence in Fragrance",
@@ -111,7 +111,7 @@ export default function PhilosophyInteractive() {
 
   const ctaData = {
     title: "Experience Intentional Fragrance",
-    description: "Explore our collection of three signature scents, each crafted to embody our philosophy of quiet confidence and authentic presence.",
+    description: "Explore our collection of signature scents, each crafted to embody our philosophy of quiet confidence and authentic presence.",
     primaryLink: { text: "View Fragrances", href: "/collection" },
     secondaryLink: { text: "Contact Us", href: "/contact-us" }
   };

@@ -1,13 +1,10 @@
 "use client";
 
-import { useRef } from "react";
 import ProductCard from "@/app/collection/components/ProductCard";
 import { useQuickView } from "@/app/context/QuickViewContext";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
 
 export default function ProductCarousel({ products = [] }) {
-  const scrollRef = useRef(null);
   const { openQuickView } = useQuickView();
 
   const selectedSlugs = ["lucifer", "oud-intense", "mystique"];
@@ -55,7 +52,6 @@ const mobileProducts = products.slice(0, 4);
 
         {/* DESKTOP SLIDER */}
         <div
-          ref={scrollRef}
           className="
             hidden sm:flex 
             gap-4 sm:gap-5 lg:gap-6 

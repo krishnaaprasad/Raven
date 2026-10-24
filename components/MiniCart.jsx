@@ -14,6 +14,8 @@ import {
 } from "lucide-react";
 import { useCart } from "@/app/context/cartcontext";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
+import { FREE_SHIPPING_MIN } from "@/lib/checkoutRules";
 
 const crimson = Crimson_Text({
   subsets: ["latin"],
@@ -176,13 +178,15 @@ export default function MiniCart() {
                       className="w-20 h-20 rounded-lg 
                       bg-(--theme-bg) 
                       border border-(--theme-border)
-                      overflow-hidden cursor-pointer"
+                      overflow-hidden cursor-pointer relative"
                     >
                       {item.image ? (
-                        <img
+                        <Image
                           src={item.image}
                           alt={item.name}
-                          className="w-full h-full object-cover"
+                          fill
+                          sizes="80px"
+                          className="object-cover"
                         />
                       ) : (
                         <span className="text-[10px] text-(--theme-muted)">
@@ -265,7 +269,9 @@ export default function MiniCart() {
             </div>
 
             <p className="text-xs text-(--theme-muted) mb-4">
-              Shipping & taxes calculated at checkout
+              {subtotal >= FREE_SHIPPING_MIN
+                ? "You've unlocked free standard shipping"
+                : `Add ₹${formatAmount(FREE_SHIPPING_MIN - subtotal)} more for free standard shipping`}
             </p>
 
             <button

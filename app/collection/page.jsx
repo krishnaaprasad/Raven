@@ -4,6 +4,7 @@ export const revalidate = 60;
 import CraftCredentials from "./components/CraftCredentials";
 import connectToDatabase from '@/lib/mongodb';
 import Product from '@/models/Product';
+import { PUBLIC_PRODUCT_FIELDS } from "@/lib/publicProduct";
 import CollectionClientWrapper from './components/CollectionClientWrapper';
 import ScrollReveal from '@/components/ScrollReveal';
 
@@ -11,7 +12,7 @@ import ScrollReveal from '@/components/ScrollReveal';
 export const metadata = {
   title: 'Luxury Perfume Collection for Men & Women | Raven Fragrance India',
   description:
-    'Shop luxury perfumes for men and women at Raven Fragrance. Explore premium floral, woody, oriental and fresh fragrances crafted for long-lasting elegance. Free delivery across India.',
+    'Shop luxury perfumes for men and women at Raven Fragrance. Explore premium floral, woody, oriental and fresh fragrances crafted for long-lasting elegance. Free shipping on orders above ₹1499.',
   keywords: [
     'luxury perfumes India',
     'premium fragrances online',
@@ -22,7 +23,7 @@ export const metadata = {
     'floral woody oriental perfumes'
   ],
   alternates: {
-    canonical: 'https://ravenfragrance.in/collection',
+    canonical: 'https://www.ravenfragrance.in/collection',
   },
 };
 
@@ -65,7 +66,7 @@ export default async function ProductCollectionPage() {
   try {
     const rawProducts = await Product.find({ deleted: { $ne: true } })
       .sort({ createdAt: -1 })
-      .select('-__v')
+      .select(PUBLIC_PRODUCT_FIELDS)
       .lean();
 
     products = JSON.parse(JSON.stringify(rawProducts));
@@ -85,7 +86,7 @@ export default async function ProductCollectionPage() {
             </h1>
 
             <p className="text-base sm:text-lg text-[var(--theme-muted)] max-w-2xl mx-auto mb-8">
-              Three signature fragrances, each created with intention. Designed to express quiet confidence and a presence that doesn’t ask for attention.
+              A small collection of signature fragrances, each created with intention. Designed to express quiet confidence and a presence that doesn’t ask for attention.
             </p>
           </div>
         </section>

@@ -8,6 +8,7 @@ import OrdersList from "@/components/OrdersList";
 import OrderDetails from "@/components/OrderDetails";
 import { Crimson_Text } from "next/font/google";
 import { FiChevronDown } from "react-icons/fi";
+import { toast } from "react-hot-toast";
 
 const crimson = Crimson_Text({
   subsets: ["latin"],
@@ -114,9 +115,9 @@ function AccountPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Update failed");
 
-      alert("Account information updated successfully!");
+      toast.success("Account information updated");
     } catch (error) {
-      alert(error.message);
+      toast.error(error.message);
     } finally {
       setLoading(false);
     }

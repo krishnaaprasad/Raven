@@ -8,12 +8,14 @@ const DirectContact = ({ className = "" }) => {
       icon: "EnvelopeIcon",
       label: "Email",
       value: "ravenfragrances@gmail.com",
+      href: "mailto:ravenfragrances@gmail.com",
       description: "For general inquiries and detailed questions",
     },
     {
       icon: "PhoneIcon",
       label: "Phone",
       value: "+91 84248 32375",
+      href: "tel:+918424832375",
       description: "Monday – Friday, 10:00 AM – 6:00 PM IST",
     },
     {
@@ -100,7 +102,13 @@ const DirectContact = ({ className = "" }) => {
                     mb-0.5
                   "
                 >
-                  {method.value}
+                  {method.href ? (
+                    <a href={method.href} className="hover:underline">
+                      {method.value}
+                    </a>
+                  ) : (
+                    method.value
+                  )}
                 </p>
 
                 <p
