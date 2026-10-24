@@ -5,6 +5,7 @@ import { event } from "@/lib/ga";
 
 const CartContext = createContext()
 const CART_EXPIRY_MS = 30 * 24 * 60 * 60 * 1000 // 30 days
+export const MAX_QTY_PER_ITEM = 10 // same limit as the create-order API
 
 // Guest Session ID
 if (typeof window !== "undefined" && !localStorage.getItem("guestSessionId")) {
@@ -131,8 +132,8 @@ export function CartProvider({ children }) {
 
       // Immutable update — mutating the existing item double-counted quantity in strict mode
       const updated = idx >= 0
-        ? prev.map((item, i) => i === idx ? { ...item, quantity: item.quantity + quantity } : item)
-        : [...prev, { ...product, quantity }]
+        ? prev.map((item, i) => i === idx ? { ...item, quantity: Math.min(item.quantity + quantity, MAX_QTY_PER_ITEM) } : item)
+        : [...prev, { ...product, quantity: Math.min(quantity, MAX_QTY_PER_ITEM) }]
 
       saveToLocal(updated)
       return updated
@@ -168,7 +169,7 @@ export function CartProvider({ children }) {
 
   // Update Qty
   const updateQuantity = (productId, size, newQty) => {
-    if (newQty < 1) return
+    if (newQty < 1 || newQty > MAX_QTY_PER_ITEM) return
     setCartItems(prev => {
       const updated = prev.map(item =>
         item.id === productId && item.size === size

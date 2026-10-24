@@ -4,9 +4,7 @@ import connectToDatabase from "@/lib/mongodb";
 import { Order } from "@/models/Order";
 import axios from "axios";
 import { generateInvoice } from "@/lib/invoice/generateInvoice"; // ✅ still here
-import Coupon from "@/models/Coupon";
-import Product from "@/models/Product";
-import StockLog from "@/models/StockLog";
+import { finalizePaidOrder, releaseReservation } from "@/lib/orderInventory";
 
 export async function GET(req) {
   try {
@@ -228,19 +226,6 @@ if (order.payment_status === "PAID" && order.verified === true) {
     ) {
       order_status = "Cancelled";
     }
-    if (payment_status === "PAID" && !order.verified) {
-  if (order.couponCode) {
-    const coupon = await Coupon.findOne({
-      code: order.couponCode,
-    });
-
-    if (coupon) {
-      await Coupon.findByIdAndUpdate(coupon._id, {
-        $inc: { usedCount: 1 },
-      });
-    }
-  }
-}
 
     // Legacy `status` field kept in sync for old code
     const legacyStatusMap = {
@@ -278,60 +263,12 @@ if (order.payment_status === "PAID" && order.verified === true) {
     await Order.findByIdAndUpdate(orderId, updatePayload);
 
     // -----------------------------------------
-    // 5.5 STOCK DEDUCTION (only if not already done)
+    // 5.5 Stock + coupon bookkeeping (each applied exactly once, see lib/orderInventory.js)
     // -----------------------------------------
     if (payment_status === "PAID") {
-      const freshOrderForStock = await Order.findById(orderId);
-      if (freshOrderForStock && !freshOrderForStock.stockDeducted) {
-        try {
-          for (const item of freshOrderForStock.cartItems) {
-            const product = await Product.findOne({ slug: item.slug });
-            if (!product) continue;
-
-            const variant = product.variants.find(
-              (v) => String(v.size) === String(item.size)
-            );
-            if (!variant) continue;
-
-            const previousStock = variant.stock;
-            const quantity = Number(item.quantity);
-
-            const updated = await Product.findOneAndUpdate(
-              {
-                _id: product._id,
-                "variants.size": item.size,
-                "variants.stock": { $gte: quantity },
-              },
-              { $inc: { "variants.$.stock": -quantity } },
-              { new: true }
-            );
-
-            if (updated) {
-              const updatedVariant = updated.variants.find(
-                (v) => String(v.size) === String(item.size)
-              );
-              await StockLog.create({
-                productId: product._id,
-                variantSize: item.size,
-                type: "ORDER_PLACED",
-                quantity: -quantity,
-                previousStock,
-                newStock: updatedVariant?.stock ?? previousStock - quantity,
-                orderId: freshOrderForStock._id,
-                by: "system",
-              });
-            } else {
-              console.warn(
-                `⚠️ Stock insufficient for ${item.slug} (${item.size}) qty: ${quantity}`
-              );
-            }
-          }
-
-          await Order.findByIdAndUpdate(orderId, { stockDeducted: true });
-        } catch (stockErr) {
-          console.error("❌ Verify stock deduction error:", stockErr);
-        }
-      }
+      await finalizePaidOrder(orderId);
+    } else if (payment_status === "FAILED" || payment_status === "CANCELLED") {
+      await releaseReservation(orderId, `Payment ${payment_state || payment_status}`);
     }
 
     // -----------------------------------------

@@ -1,8 +1,8 @@
 import "@/models/User";
 import { NextResponse } from "next/server";
+import { finalizePaidOrder, releaseReservation } from "@/lib/orderInventory";
 import connectToDatabase from "@/lib/mongodb";
 import { Order } from "@/models/Order";
-import Coupon from "@/models/Coupon";
 import axios from "axios";
 
 // POST /api/admin/orders/[id]/verify-payment
@@ -162,56 +162,12 @@ export async function POST(req, { params }) {
       new: true,
     }).populate("userId", "name email phone isGuest");
 
-    // Apply coupon usage once
-    if (
-      payment_status === "PAID" &&
-      updatedOrder?.couponCode &&
-      !updatedOrder?.couponUsageApplied
-    ) {
-      try {
-        const now = new Date();
-        const reservedCoupon = await Coupon.findOneAndUpdate(
-          {
-            code: updatedOrder.couponCode.toUpperCase(),
-            isActive: true,
-            deleted: { $ne: true },
-            $and: [
-              {
-                $or: [
-                  { expiryDate: { $exists: false } },
-                  { expiryDate: null },
-                  { expiryDate: { $gte: now } },
-                ],
-              },
-              {
-                $or: [
-                  { usageLimit: { $exists: false } },
-                  { usageLimit: null },
-                  { $expr: { $lt: ["$usedCount", "$usageLimit"] } },
-                ],
-              },
-            ],
-          },
-          { $inc: { usedCount: 1 } },
-          { new: true }
-        );
-
-        if (reservedCoupon) {
-          await Order.findOneAndUpdate(
-            { _id: updatedOrder._id, couponUsageApplied: { $ne: true } },
-            {
-              $set: {
-                couponUsageApplied: true,
-                "paymentDetails.couponUsageApplied": true,
-              },
-            }
-          );
-        }
-      } catch (couponErr) {
-        console.error("❌ Reconcile coupon usage update error:", couponErr);
-      }
+    // Stock + coupon bookkeeping (each applied exactly once, see lib/orderInventory.js)
+    if (payment_status === "PAID") {
+      await finalizePaidOrder(id);
+    } else if (payment_status === "FAILED" || payment_status === "CANCELLED") {
+      await releaseReservation(id, `Cashfree status ${state || payment_status}`);
     }
-
 
     return NextResponse.json({
       success: true,

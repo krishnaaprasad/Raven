@@ -48,6 +48,7 @@ export async function GET(request, context) {
         cartItems: order.cartItems,
 
         shippingCharge: order.shippingCharge,
+        deliveryType: order.deliveryType,
 
        // 🔥 IMPORTANT
         discount: Number(order.discount || 0),

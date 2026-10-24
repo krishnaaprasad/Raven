@@ -170,7 +170,7 @@ const total = Number(order.totalAmount || 0);
 
         <p className="text-sm mt-2">
           <span className="font-semibold">Delivery Type:</span>{" "}
-          {order.deliveryType}
+          {{ standard: "Standard (5–7 business days)", express: "Express (2–3 business days)", pickup: "Self Pick-Up" }[order.deliveryType] || "Standard"}
         </p>
       </div>
 

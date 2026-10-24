@@ -9,6 +9,14 @@ import { generateSequentialOrderIdFromItems } from "@/lib/generateOrderId";
 import Coupon from "@/models/Coupon";
 import Product from "@/models/Product";
 import { getShippingCharge, isValidPincodeRegion, DELIVERY_AREA_MESSAGE } from "@/lib/checkoutRules";
+import {
+  PAYMENT_WINDOW_MINUTES,
+  reserveStock,
+  undoReservation,
+  logReservation,
+  releaseReservation,
+  releaseStaleReservations,
+} from "@/lib/orderInventory";
 
 // =============================
 // Helper → Generate Sequential Custom Order ID
@@ -78,8 +86,14 @@ async function findOrCreateUser({ name, email, phone, address }) {
 // POST Handler
 // =============================
 export async function POST(req) {
+  let createdOrderId = null;
   try {
     await connectToDatabase();
+
+    // Free stock held by online orders that were never paid (keeps "out of stock" honest)
+    await releaseStaleReservations().catch((err) =>
+      console.error("Stale reservation release failed:", err.message)
+    );
 
     const session = await getServerSession(authOptions);
 
@@ -153,7 +167,8 @@ export async function POST(req) {
       const slug = typeof item?.slug === "string" ? item.slug.trim() : "";
       const quantity = Number(item?.quantity);
 
-      if (!slug || !Number.isFinite(quantity) || quantity <= 0) {
+      // Whole units only, sane upper bound per line
+      if (!slug || !Number.isInteger(quantity) || quantity <= 0 || quantity > 10) {
         return NextResponse.json(
           { error: "Invalid cart item" },
           { status: 400 }
@@ -192,6 +207,9 @@ export async function POST(req) {
       subtotal += dbPrice * quantity;
 
       item.price = dbPrice;
+      item.slug = slug;
+      item.name = product.name;
+      item.quantity = quantity;
     }
 
     // 2️⃣ Shipping is priced on the server (same rules as checkout page) — never trust the client's amount
@@ -275,6 +293,26 @@ export async function POST(req) {
       appliedCoupon = reservedCoupon;
     }
 
+    // Give the coupon use back if we stop before an order exists
+    const undoCoupon = async () => {
+      if (appliedCoupon) {
+        await Coupon.updateOne(
+          { _id: appliedCoupon._id, usedCount: { $gt: 0 } },
+          { $inc: { usedCount: -1 } }
+        ).catch(() => {});
+      }
+    };
+
+    // 3.5 Reserve stock now (atomic per line) so two customers can't pay for the last bottle
+    const reservation = await reserveStock(cartItems);
+    if (!reservation.ok) {
+      await undoCoupon();
+      return NextResponse.json(
+        { error: `${reservation.item.name || reservation.item.slug} (${reservation.item.size}) just went out of stock` },
+        { status: 400 }
+      );
+    }
+
     // 4️⃣ Final secure total
     const finalTotalAmount = Math.max(0, subtotal + safeShippingCharge - discountAmount);
     // ✅ Generate custom order ID
@@ -329,7 +367,9 @@ export async function POST(req) {
     }
 
     // Create Order
-    const newOrder = await Order.create({
+    let newOrder;
+    try {
+      newOrder = await Order.create({
       customOrderId,
       userId: finalUserId, // 🔗 always set (guest or logged)
       userName: `${firstName} ${lastName}`,
@@ -350,7 +390,18 @@ export async function POST(req) {
       shippingCharge: safeShippingCharge,
       totalAmount: finalTotalAmount,
       discount: discountAmount,
-      couponCode: appliedCoupon?.code || null,    });
+      couponCode: appliedCoupon?.code || null,
+      // Stock and coupon use are already reserved for this order (released if it isn't paid)
+      stockDeducted: true,
+      couponUsageApplied: Boolean(appliedCoupon),
+      });
+    } catch (createErr) {
+      await undoReservation(reservation.taken);
+      await undoCoupon();
+      throw createErr;
+    }
+    createdOrderId = newOrder._id;
+    await logReservation(reservation.taken, newOrder._id);
 
     const isProduction = process.env.NEXT_PUBLIC_CASHFREE_ENV === "production";
     const baseURL = isProduction
@@ -375,6 +426,8 @@ export async function POST(req) {
         brand: "Raven Fragrance",
         order_prefix: customOrderId.slice(0, 3),
       },
+      // Link expires so nobody pays after the reservation is released
+      order_expiry_time: new Date(Date.now() + PAYMENT_WINDOW_MINUTES * 60 * 1000).toISOString(),
       order_meta: {
         return_url: `${frontendURL}/order-success?orderId=${newOrder._id}&cfOrderId=${customOrderId}`,
       },
@@ -396,6 +449,7 @@ export async function POST(req) {
         status: "FAILED",
         cashfreeResponse: cfData,
       });
+      await releaseReservation(newOrder._id, "Payment could not be started");
       return NextResponse.json(
         { error: "Failed to initialize payment" },
         { status: 400 }
@@ -420,6 +474,10 @@ export async function POST(req) {
     );
   } catch (error) {
     console.error("Payment create error:", error.response?.data || error.message);
+    // Order was saved but payment couldn't start (e.g. Cashfree error) — free its stock/coupon
+    if (createdOrderId) {
+      await releaseReservation(createdOrderId, "Payment could not be started").catch(() => {});
+    }
     return NextResponse.json(
       { error: "Internal Server Error" },
       { status: 500 }

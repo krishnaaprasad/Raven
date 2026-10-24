@@ -162,6 +162,9 @@ const orderSchema = mongoose.models.Order?.schema || new mongoose.Schema(
     // ---------- Inventory tracking ----------
     stockDeducted: { type: Boolean, default: false },
     stockRestored: { type: Boolean, default: false },
+    // Paid, but stock had run out by then — needs a call/refund (set by lib/orderInventory.js)
+    stockShortage: { type: Boolean, default: false },
+    stockShortageItems: { type: [String], default: [] },
 
     // ---------- Soft delete ----------
     deleted: { type: Boolean, default: false },

@@ -303,7 +303,13 @@ useEffect(() => {
           <div className="space-y-4">
             <div>
               <h4 className="text-sm font-bold mb-1 text-(--theme-text)">Shipping Method</h4>
-              <p className="text-sm text-(--theme-muted)">Standard Delivery (3–5 days)</p>
+              <p className="text-sm text-(--theme-muted)">
+                {{
+                  standard: "Standard Delivery (5–7 business days)",
+                  express: "Express Delivery (2–3 business days)",
+                  pickup: "Self Pick-Up from Raven Boutique",
+                }[order.deliveryType] || "Standard Delivery (5–7 business days)"}
+              </p>
             </div>
 
             <div>
