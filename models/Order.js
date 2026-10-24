@@ -155,6 +155,7 @@ const orderSchema = mongoose.models.Order?.schema || new mongoose.Schema(
     deliveryMessageSent: { type: Boolean, default: false },
     deliveredWhatsappSent: { type: Boolean, default: false },
     reviewRequestSent: { type: Boolean, default: false },
+    reviewEmailSent: { type: Boolean, default: false },
     repurchaseReminderSent: { type: Boolean, default: false },
     deliveredAt: { type: Date, default: null },
 

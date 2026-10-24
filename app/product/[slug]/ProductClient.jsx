@@ -24,7 +24,7 @@ import 'yet-another-react-lightbox/styles.css';
 import { motion, AnimatePresence } from "framer-motion";
 import { useCart } from '@/app/context/cartcontext';
 import { toast } from 'react-hot-toast';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { event } from "@/lib/ga";
 
 // ---------- Cloudinary Helper ----------
@@ -46,10 +46,11 @@ function buildCloudinaryUrl(url, { w, h, crop = 'fill', quality = 'auto' } = {})
   return `${prefix}/image/upload/${transforms.join(",")}/${rest}`;
 }
 
-export default function ProductClient({ slug }) {
-  const [product, setProduct] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [selected, setSelected] = useState(null);
+export default function ProductClient({ slug, initialProduct = null }) {
+  // Product is server-rendered when available; client fetch is only a fallback
+  const [product, setProduct] = useState(initialProduct);
+  const [loading, setLoading] = useState(!initialProduct);
+  const [selected, setSelected] = useState(initialProduct?.variants?.[0] || null);
   const [quantity, setQuantity] = useState(1);
   const [thumbsSwiper, setThumbsSwiper] = useState(null);
   const [lightboxOpen, setLightboxOpen] = useState(false);
@@ -66,13 +67,17 @@ export default function ProductClient({ slug }) {
 
   const { addToCart } = useCart();
   const router = useRouter();
-  const searchParams = useSearchParams();
   const [relatedProducts, setRelatedProducts] = useState([]);
 
   const [copied, setCopied] = useState(false);
-  const shouldOpenReviewSection =
-    searchParams.get("review") === "true" ||
-    searchParams.get("writeReview") === "true";
+  // Read ?review=true on the client (useSearchParams would stop this cached page from server-rendering)
+  const [shouldOpenReviewSection, setShouldOpenReviewSection] = useState(false);
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    setShouldOpenReviewSection(
+      params.get("review") === "true" || params.get("writeReview") === "true"
+    );
+  }, []);
 
 const handleShare = async () => {
   const shareData = {
@@ -105,10 +110,15 @@ const handleShare = async () => {
   useEffect(() => {
     async function fetchProduct() {
       try {
-        const res = await fetch(`/api/products/${slug}`);
-        const data = await res.json();
+        let data = initialProduct;
+        let ok = Boolean(initialProduct);
+        if (!data) {
+          const res = await fetch(`/api/products/${slug}`);
+          data = await res.json();
+          ok = res.ok;
+        }
 
-        if (res.ok && data) {
+        if (ok && data) {
           setProduct(data);
           setSelected(data.variants?.[0]);
           // 🔥 GA4: Track product view
@@ -142,7 +152,7 @@ event({
     }
 
     if (slug) fetchProduct();
-  }, [slug, router]);
+  }, [slug, router, initialProduct]);
 
   useEffect(() => {
   async function fetchRelated() {

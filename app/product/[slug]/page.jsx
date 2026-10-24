@@ -1,6 +1,29 @@
+import { cache } from "react";
 import connectToDatabase from "@/lib/mongodb";
 import Product from "@/models/Product";
 import ProductClient from "./ProductClient";
+
+// Cache rendered product pages; refresh every 60s so price/stock edits show up quickly
+export const revalidate = 60;
+
+// One DB query shared by generateMetadata and the page
+const getProduct = cache(async (slug) => {
+  await connectToDatabase();
+  const product = await Product.findOne({ slug, deleted: { $ne: true } })
+    .select("-__v")
+    .lean();
+  return product ? JSON.parse(JSON.stringify(product)) : null;
+});
+
+export async function generateStaticParams() {
+  try {
+    await connectToDatabase();
+    const products = await Product.find({ deleted: { $ne: true } }).select("slug").lean();
+    return products.map((p) => ({ slug: p.slug }));
+  } catch {
+    return [];
+  }
+}
 
 export async function generateMetadata({ params }) {
   const { slug } = await params;
@@ -12,11 +35,7 @@ export async function generateMetadata({ params }) {
       : "https://www.ravenfragrance.in");
 
   try {
-    await connectToDatabase();
-    const product = await Product.findOne({
-      slug,
-      deleted: { $ne: true },
-    }).lean();
+    const product = await getProduct(slug);
 
     if (!product) throw new Error("Failed to fetch product");
 
@@ -81,5 +100,11 @@ export async function generateMetadata({ params }) {
 
 export default async function Page({ params }) {
   const { slug } = await params;
-  return <ProductClient slug={slug} />;
+  let product = null;
+  try {
+    product = await getProduct(slug);
+  } catch (error) {
+    console.error("Product fetch error:", error);
+  }
+  return <ProductClient slug={slug} initialProduct={product} />;
 }

@@ -3,7 +3,6 @@ import { NextResponse } from "next/server";
 import connectToDatabase from "@/lib/mongodb";
 import { Order } from "@/models/Order";
 import Coupon from "@/models/Coupon";
-import { sendOrderConfirmation } from "@/lib/notifications/whatsapp.service";
 import axios from "axios";
 
 // POST /api/admin/orders/[id]/verify-payment
@@ -135,9 +134,6 @@ export async function POST(req, { params }) {
       order.referenceId ||
       "N/A";
 
-    const wasFinalized =
-      order.payment_status === "PAID" && order.verified === true;
-
     const updatePayload = {
       payment_state,
       payment_status,
@@ -216,14 +212,6 @@ export async function POST(req, { params }) {
       }
     }
 
-    // Send confirmation once if newly marked paid
-    if (payment_status === "PAID" && !wasFinalized) {
-      try {
-        await sendOrderConfirmation(updatedOrder);
-      } catch (whatsappErr) {
-        console.error("❌ Reconcile WhatsApp confirmation error:", whatsappErr);
-      }
-    }
 
     return NextResponse.json({
       success: true,

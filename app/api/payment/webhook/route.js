@@ -5,7 +5,6 @@ import { Order } from "@/models/Order";
 import Coupon from "@/models/Coupon";
 import Product from "@/models/Product";
 import StockLog from "@/models/StockLog";
-import { sendOrderConfirmation } from "@/lib/notifications/whatsapp.service";
 import axios from "axios";
 import crypto from "crypto";
 
@@ -341,13 +340,6 @@ export async function POST(req) {
         }
       } catch (mailErr) {
         console.error("❌ Webhook email error:", mailErr);
-      }
-
-      // Send WhatsApp confirmation
-      try {
-        await sendOrderConfirmation(updatedOrder);
-      } catch (whatsappErr) {
-        console.error("❌ Webhook WhatsApp confirmation error:", whatsappErr);
       }
     }
 

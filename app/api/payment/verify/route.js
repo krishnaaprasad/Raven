@@ -7,7 +7,6 @@ import { generateInvoice } from "@/lib/invoice/generateInvoice"; // ✅ still he
 import Coupon from "@/models/Coupon";
 import Product from "@/models/Product";
 import StockLog from "@/models/StockLog";
-import { sendOrderConfirmation } from "@/lib/notifications/whatsapp.service";
 
 export async function GET(req) {
   try {
@@ -66,12 +65,6 @@ if (order.payment_status === "PAID" && order.verified === true) {
     } catch (mailErr) {
       console.error("❌ Email error on already-verified path:", mailErr);
     }
-  }
-
-  try {
-    await sendOrderConfirmation(order);
-  } catch (whatsappErr) {
-    console.error("WhatsApp confirmation skipped for already verified order:", whatsappErr);
   }
 
   return NextResponse.json({
@@ -397,13 +390,6 @@ if (order.payment_status === "PAID" && order.verified === true) {
         }
       } catch (mailErr) {
         console.error("❌ Email Sending Error:", mailErr);
-      }
-
-      try {
-        const orderForWhatsapp = await Order.findById(orderId);
-        await sendOrderConfirmation(orderForWhatsapp);
-      } catch (whatsappErr) {
-        console.error("❌ WhatsApp confirmation error:", whatsappErr);
       }
     }
 
