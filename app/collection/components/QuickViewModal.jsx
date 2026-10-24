@@ -53,7 +53,9 @@ const QuickViewModal = () => {
     variants.find((v) => v.size === selectedSize) || variants[0];
 
   const price = activeVariant?.price || 0;
-  const stock = activeVariant?.stock ?? 0;
+  const isComingSoon = product?.isComingSoon === true;
+  // Coming-soon products are not purchasable regardless of stock
+  const stock = isComingSoon ? 0 : activeVariant?.stock ?? 0;
   
   const images = (product?.images || [])
   .map((img) => (typeof img === 'string' ? img : img?.original))
@@ -305,7 +307,7 @@ const viewDetails = () => {
                 className="w-full py-4 bg-[#b28c34] text-white rounded-md font-[Outfit] text-base font-medium hover:bg-[#9a864c] transition disabled:opacity-50 flex items-center justify-center gap-2"
               >
                 <Icon name="ShoppingBagIcon" size={20} />
-                {stock <= 0 ? 'Out of Stock' : 'Add to Cart'}
+                {isComingSoon ? 'Coming Soon' : stock <= 0 ? 'Out of Stock' : 'Add to Cart'}
               </button>
 
               {/* Buy Now */}

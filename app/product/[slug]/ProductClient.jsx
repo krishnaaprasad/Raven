@@ -233,7 +233,8 @@ event({
   };
   const decrease = () => setQuantity((q) => (q > 1 ? q - 1 : 1));
 
-  const isOutOfStock = !selected?.stock || selected.stock <= 0;
+  const isComingSoon = product?.isComingSoon === true;
+  const isOutOfStock = isComingSoon || !selected?.stock || selected.stock <= 0;
 
   const handleAddToCart = () => {
     if (isOutOfStock) return;
@@ -701,10 +702,12 @@ event({
   {isOutOfStock ? (
     <div className="flex flex-col gap-3">
       <div className="h-12 flex items-center justify-center bg-gray-200 text-gray-500 font-[system-ui] text-xs uppercase tracking-[0.2em]">
-        Out of Stock
+        {isComingSoon ? "Coming Soon" : "Out of Stock"}
       </div>
       <p className="text-xs text-(--theme-muted) text-center">
-        This variant is currently unavailable. Please check back later.
+        {isComingSoon
+          ? "This fragrance is launching soon. Stay tuned."
+          : "This variant is currently unavailable. Please check back later."}
       </p>
     </div>
   ) : (

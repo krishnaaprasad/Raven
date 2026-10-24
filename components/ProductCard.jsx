@@ -34,14 +34,7 @@ export default function ProductCard({ product, bestsellerIds = [] }) {
   const reviewCount = product?.reviewCount || 0;
 
   // Check if product is coming soon
-  const isComingSoon = Boolean(
-    product?.isComingSoon ||
-      product?.comingSoon ||
-      product?.status === "coming_soon" ||
-      product?.status === "comingSoon" ||
-      img1?.toLowerCase().includes("coming") ||
-      product?.name?.toLowerCase().includes("horizon")
-  );
+  const isComingSoon = product?.isComingSoon === true;
 
   // Check if ALL variants are out of stock
   const isProductOOS =
@@ -181,16 +174,20 @@ export default function ProductCard({ product, bestsellerIds = [] }) {
         <div className="p-4 bg-[#FDFBF5]">
 
           {/* RATING */}
-          <div className="flex items-center gap-1 mb-1.5">
-            <Star className="w-4 h-4 fill-[#ffffff] text-[#000000]" />
+          <div className="flex items-center gap-1 mb-1.5 min-h-5">
+            {reviewCount > 0 && product.rating != null && (
+              <>
+                <Star className="w-4 h-4 fill-[#ffffff] text-[#000000]" />
 
-            <span className={`text-sm font-semibold ${outfit.className}`}>
-              {product.rating?.toFixed(1) || "4.8"}
-            </span>
+                <span className={`text-sm font-semibold ${outfit.className}`}>
+                  {Number(product.rating).toFixed(1)}
+                </span>
 
-            <span className={`text-sm text-[#7C6E5A] ${outfit.className}`}>
-              ({product.reviewCount || 0})
-            </span>
+                <span className={`text-sm text-[#7C6E5A] ${outfit.className}`}>
+                  ({reviewCount})
+                </span>
+              </>
+            )}
           </div>
 
           {/* TAGLINE */}

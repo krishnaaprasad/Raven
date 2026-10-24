@@ -15,7 +15,7 @@ export async function GET(req) {
 
     const products = await Product.find(filter)
       .sort({ createdAt: -1 })
-      .select("slug name images rating reviewCount variants accords")
+      .select("slug name images rating reviewCount variants accords fragranceType isComingSoon createdAt")
       .lean();
 
     return Response.json(products);

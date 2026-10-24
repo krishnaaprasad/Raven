@@ -21,14 +21,8 @@ const ProductCard = ({ product }) => {
   const price = variant.price ?? 0;
   const size = variant.size ?? "";
 
-  const isComingSoon = Boolean(
-    product?.isComingSoon ||
-      product?.comingSoon ||
-      product?.status === "coming_soon" ||
-      product?.status === "comingSoon" ||
-      primaryImage?.toLowerCase().includes("coming") ||
-      product?.name?.toLowerCase().includes("horizon")
-  );
+  // Only the admin-controlled flag decides this
+  const isComingSoon = product?.isComingSoon === true;
 
   const outOfStock =
     !isComingSoon &&
