@@ -7,11 +7,35 @@ import Product from "@/models/Product";
 import StockLog from "@/models/StockLog";
 import { sendOrderConfirmation } from "@/lib/notifications/whatsapp.service";
 import axios from "axios";
+import crypto from "crypto";
+
+// Cashfree signs webhooks: base64(HMAC_SHA256(timestamp + rawBody, secretKey))
+function isValidCashfreeSignature(rawBody, timestamp, signature) {
+  const secret = process.env.CASHFREE_SECRET_KEY;
+  if (!secret || !timestamp || !signature) return false;
+  const expected = crypto
+    .createHmac("sha256", secret)
+    .update(timestamp + rawBody)
+    .digest("base64");
+  const a = Buffer.from(expected);
+  const b = Buffer.from(String(signature));
+  return a.length === b.length && crypto.timingSafeEqual(a, b);
+}
 
 export async function POST(req) {
   try {
-    const body = await req.json();
-    console.log("📩 Webhook Received:", JSON.stringify(body, null, 2));
+    const rawBody = await req.text();
+    const signature = req.headers.get("x-webhook-signature");
+    const timestamp = req.headers.get("x-webhook-timestamp");
+
+    // Reject forged webhooks — otherwise anyone could mark an order as PAID
+    if (!isValidCashfreeSignature(rawBody, timestamp, signature)) {
+      console.warn("⚠️ Webhook rejected: invalid signature");
+      return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
+    }
+
+    const body = JSON.parse(rawBody);
+    console.log("📩 Webhook Received:", body?.type, body?.data?.order?.order_id);
 
     // Handle Cashfree TEST webhook (no order payload)
     if (!body?.data?.order) {
@@ -306,7 +330,7 @@ export async function POST(req) {
             `${process.env.NEXT_PUBLIC_BASE_URL || "https://www.ravenfragrance.in"}/api/send-confirmation-mail`,
             {
               method: "POST",
-              headers: { "Content-Type": "application/json" },
+              headers: { "Content-Type": "application/json", "x-internal-key": process.env.NEXTAUTH_SECRET || "" },
               body: JSON.stringify(emailPayload),
             }
           )

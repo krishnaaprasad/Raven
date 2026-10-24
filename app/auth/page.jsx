@@ -45,10 +45,7 @@ export default function LoginRegisterPage({ onClose, onLoginSuccess, verificatio
 
       if (!res.ok) throw new Error(data.error || 'Failed to send OTP');
 
-      setConfirmationData({
-        verificationId: data.verificationId,
-        authToken: data.authToken
-      });
+      setConfirmationData({ verificationId: data.verificationId });
       setOtpSent(true);
       setResendTimer(30);
       setOtp(['', '', '', '']);
@@ -110,32 +107,32 @@ export default function LoginRegisterPage({ onClose, onLoginSuccess, verificatio
         throw new Error('Verification session lost. Please resend OTP.');
       }
 
-      const res = await fetch('/api/auth/otp/verify', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          verificationId: confirmationData.verificationId,
-          authToken: confirmationData.authToken,
-          otp: otpString,
-          phoneNumber: phoneNumber
-        })
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) throw new Error(data.error || 'Invalid OTP');
-
       // ✅ Handle verificationOnly mode (Change phone without logout)
       if (verificationOnly) {
+        const res = await fetch('/api/auth/otp/verify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            verificationId: confirmationData.verificationId,
+            otp: otpString,
+            phoneNumber: phoneNumber
+          })
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Invalid OTP');
+
         onLoginSuccess?.(phoneNumber);
         onClose?.();
         return;
       }
 
-      // OTP is valid. Now sign in using NextAuth Credentials
+      // OTP is verified on the server inside the credentials provider
       const result = await signIn('credentials', {
         redirect: false,
-        phone: phoneNumber
+        phone: phoneNumber,
+        otp: otpString,
+        verificationId: confirmationData.verificationId
       });
 
       if (result?.error) {

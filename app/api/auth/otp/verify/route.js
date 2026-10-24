@@ -1,43 +1,23 @@
+import { validateOtp } from "@/lib/otp";
+
+// Used only for phone verification without login (e.g. changing phone number).
+// Login verifies the OTP itself inside the NextAuth credentials provider.
 export async function POST(req) {
   try {
-    const { verificationId, phoneNumber, otp, authToken } = await req.json();
+    const { verificationId, phoneNumber, otp } = await req.json();
 
-    if (!verificationId || !otp || !authToken || !phoneNumber) {
-      return new Response(JSON.stringify({ error: "Missing required fields" }), { status: 400 });
+    if (!verificationId || !otp || !phoneNumber) {
+      return Response.json({ error: "Missing required fields" }, { status: 400 });
     }
 
-    const customerId = process.env.MESSAGE_CENTRAL_CUSTOMER_ID || process.env.MESSAGECENTRAL_CUSTOMER_ID;
-
-    if (!customerId || !authToken) {
-      console.error("MessageCentral credentials missing for OTP verification");
-      return new Response(JSON.stringify({ error: "SMS service not configured" }), { status: 500 });
+    const result = await validateOtp(phoneNumber, verificationId, otp);
+    if (!result.ok) {
+      return Response.json({ error: result.error }, { status: 400 });
     }
 
-    // Use GET method and add url search parameters
-    const validateResponse = await fetch(`https://cpaas.messagecentral.com/verification/v3/validateOtp?countryCode=91&mobileNumber=${phoneNumber}&verificationId=${verificationId}&customerId=${customerId}&code=${otp}`, {
-      method: 'GET',
-      headers: {
-        'authToken': authToken,
-      }
-    });
-
-    const validateData = await validateResponse.json();
-
-    if (validateData.responseCode === 200) {
-      return new Response(JSON.stringify({ success: true }), { status: 200 });
-    } else {
-      console.error("OTP Validation Failed:", validateData);
-      
-      let errorMessage = "Invalid OTP";
-      if (validateData.responseCode === 702) errorMessage = "Wrong OTP provided";
-      if (validateData.responseCode === 705) errorMessage = "OTP has expired";
-      if (validateData.responseCode === 703) errorMessage = "Already verified";
-
-      return new Response(JSON.stringify({ error: errorMessage }), { status: 400 });
-    }
-
+    return Response.json({ success: true });
   } catch (error) {
     console.error("OTP Validate Error:", error);
-    return new Response(JSON.stringify({ error: "Internal server error" }), { status: 500 });
+    return Response.json({ error: "Internal server error" }, { status: 500 });
   }
 }

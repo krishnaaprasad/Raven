@@ -1,23 +1,27 @@
 import connectToDatabase from "@/lib/mongodb";
 import User from "@/models/User";
 import { NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
-export async function POST(req) {
+export async function POST() {
   try {
-    const { phone } = await req.json();
-
+    // Only ever return the logged-in user's own details — never look up arbitrary phone numbers
+    const session = await getServerSession(authOptions);
+    const phone = session?.user?.phone;
     if (!phone) {
-      return NextResponse.json({ error: "Phone number is required" }, { status: 400 });
+      return NextResponse.json({ exists: false });
     }
 
     await connectToDatabase();
 
-    const user = await User.findOne({ phone });
+    const user = await User.findOne({ phone }).lean();
 
     if (user) {
+      const email = user.email?.startsWith("phone-only+") ? "" : user.email || "";
       return NextResponse.json({
         exists: true,
-        email: user.email || "",
+        email,
         firstName: user.name?.split(" ")[0] || "",
         lastName: user.name?.split(" ").slice(1).join(" ") || "",
         address1: user.address1 || "",

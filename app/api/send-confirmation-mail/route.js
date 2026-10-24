@@ -1,9 +1,24 @@
+import crypto from "crypto";
 import nodemailer from "nodemailer";
 import orderConfirmationTemplate from "@/lib/email/templates/order-confirmation";
 import { generateInvoice } from "@/lib/invoice/generateInvoice";
 
+// Server-to-server only: without this check anyone could send emails (with PDFs) from our mailbox
+function isInternalCall(req) {
+  const secret = process.env.NEXTAUTH_SECRET;
+  const provided = req.headers.get("x-internal-key");
+  if (!secret || !provided) return false;
+  const a = Buffer.from(secret);
+  const b = Buffer.from(provided);
+  return a.length === b.length && crypto.timingSafeEqual(a, b);
+}
+
 export async function POST(req) {
   try {
+    if (!isInternalCall(req)) {
+      return Response.json({ success: false, message: "Unauthorized" }, { status: 401 });
+    }
+
     const body = await req.json();
 
     const {

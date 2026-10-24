@@ -4,7 +4,9 @@ import { runWhatsAppDailyScheduler } from "@/lib/notifications/scheduler.service
 
 export async function GET(req) {
   const secret = process.env.CRON_SECRET;
-  const providedSecret = req.headers.get("x-cron-secret") || new URL(req.url).searchParams.get("secret");
+  // Vercel Cron sends "Authorization: Bearer <CRON_SECRET>"; x-cron-secret / ?secret kept for manual runs
+  const bearer = req.headers.get("authorization")?.replace(/^Bearer\s+/i, "");
+  const providedSecret = bearer || req.headers.get("x-cron-secret") || new URL(req.url).searchParams.get("secret");
 
   if (!secret || !providedSecret) {
     return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });

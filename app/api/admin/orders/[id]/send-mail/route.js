@@ -64,7 +64,7 @@ const emailPayload = {
     process.env.NEXT_PUBLIC_BASE_URL || "https://www.ravenfragrance.in";
     await fetch(`${baseURL}/api/send-confirmation-mail`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", "x-internal-key": process.env.NEXTAUTH_SECRET || "" },
       body: JSON.stringify(emailPayload),
     });
 

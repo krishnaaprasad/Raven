@@ -3,6 +3,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 import connectToDatabase from "@/lib/mongodb";
 import User from "@/models/User";
+import { validateOtp } from "@/lib/otp";
 
 export const authOptions = {
   providers: [
@@ -15,12 +16,20 @@ export const authOptions = {
       name: "OTP",
       credentials: {
         phone: { label: "Phone", type: "text" },
+        otp: { label: "OTP", type: "text" },
+        verificationId: { label: "Verification ID", type: "text" },
       },
       async authorize(credentials) {
+        const phone = credentials?.phone;
+
+        // OTP must be verified server-side here, otherwise anyone could log in with just a phone number
+        const check = await validateOtp(phone, credentials?.verificationId, credentials?.otp);
+        if (!check.ok) throw new Error(check.error);
+
         await connectToDatabase();
 
-        const phone = credentials.phone;
         let user = await User.findOne({ phone });
+        if (user?.isBanned) throw new Error("This account has been suspended");
 
         if (!user) {
           // If no user exists, create one silently on successful OTP verify.

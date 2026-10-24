@@ -57,7 +57,7 @@ if (order.payment_status === "PAID" && order.verified === true) {
         `${process.env.NEXT_PUBLIC_BASE_URL || "https://www.ravenfragrance.in"}/api/send-confirmation-mail`,
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { "Content-Type": "application/json", "x-internal-key": process.env.NEXTAUTH_SECRET || "" },
           body: JSON.stringify(emailPayload),
         }
       ).catch((err) => console.error("📩 Email trigger error:", err));
@@ -381,7 +381,7 @@ if (order.payment_status === "PAID" && order.verified === true) {
             `${process.env.NEXT_PUBLIC_BASE_URL}/api/send-confirmation-mail`,
             {
               method: "POST",
-              headers: { "Content-Type": "application/json" },
+              headers: { "Content-Type": "application/json", "x-internal-key": process.env.NEXTAUTH_SECRET || "" },
               body: JSON.stringify(emailPayload),
             }
           )

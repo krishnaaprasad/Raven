@@ -1,15 +1,20 @@
 import connectToDatabase from "@/lib/mongodb";
 import User from "@/models/User";
 import { NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
 export async function POST(req) {
   try {
-    const data = await req.json();
-    const { phone, email, firstName, lastName, address1, address2, city, state, pincode } = data;
-
+    // Phone comes from the OTP-verified session, never from the request body
+    const session = await getServerSession(authOptions);
+    const phone = session?.user?.phone;
     if (!phone) {
-      return NextResponse.json({ error: "Verified phone number is required" }, { status: 400 });
+      return NextResponse.json({ error: "Verified phone number is required" }, { status: 401 });
     }
+
+    const data = await req.json();
+    const { email, firstName, lastName, address1, address2, city, state, pincode } = data;
 
     await connectToDatabase();
 
@@ -27,12 +32,10 @@ export async function POST(req) {
       user.city = city || user.city;
       user.state = state || user.state;
       user.pincode = pincode || user.pincode;
-      
+
       await user.save();
-      return NextResponse.json({ success: true, user });
     } else {
-       // Create a new guest user profile using the phone and the filled form
-      user = await User.create({
+      await User.create({
         phone,
         phoneVerified: true,
         name: fullName || "User",
@@ -42,10 +45,10 @@ export async function POST(req) {
         city,
         state,
         pincode,
-        isGuest: true // Marks them as an un-authenticated guest account
       });
-      return NextResponse.json({ success: true, user });
     }
+
+    return NextResponse.json({ success: true });
 
   } catch (error) {
     console.error("Error saving checkout user data:", error);

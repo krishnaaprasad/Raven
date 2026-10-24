@@ -7,6 +7,9 @@ import WhyChooseRaven from '@/components/WhyChooseRaven';
 import HomeBottomFold from "@/components/HomeBottomFold";
 import ScrollReveal from "@/components/ScrollReveal";
 
+// Refresh product data every 60s (previously frozen at build time until the next deploy)
+export const revalidate = 60;
+
 export default async function Home() {
   
   // ✅ Connect to DB (server component allowed)
@@ -30,7 +33,7 @@ export default async function Home() {
   return (
     <div className="homepage-theme" >
       {/* HERO SECTION */}
-      <HeroSection products={products.slice(0, 5)} />
+      <HeroSection />
 
       {/* REVEALING SECTIONS */}
       <ScrollReveal>

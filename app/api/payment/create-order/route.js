@@ -94,7 +94,6 @@ export async function POST(req) {
       state,
       pincode,
       shipping,
-      shippingCharge,
       totalAmount,
       cartItems,
       couponCode,
@@ -143,9 +142,9 @@ export async function POST(req) {
         );
       }
 
-      const product = await Product.findOne({ slug });
+      const product = await Product.findOne({ slug, deleted: { $ne: true } });
 
-      if (!product) {
+      if (!product || product.isComingSoon) {
         return NextResponse.json(
           { error: "Invalid product in cart" },
           { status: 400 }
@@ -177,11 +176,13 @@ export async function POST(req) {
       item.price = dbPrice;
     }
 
-    // 2️⃣ Calculate shipping safely
-    const parsedShippingCharge = Number.parseFloat(shippingCharge);
-    const safeShippingCharge = Number.isFinite(parsedShippingCharge) && parsedShippingCharge >= 0
-      ? parsedShippingCharge
-      : 0;
+    // 2️⃣ Shipping is priced on the server — never trust the client's amount
+    // (keep in sync with shippingCharges in app/checkout/CheckoutClient.jsx)
+    const SHIPPING_CHARGES = { standard: 50, express: 120, pickup: 0 };
+    if (!(shipping in SHIPPING_CHARGES)) {
+      return NextResponse.json({ error: "Invalid shipping method" }, { status: 400 });
+    }
+    const safeShippingCharge = SHIPPING_CHARGES[shipping];
 
     // 3️⃣ Validate coupon if provided
     let discountAmount = 0;
@@ -201,21 +202,36 @@ export async function POST(req) {
         );
       }
 
+      // Check minimum order BEFORE reserving a use, so failed attempts don't burn the coupon
+      if (subtotal < (coupon.minOrderAmount || 0)) {
+        return NextResponse.json(
+          { error: `Minimum order ₹${coupon.minOrderAmount} required` },
+          { status: 400 }
+        );
+      }
+
       const now = new Date();
       const reservedCoupon = await Coupon.findOneAndUpdate(
         {
           _id: coupon._id,
           isActive: true,
           deleted: { $ne: true },
-          $or: [
-            { expiryDate: { $exists: false } },
-            { expiryDate: null },
-            { expiryDate: { $gte: now } },
-          ],
-          $or: [
-            { usageLimit: { $exists: false } },
-            { usageLimit: null },
-            { $expr: { $lt: ["$usedCount", "$usageLimit"] } },
+          // $and needed: two "$or" keys in one object silently drop the first (expiry was never checked)
+          $and: [
+            {
+              $or: [
+                { expiryDate: { $exists: false } },
+                { expiryDate: null },
+                { expiryDate: { $gte: now } },
+              ],
+            },
+            {
+              $or: [
+                { usageLimit: { $exists: false } },
+                { usageLimit: null },
+                { $expr: { $lt: ["$usedCount", "$usageLimit"] } },
+              ],
+            },
           ],
         },
         { $inc: { usedCount: 1 } },
@@ -224,14 +240,7 @@ export async function POST(req) {
 
       if (!reservedCoupon) {
         return NextResponse.json(
-          { error: "Coupon usage limit reached" },
-          { status: 400 }
-        );
-      }
-
-      if (subtotal < reservedCoupon.minOrderAmount) {
-        return NextResponse.json(
-          { error: `Minimum order ₹${reservedCoupon.minOrderAmount} required` },
+          { error: "Coupon expired or usage limit reached" },
           { status: 400 }
         );
       }

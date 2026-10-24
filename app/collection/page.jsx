@@ -1,4 +1,5 @@
-export const dynamic = "force-dynamic";
+// Cached and refreshed every 60s — fast page loads, admin/stock changes appear within a minute
+export const revalidate = 60;
 
 import CraftCredentials from "./components/CraftCredentials";
 import connectToDatabase from '@/lib/mongodb';

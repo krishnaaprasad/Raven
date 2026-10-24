@@ -12,7 +12,9 @@ export async function GET(req) {
       return Response.json({ results: [] });
     }
 
-    const regex = new RegExp(q, "i");
+    // Escape user input — raw regex lets anyone send patterns that hang the DB (ReDoS)
+    const safe = q.slice(0, 50).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const regex = new RegExp(safe, "i");
 
     const products = await Product.find({
       deleted: { $ne: true },

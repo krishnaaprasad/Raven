@@ -24,7 +24,7 @@ export default function HomeMarquee() {
   useEffect(() => {
     async function load() {
       try {
-        const res = await fetch("/api/admin/marquee");
+        const res = await fetch("/api/marquee");
         if (!res.ok) return;
 
         const data = await res.json();
