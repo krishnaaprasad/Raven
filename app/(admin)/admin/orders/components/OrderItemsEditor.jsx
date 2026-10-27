@@ -38,7 +38,17 @@ export default function OrderItemsEditor({ products, items, onChange, heldQty = 
             <div className="flex gap-2 items-start">
               <select
                 value={it.slug}
-                onChange={(e) => setRow(idx, { slug: e.target.value, variantSize: "", price: "" })}
+                onChange={(e) => {
+                  // Picking a product fills its size and price straight away (first size;
+                  // all products currently have one) — size can still be changed below
+                  const p = products.find((x) => x.slug === e.target.value);
+                  const first = p?.variants?.[0];
+                  setRow(idx, {
+                    slug: e.target.value,
+                    variantSize: first ? String(first.size) : "",
+                    price: first?.price ?? "",
+                  });
+                }}
                 className="flex-1 h-9 border rounded-md px-2 text-sm text-[#1b180d] bg-white"
               >
                 <option value="">Select product</option>
@@ -74,7 +84,7 @@ export default function OrderItemsEditor({ products, items, onChange, heldQty = 
                   <option value="">Size</option>
                   {product.variants.map((v) => (
                     <option key={v.size} value={v.size}>
-                      {v.size}
+                      {v.size} - ₹{v.price}
                     </option>
                   ))}
                 </select>
