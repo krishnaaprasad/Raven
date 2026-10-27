@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import connectToDatabase from "@/lib/mongodb";
+import { istDayStart, istMonthStart, istMonthStartOf, istYearMonth, IST_TZ } from "@/lib/istDate";
 import { Order } from "@/models/Order";
 import Product from "@/models/Product";
 import Expense from "@/models/Expense";
@@ -16,15 +17,15 @@ export async function GET(req) {
     const now = new Date();
     let year, month;
 
-    if (periodParam && /^\d{4}-\d{2}$/.test(periodParam)) {
+    // Month must be 01–12 ("2026-13" used to pass the regex)
+    if (periodParam && /^\d{4}-(0[1-9]|1[0-2])$/.test(periodParam)) {
       [year, month] = periodParam.split("-").map(Number);
     } else {
-      year = now.getFullYear();
-      month = now.getMonth() + 1;
+      ({ year, month } = istYearMonth(now));
     }
 
-    const startDate = new Date(year, month - 1, 1);
-    const endDate = new Date(year, month, 1);
+    const startDate = istMonthStartOf(year, month);
+    const endDate = istMonthStartOf(year, month + 1);
     const period = `${year}-${String(month).padStart(2, "0")}`;
 
     // 1. Revenue

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import connectToDatabase from "@/lib/mongodb";
+import { istDayStart, istMonthStart, istMonthStartOf, istYearMonth, IST_TZ } from "@/lib/istDate";
 import { Order } from "@/models/Order";
 import Product from "@/models/Product";
 import Expense from "@/models/Expense";
@@ -12,14 +13,17 @@ export async function GET() {
     const now = new Date();
     const months = [];
 
+    const cur = istYearMonth(now);
     for (let i = 5; i >= 0; i--) {
-      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const idx = cur.year * 12 + (cur.month - 1) - i; // months since year 0
+      const year = Math.floor(idx / 12);
+      const month = (idx % 12) + 1;
       months.push({
-        year: d.getFullYear(),
-        month: d.getMonth() + 1,
-        period: `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`,
-        startDate: new Date(d.getFullYear(), d.getMonth(), 1),
-        endDate: new Date(d.getFullYear(), d.getMonth() + 1, 1),
+        year,
+        month,
+        period: `${year}-${String(month).padStart(2, "0")}`,
+        startDate: istMonthStartOf(year, month),
+        endDate: istMonthStartOf(year, month + 1),
       });
     }
 

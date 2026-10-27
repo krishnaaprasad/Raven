@@ -1,11 +1,40 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { X } from "lucide-react";
 import { toast } from "react-hot-toast";
+import OrderItemsEditor, { itemsSubtotal } from "../orders/components/OrderItemsEditor";
 
 export default function EditOrderModal({ order, onClose, onUpdated }) {
-  const item = order.cartItems[0];
+  const [products, setProducts] = useState([]);
+  const [saving, setSaving] = useState(false);
+  const [items, setItems] = useState(() =>
+    (order.cartItems || []).map((l) => ({
+      slug: l.slug,
+      variantSize: l.size,
+      quantity: l.quantity,
+      price: l.price,
+    }))
+  );
+
+  // Quantities this order already holds — added to the stock hint while editing
+  const heldQty = useMemo(() => {
+    if (!order.stockDeducted || order.stockRestored) return {};
+    const m = {};
+    for (const l of order.cartItems || []) {
+      const k = `${l.slug}|${l.size}`;
+      m[k] = (m[k] || 0) + Number(l.quantity || 0);
+    }
+    return m;
+  }, [order]);
+
+  useEffect(() => {
+    (async () => {
+      const res = await fetch("/api/admin/products?limit=1000");
+      const json = await res.json().catch(() => ({}));
+      if (json.success) setProducts(json.data || []);
+    })();
+  }, []);
 
   const [form, setForm] = useState({
     userName: order.userName || "",
@@ -15,8 +44,6 @@ export default function EditOrderModal({ order, onClose, onUpdated }) {
     city: order.addressDetails?.city || "",
     state: order.addressDetails?.state || "",
     pincode: order.addressDetails?.pincode || "",
-    quantity: item.quantity,
-    price: item.price,
     shippingCharge: order.shippingCharge || 0,
     // ✅ ADD THESE
     discount: order.discount || 0,
@@ -73,22 +100,25 @@ export default function EditOrderModal({ order, onClose, onUpdated }) {
   "FOC",
 ];
 
+  const subtotal = useMemo(() => itemsSubtotal(items), [items]);
   const total = useMemo(() => {
-    const sub =
-      Number(form.quantity || 1) *
-      Number(form.price || 0);
-
     const ship = Number(form.shippingCharge || 0);
     const discount = Number(form.discount || 0);
+    return Math.max(0, subtotal + ship - discount);
+  }, [form, subtotal]);
 
-    return Math.max(0, sub + ship - discount);
-  }, [form]);
   const handleUpdate = async () => {
+    if (saving) return;
+    if (items.some((it) => !it.slug || !it.variantSize)) {
+      toast.error("Choose a product and size on every row");
+      return;
+    }
+    setSaving(true);
     try {
       const res = await fetch(`/api/admin/orders/${order._id}/edit`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify({ ...form, items }),
       });
 
       const data = await res.json();
@@ -99,12 +129,14 @@ export default function EditOrderModal({ order, onClose, onUpdated }) {
       onClose();
     } catch (e) {
       toast.error(e.message);
+    } finally {
+      setSaving(false);
     }
   };
 
   return (
     <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center px-3">
-      <div className="bg-white w-full max-w-md rounded-xl shadow-xl flex flex-col text-[#1b180d]">
+      <div className="bg-white w-full max-w-lg rounded-xl shadow-xl flex flex-col text-[#1b180d]">
 
         {/* HEADER */}
         <div className="flex justify-between px-4 py-3 border-b">
@@ -116,7 +148,6 @@ export default function EditOrderModal({ order, onClose, onUpdated }) {
         <div className="px-4 py-3 space-y-3 text-sm max-h-[70vh] overflow-y-auto">
 
           {/* LOCKED */}
-          <Input label="Product" value={item.name} disabled />
           <Input
             label="Order Date"
             value={new Date(order.createdAt).toLocaleDateString()}
@@ -172,18 +203,11 @@ export default function EditOrderModal({ order, onClose, onUpdated }) {
             onChange={e => update("pincode", e.target.value)}
           />
 
+          {/* PRODUCTS */}
+          <OrderItemsEditor products={products} items={items} onChange={setItems} heldQty={heldQty} />
+
           {/* NUMBERS – scroll disabled */}
           <div className="grid grid-cols-2 gap-2">
-            <NumberInput
-              label="Qty"
-              value={form.quantity}
-              onChange={v => update("quantity", v)}
-            />
-            <NumberInput
-              label="Price"
-              value={form.price}
-              onChange={v => update("price", v)}
-            />
             <NumberInput
               label="Shipping"
               value={form.shippingCharge}
@@ -232,12 +256,7 @@ export default function EditOrderModal({ order, onClose, onUpdated }) {
           <div className="pt-3 border-t space-y-1 text-sm">
   <div className="flex justify-between">
     <span>Subtotal</span>
-    <span>
-      ₹{(
-        Number(form.quantity || 1) *
-        Number(form.price || 0)
-      ).toFixed(2)}
-    </span>
+    <span>₹{subtotal.toFixed(2)}</span>
   </div>
 
   <div className="flex justify-between">
@@ -265,9 +284,10 @@ export default function EditOrderModal({ order, onClose, onUpdated }) {
         <div className="px-4 py-3 border-t">
           <button
             onClick={handleUpdate}
-            className="w-full h-9 bg-[#b28c34] text-white rounded-lg text-sm font-semibold"
+            disabled={saving}
+            className="w-full h-9 bg-[#b28c34] text-white rounded-lg text-sm font-semibold disabled:opacity-60"
           >
-            Update Order
+            {saving ? "Saving..." : "Update Order"}
           </button>
         </div>
       </div>

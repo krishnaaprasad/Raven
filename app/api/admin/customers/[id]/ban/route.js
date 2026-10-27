@@ -16,6 +16,14 @@ export async function PATCH(req, context) {
       );
     }
 
+    // Never ban an admin account (would lock staff out of the panel)
+    if (ban && user.role === "ADMIN") {
+      return NextResponse.json(
+        { success: false, message: "Admin accounts can't be banned" },
+        { status: 400 }
+      );
+    }
+
     user.isBanned = !!ban;
     await user.save();
 

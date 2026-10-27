@@ -66,6 +66,7 @@ const emailPayload = {
       method: "POST",
       headers: { "Content-Type": "application/json", "x-internal-key": process.env.NEXTAUTH_SECRET || "" },
       body: JSON.stringify(emailPayload),
+      signal: AbortSignal.timeout(15000),
     });
 
     return NextResponse.json({ success: true });

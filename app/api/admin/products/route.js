@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import connectToDatabase from "@/lib/mongodb";
 import Product from "@/models/Product";
+import { normalizeVariant } from "@/lib/productVariants";
+import { escapeRegex } from "@/lib/escapeRegex";
 
 // =====================
 // GET /api/admin/products
@@ -18,9 +20,9 @@ export async function GET(req) {
     const query = {
       ...(q && {
         $or: [
-          { name: { $regex: q, $options: "i" } },
-          { slug: { $regex: q, $options: "i" } },
-          { brand: { $regex: q, $options: "i" } },
+          { name: { $regex: escapeRegex(q), $options: "i" } },
+          { slug: { $regex: escapeRegex(q), $options: "i" } },
+          { brand: { $regex: escapeRegex(q), $options: "i" } },
         ],
       }),
       ...(!includeDeleted && { deleted: { $ne: true } }), // SHOW ALL non-deleted
@@ -105,13 +107,7 @@ export async function POST(req) {
     }
 
     // Normalize variants
-    const formattedVariants = variants.map((v) => ({
-      size: v.size,
-      price: Number(v.price),
-      mrp: Number(v.mrp),
-      stock: Number(v.stock) || 0,
-        
-    }));
+    const formattedVariants = variants.map(normalizeVariant);
 
     // Create product
     const newProduct = await Product.create({

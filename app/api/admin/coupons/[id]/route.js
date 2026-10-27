@@ -73,16 +73,29 @@ export async function PATCH(req, context) {
       );
     }
 
-    const updatedCoupon = await Coupon.findByIdAndUpdate(
-      id,
+    // Percentage coupons can't exceed 100% (check against the type after this update)
+    const current = await Coupon.findById(id).select("type value").lean();
+    if (!current) {
+      return NextResponse.json({ error: "Coupon not found" }, { status: 404 });
+    }
+    const nextType = update.type ?? current.type;
+    const nextValue = Number(update.value ?? current.value);
+    if (nextType === "PERCENT" && nextValue > 100) {
+      return NextResponse.json({ error: "Percentage coupons cannot exceed 100%" }, { status: 400 });
+    }
+
+    // Write only if type/value are still what we validated against (another edit in between
+    // could otherwise combine into e.g. a 150% PERCENT coupon)
+    const updatedCoupon = await Coupon.findOneAndUpdate(
+      { _id: id, type: current.type, value: current.value },
       { $set: update },
       { new: true, runValidators: true }
     );
 
     if (!updatedCoupon) {
       return NextResponse.json(
-        { error: "Coupon not found" },
-        { status: 404 }
+        { error: "This coupon was changed by someone else just now. Reload and try again." },
+        { status: 409 }
       );
     }
 

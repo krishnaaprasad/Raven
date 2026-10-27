@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import connectToDatabase from "@/lib/mongodb";
 import User from "@/models/User";
 import { Order } from "@/models/Order";
+import { escapeRegex } from "@/lib/escapeRegex";
 
 export async function GET(req, context) {
   try {
@@ -30,7 +31,7 @@ export async function GET(req, context) {
     if (orderSearch) {
       ordersQuery.$and = [
         {
-          $or: [{ customOrderId: { $regex: orderSearch, $options: "i" } }],
+          $or: [{ customOrderId: { $regex: escapeRegex(orderSearch), $options: "i" } }],
         },
       ];
     }

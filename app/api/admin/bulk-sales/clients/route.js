@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import connectToDatabase from "@/lib/mongodb";
 import BulkClient from "@/models/BulkClient";
 import BulkInvoice from "@/models/BulkInvoice";
+import { escapeRegex } from "@/lib/escapeRegex";
 
 // GET /api/admin/bulk-sales/clients
 export async function GET(req) {
@@ -14,9 +15,9 @@ export async function GET(req) {
     const filter = { deleted: { $ne: true } };
     if (q) {
       filter.$or = [
-        { name: { $regex: q, $options: "i" } },
-        { company: { $regex: q, $options: "i" } },
-        { phone: { $regex: q, $options: "i" } },
+        { name: { $regex: escapeRegex(q), $options: "i" } },
+        { company: { $regex: escapeRegex(q), $options: "i" } },
+        { phone: { $regex: escapeRegex(q), $options: "i" } },
       ];
     }
 

@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 import connectToDatabase from "@/lib/mongodb";
 import { Order } from "@/models/Order";
 import User from "@/models/User";
+import { buildAdminOrderFilter } from "@/lib/adminOrderFilter";
 
 
 export async function GET(request) {
@@ -14,75 +15,7 @@ export async function GET(request) {
     const page = Math.max(1, parseInt(searchParams.get("page") || "1"));
     const limit = Math.min(100, parseInt(searchParams.get("limit") || "10"));
 
-    const q = (searchParams.get("q") || "").trim();
-    const paymentStatus = searchParams.get("paymentStatus") || null;
-    const orderStatus = searchParams.get("orderStatus") || null;
-    const from = searchParams.get("from") || null;
-    const to = searchParams.get("to") || null;
-    const hasDiscount = searchParams.get("hasDiscount") || null;
-    const productName = searchParams.get("productName") || null;
-
-    const showDeleted = searchParams.get("deleted") === "true";
-
-    const filter = showDeleted
-      ? { deleted: true }
-      : { deleted: { $ne: true } };
-
-
-    // SEARCH
-    if (q) {
-      const re = new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i");
-      filter.$or = [
-        { customOrderId: re },
-        { userName: re },
-        { email: re },
-        { phone: re },
-        { "cartItems.name": re },
-      ];
-    }
-
-    // PAYMENT STATUS
-    if (paymentStatus) {
-      filter.$and = filter.$and || [];
-      filter.$and.push({
-        $or: [
-          { payment_status: paymentStatus },
-          { status: paymentStatus },
-        ],
-      });
-    }
-
-    // ORDER STATUS
-    if (orderStatus) filter.order_status = orderStatus;
-
-    // DATE RANGE FILTER
-if (from || to) {
-  filter.createdAt = {};
-  if (from) filter.createdAt.$gte = new Date(from);
-  if (to) filter.createdAt.$lte = new Date(`${to}T23:59:59`);
-}
-
-// PRODUCT NAME FILTER (dropdown)
-if (productName) {
-  const re = new RegExp(productName, "i");
-  filter["cartItems.name"] = re;
-}
-
-// DISCOUNT FILTER
-if (hasDiscount === "yes") {
-  filter.discount = { $gt: 0 };
-}
-
-if (hasDiscount === "no") {
-  filter.$and = filter.$and || [];
-  filter.$and.push({
-    $or: [
-      { discount: { $exists: false } },
-      { discount: 0 },
-      { discount: null },
-    ],
-  });
-}
+    const filter = buildAdminOrderFilter(searchParams);
 
     const total = await Order.countDocuments(filter);
 

@@ -290,6 +290,9 @@ export async function POST(req) {
         discountAmount = reservedCoupon.value;
       }
 
+      // Never discount more than the products themselves (shipping is still charged)
+      discountAmount = Math.min(discountAmount, subtotal);
+
       appliedCoupon = reservedCoupon;
     }
 

@@ -4,6 +4,7 @@ import connectToDatabase from "@/lib/mongodb";
 import { Order } from "@/models/Order";
 import axios from "axios";
 import { finalizePaidOrder, releaseReservation } from "@/lib/orderInventory";
+import { sendOrderConfirmationOnce } from "@/lib/orderEmail";
 import crypto from "crypto";
 
 // Cashfree signs webhooks: base64(HMAC_SHA256(timestamp + rawBody, secretKey))
@@ -197,43 +198,7 @@ export async function POST(req) {
     if (payment_status === "PAID") {
       // Send confirmation email
       try {
-        const freshOrder = await Order.findById(updatedOrder._id);
-
-        if (!freshOrder.emailSent) {
-          const emailPayload = {
-            email: freshOrder.email,
-            name: freshOrder.userName,
-            orderId: freshOrder.customOrderId || freshOrder._id.toString(),
-            paymentMethod,
-            subtotal: freshOrder.cartItems.reduce(
-              (acc, item) => acc + item.price * item.quantity,
-              0
-            ),
-            shippingCost: freshOrder.shippingCharge,
-            discount: freshOrder.discount || 0,
-            couponCode: freshOrder.couponCode || null,
-            totalAmount: freshOrder.totalAmount,
-            items: freshOrder.cartItems,
-            shipping: freshOrder.deliveryType,
-            address: {
-              ...freshOrder.addressDetails,
-              phone: freshOrder.phone,
-            },
-          };
-
-          fetch(
-            `${process.env.NEXT_PUBLIC_BASE_URL || "https://www.ravenfragrance.in"}/api/send-confirmation-mail`,
-            {
-              method: "POST",
-              headers: { "Content-Type": "application/json", "x-internal-key": process.env.NEXTAUTH_SECRET || "" },
-              body: JSON.stringify(emailPayload),
-            }
-          )
-            .then(() => console.log("📨 Webhook: Email triggered successfully"))
-            .catch((err) => console.error("📩 Webhook: Email trigger error:", err));
-
-          await Order.findByIdAndUpdate(freshOrder._id, { emailSent: true });
-        }
+        await sendOrderConfirmationOnce(updatedOrder._id, paymentMethod);
       } catch (mailErr) {
         console.error("❌ Webhook email error:", mailErr);
       }

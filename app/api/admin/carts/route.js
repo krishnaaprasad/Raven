@@ -1,6 +1,7 @@
 import Cart from "@/models/Cart";
 import connectToDatabase from "@/lib/mongodb";
 import User from "@/models/User";
+import { escapeRegex } from "@/lib/escapeRegex";
 
 export async function GET(req) {
   try {
@@ -31,7 +32,7 @@ export async function GET(req) {
     // Search matching name/email/session
     if (search) {
       query.$or = [
-        { sessionId: { $regex: search, $options: "i" } },
+        { sessionId: { $regex: escapeRegex(search), $options: "i" } },
       ];
     }
 

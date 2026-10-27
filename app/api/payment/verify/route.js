@@ -5,6 +5,7 @@ import { Order } from "@/models/Order";
 import axios from "axios";
 import { generateInvoice } from "@/lib/invoice/generateInvoice"; // ✅ still here
 import { finalizePaidOrder, releaseReservation } from "@/lib/orderInventory";
+import { sendOrderConfirmationOnce } from "@/lib/orderEmail";
 
 export async function GET(req) {
   try {
@@ -32,37 +33,11 @@ if (!order) {
 
 // Prevent double verification — but still send email if not sent
 if (order.payment_status === "PAID" && order.verified === true) {
-  // Send email if it wasn't sent yet
-  if (!order.emailSent) {
-    try {
-      const emailPayload = {
-        email: order.email,
-        name: order.userName,
-        orderId: order.customOrderId || order._id.toString(),
-        paymentMethod: order.paymentMethod || "Online Payment",
-        subtotal: order.cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0),
-        shippingCost: order.shippingCharge,
-        discount: order.discount || 0,
-        couponCode: order.couponCode || null,
-        totalAmount: order.totalAmount,
-        items: order.cartItems,
-        shipping: order.deliveryType,
-        address: { ...order.addressDetails, phone: order.phone },
-      };
-
-      fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL || "https://www.ravenfragrance.in"}/api/send-confirmation-mail`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json", "x-internal-key": process.env.NEXTAUTH_SECRET || "" },
-          body: JSON.stringify(emailPayload),
-        }
-      ).catch((err) => console.error("📩 Email trigger error:", err));
-
-      await Order.findByIdAndUpdate(order._id, { emailSent: true });
-    } catch (mailErr) {
-      console.error("❌ Email error on already-verified path:", mailErr);
-    }
+  // Send email if it wasn't sent yet (claimed once, see lib/orderEmail.js)
+  try {
+    await sendOrderConfirmationOnce(order._id);
+  } catch (mailErr) {
+    console.error("❌ Email error on already-verified path:", mailErr);
   }
 
   return NextResponse.json({
@@ -277,54 +252,7 @@ if (order.payment_status === "PAID" && order.verified === true) {
     if (payment_status === "PAID" || payment_state === "SUCCESS") {
       try {
         // Always read fresh from database
-        let updatedOrder = await Order.findById(orderId);
-
-        if (updatedOrder.emailSent === true) {
-          console.log("📨 Email already sent earlier - skipping.");
-        } else {
-          console.log("📨 Sending confirmation mail for FIRST time...");
-
-          const emailPayload = {
-            email: updatedOrder.email,
-            name: updatedOrder.userName,
-            orderId:
-              updatedOrder.customOrderId || updatedOrder._id.toString(),
-            paymentMethod,
-            subtotal: updatedOrder.cartItems.reduce(
-              (acc, item) => acc + item.price * item.quantity,
-              0
-            ),
-            shippingCost: updatedOrder.shippingCharge,
-            discount: updatedOrder.discount || 0,        
-            couponCode: updatedOrder.couponCode || null, 
-            totalAmount: updatedOrder.totalAmount,
-            items: updatedOrder.cartItems,
-            shipping: updatedOrder.deliveryType,
-            address: {
-              ...updatedOrder.addressDetails,
-              phone: updatedOrder.phone,
-            },
-          };
-
-          // Fire-and-forget email trigger
-          fetch(
-            `${process.env.NEXT_PUBLIC_BASE_URL}/api/send-confirmation-mail`,
-            {
-              method: "POST",
-              headers: { "Content-Type": "application/json", "x-internal-key": process.env.NEXTAUTH_SECRET || "" },
-              body: JSON.stringify(emailPayload),
-            }
-          )
-            .then(() => console.log("📨 Email triggered successfully"))
-            .catch((err) =>
-              console.error("📩 Email trigger error:", err)
-            );
-
-          // Mark as sent
-          updatedOrder.emailSent = true;
-          await updatedOrder.save();
-          console.log("✅ emailSent flag saved in DB");
-        }
+        await sendOrderConfirmationOnce(orderId, paymentMethod);
       } catch (mailErr) {
         console.error("❌ Email Sending Error:", mailErr);
       }

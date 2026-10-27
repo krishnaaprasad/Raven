@@ -265,6 +265,7 @@ export default function EditProductClient({ productId }) {
                   price: v.price ?? "",
                   mrp: v.mrp ?? "",
                   stock: v.stock ?? "",
+                  stockLoaded: v.stock ?? 0, // server applies (stock − stockLoaded) to live stock
                   oil_cost: v.oil_cost ?? "",
                   packaging_cost: v.packaging_cost ?? "",
                   other_cost: v.other_cost ?? "",
@@ -505,6 +506,7 @@ export default function EditProductClient({ productId }) {
             price: Number(v.price),
             mrp: v.mrp ? Number(v.mrp) : undefined,
             stock: Number(v.stock) || 0,
+            ...(v.stockLoaded !== undefined ? { stockLoaded: Number(v.stockLoaded) || 0 } : {}),
             oil_cost: Number(v.oil_cost) || 0,
             packaging_cost: Number(v.packaging_cost) || 0,
             other_cost: Number(v.other_cost) || 0,

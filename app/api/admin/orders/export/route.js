@@ -1,43 +1,15 @@
 import { NextResponse } from "next/server";
 import connectToDatabase from "@/lib/mongodb";
 import { Order } from "@/models/Order";
+import { buildAdminOrderFilter } from "@/lib/adminOrderFilter";
 
 export async function GET(req) {
   try {
     await connectToDatabase();
 
     const { searchParams } = new URL(req.url);
-    const q = searchParams.get("q") || "";
-    const paymentStatus = searchParams.get("paymentStatus") || "";
-    const orderStatus = searchParams.get("orderStatus") || "";
-    const from = searchParams.get("from") || "";
-    const to = searchParams.get("to") || "";
-
-    const filter = {};
-
-    if (q) {
-      filter.$or = [
-        { customOrderId: { $regex: q, $options: "i" } },
-        { userName: { $regex: q, $options: "i" } },
-        { email: { $regex: q, $options: "i" } },
-        { phone: { $regex: q, $options: "i" } },
-      ];
-    }
-
-    if (paymentStatus) {
-      filter.$or = [
-        { payment_status: paymentStatus },
-        { status: paymentStatus },
-      ];
-    }
-
-    if (orderStatus) filter.order_status = orderStatus;
-
-    if (from || to) {
-      filter.createdAt = {};
-      if (from) filter.createdAt.$gte = new Date(from);
-      if (to) filter.createdAt.$lte = new Date(`${to}T23:59:59`);
-    }
+    // Same filter as the on-screen list (also excludes deleted orders, uses IST dates)
+    const filter = buildAdminOrderFilter(searchParams);
 
     const orders = await Order.find(filter).sort({ createdAt: -1 }).lean();
 

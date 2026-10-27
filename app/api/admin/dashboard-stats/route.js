@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import connectToDatabase from "@/lib/mongodb";
+import { istDayStart, istMonthStart, istMonthStartOf, istYearMonth, IST_TZ } from "@/lib/istDate";
 import { Order } from "@/models/Order";
 import Product from "@/models/Product";
 import User from "@/models/User";
@@ -11,18 +12,17 @@ export async function GET() {
     await connectToDatabase();
 
     const now = new Date();
-    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const startOfYesterday = new Date(startOfToday);
-    startOfYesterday.setDate(startOfYesterday.getDate() - 1);
+    // IST boundaries (server clock is UTC)
+    const startOfMonth = istMonthStart(0);
+    const startOfToday = istDayStart(0);
+    const startOfYesterday = istDayStart(-1);
 
     // Previous month for comparison
-    const startOfPrevMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-    const endOfPrevMonth = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59);
+    const startOfPrevMonth = istMonthStart(-1);
+    const endOfPrevMonth = new Date(istMonthStart(0).getTime() - 1);
 
     // Week start (7 days ago)
-    const startOfWeek = new Date(startOfToday);
-    startOfWeek.setDate(startOfWeek.getDate() - 7);
+    const startOfWeek = istDayStart(-7);
 
     // 30 days ago for overdue
     const thirtyDaysAgo = new Date(now);

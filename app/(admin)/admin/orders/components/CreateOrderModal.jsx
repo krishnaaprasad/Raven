@@ -3,6 +3,7 @@
 import { useEffect, useState, useMemo } from "react";
 import { X } from "lucide-react";
 import { toast } from "react-hot-toast";
+import OrderItemsEditor, { emptyItem, itemsSubtotal } from "./OrderItemsEditor";
 
 export default function CreateOrderModal({ onClose, onCreated }) {
   const INDIAN_STATES = [
@@ -24,17 +25,15 @@ export default function CreateOrderModal({ onClose, onCreated }) {
     city: "",
     state: "",
     pincode: "",
-    productId: "",
-    variantSize: "",
-    quantity: 1,
     shippingCharge: "",
       // ✅ ADD THESE
     discount: "",
     couponCode: "",
     paymentMethod: "Cash",
-    price: "",
     remark: "",
   });
+  const [items, setItems] = useState([emptyItem()]);
+  const [saving, setSaving] = useState(false);
 
   const update = (k, v) => setForm(p => ({ ...p, [k]: v }));
 
@@ -46,31 +45,26 @@ export default function CreateOrderModal({ onClose, onCreated }) {
     })();
   }, []);
 
-  const product = products.find(p => p._id === form.productId);
-  const variant = product?.variants?.find(v => v.size === form.variantSize);
-
-  useEffect(() => {
-    if (variant?.price != null) {
-      update("price", variant.price);
-    }
-  }, [variant]);
-
+  const subtotal = useMemo(() => itemsSubtotal(items), [items]);
 
   const total = useMemo(() => {
-    const qty = Number(form.quantity || 1);
-    const price = Number(form.price || 0);
     const ship = Number(form.shippingCharge || 0);
     const discount = Number(form.discount || 0);
-
-    const sub = qty * price;
-    const calculated = sub + ship - discount;
-
-    return calculated < 0 ? 0 : calculated;
-  }, [form]);
+    return Math.max(0, subtotal + ship - discount);
+  }, [form, subtotal]);
 
   const handleSave = async () => {
+    if (saving) return; // no double submit (would create two orders)
     try {
-      const sub = Number(form.quantity || 1) * Number(form.price || 0);
+      if (!form.userName.trim() || !form.phone.trim()) {
+        toast.error("Customer name and phone are required");
+        return;
+      }
+      if (items.some((it) => !it.slug || !it.variantSize)) {
+        toast.error("Choose a product and size on every row");
+        return;
+      }
+      const sub = subtotal;
       const discountVal = Number(form.discount || 0);
       if (discountVal < 0) {
         toast.error("Discount cannot be negative");
@@ -79,11 +73,12 @@ export default function CreateOrderModal({ onClose, onCreated }) {
       if (discountVal > sub) {
         toast.error("Discount cannot exceed subtotal");
         return;
-      }      
+      }
+      setSaving(true);
       const res = await fetch("/api/admin/orders/create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify({ ...form, items }),
       });
 
       const data = await res.json();
@@ -93,12 +88,14 @@ export default function CreateOrderModal({ onClose, onCreated }) {
       onClose();
     } catch (e) {
       toast.error(e.message);
+    } finally {
+      setSaving(false);
     }
   };
 
   return (
     <div className="fixed inset-0 z-50 bg-black/30 flex items-center justify-center px-3">
-      <div className="bg-white w-full max-w-md rounded-xl shadow-xl text-[#1b180d]">
+      <div className="bg-white w-full max-w-lg rounded-xl shadow-xl text-[#1b180d]">
 
         {/* HEADER */}
         <div className="flex justify-between px-4 py-3 border-b">
@@ -134,49 +131,12 @@ export default function CreateOrderModal({ onClose, onCreated }) {
 
           <Input label="Pincode" onChange={e => update("pincode", e.target.value)} />
 
-          {/* PRODUCT */}
-          <Select
-            label="Product*"
-            value={form.productId}
-            onChange={e => {
-              update("productId", e.target.value);
-              update("variantSize", "");
-            }}
-          >
-            <option value="">Select product</option>
-            {products.map(p => (
-              <option key={p._id} value={p._id}>{p.name}</option>
-            ))}
-          </Select>
-
-          {/* VARIANT */}
-          {product && (
-            <Select
-              label="Variant*"
-              value={form.variantSize}
-              onChange={e => update("variantSize", e.target.value)}
-            >
-              <option value="">Select size</option>
-              {product.variants.map(v => (
-                <option key={v.size} value={v.size}>
-                  {v.size} - ₹{v.price}
-                </option>
-              ))}
-            </Select>
-          )}
+          {/* PRODUCTS (one row = single-product order) */}
+          <OrderItemsEditor products={products} items={items} onChange={setItems} />
 
           <div className="grid grid-cols-2 gap-2">
-            <Input type="number" label="Qty" value={form.quantity}
-              onChange={e => update("quantity", e.target.value)} />
             <Input type="number" label="Shipping"
               onChange={e => update("shippingCharge", e.target.value)} />
-            <Input
-              type="number"
-              label="Price"
-              value={form.price}
-              onChange={e => update("price", e.target.value)}
-            />
-            <div className="grid grid-cols-2 gap-2">
             <Input
               type="number"
               label="Discount"
@@ -189,7 +149,6 @@ export default function CreateOrderModal({ onClose, onCreated }) {
               value={form.couponCode}
               onChange={e => update("couponCode", e.target.value.toUpperCase())}
             />
-          </div>
           </div>
 
           <Select
@@ -217,12 +176,7 @@ export default function CreateOrderModal({ onClose, onCreated }) {
           <div className="pt-3 border-t space-y-1 text-sm">
             <div className="flex justify-between">
               <span>Subtotal</span>
-              <span>
-                ₹{(
-                  Number(form.quantity || 1) *
-                  Number(form.price || 0)
-                ).toFixed(2)}
-              </span>
+              <span>₹{subtotal.toFixed(2)}</span>
             </div>
 
             <div className="flex justify-between">
@@ -250,9 +204,10 @@ export default function CreateOrderModal({ onClose, onCreated }) {
         <div className="px-4 py-3 border-t">
           <button
             onClick={handleSave}
-            className="w-full h-9 bg-[#b28c34] text-white rounded-lg text-sm font-semibold"
+            disabled={saving}
+            className="w-full h-9 bg-[#b28c34] text-white rounded-lg text-sm font-semibold disabled:opacity-60"
           >
-            Save Order
+            {saving ? "Saving..." : "Save Order"}
           </button>
         </div>
       </div>

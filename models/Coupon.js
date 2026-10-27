@@ -19,7 +19,9 @@ const couponSchema = new mongoose.Schema(
       type: Number,
       required: true,
       min: [0.01, "Coupon value must be greater than 0"],
-      max: [100, "Coupon value cannot exceed 100"],    },
+      // 100 is the cap for PERCENT only (it used to block FLAT coupons above ₹100);
+      // the admin create/update routes enforce it per type
+    },
 
     minOrderAmount: {
       type: Number,

@@ -1,6 +1,7 @@
 // /app/api/admin/revenue-stats/route.js
 import { NextResponse } from "next/server";
 import connectToDatabase from "@/lib/mongodb";
+import { istMonthStartOf, IST_TZ } from "@/lib/istDate";
 import { Order } from "@/models/Order";
 
 export async function GET(req) {
@@ -11,15 +12,15 @@ export async function GET(req) {
     const month = Number(searchParams.get("month"));
     const year = Number(searchParams.get("year"));
 
-    if (!month || !year) {
+    if (!Number.isInteger(month) || month < 1 || month > 12 || !Number.isInteger(year) || year < 2000 || year > 2100) {
       return NextResponse.json(
-        { error: "month and year params required" },
+        { error: "Valid month (1-12) and year (2000-2100) params required" },
         { status: 400 }
       );
     }
 
-    const startDate = new Date(year, month - 1, 1);
-    const endDate = new Date(year, month, 0, 23, 59, 59);
+    const startDate = istMonthStartOf(year, month);
+    const endDate = new Date(istMonthStartOf(year, month + 1).getTime() - 1);
 
     const orders = await Order.aggregate([
       {
@@ -31,7 +32,7 @@ export async function GET(req) {
       },
       {
         $group: {
-          _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+          _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt", timezone: IST_TZ } },
           revenue: { $sum: "$totalAmount" },
           orders: { $sum: 1 },
         },
@@ -44,9 +45,10 @@ export async function GET(req) {
 
     const result = [];
 
-    let d = new Date(startDate);
-    while (d <= endDate) {
-      const dateString = d.toISOString().split("T")[0];
+    // One row per IST calendar day of the month
+    const daysInMonth = new Date(Date.UTC(year, month, 0)).getUTCDate();
+    for (let day = 1; day <= daysInMonth; day++) {
+      const dateString = `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
 
       result.push({
         date: dateString,
@@ -54,8 +56,6 @@ export async function GET(req) {
         orders: map[dateString]?.orders || 0,
       });
 
-      // Create new instance so date never mutates wrong
-      d = new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1);
     }
 
 

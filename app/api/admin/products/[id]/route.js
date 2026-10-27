@@ -3,6 +3,9 @@ import { NextResponse } from "next/server";
 import connectToDatabase from "@/lib/mongodb";
 import Product from "@/models/Product";
 import { revalidatePath } from "next/cache";
+import mongoose from "mongoose";
+import StockLog from "@/models/StockLog";
+import { normalizeVariant } from "@/lib/productVariants";
 
 // GET /api/admin/products/[id]  → single product for Edit page
 export async function GET(req, { params }) {
@@ -54,7 +57,7 @@ export async function PATCH(req, { params }) {
       await product.save();
 
       revalidatePath("/");
-      revalidatePath("/shop");
+      revalidatePath("/collection");
       revalidatePath(`/product/${product.slug}`);
 
       return NextResponse.json({
@@ -110,34 +113,108 @@ export async function PATCH(req, { params }) {
       }
     }
 
-    // Normalize variants
-    const formattedVariants = (variants || []).map((v) => ({
-      size: v.size,
-      price: Number(v.price),
-      mrp: Number(v.mrp),
-      stock: Number(v.stock) || 0,
-    }));
+    // Normalize variants (keeps cost fields). Stock for an existing size is applied as the
+    // CHANGE the admin made in the form (stock − stockLoaded) on top of the live value, so
+    // orders placed while the form was open aren't undone by a stale number.
+    // The write is conditional on every variant's stock still being what we read (sales /
+    // adjustments in between → re-read and recompute), and the product update + its stock
+    // logs commit together in one transaction.
+    const fields = {
+      name,
+      slug,
+      brand: brand || "",
+      description: description || "",
+      images: images || [],
+      benefits: benefits || [],
+      fragranceType: fragranceType || "",
+      longevity: longevity || "",
+      sillage: sillage || "",
+      topNotes: topNotes || [],
+      heartNotes: heartNotes || [],
+      baseNotes: baseNotes || [],
+      ingredients: ingredients || [],
+      accords: accords || [],
+      isComingSoon: isComingSoon !== undefined ? Boolean(isComingSoon) : product.isComingSoon,
+    };
 
-    product.name = name;
-    product.slug = slug;
-    product.brand = brand || "";
-    product.description = description || "";
-    product.images = images || [];
-    product.benefits = benefits || [];
-    product.variants = formattedVariants;
-    product.fragranceType = fragranceType || "";
-    product.longevity = longevity || "";
-    product.sillage = sillage || "";
-    product.topNotes = topNotes || [];
-    product.heartNotes = heartNotes || [];
-    product.baseNotes = baseNotes || [];
-    product.ingredients = ingredients || [];
-    product.accords = accords || [];
-    product.isComingSoon = isComingSoon !== undefined ? Boolean(isComingSoon) : product.isComingSoon;
-    // keep product.deleted as-is
-    
+    let updated = null;
+    for (let attempt = 0; attempt < 3 && !updated; attempt++) {
+      const fresh = attempt === 0 ? product : await Product.findById(id).lean();
+      if (!fresh) {
+        return NextResponse.json({ success: false, message: "Product not found" }, { status: 404 });
+      }
 
-    const updated = await product.save();
+      const stockChanges = [];
+      const formattedVariants = [];
+      for (const v of variants) {
+        const next = normalizeVariant(v);
+        const live = fresh.variants.find((pv) => String(pv.size) === next.size);
+        const liveStock = Number(live?.stock || 0);
+        const loaded = Number(v.stockLoaded);
+        if (live && Number.isFinite(loaded)) {
+          const delta = next.stock - loaded;
+          if (liveStock + delta < 0) {
+            return NextResponse.json(
+              {
+                success: false,
+                message: `${next.size}: only ${liveStock} left now, can't reduce by ${-delta}. Reload the page and try again.`,
+              },
+              { status: 409 }
+            );
+          }
+          next.stock = liveStock + delta;
+        }
+        if (live && next.stock !== liveStock) {
+          stockChanges.push({ size: next.size, from: liveStock, to: next.stock });
+        }
+        formattedVariants.push(next);
+      }
+
+      // Only write if no variant's stock moved since `fresh` was read
+      const guard = fresh.variants.map((pv) => ({ $elemMatch: { size: pv.size, stock: pv.stock } }));
+      const filter = guard.length ? { _id: id, variants: { $all: guard } } : { _id: id };
+
+      const session = await mongoose.startSession();
+      try {
+        await session.withTransaction(async () => {
+          updated = await Product.findOneAndUpdate(
+            filter,
+            { $set: { ...fields, variants: formattedVariants } },
+            { new: true, runValidators: true, session }
+          );
+          if (!updated) return; // stock changed meanwhile → retry with fresh values
+          if (stockChanges.length) {
+            await StockLog.insertMany(
+              stockChanges.map((c) => ({
+                productId: updated._id,
+                variantSize: c.size,
+                type: "CORRECTION",
+                quantity: c.to - c.from,
+                previousStock: c.from,
+                newStock: c.to,
+                reason: "Edited on product page",
+                by: "admin",
+              })),
+              { session }
+            );
+          }
+        });
+      } finally {
+        await session.endSession();
+      }
+    }
+
+    if (!updated) {
+      return NextResponse.json(
+        { success: false, message: "Stock changed while saving (orders coming in). Please try again." },
+        { status: 409 }
+      );
+    }
+
+    // Refresh cached storefront pages for this product
+    revalidatePath("/");
+    revalidatePath("/collection");
+    revalidatePath(`/product/${updated.slug}`);
 
     return NextResponse.json({
       success: true,

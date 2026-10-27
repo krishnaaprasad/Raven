@@ -4,6 +4,9 @@ import { Order } from "@/models/Order";
 import Product from "@/models/Product";
 import StockLog from "@/models/StockLog";
 import { sendDeliveryMessage } from "@/lib/notifications/whatsapp.service";
+import { redeductRestoredStock } from "@/lib/orderInventory";
+
+const ORDER_STATUSES = ["Payment Awaiting", "Processing", "Shipped", "Out for Delivery", "Delivered", "Cancelled"];
 
 export async function GET(req, { params }) {
   try {
@@ -53,9 +56,9 @@ export async function PATCH(req, { params }) {
 
     const { order_status } = await req.json();
 
-    if (!order_status) {
+    if (!ORDER_STATUSES.includes(order_status)) {
       return NextResponse.json(
-        { success: false, error: "order_status required" },
+        { success: false, error: "Invalid order status" },
         { status: 400 }
       );
     }
@@ -67,6 +70,10 @@ export async function PATCH(req, { params }) {
         { success: false, error: "Order not found" },
         { status: 404 }
       );
+    }
+
+    if (order.order_status === order_status) {
+      return NextResponse.json({ success: true, order });
     }
 
     // ✅ Save history
@@ -137,6 +144,20 @@ export async function PATCH(req, { params }) {
         await order.save();
       } catch (stockErr) {
         console.error("❌ Stock restoration error:", stockErr);
+      }
+    }
+
+    // Un-cancelling a paid order: take back only the stock that cancelling returned
+    if (
+      previousStatus === "Cancelled" &&
+      order_status !== "Cancelled" &&
+      order.payment_status === "PAID" &&
+      order.stockRestored === true
+    ) {
+      try {
+        await redeductRestoredStock(order._id);
+      } catch (stockErr) {
+        console.error("❌ Re-deduct stock on un-cancel failed:", stockErr);
       }
     }
 

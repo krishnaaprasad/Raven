@@ -90,7 +90,12 @@ export async function POST(req) {
       return NextResponse.json({ error: "Invalid coupon type" }, { status: 400 });
     }
 
-    if (!Number.isFinite(sanitizedData.value) || sanitizedData.value <= 0 || sanitizedData.value > 100) {
+    // 100 is the limit for percentages only; flat coupons can be any rupee amount
+    if (
+      !Number.isFinite(sanitizedData.value) ||
+      sanitizedData.value <= 0 ||
+      (sanitizedData.type === "PERCENT" && sanitizedData.value > 100)
+    ) {
       return NextResponse.json({ error: "Invalid coupon value" }, { status: 400 });
     }
 

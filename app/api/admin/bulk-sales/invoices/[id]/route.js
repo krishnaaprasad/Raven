@@ -39,6 +39,16 @@ export async function DELETE(req, { params }) {
       );
     }
 
+    // Claim the cancel once — a double click / two tabs must not return the stock twice
+    const claimed = await BulkInvoice.findOneAndUpdate(
+      { _id: invoice._id, deleted: { $ne: true }, amountPaid: { $lte: 0 } },
+      { $set: { deleted: true } },
+      { new: true }
+    );
+    if (!claimed) {
+      return NextResponse.json({ success: false, error: "Invoice already cancelled or has payments" }, { status: 409 });
+    }
+
     // Restore stock
     if (invoice.stockDeducted) {
       const stockLogs = [];
@@ -64,11 +74,14 @@ export async function DELETE(req, { params }) {
           by: "admin",
         });
       }
-      if (stockLogs.length) await StockLog.insertMany(stockLogs);
+      // Best effort: the cancel and stock return are already done
+      if (stockLogs.length) {
+        await StockLog.insertMany(stockLogs).catch((logErr) =>
+          console.error("Bulk invoice cancel stock log failed:", invoice.invoiceNumber, logErr.message)
+        );
+      }
     }
 
-    invoice.deleted = true;
-    await invoice.save();
 
     return NextResponse.json({ success: true });
   } catch (err) {

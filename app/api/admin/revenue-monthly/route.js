@@ -16,8 +16,9 @@ export async function GET() {
       {
         $group: {
           _id: {
-            year: { $year: "$createdAt" },
-            month: { $month: "$createdAt" },
+            // Group by India month (server/DB dates are UTC)
+            year: { $year: { date: "$createdAt", timezone: "Asia/Kolkata" } },
+            month: { $month: { date: "$createdAt", timezone: "Asia/Kolkata" } },
           },
           revenue: { $sum: "$totalAmount" },
           orders: { $sum: 1 },

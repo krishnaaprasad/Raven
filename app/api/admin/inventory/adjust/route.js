@@ -27,9 +27,9 @@ export async function POST(req) {
     }
 
     const adjustmentNum = Number(adjustment);
-    if (!Number.isFinite(adjustmentNum) || adjustmentNum === 0) {
+    if (!Number.isInteger(adjustmentNum) || adjustmentNum === 0) {
       return NextResponse.json(
-        { success: false, error: "Adjustment must be a non-zero number" },
+        { success: false, error: "Adjustment must be a non-zero whole number" },
         { status: 400 }
       );
     }
@@ -67,16 +67,17 @@ export async function POST(req) {
     }
 
     // Atomic update
+    // $elemMatch: size and stock must match the SAME variant (two separate
+    // conditions could match different variants and decrement the wrong one)
     const filter =
       adjustmentNum < 0
         ? {
             _id: productId,
-            "variants.size": variantSize,
-            "variants.stock": { $gte: Math.abs(adjustmentNum) },
+            variants: { $elemMatch: { size: String(variantSize), stock: { $gte: Math.abs(adjustmentNum) } } },
           }
         : {
             _id: productId,
-            "variants.size": variantSize,
+            "variants.size": String(variantSize),
           };
 
     const updated = await Product.findOneAndUpdate(

@@ -5,6 +5,7 @@ import BulkInvoice from "@/models/BulkInvoice";
 import BulkInvoiceCounter from "@/models/BulkInvoiceCounter";
 import Product from "@/models/Product";
 import StockLog from "@/models/StockLog";
+import { reserveStock, undoReservation } from "@/lib/orderInventory";
 
 async function generateInvoiceNumber() {
   const counter = await BulkInvoiceCounter.findOneAndUpdate(
@@ -62,7 +63,13 @@ export async function POST(req) {
       return NextResponse.json({ success: false, error: "Client not found" }, { status: 404 });
     }
 
-    if (!lineItems || !lineItems.length) {
+    const shippingNum = Number(shipping || 0);
+    const totalDiscountNum = Number(totalDiscount || 0);
+    if (!Number.isFinite(shippingNum) || shippingNum < 0 || !Number.isFinite(totalDiscountNum) || totalDiscountNum < 0) {
+      return NextResponse.json({ success: false, error: "Shipping and discount must be 0 or more" }, { status: 400 });
+    }
+
+    if (!Array.isArray(lineItems) || !lineItems.length) {
       return NextResponse.json({ success: false, error: "At least one line item required" }, { status: 400 });
     }
 
@@ -81,17 +88,24 @@ export async function POST(req) {
         return NextResponse.json({ success: false, error: `Variant ${item.variantSize} not found for ${product.name}` }, { status: 400 });
       }
 
-      const qty = Number(item.quantity) || 1;
+      const qty = Number(item.quantity);
+      if (!Number.isInteger(qty) || qty < 1) {
+        return NextResponse.json({ success: false, error: `Quantity for ${product.name} must be a whole number of at least 1` }, { status: 400 });
+      }
       if (variant.stock < qty) {
         stockErrors.push({ productName: product.name, variantSize: item.variantSize, available: variant.stock, requested: qty });
       }
 
-      const unitPrice = Number(item.unitPrice) || variant.price;
-      const discount = Number(item.discount) || 0;
+      const unitPrice = item.unitPrice === "" || item.unitPrice == null ? Number(variant.price) : Number(item.unitPrice);
+      const discount = Number(item.discount || 0);
+      if (!Number.isFinite(unitPrice) || unitPrice < 0 || !Number.isFinite(discount) || discount < 0) {
+        return NextResponse.json({ success: false, error: `Invalid price or discount for ${product.name}` }, { status: 400 });
+      }
       const lineTotal = (unitPrice * qty) - discount;
 
       processedItems.push({
         productId: product._id,
+        slug: product.slug,
         productName: product.name,
         variantSize: variant.size,
         sku: product.slug?.substring(0, 3).toUpperCase() || "",
@@ -109,19 +123,37 @@ export async function POST(req) {
 
     // Calculate totals
     const subtotal = processedItems.reduce((s, i) => s + i.lineTotal, 0);
-    const totalAmount = subtotal - Number(totalDiscount) + Number(shipping);
+    const totalAmount = subtotal - totalDiscountNum + shippingNum;
+    if (totalAmount < 0) {
+      return NextResponse.json({ success: false, error: "Discounts can't be more than the invoice amount" }, { status: 400 });
+    }
     const totalCogs = processedItems.reduce((s, i) => s + (i.unitCost * i.quantity), 0);
     const grossProfit = totalAmount - totalCogs;
 
+    // Take stock atomically before creating the invoice (the check above can race with
+    // other sales; the same product on two lines also has to fit in stock together)
+    const reservation = await reserveStock(
+      processedItems.map((i) => ({ slug: i.slug, size: String(i.variantSize), quantity: i.quantity, name: i.productName }))
+    );
+    if (!reservation.ok) {
+      return NextResponse.json(
+        { success: false, error: `Insufficient stock for ${reservation.item.name} (${reservation.item.size})` },
+        { status: 400 }
+      );
+    }
+
     // Generate invoice number
-    const invoiceNumber = await generateInvoiceNumber();
+    let invoiceNumber;
+    let invoice;
+    try {
+    invoiceNumber = await generateInvoiceNumber();
 
     // Default due date: 30 days from invoice date
     const invDate = invoiceDate ? new Date(invoiceDate) : new Date();
     const due = dueDate ? new Date(dueDate) : new Date(invDate.getTime() + 30 * 24 * 60 * 60 * 1000);
 
     // Create invoice
-    const invoice = await BulkInvoice.create({
+    invoice = await BulkInvoice.create({
       invoiceNumber,
       clientId: client._id,
       clientName: client.name,
@@ -129,41 +161,42 @@ export async function POST(req) {
       dueDate: due,
       lineItems: processedItems,
       subtotal,
-      shipping: Number(shipping),
-      totalDiscount: Number(totalDiscount),
+      shipping: shippingNum,
+      totalDiscount: totalDiscountNum,
       totalAmount,
       totalCogs,
       grossProfit,
       notes: notes || "",
+      stockDeducted: true,
     });
-
-    // Deduct stock
-    const stockLogs = [];
-    for (const item of processedItems) {
-      const product = await Product.findOne({ _id: item.productId, "variants.size": item.variantSize });
-      const variant = product?.variants?.find((v) => v.size === item.variantSize);
-      const previousStock = variant?.stock || 0;
-
-      await Product.updateOne(
-        { _id: item.productId, "variants.size": item.variantSize },
-        { $inc: { "variants.$.stock": -item.quantity } }
-      );
-
-      stockLogs.push({
-        productId: item.productId,
-        variantSize: item.variantSize,
-        type: "BULK_SALE",
-        quantity: -item.quantity,
-        previousStock,
-        newStock: previousStock - item.quantity,
-        orderId: invoice._id,
-        reason: `Bulk invoice ${invoiceNumber} — ${client.name}`,
-        by: "admin",
-      });
+    } catch (createErr) {
+      await undoReservation(reservation.taken);
+      throw createErr;
     }
 
-    if (stockLogs.length) await StockLog.insertMany(stockLogs);
-    await BulkInvoice.findByIdAndUpdate(invoice._id, { stockDeducted: true });
+    // Stock logs for the reservation taken above — best effort: the invoice and stock are
+    // already saved, so a log failure must not report an error (staff would re-create it)
+    try {
+      const stockLogs = reservation.taken
+        .filter((t) => t.product?._id)
+        .map((t) => {
+          const newStock = t.product.variants?.find((v) => String(v.size) === t.size)?.stock ?? 0;
+          return {
+            productId: t.product._id,
+            variantSize: t.size,
+            type: "BULK_SALE",
+            quantity: -t.quantity,
+            previousStock: newStock + t.quantity,
+            newStock,
+            orderId: invoice._id,
+            reason: `Bulk invoice ${invoiceNumber} — ${client.name}`,
+            by: "admin",
+          };
+        });
+      if (stockLogs.length) await StockLog.insertMany(stockLogs);
+    } catch (logErr) {
+      console.error("BulkInvoice stock log write failed:", invoice.invoiceNumber, logErr.message);
+    }
 
     return NextResponse.json({ success: true, invoice }, { status: 201 });
   } catch (err) {

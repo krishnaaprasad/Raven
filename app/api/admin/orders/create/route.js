@@ -1,8 +1,18 @@
 import { NextResponse } from "next/server";
 import connectToDatabase from "@/lib/mongodb";
-import { Order, OrderCounter } from "@/models/Order";
+import { Order } from "@/models/Order";
 import Product from "@/models/Product";
 import { generateSequentialOrderIdFromItems } from "@/lib/generateOrderId";
+import { reserveStock, undoReservation, logReservation } from "@/lib/orderInventory";
+import { buildManualLines } from "@/lib/manualOrderItems";
+
+function orderCreatedAt(orderDate) {
+  if (typeof orderDate !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(orderDate)) return new Date();
+  const todayIst = new Date(Date.now() + 330 * 60 * 1000).toISOString().slice(0, 10);
+  if (orderDate === todayIst) return new Date();
+  const d = new Date(`${orderDate}T12:00:00+05:30`);
+  return Number.isNaN(d.getTime()) ? new Date() : d;
+}
 
 
 export async function POST(req) {
@@ -11,107 +21,87 @@ export async function POST(req) {
     const body = await req.json();
 
     const {
-  userName,
-  email,
-  phone,
-  address,
-  city,
-  state,
-  pincode,
-  productId,
-  variantSize,          // ✅ NEW
-  quantity,
-  shippingCharge,
-  paymentMethod,
-  orderDate,
-  price,
-  remark,
-  discount,
-  couponCode,
-} = body;
+      userName,
+      email,
+      phone,
+      address,
+      city,
+      state,
+      pincode,
+      items,
+      // legacy single-product fields (older admin page)
+      productId,
+      variantSize,
+      quantity,
+      price,
+      shippingCharge,
+      paymentMethod,
+      orderDate,
+      remark,
+      discount,
+      couponCode,
+    } = body;
 
-if (!userName || !phone || !productId || !variantSize) {
-  return NextResponse.json(
-    { success: false, error: "Missing required fields" },
-    { status: 400 }
-  );
-}
+    if (!userName || !phone) {
+      return NextResponse.json(
+        { success: false, error: "Customer name and phone are required" },
+        { status: 400 }
+      );
+    }
 
-const product = await Product.findById(productId);
-if (!product) {
-  return NextResponse.json(
-    { success: false, error: "Product not found" },
-    { status: 404 }
-  );
-}
+    // Validate + price every product line (supports several products per order)
+    const rawItems = Array.isArray(items) && items.length
+      ? items
+      : productId
+        ? [{ productId, variantSize, quantity: quantity ?? 1, price }]
+        : [];
+    const built = await buildManualLines(rawItems);
+    if (!built.ok) {
+      return NextResponse.json({ success: false, error: built.error }, { status: 400 });
+    }
+    const { lines, subtotal: subTotal } = built;
 
-const variant = product.variants.find(
-  (v) => String(v.size) === String(variantSize)
-);
+    const ship = Number(shippingCharge || 0);
+    if (!Number.isFinite(ship) || ship < 0) {
+      return NextResponse.json(
+        { success: false, error: "Invalid shipping charge" },
+        { status: 400 }
+      );
+    }
 
-if (!variant || variant.price == null) {
-  return NextResponse.json(
-    { success: false, error: "Invalid product variant selected" },
-    { status: 400 }
-  );
-}
+    const discountAmount = Number(discount || 0);
+    if (!Number.isFinite(discountAmount) || discountAmount < 0) {
+      return NextResponse.json(
+        { success: false, error: "Invalid discount value" },
+        { status: 400 }
+      );
+    }
+    if (discountAmount > subTotal) {
+      return NextResponse.json(
+        { success: false, error: "Discount cannot exceed subtotal" },
+        { status: 400 }
+      );
+    }
+    const totalAmount = subTotal + ship - discountAmount;
 
-const qty = Math.max(1, Number(quantity || 1));
-const ship = Number(shippingCharge || 0);
-const unitPrice =
-  price != null && price !== ""
-    ? Number(price)
-    : Number(variant.price);
+    // Number first: if it fails, no stock has been taken yet
+    const customOrderId = await generateSequentialOrderIdFromItems(lines);
 
-
-if (Number.isNaN(unitPrice)) {
-  return NextResponse.json(
-    { success: false, error: "Invalid variant price" },
-    { status: 400 }
-  );
-}
-
-const subTotal = qty * unitPrice;
-const discountAmount = Number(discount || 0);
-
-if (!Number.isFinite(discountAmount) || discountAmount < 0) {
-  return NextResponse.json(
-    { success: false, error: "Invalid discount value" },
-    { status: 400 }
-  );
-}
-
-if (discountAmount > subTotal) {
-  return NextResponse.json(
-    { success: false, error: "Discount cannot exceed subtotal" },
-    { status: 400 }
-  );
-}
-const totalAmount = subTotal + ship - discountAmount;
-
-
-
-// ✅ Generate prefix from product (like production)
-const now = new Date();
-const datePart = now.toISOString().slice(0, 10).replace(/-/g, ""); // YYYYMMDD
-
-let prefix =
-  product.slug?.substring(0, 3).toUpperCase() ||
-  product.name?.substring(0, 3).toUpperCase() ||
-  "ORD";
-
-const today = datePart;
-
-// find by prefix+date
-const customOrderId = await generateSequentialOrderIdFromItems([
-  {
-    slug: product.slug,
-    name: product.name,
-  },
-]);
+    // Manual sales take stock too — all lines or none
+    const reservation = await reserveStock(lines);
+    if (!reservation.ok) {
+      const p = await Product.findOne({ slug: reservation.item.slug }).select("variants").lean();
+      const left = p?.variants?.find((v) => String(v.size) === String(reservation.item.size))?.stock ?? 0;
+      return NextResponse.json(
+        { success: false, error: `Not enough stock: ${reservation.item.name} (${reservation.item.size}) has ${left} left` },
+        { status: 400 }
+      );
+    }
 
     // ✅ CREATE ORDER
-    const order = await Order.create({
+    let order;
+    try {
+    order = await Order.create({
       customOrderId,
 
       userId: null,
@@ -128,16 +118,7 @@ const customOrderId = await generateSequentialOrderIdFromItems([
 
       deliveryType: "standard",
 
-      cartItems: [
-        {
-          name: product.name,
-          size: variant.size,
-          price: Number(unitPrice),
-          quantity: qty,
-          image: product.images?.[0]?.original || product.images?.[0]?.thumbnail || "",
-          slug: product.slug,
-        },
-      ],
+      cartItems: lines,
 
       shippingCharge: ship,
 
@@ -153,8 +134,10 @@ const customOrderId = await generateSequentialOrderIdFromItems([
 
       paymentGateway: "Manual",
       paymentMethod: paymentMethod || "Cash",
+      stockDeducted: true, // so cancelling this order puts the stock back
 
-      createdAt: orderDate ? new Date(orderDate) : new Date(), // ✅ IMPORTANT
+      // Today → now (keeps order of entries); a past day → noon IST of that day
+      createdAt: orderCreatedAt(orderDate),
 
       orderHistory: [
         {
@@ -177,6 +160,11 @@ const customOrderId = await generateSequentialOrderIdFromItems([
         },
       ],
     });
+    } catch (createErr) {
+      await undoReservation(reservation.taken);
+      throw createErr;
+    }
+    await logReservation(reservation.taken, order._id);
 
     // Send confirmation email for manual order
     if (order.email) {
@@ -199,18 +187,19 @@ const customOrderId = await generateSequentialOrderIdFromItems([
           },
         };
 
-        fetch(
+        // Await it: on Vercel an un-awaited fetch can be cut off when the response is sent
+        const mailRes = await fetch(
           `${process.env.NEXT_PUBLIC_BASE_URL || "https://www.ravenfragrance.in"}/api/send-confirmation-mail`,
           {
             method: "POST",
             headers: { "Content-Type": "application/json", "x-internal-key": process.env.NEXTAUTH_SECRET || "" },
             body: JSON.stringify(emailPayload),
+            signal: AbortSignal.timeout(15000), // don't hang the admin request on a slow mail route
           }
-        )
-          .then(() => console.log("📨 Manual order: email sent"))
-          .catch((err) => console.error("📩 Manual order email error:", err));
+        );
 
-        await Order.findByIdAndUpdate(order._id, { emailSent: true });
+        if (mailRes.ok) await Order.findByIdAndUpdate(order._id, { emailSent: true });
+        else console.error("📩 Manual order email failed:", mailRes.status);
       } catch (mailErr) {
         console.error("❌ Manual order email error:", mailErr);
       }
