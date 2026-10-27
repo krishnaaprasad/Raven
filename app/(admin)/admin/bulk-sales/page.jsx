@@ -160,9 +160,8 @@ export default function BulkSalesPage() {
                   <td className="px-4 py-3 text-[12px] text-[#6b6654]">{new Date(inv.dueDate).toLocaleDateString("en-IN", { day: "2-digit", month: "short" })}</td>
                   <td className="px-4 py-3">
                     <div className="flex items-center justify-end gap-1.5">
-                      {inv.paymentStatus !== "received" && (
-                        <button onClick={() => setShowPaymentModal(inv)} title="Record Payment" className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-green-50 text-green-600"><IndianRupee size={14} /></button>
-                      )}
+                      {/* Always available: record a payment, or view/reverse existing ones */}
+                      <button onClick={() => setShowPaymentModal(inv)} title={inv.paymentStatus === "received" ? "Payments" : "Record Payment"} className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-green-50 text-green-600"><IndianRupee size={14} /></button>
                       {inv.amountPaid === 0 && (
                         <button onClick={() => handleDeleteInvoice(inv._id)} title="Cancel" className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-red-50 text-red-400"><Trash2 size={14} /></button>
                       )}
@@ -221,7 +220,36 @@ function PaymentModal({ invoice, onClose, onSuccess }) {
   const [mode, setMode] = useState("UPI");
   const [reference, setReference] = useState("");
   const [saving, setSaving] = useState(false);
+  const [payments, setPayments] = useState(null);
+  const [reversingId, setReversingId] = useState(null);
   const remaining = invoice.totalAmount - invoice.amountPaid;
+
+  // Existing payments on this invoice (so a wrong entry can be reversed)
+  useEffect(() => {
+    let active = true;
+    fetch(`/api/admin/bulk-sales/payments?invoiceId=${invoice._id}`)
+      .then((r) => r.json())
+      .then((d) => active && setPayments(d.success ? d.payments : []))
+      .catch(() => active && setPayments([]));
+    return () => {
+      active = false;
+    };
+  }, [invoice._id]);
+
+  async function handleReverse(p) {
+    if (reversingId) return;
+    if (!confirm(`Reverse payment of ₹${Number(p.amount).toLocaleString("en-IN")} (${p.paymentMode})?`)) return;
+    setReversingId(p._id);
+    const res = await fetch(`/api/admin/bulk-sales/payments/${p._id}`, { method: "DELETE" });
+    const data = await res.json().catch(() => ({}));
+    setReversingId(null);
+    if (data.success) {
+      toast.success("Payment reversed");
+      onSuccess();
+    } else {
+      toast.error(data.error || "Failed to reverse payment");
+    }
+  }
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -241,10 +269,39 @@ function PaymentModal({ invoice, onClose, onSuccess }) {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
       <div className="bg-white rounded-xl shadow-xl w-full max-w-sm mx-4 p-5 text-[#1b180d]">
         <div className="flex justify-between items-center mb-4">
-          <h3 className="text-sm font-bold">Record Payment — {invoice.invoiceNumber}</h3>
+          <h3 className="text-sm font-bold">Payments — {invoice.invoiceNumber}</h3>
           <button onClick={onClose} className="p-1 rounded hover:bg-[#f5f1e6]"><X size={16} /></button>
         </div>
         <p className="text-xs text-[#6b6654] mb-3">Remaining: ₹{remaining.toLocaleString("en-IN")}</p>
+
+        {/* Payments already recorded */}
+        {payments === null ? (
+          <p className="text-xs text-[#6b6654] mb-3">Loading payments…</p>
+        ) : payments.length > 0 ? (
+          <div className="mb-4 border border-[#e7e1cf] rounded-lg divide-y divide-[#e7e1cf]">
+            {payments.map((p) => (
+              <div key={p._id} className="flex items-center justify-between px-3 py-2 text-xs">
+                <div>
+                  <p className="font-semibold">₹{Number(p.amount).toLocaleString("en-IN")} · {p.paymentMode}</p>
+                  <p className="text-[#6b6654]">
+                    {new Date(p.paymentDate).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric", timeZone: "Asia/Kolkata" })}
+                    {p.reference ? ` · ${p.reference}` : ""}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => handleReverse(p)}
+                  disabled={Boolean(reversingId)}
+                  className="px-2 py-1 rounded-md border border-red-200 text-red-600 hover:bg-red-50 disabled:opacity-50"
+                >
+                  {reversingId === p._id ? "Reversing…" : "Reverse"}
+                </button>
+              </div>
+            ))}
+          </div>
+        ) : null}
+
+        {remaining > 0 && (
         <form onSubmit={handleSubmit} className="space-y-3">
           <input type="number" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="Amount" max={remaining} min="1" required className="w-full h-9 px-3 text-sm border border-[#e7e1cf] rounded-lg bg-white text-[#1b180d]" />
           <select value={mode} onChange={(e) => setMode(e.target.value)} className="w-full h-9 px-3 text-sm border border-[#e7e1cf] rounded-lg bg-white text-[#1b180d]">
@@ -255,6 +312,7 @@ function PaymentModal({ invoice, onClose, onSuccess }) {
             {saving ? "Saving..." : "Record Payment"}
           </button>
         </form>
+        )}
       </div>
     </div>
   );

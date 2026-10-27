@@ -10,37 +10,14 @@ export default function AdminLayout({ children }) {
   const [collapsed, setCollapsed] = useState(false);
   const pathname = usePathname();
 
+  // Light theme for the admin is applied by app/theme-provider.jsx (it ran after this
+  // effect and re-applied dark mode, which made admin text white-on-white)
   useEffect(() => {
     document.body.style.overflow = mobileOpen ? "hidden" : "auto";
-
-    const root = document.documentElement;
-    root.classList.remove("dark");
-
-    root.style.setProperty("--theme-bg", "#fcfbf8");
-    root.style.setProperty("--theme-soft", "#f6f6f6");
-    root.style.setProperty("--theme-border", "#e7e1cf");
-    root.style.setProperty("--theme-text", "#1b180d");
-    root.style.setProperty("--theme-muted", "#6b6654");
-    root.style.setProperty("--background", "#ffffff");
-    root.style.setProperty("--foreground", "#171717");
-
-    return () => {
-      const saved = localStorage.getItem("theme");
-      if (saved === "dark") {
-        root.classList.add("dark");
-        root.style.setProperty("--theme-bg", "#0f0f0f");
-        root.style.setProperty("--theme-soft", "#161616");
-        root.style.setProperty("--theme-border", "#262626");
-        root.style.setProperty("--theme-text", "#f5f5f5");
-        root.style.setProperty("--theme-muted", "#9a9a9a");
-        root.style.setProperty("--background", "#0f0f0f");
-        root.style.setProperty("--foreground", "#f5f5f5");
-      }
-    };
   }, [mobileOpen]);
 
   if (pathname === "/admin/login") {
-    return <div className="font-[Manrope,sans-serif]">{children}</div>;
+    return <div className="font-[Manrope,sans-serif] text-[#1b180d]">{children}</div>;
   }
 
   return (
@@ -49,6 +26,7 @@ export default function AdminLayout({ children }) {
       style={{
         backgroundColor: "#fcfbf8",
         color: "#1b180d",
+        colorScheme: "light",
         marginTop: "-48px",
         "--theme-bg": "#fcfbf8",
         "--theme-soft": "#f6f6f6",

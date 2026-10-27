@@ -5,6 +5,7 @@ import { Order } from "@/models/Order";
 import mongoose from "mongoose";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { allowRequest, clientIp, tooManyRequests } from "@/lib/rateLimit";
 
 export async function GET(req) {
   try {
@@ -36,6 +37,9 @@ export async function GET(req) {
 export async function POST(req) {
   try {
     await connectToDatabase();
+
+    // Stops fake-review floods (normal customers post one or two)
+    if (!(await allowRequest(`review:${clientIp(req)}`, 5, 60 * 60 * 1000))) return tooManyRequests();
 
     const body = await req.json();
     const { productId, name, rating, title, comment, images } = body;

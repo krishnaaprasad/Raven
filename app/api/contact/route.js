@@ -1,4 +1,8 @@
 import nodemailer from 'nodemailer'
+import connectToDatabase from '@/lib/mongodb'
+import { allowRequest, clientIp, tooManyRequests } from '@/lib/rateLimit'
+
+const HOUR = 60 * 60 * 1000
 
 // Visitor input goes into an HTML email — escape it so nobody can inject links/markup
 const esc = (v) =>
@@ -12,6 +16,10 @@ const esc = (v) =>
 // POST handler for contact form
 export async function POST(req) {
   try {
+    // Each message sends an email — limit per visitor so the inbox can't be flooded
+    await connectToDatabase()
+    if (!(await allowRequest(`contact:${clientIp(req)}`, 5, HOUR))) return tooManyRequests()
+
     const { name, email, phone, subject, message } = await req.json()
 
     // Type-check first: a number/array here would otherwise throw (500) or slip through via String()

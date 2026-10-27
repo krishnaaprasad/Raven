@@ -2,27 +2,7 @@ import { NextResponse } from "next/server";
 import connectToDatabase from "@/lib/mongodb";
 import BulkInvoice from "@/models/BulkInvoice";
 import BulkPayment from "@/models/BulkPayment";
-
-// Update pipeline: add `amount` to amountPaid and recompute paymentStatus from the new value,
-// both in one atomic write
-function applyPaymentPipeline(amount) {
-  return [
-    { $set: { amountPaid: { $add: ["$amountPaid", amount] } } },
-    {
-      $set: {
-        paymentStatus: {
-          $switch: {
-            branches: [
-              { case: { $gte: ["$amountPaid", "$totalAmount"] }, then: "received" },
-              { case: { $gt: ["$amountPaid", 0] }, then: "partial" },
-            ],
-            default: "pending",
-          },
-        },
-      },
-    },
-  ];
-}
+import { applyPaymentPipeline } from "@/lib/bulkPayments";
 
 // GET /api/admin/bulk-sales/payments?invoiceId=...&clientId=...
 export async function GET(req) {

@@ -144,6 +144,14 @@ const didInitProduct = useRef(false);
       <tr className="hover:bg-[#faf8f3] transition-colors duration-150 text-[13px]">
         <td className="px-4 py-3.5 font-semibold text-[#1b180d] whitespace-nowrap">
           {displayId}
+          {order.stockShortage && (
+            <span
+              title={`Paid but out of stock: ${(order.stockShortageItems || []).join(", ")}`}
+              className="ml-2 inline-block px-1.5 py-0.5 rounded bg-red-100 text-red-700 text-[10px] font-bold uppercase align-middle"
+            >
+              Stock short
+            </span>
+          )}
         </td>
 
         <td className="px-4 py-3.5">

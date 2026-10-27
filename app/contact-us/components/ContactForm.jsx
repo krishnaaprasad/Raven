@@ -83,7 +83,10 @@ const ContactForm = ({ className = "", setSubmitted, setError }) => {
         body: JSON.stringify(formData),
       });
 
-      if (!res.ok) throw new Error("Failed to send message");
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.message || "Failed to send message");
+      }
 
       toast.success("Message sent successfully!");
       if (setSubmitted) setSubmitted(true);
@@ -98,7 +101,7 @@ const ContactForm = ({ className = "", setSubmitted, setError }) => {
 
     } catch (err) {
       console.error("Submission error:", err);
-      toast.error("Something went wrong while sending the message.");
+      toast.error(err.message || "Something went wrong while sending the message.");
     } finally {
       setIsSubmitting(false);
     }

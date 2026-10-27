@@ -1,9 +1,14 @@
 import connectToDatabase from "@/lib/mongodb";
 import Newsletter from "@/models/Newsletter";
+import { allowRequest, clientIp, tooManyRequests } from "@/lib/rateLimit";
+
+const HOUR = 60 * 60 * 1000;
 
 export async function POST(req) {
   try {
     await connectToDatabase();
+
+    if (!(await allowRequest(`newsletter:${clientIp(req)}`, 10, HOUR))) return tooManyRequests();
 
     const body = await req.json();
     // Normalise and validate; also rejects non-string values (e.g. {"$ne": null} query injection)
